@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AP Physics 1 Day 1: Forces and Free-Body Diagrams</title>
+<!-- Self-contained offline lesson for AP Physics 1 (Southold UFSD, Mr. Tiu). No internet, install or login needed. Open in Chrome. -->
+<style>
+*{box-sizing:border-box}
+body{font-family:system-ui,"Segoe UI",Roboto,Arial,sans-serif;margin:0;background:#f4f6fa;color:#222;font-size:15px;line-height:1.45}
+header{background:#234;color:#fff;padding:6px 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:20;min-height:46px}
+header h1{font-size:16px;margin:0;white-space:nowrap}
+#hdrProg{display:flex;align-items:center;gap:8px;font-size:13px;color:#cde;flex:1;min-width:240px}
+.bar{flex:1;max-width:320px;height:12px;background:#3a5068;border-radius:6px;overflow:hidden;border:1px solid #567}.bar i{display:block;height:100%;background:#ffd76a;transition:width .4s}
+#who{font-size:13px;color:#ffd76a;font-weight:bold}
+header button{background:#3a5068;color:#fff;border:1px solid #567}
+#wrap{display:flex;gap:10px;padding:8px;align-items:flex-start}
+#side{width:228px;flex:none;position:sticky;top:54px;max-height:calc(100vh - 62px);overflow:auto}
+#side .panel{padding:6px}
+#side h3{margin:2px 4px 6px;font-size:13px;color:#456;text-transform:uppercase;letter-spacing:.04em}
+.navi{display:flex;gap:7px;align-items:flex-start;width:100%;text-align:left;border:1px solid transparent;background:none;border-radius:6px;padding:6px 6px;font-size:13px;cursor:pointer;color:#234;line-height:1.25}
+.navi:hover{background:#eef2f8}.navi.on{background:#ffd76a;border-color:#e0b93e;font-weight:bold}
+.navi .st{flex:none;width:19px;height:19px;border-radius:50%;border:2px solid #9ab;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:bold;margin-top:-1px}
+.navi .st.done{background:#2b8a3e;border-color:#2b8a3e}.navi .st.part{background:linear-gradient(90deg,#e8a33d 50%,#fff 50%);border-color:#e8a33d}
+.navi small{display:block;color:#678;font-weight:normal;font-size:11px}
+main{flex:1;min-width:0;max-width:1120px}
+.panel{background:#fff;border-radius:8px;box-shadow:0 1px 3px #0002;padding:10px 14px;margin-bottom:10px}
+h2{font-size:21px;margin:2px 0 4px;color:#234}h3{font-size:16px;margin:8px 0 6px;color:#234}h4{margin:6px 0 4px;font-size:15px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px}.chip{font-size:11.5px;background:#e6eefb;color:#234;border:1px solid #b8c9e6;border-radius:10px;padding:1px 8px}
+.chip.time{background:#e6f4ea;border-color:#a6d4b2}
+button{font:inherit;font-size:14px;padding:6px 12px;border:1px solid #889;border-radius:6px;background:#eef;cursor:pointer;color:#222;touch-action:manipulation}
+button:hover:not(:disabled){filter:brightness(.96)}button:disabled{opacity:.5;cursor:default}
+button.on{background:#ffd76a;border-color:#c9a237}button.go{background:#2b6cb0;color:#fff;border-color:#1f4f82;font-weight:bold}button.big{font-size:16px;padding:8px 18px}
+button.warn{background:#ffd2c8;border-color:#c55}button.ok{background:#d3f0dc;border-color:#3a9b57}
+input[type=text],input[type=number],textarea,select{font:inherit;font-size:15px;padding:5px 7px;border:1px solid #99a;border-radius:5px;background:#fff}
+input[type=range]{width:100%;accent-color:#2b6cb0}
+.formula{font-family:Georgia,"Times New Roman",serif;font-size:16px;background:#f3f6ff;padding:6px 10px;border-radius:6px;line-height:1.7;margin:6px 0}
+.eq{font-family:Georgia,"Times New Roman",serif;font-size:16px;white-space:nowrap}
+.mis{background:#fff4e5;border:1px solid #f0b46a;border-left:5px solid #e8890c;border-radius:6px;padding:7px 12px;margin:8px 0}
+.mis b.t{color:#b35c00}
+.tip{background:#e9f7ef;border:1px solid #9fd3b1;border-left:5px solid #2b8a3e;border-radius:6px;padding:7px 12px;margin:8px 0}
+.ex{background:#f3f6ff;border:1px solid #c5d2ee;border-left:5px solid #2b6cb0;border-radius:6px;padding:7px 12px;margin:8px 0}
+.ex .sol{display:none;border-top:1px dashed #b5c4e3;margin-top:6px;padding-top:6px}.ex.open .sol{display:block}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+table.t{border-collapse:collapse;font-size:13.5px;width:100%;margin:6px 0}table.t th,table.t td{border:1px solid #ccd;padding:3px 6px;text-align:left;vertical-align:top}table.t th{background:#eef2f8}
+.q{border:1px solid #cfd8e6;border-radius:8px;padding:9px 12px;margin:10px 0;background:#fcfdff}
+.q.done.right{border-color:#8fcfa1;background:#f4fbf6}.q.done.shown{border-color:#e3c27a;background:#fffbef}
+.qh{display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:4px}.qh b{font-size:15px;color:#234}
+.badge{font-size:11px;background:#eef2f8;border:1px solid #c8d3e4;border-radius:8px;padding:0 7px;color:#456}.badge.ap{background:#ede4ff;border-color:#bca6ea;color:#4b2a91}.badge.exit{background:#ffe8d6;border-color:#f0b48a;color:#8a3d00}
+.qstat{margin-left:auto;font-weight:bold}
+.qp{margin:2px 0 8px}
+.choices{display:flex;flex-direction:column;gap:5px}
+.choice{display:flex;gap:8px;align-items:flex-start;border:1px solid #cfd6e2;border-radius:6px;padding:6px 9px;cursor:pointer;background:#fff}
+.choice:hover{background:#f2f6ff}.choice input{margin-top:3px;flex:none;width:17px;height:17px}
+.choice.picked{border-color:#2b6cb0;background:#eef4ff}.choice.good{border-color:#2b8a3e;background:#e6f6ea}.choice.badc{border-color:#c33;background:#fdecea}
+.choices.grid{display:grid;grid-template-columns:repeat(4,1fr)}
+.numrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.numrow input{width:140px}
+.qbtns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.fb{margin-top:7px;font-size:14px}.fb:empty{display:none}
+.fb .r{color:#1d7a35;font-weight:bold}.fb .w{color:#b02a1e;font-weight:bold}
+.hintbox{background:#fffbe6;border:1px solid #e8d48a;border-radius:6px;padding:5px 9px;margin-top:6px;font-size:14px}
+.explain{background:#f1f5fb;border-radius:6px;padding:5px 9px;margin-top:6px;font-size:14px}
+textarea{width:100%;min-height:110px;resize:vertical;line-height:1.4}
+.sample{background:#f4fbf6;border:1px solid #9fd3b1;border-radius:6px;padding:8px 11px;margin-top:8px}
+.rubric label{display:block;font-size:14px;margin:3px 0}
+.navbtns{display:flex;justify-content:space-between;gap:10px;margin:8px 0 18px}
+.sim{border:1px solid #b9c6da;border-radius:8px;background:#fff;padding:8px;margin:10px 0}
+.sim h4{margin:0 0 6px;display:flex;gap:8px;align-items:center}
+.simgrid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:10px}
+.ctrl{font-size:13px}.ctrl .sl{display:grid;grid-template-columns:112px 1fr 58px;gap:6px;align-items:center;margin:3px 0}
+.ctrl .sl output{font-weight:bold;text-align:right;font-size:13px}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px;margin:5px 0}
+.status{background:#fffbe6;border:1px solid #e8d48a;border-radius:6px;padding:5px 8px;font-size:13px;line-height:1.5}
+.readout{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;background:#f6f8fb;border:1px solid #dde3ec;border-radius:6px;padding:5px 7px;line-height:1.55;white-space:pre-wrap}
+.pred{background:#f5efff;border:1px solid #cbb8ef;border-radius:6px;padding:5px 8px;font-size:13px;margin:5px 0}
+.pred input[type=number]{width:74px;font-size:13px;padding:2px 4px}
+canvas{display:block;max-width:100%;touch-action:none}
+.fbdwrap{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.fbdpal{display:flex;flex-direction:column;gap:5px;min-width:210px;max-width:250px}
+.fchip{display:flex;align-items:center;gap:7px;text-align:left;font-size:13.5px;padding:5px 9px;background:#fff}
+.fchip i{display:inline-block;width:22px;height:5px;border-radius:2px;flex:none}
+.fchip.on{background:#ffd76a;border-color:#c9a237}.fchip.placed:after{content:"✓";margin-left:auto;color:#2b8a3e;font-weight:bold}
+.scene{min-width:170px;max-width:240px}
+.scene svg{width:100%;height:auto;border:1px solid #dde3ec;border-radius:6px;background:#fbfcfe}
+.g{font-size:12.5px;color:#556}
+.hide{display:none!important}
+.startcard{max-width:780px;margin:18px auto}
+.startcard input[type=text]{font-size:18px;width:300px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#234;color:#fff;padding:8px 16px;border-radius:8px;font-size:14px;z-index:50;opacity:0;transition:opacity .3s;pointer-events:none}.toast.show{opacity:1}
+.sumtbl td:nth-child(4){max-width:330px;word-break:break-word}
+.bigscore{font-size:30px;font-weight:bold;color:#234}
+#printArea{display:none}
+kbd{background:#eee;border:1px solid #bbb;border-radius:3px;padding:0 4px;font-size:12px}
+@media (max-width:1100px){.simgrid{grid-template-columns:1fr}#side{width:190px}}
+@media (max-width:820px){#wrap{flex-direction:column}#side{position:static;width:100%;max-height:none}.two{grid-template-columns:1fr}}
+@media print{
+  body{background:#fff;font-size:12px}header,#wrap,.toast,.noprint{display:none!important}
+  #printArea{display:block!important;padding:0 6px}
+  #printArea .panel{box-shadow:none;border:1px solid #ccc;padding:6px 10px}
+  table.t{font-size:11px}table.t tr{page-break-inside:avoid}
+}
+.qp > svg{width:260px;max-width:100%;height:auto;border:1px solid #dde3ec;border-radius:6px;background:#fbfcfe;margin:6px 0}
+
+</style></head><body>
+<noscript><p style="padding:20px;font:16px sans-serif">This lesson needs JavaScript. Open the downloaded file in Google Chrome.</p></noscript>
+<p id="boot" style="padding:20px;font:16px sans-serif">Loading lesson… If this message stays, download the file and open it in Chrome (Google Drive’s preview can’t run it).</p>
+<script>
+// ===== Forces sub-days: shared physics + answer-checking core (pure functions; also run by node tests) =====
+// Conventions: g = 9.8 m/s^2. Angles in degrees, measured counter-clockwise from +x (right), y up.
+const G = 9.8;
+const D2R = Math.PI / 180;
+
+// ---------- answer checking ----------
+// Accepts "4.9", "4.9 m/s^2", "-3", "−3" (unicode minus), "1.2e3", "1.2 x 10^3", "1,200"
+function parseNum(s) {
+  if (s === null || s === undefined) return NaN;
+  s = String(s).trim().replace(/[\u2212\u2013\u2014]/g, '-').replace(/(\d),(\d{3})/g, '$1$2').replace(/^\+/, '');
+  const m = s.match(/^([-]?\s*\d*\.?\d+(?:e[-+]?\d+)?)\s*(?:(?:x|\u00d7|\*)\s*10\s*\^\s*([-+]?\d+))?/i);
+  if (!m) return NaN;
+  let v = parseFloat(m[1].replace(/\s+/g, ''));
+  if (m[2] !== undefined) v *= Math.pow(10, +m[2]);
+  return v;
+}
+// tol: {rel: fraction} and/or {abs: value}. Default: 1.5 % relative.
+// Returns {ok, v, bad (unparseable), close (within 5 %), sign (right magnitude, wrong sign), g10 (looks like g = 10 was used)}
+function checkNum(input, ans, tol, opt) {
+  const v = parseNum(input);
+  if (!isFinite(v)) return { ok: false, bad: true, v };
+  tol = tol || {};
+  const rel = tol.rel !== undefined ? tol.rel : (tol.abs !== undefined ? 0 : 0.015);
+  const allowed = Math.max(tol.abs || 0, rel * Math.abs(ans), 1e-12);
+  const ok = Math.abs(v - ans) <= allowed;
+  const sign = !ok && ans !== 0 && Math.abs(v + ans) <= allowed;
+  const close = !ok && Math.abs(v - ans) <= Math.max(0.05 * Math.abs(ans), allowed * 3);
+  let g10 = false;
+  if (!ok && opt && opt.g10 !== undefined) g10 = Math.abs(v - opt.g10) <= Math.max(0.01 * Math.abs(opt.g10), 1e-9);
+  return { ok, v, bad: false, sign, close, g10 };
+}
+function sameSet(a, b) { a = [...a].sort(); b = [...b].sort(); return a.length === b.length && a.every((x, i) => x === b[i]); }
+function checkMC(choice, ans) { return Array.isArray(ans) ? sameSet(choice || [], ans) : choice === ans; }
+
+// ---------- free-body diagrams ----------
+const normAng = a => ((Math.round(a) % 360) + 360) % 360;
+function snapAngle(deg, allowed) {
+  let best = allowed[0], bd = 1e9;
+  for (const a of allowed) { const d = Math.abs(((deg - a + 540) % 360) - 180); if (d < bd) { bd = d; best = a; } }
+  return normAng(best);
+}
+// placed: {key: {dir, len}}; spec: {expect:[{f, dir}], rel:[[keyA, '>'|'<'|'=', keyB]]}
+// Returns {ok, missing:[keys], extra:[keys], wrongDir:[keys], relFail:[[a,op,b]]}
+function checkFBD(placed, spec) {
+  placed = placed || {};
+  const exp = {}; for (const e of spec.expect) exp[e.f] = normAng(e.dir);
+  const missing = [], extra = [], wrongDir = [], relFail = [];
+  for (const k in exp) { if (!placed[k]) missing.push(k); else if (normAng(placed[k].dir) !== exp[k]) wrongDir.push(k); }
+  for (const k in placed) if (!(k in exp)) extra.push(k);
+  if (!missing.length && !extra.length && !wrongDir.length) {
+    for (const r of (spec.rel || [])) {
+      const A = placed[r[0]].len, B = placed[r[2]].len;
+      const good = r[1] === '>' ? A > B : r[1] === '<' ? A < B : A === B;
+      if (!good) relFail.push(r);
+    }
+  }
+  return { ok: !missing.length && !extra.length && !wrongDir.length && !relFail.length, missing, extra, wrongDir, relFail };
+}
+
+// ---------- 2.1 center of mass ----------
+function centerOfMass(ms, xs) { let M = 0, s = 0; for (let i = 0; i < ms.length; i++) { M += ms[i]; s += ms[i] * xs[i]; } return M > 0 ? s / M : NaN; }
+
+// ---------- 2.5 / 2.7 box on a level floor, applied force F at angle ang above horizontal ----------
+// p: {m, F, ang, mus, muk, g}. v = current velocity (m/s, + right). Static friction adopts the value needed (up to mus*N).
+function boxForces(p, v) {
+  const g = p.g || G, th = (p.ang || 0) * D2R;
+  const Fx = p.F * Math.cos(th), Fy = p.F * Math.sin(th), W = p.m * g;
+  const lift = Fy > W;
+  const N = Math.max(0, W - Fy), fsMax = p.mus * N, fk = p.muk * N;
+  let f, regime;
+  if (v === 0) {
+    if (Math.abs(Fx) <= fsMax + 1e-12) { f = -Fx; regime = 'static'; }
+    else { f = -Math.sign(Fx) * fk; regime = 'kinetic'; }
+  } else { f = -Math.sign(v) * fk; regime = 'kinetic'; }
+  if (lift) { f = 0; regime = 'none'; }
+  const Fnet = Fx + f;
+  return { Fx, Fy, W, N, fsMax, fk, f, regime, Fnet, a: Fnet / p.m, lift };
+}
+// one time step with the "friction can't reverse the motion" rule: if v would cross zero, the object stops there.
+function stepWithStop(forcesFn, p, s, dt) {
+  const fr = forcesFn(p, s.v);
+  const v2 = s.v + fr.a * dt;
+  if (s.v !== 0 && Math.sign(v2) !== Math.sign(s.v)) {
+    const tz = -s.v / fr.a;
+    return { t: s.t + dt, x: s.x + s.v * tz + 0.5 * fr.a * tz * tz, v: 0, fr: forcesFn(p, 0) };
+  }
+  return { t: s.t + dt, x: s.x + s.v * dt + 0.5 * fr.a * dt * dt, v: v2, fr };
+}
+const boxStep = (p, s, dt) => stepWithStop(boxForces, p, s, dt);
+
+// ---------- inclines (2.2.B.4, 2.5, 2.7): v measured DOWN the slope ----------
+function inclineForces(p, v) {
+  const g = p.g || G, th = p.ang * D2R, W = p.m * g;
+  const Wpar = W * Math.sin(th), N = W * Math.cos(th), fsMax = p.mus * N, fk = p.muk * N;
+  let f, regime;
+  if (v === 0) {
+    if (Wpar <= fsMax + 1e-12) { f = -Wpar; regime = 'static'; }
+    else { f = -fk; regime = 'kinetic'; }
+  } else { f = -Math.sign(v) * fk; regime = 'kinetic'; }
+  const Fnet = Wpar + f;
+  return { W, Wpar, Wperp: N, N, fsMax, fk, f, regime, Fnet, a: Fnet / p.m };
+}
+const inclineStep = (p, s, dt) => stepWithStop(inclineForces, p, s, dt);
+const criticalAngle = mus => Math.atan(mus) / D2R;
+
+// ---------- connected objects (2.1 systems, 2.3.A.3 tension, 2.5) ----------
+// Modified Atwood: m1 on a horizontal table (friction mus/muk), string over ideal pulley to hanging m2. + = m2 moving down.
+function tableAtwood(p, moving) {
+  const g = p.g || G, drive = p.m2 * g, fsMax = p.mus * p.m1 * g, fk = p.muk * p.m1 * g;
+  if (!moving && drive <= fsMax + 1e-12) return { a: 0, T: drive, f: drive, regime: 'static', drive, fsMax, fk };
+  const a = (drive - fk) / (p.m1 + p.m2);
+  return { a, T: p.m2 * (g - a), f: fk, regime: 'kinetic', drive, fsMax, fk };
+}
+// Classic Atwood: two hanging masses on an ideal pulley. + = m2 moving down.
+function atwood(p) {
+  const g = p.g || G, a = (p.m2 - p.m1) * g / (p.m1 + p.m2), T = 2 * p.m1 * p.m2 * g / (p.m1 + p.m2);
+  return { a, T };
+}
+
+// ---------- apparent weight in an elevator (2.6.C) + springs (2.8) ----------
+// a = elevator acceleration (+ up). Scale reading (normal force) N = m (g + a), never negative.
+const apparentWeight = (m, a, g) => Math.max(0, m * ((g || G) + a));
+const springStretch = (k, m, a, g) => m * ((g || G) + a) / k; // Hooke: k x = m (g + a)
+// Elevator trips (+ = up). Presets: 'up' / 'down' match the v-t graph in Day 3 Q13 (speed up 0-2 s, cruise 2-6 s, slow 6-8 s, rest 8-10 s).
+// 'custom': A = { v0, a } -> cruise at v0 for 2 s, then accelerate at a (until it stops if a opposes v0, else for 3 s), then constant velocity.
+function elevatorProfile(type, A) {
+  if (type === 'up') return [{ t0: 0, t1: 2, a: A }, { t0: 2, t1: 6, a: 0 }, { t0: 6, t1: 8, a: -A }, { t0: 8, t1: 10, a: 0 }];
+  if (type === 'down') return [{ t0: 0, t1: 2, a: -A }, { t0: 2, t1: 6, a: 0 }, { t0: 6, t1: 8, a: A }, { t0: 8, t1: 10, a: 0 }];
+  if (type === 'custom') { const v0 = A.v0 || 0, a = A.a || 0; let segs;
+    if (Math.abs(a) < 1e-9) segs = [{ t0: 0, t1: 10, a: 0 }];
+    else { const opp = Math.abs(v0) > 1e-9 && Math.sign(a) !== Math.sign(v0), dur = opp ? Math.min(7, Math.abs(v0 / a)) : 3;
+      segs = [{ t0: 0, t1: 2, a: 0 }, { t0: 2, t1: 2 + dur, a }, { t0: 2 + dur, t1: 10, a: 0 }]; }
+    segs.v0 = v0; return segs; }
+  // 'drop': cable fails -> free fall 1 s, then emergency brakes decelerate at +g for 1 s
+  return [{ t0: 0, t1: 1, a: 0 }, { t0: 1, t1: 2, a: -G }, { t0: 2, t1: 3, a: G }, { t0: 3, t1: 10, a: 0 }];
+}
+function elevatorAt(segs, t) {
+  let v = segs.v0 || 0, y = 0;
+  for (const s of segs) {
+    const d = Math.max(0, Math.min(t, s.t1) - s.t0);
+    if (t < s.t1) { y += v * d + 0.5 * s.a * d * d; v += s.a * d; return { a: s.a, v: Math.abs(v) < 1e-9 ? 0 : v, y }; }
+    y += v * d + 0.5 * s.a * d * d; v += s.a * d;
+  }
+  return { a: 0, v: Math.abs(v) < 1e-9 ? 0 : v, y };
+}
+// words for the motion: "slowing down, moving down" etc.
+function motionLabel(v, a) {
+  if (Math.abs(a) < 1e-9) return Math.abs(v) < 1e-6 ? 'at rest' : 'constant velocity ' + (v > 0 ? 'up' : 'down');
+  if (Math.abs(v) < 1e-6) return 'starting from rest, speeding up ' + (a > 0 ? 'upward' : 'downward');
+  return (Math.sign(a) === Math.sign(v) ? 'speeding up' : 'slowing down') + ', moving ' + (v > 0 ? 'up' : 'down');
+}
+
+// ---------- Newton's 3rd law skaters (2.3) ----------
+// Push of magnitude F lasting tp seconds; A on the left (moves left, -), B on the right (moves right, +). Frictionless ice.
+function skaters(p, t) {
+  const aA = -p.F / p.mA, aB = p.F / p.mB, tt = Math.min(t, p.tp), after = Math.max(0, t - p.tp);
+  const vA = aA * tt, vB = aB * tt;
+  const xA = p.xA0 + 0.5 * aA * tt * tt + vA * after, xB = p.xB0 + 0.5 * aB * tt * tt + vB * after;
+  return { aA: t < p.tp ? aA : 0, aB: t < p.tp ? aB : 0, vA, vB, xA, xB, pushing: t < p.tp, xcm: (p.mA * xA + p.mB * xB) / (p.mA + p.mB) };
+}
+
+const PHYS = { G, D2R, parseNum, checkNum, checkMC, sameSet, normAng, snapAngle, checkFBD, centerOfMass, boxForces, boxStep, stepWithStop,
+  inclineForces, inclineStep, criticalAngle, tableAtwood, atwood, apparentWeight, springStretch, elevatorProfile, elevatorAt, motionLabel, skaters };
+if (typeof module !== 'undefined') module.exports = PHYS;
+
+</script>
+<script>
+// ===== Self-guided lesson engine (sections, progress, questions, FBD builder, sim helpers, summary) =====
+const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => [...(r || document).querySelectorAll(s)];
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const strip = h => { const d = document.createElement('div'); d.innerHTML = h; return (d.textContent || '').replace(/\s+/g, ' ').trim(); };
+const fmt = (x, d) => { if (!isFinite(x)) return '—'; if (d !== undefined) return (Math.abs(x) < 0.5 * Math.pow(10, -d) ? 0 : x).toFixed(d); const a = Math.abs(x); return a >= 100 ? x.toFixed(0) : a >= 10 ? x.toFixed(1) : x.toFixed(2); };
+
+// ---------- force palette for free-body diagrams ----------
+const FORCES = {
+  Fg: { sym: 'F<sub>g</sub>', txt: 'F_g', name: 'Gravitational force (by Earth)', col: '#7b3fd0' },
+  FN: { sym: 'F<sub>N</sub>', txt: 'F_N', name: 'Normal force (by surface)', col: '#2563eb' },
+  Ff: { sym: 'F<sub>f</sub>', txt: 'F_f', name: 'Friction (by surface)', col: '#d9480f' },
+  FT: { sym: 'F<sub>T</sub>', txt: 'F_T', name: 'Tension (by rope / string)', col: '#0b7285' },
+  Fapp: { sym: 'F<sub>app</sub>', txt: 'F_app', name: 'Applied force (by hand / person)', col: '#2b8a3e' },
+  Fsp: { sym: 'F<sub>s</sub>', txt: 'F_s', name: 'Spring force (by spring)', col: '#c2255c' },
+  Fair: { sym: 'F<sub>air</sub>', txt: 'F_air', name: 'Air resistance (by air)', col: '#868e96' },
+  Fmotion: { sym: 'F<sub>motion</sub>', txt: 'F_motion', name: '“Force of motion”', col: '#a61e4d', why: 'There is no “force of motion.” Every force is exerted BY some other object. Moving objects keep moving because of inertia, not because a force pushes them along.' },
+  Fthrow: { sym: 'F<sub>throw</sub>', txt: 'F_throw', name: '“Force of the throw” (by hand)', col: '#a61e4d', why: 'After the ball leaves the hand, the hand is no longer touching it, so the hand exerts no force on it. The ball keeps rising because of the velocity it already has.' },
+  Finertia: { sym: 'F<sub>inertia</sub>', txt: 'F_inertia', name: '“Inertia force”', col: '#a61e4d', why: 'Inertia is a property of matter (measured by mass). It is not a force, and nothing exerts it.' },
+  Fnet: { sym: 'F<sub>net</sub>', txt: 'F_net', name: 'Net force', col: '#495057', why: 'The net force is the vector SUM of the forces on the diagram. It is never drawn as an extra force on a free-body diagram.' },
+};
+const DIRNAME = { 0: '→ right', 45: '↗ up-right', 90: '↑ up', 135: '↖ up-left', 180: '← left', 225: '↙ down-left', 270: '↓ down', 315: '↘ down-right', 30: '↗ 30° above horizontal', 60: '↗ 60° above horizontal', 120: '↖ 30° left of vertical', 150: '↖ 30° above horizontal (left)', 210: '↙ 30° below horizontal (left)', 240: '↙ 30° left of straight down', 300: '↘ 30° right of straight down', 330: '↘ 30° below horizontal' };
+const dirName = a => DIRNAME[a] || (a + '°');
+
+// ---------- small situation pictures (inline SVG) ----------
+const PIC = {
+  _w: (inner, h) => `<svg viewBox="0 0 240 ${h || 150}" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Arial" font-size="12">${inner}</svg>`,
+  floor: (y, rough) => `<rect x="0" y="${y}" width="240" height="${150 - y}" fill="${rough ? '#d9c6a5' : '#cfe8f7'}"/>` + (rough ? Array.from({ length: 24 }, (_, i) => `<line x1="${i * 10}" y1="${y + 10}" x2="${i * 10 + 8}" y2="${y + 2}" stroke="#a88f68"/>`).join('') : ''),
+  arrow: (x1, y1, x2, y2, c, lab, dash) => { const a = Math.atan2(y2 - y1, x2 - x1), h = 8; return `<line x1="${x1}" y1="${y1}" x2="${x2 - Math.cos(a) * 4}" y2="${y2 - Math.sin(a) * 4}" stroke="${c}" stroke-width="3" ${dash ? 'stroke-dasharray="5 4"' : ''}/><polygon points="${x2},${y2} ${x2 - h * Math.cos(a - .45)},${y2 - h * Math.sin(a - .45)} ${x2 - h * Math.cos(a + .45)},${y2 - h * Math.sin(a + .45)}" fill="${c}"/>` + (lab ? `<text x="${(x1 + x2) / 2}" y="${Math.min(y1, y2) - 6}" text-anchor="middle" fill="${c}" font-weight="bold">${lab}</text>` : ''); },
+  lamp: () => PIC._w(`<rect x="0" y="0" width="240" height="14" fill="#bbb"/><line x1="120" y1="14" x2="120" y2="70" stroke="#333" stroke-width="2"/><path d="M95 100 L120 70 L145 100 Z" fill="#f2c94c" stroke="#8a6d1e"/><circle cx="120" cy="104" r="6" fill="#fff6c8" stroke="#8a6d1e"/><text x="8" y="140" fill="#456">at rest</text>`),
+  box: (o) => { o = o || {}; const y = 110; let s = PIC.floor(y, o.rough !== false) + `<rect x="95" y="${y - 44}" width="54" height="44" fill="#c8894b" stroke="#7a4f26" stroke-width="2"/><text x="122" y="${y - 18}" text-anchor="middle" fill="#fff" font-weight="bold">box</text>`;
+    if (o.push) s += PIC.arrow(40, y - 22, 92, y - 22, '#2b8a3e', 'push');
+    if (o.pushDown) s += PIC.arrow(48, y - 76, 96, y - 46, '#2b8a3e', 'push 30° below horizontal');
+    if (o.rope) s += `<line x1="149" y1="${y - 26}" x2="215" y2="${y - 64}" stroke="#333" stroke-width="2"/><text x="170" y="${y - 70}" fill="#333">rope, 30°</text>`;
+    if (o.v) s += PIC.arrow(98, y - 58, 146, y - 58, '#555', 'v ' + (o.v || ''), true);
+    if (o.note) s += `<text x="8" y="144" fill="#333">${o.note}</text>`;
+    return PIC._w(s); },
+  ball: () => PIC._w(`<rect x="0" y="130" width="240" height="20" fill="#9bd18b"/><circle cx="120" cy="70" r="16" fill="#f08a1c" stroke="#8a4b00" stroke-width="2"/>${PIC.arrow(150, 92, 150, 40, '#555', '', true)}<text x="158" y="66" fill="#555">v (rising)</text><text x="8" y="22" fill="#456">already left the hand · ignore air</text>`),
+  incline: (deg, o) => { o = o || {}; const th = deg * Math.PI / 180, x0 = 20, y0 = 135, L = 210, x1 = x0 + L * Math.cos(th), y1 = y0 - L * Math.sin(th);
+    const cx = x0 + 0.55 * L * Math.cos(th), cy = y0 - 0.55 * L * Math.sin(th);
+    return PIC._w(`<polygon points="${x0},${y0} ${x1},${y0} ${x1},${y1}" fill="#d9c6a5" stroke="#8a7350"/><g transform="translate(${cx},${cy}) rotate(${-deg})"><rect x="-20" y="-30" width="40" height="30" fill="#c8894b" stroke="#7a4f26" stroke-width="2"/></g><text x="${x0 + 34}" y="${y0 - 5}" fill="#333">${deg}°</text><text x="8" y="18" fill="#456">${o.note || 'at rest on a rough incline'}</text>`); },
+  elevator: () => PIC._w(`<rect x="70" y="6" width="100" height="138" fill="#eef2f8" stroke="#456" stroke-width="2"/><line x1="120" y1="6" x2="120" y2="60" stroke="#333" stroke-width="2"/><rect x="104" y="60" width="32" height="28" fill="#c8894b" stroke="#7a4f26" stroke-width="2"/>${PIC.arrow(200, 110, 200, 50, '#c026d3', 'a')}<text x="8" y="140" fill="#456">accelerating upward</text>`, 150),
+  wall: () => PIC._w(`<rect x="170" y="0" width="70" height="150" fill="#bbb"/><rect x="128" y="55" width="42" height="40" fill="#c8894b" stroke="#7a4f26" stroke-width="2"/>${PIC.arrow(60, 75, 124, 75, '#2b8a3e', 'F')}<text x="8" y="140" fill="#456">held at rest against wall</text>`),
+};
+
+// ---------- sim UI helpers ----------
+const UI = {
+  canvas(host, hCss) { const cv = document.createElement('canvas'); host.appendChild(cv); const o = { cv, ctx: cv.getContext('2d'), w: 600, h: hCss };
+    o.fit = () => { const dpr = window.devicePixelRatio || 1; o.w = Math.max(280, host.clientWidth - 2); o.h = typeof hCss === 'function' ? hCss(o.w) : hCss; cv.width = o.w * dpr; cv.height = o.h * dpr; cv.style.width = o.w + 'px'; cv.style.height = o.h + 'px'; o.ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+    o.fit(); return o; },
+  arrow(ctx, x0, y0, dx, dy, col, label, opt) { opt = opt || {}; const L = Math.hypot(dx, dy); if (L < 2) return; ctx.save(); ctx.strokeStyle = ctx.fillStyle = col; ctx.lineWidth = opt.w || 3; if (opt.dash) ctx.setLineDash([6, 4]);
+    const ux = dx / L, uy = dy / L, hl = Math.min(12, L * 0.45); ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x0 + dx - ux * hl * 0.8, y0 + dy - uy * hl * 0.8); ctx.stroke(); ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(x0 + dx, y0 + dy); ctx.lineTo(x0 + dx - ux * hl - uy * hl * 0.5, y0 + dy - uy * hl + ux * hl * 0.5); ctx.lineTo(x0 + dx - ux * hl + uy * hl * 0.5, y0 + dy - uy * hl - ux * hl * 0.5); ctx.closePath(); ctx.fill();
+    if (label) { ctx.font = 'bold 13px system-ui'; ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; const lx = x0 + dx + ux * 10 + (opt.lx || 0) - (ux < -0.3 ? ctx.measureText(label).width : ux < 0.3 ? ctx.measureText(label).width / 2 : 0), ly = y0 + dy + uy * 12 + 4 + (opt.ly || 0); ctx.strokeText(label, lx, ly); ctx.fillText(label, lx, ly); }
+    ctx.restore(); },
+  // series: [{pts:[[x,y],...], col, label, dash}] ; o: {xmax, ymin, ymax, xlabel, ylabel, title, hlines:[{y,col,label}]}
+  plot(ctx, X, Y, W, H, series, o) { o = o || {}; ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(X, Y, W, H); ctx.strokeStyle = '#ccd'; ctx.strokeRect(X + .5, Y + .5, W - 1, H - 1);
+    const L = X + 44, R = X + W - 8, T = Y + 18, B = Y + H - 22; let ymin = o.ymin, ymax = o.ymax;
+    if (ymin === undefined || ymax === undefined) { let lo = 0, hi = 0; for (const s of series) for (const p of s.pts) { lo = Math.min(lo, p[1]); hi = Math.max(hi, p[1]); } for (const h of (o.hlines || [])) { lo = Math.min(lo, h.y); hi = Math.max(hi, h.y); } if (hi - lo < (o.minSpan || 1)) { const c = (hi + lo) / 2, sp = (o.minSpan || 1) / 2; if (lo >= 0 && c - sp < 0) { lo = 0; hi = 2 * sp; } else { lo = c - sp; hi = c + sp; } } const pad = (hi - lo) * 0.1; if (ymin === undefined) ymin = lo < 0 ? lo - pad : 0; if (ymax === undefined) ymax = hi + pad; }
+    const xmin = o.xmin || 0, xmax = o.xmax || 10, sx = x => L + (x - xmin) / (xmax - xmin) * (R - L), sy = y => B - (y - ymin) / (ymax - ymin) * (B - T);
+    ctx.font = '11px system-ui'; ctx.fillStyle = '#556'; ctx.strokeStyle = '#eef0f4'; ctx.lineWidth = 1;
+    const nice = span => { const raw = span / 5, p = Math.pow(10, Math.floor(Math.log10(raw))); for (const m of [1, 2, 2.5, 5, 10]) if (m * p >= raw) return m * p; return 10 * p; };
+    const ys = nice(ymax - ymin); for (let v = Math.ceil(ymin / ys) * ys; v <= ymax + 1e-9; v += ys) { const yy = sy(v); ctx.beginPath(); ctx.moveTo(L, yy); ctx.lineTo(R, yy); ctx.stroke(); ctx.textAlign = 'right'; ctx.fillText(+v.toFixed(6) + '', L - 4, yy + 4); }
+    const xs = nice(xmax - xmin); for (let v = Math.ceil(xmin / xs) * xs; v <= xmax + 1e-9; v += xs) { const xx = sx(v); ctx.beginPath(); ctx.moveTo(xx, T); ctx.lineTo(xx, B); ctx.stroke(); ctx.textAlign = 'center'; ctx.fillText(+v.toFixed(6) + '', xx, B + 13); }
+    ctx.strokeStyle = '#334'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(L, T); ctx.lineTo(L, B); ctx.lineTo(R, B); ctx.stroke();
+    if (ymin < 0 && ymax > 0) { ctx.strokeStyle = '#99a'; ctx.beginPath(); ctx.moveTo(L, sy(0)); ctx.lineTo(R, sy(0)); ctx.stroke(); }
+    for (const h of (o.hlines || [])) { ctx.strokeStyle = h.col || '#888'; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(L, sy(h.y)); ctx.lineTo(R, sy(h.y)); ctx.stroke(); ctx.setLineDash([]); if (h.label) { ctx.fillStyle = h.col || '#888'; ctx.textAlign = 'right'; ctx.fillText(h.label, R - 2, sy(h.y) - 3); } }
+    ctx.save(); ctx.beginPath(); ctx.rect(L, T - 2, R - L, B - T + 4); ctx.clip();
+    for (const s of series) { if (!s.pts.length) continue; ctx.strokeStyle = s.col; ctx.lineWidth = s.w || 2.2; if (s.dash) ctx.setLineDash([6, 4]); ctx.beginPath(); s.pts.forEach((p, i) => { const xx = sx(p[0]), yy = sy(p[1]); i ? ctx.lineTo(xx, yy) : ctx.moveTo(xx, yy); }); ctx.stroke(); ctx.setLineDash([]);
+      if (s.dot !== false) { const p = s.pts[s.pts.length - 1]; ctx.fillStyle = s.col; ctx.beginPath(); ctx.arc(sx(p[0]), sy(p[1]), 3.5, 0, 7); ctx.fill(); } }
+    ctx.restore();
+    ctx.fillStyle = '#234'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'left'; ctx.fillText(o.title || '', L + 4, Y + 13); ctx.font = '11px system-ui'; ctx.fillStyle = '#556'; ctx.textAlign = 'right'; ctx.fillText(o.xlabel || '', R, Y + 13);
+    ctx.restore(); return { sx, sy }; },
+  slider(host, o) { const d = document.createElement('div'); d.className = 'sl'; d.innerHTML = `<span>${o.label}</span><input type="range" min="${o.min}" max="${o.max}" step="${o.step}" value="${o.val}"><output></output>`; host.appendChild(d);
+    const inp = $('input', d), out = $('output', d), dec = o.dec !== undefined ? o.dec : (o.step < 1 ? (String(o.step).split('.')[1] || '').length : 0);
+    const show = () => { out.textContent = (+inp.value).toFixed(dec) + (o.unit ? ' ' + o.unit : ''); };
+    inp.addEventListener('input', () => { show(); o.oninput && o.oninput(+inp.value); }); show();
+    return { el: d, input: inp, get: () => +inp.value, set: v => { inp.value = v; show(); }, disable: b => { inp.disabled = b; d.style.opacity = b ? .5 : 1; } }; },
+  html(host, h) { const d = document.createElement('div'); d.innerHTML = h; while (d.firstChild) host.appendChild(d.firstChild); return host.lastChild; },
+};
+
+// ---------- the engine ----------
+const Engine = (() => {
+  let L, S, KEY, storageOK = true, active = [], loops = [], tick = null;
+  const QS = [];
+  function load() { try { S = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { S = null; storageOK = false; } if (!S || S.v !== 1) S = fresh(); }
+  function fresh() { return { v: 1, name: '', period: '', cur: -1, seen: {}, ans: {}, log: [], started: null, updated: null, secs: 0 }; }
+  function save() { S.updated = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); storageOK = true; } catch (e) { storageOK = false; } }
+  function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200); }
+  const secQs = sec => (sec.blocks || []).filter(b => b.type === 'q');
+  function secStatus(i) { const sec = L.sections[i]; if (sec.type === 'summary') return allDone() ? 'done' : 'todo'; const qs = secQs(sec);
+    if (!qs.length) return S.seen[sec.id] ? 'done' : 'todo'; const d = qs.filter(q => S.ans[q.id] && S.ans[q.id].done).length; return d === qs.length ? 'done' : d || S.seen[sec.id] ? 'part' : 'todo'; }
+  const allDone = () => L.sections.every((s, i) => s.type === 'summary' || secStatus(i) === 'done');
+  function scores() { let pts = 0, max = 0, exit = 0, exitMax = 0, fr = 0, frMax = 0, answered = 0;
+    for (const q of QS) { const a = S.ans[q.id]; if (q.qt === 'fr') { frMax++; if (a && a.done) fr++; continue; } const p = q.pts || 1; max += p; if (a && a.done) answered++; const sc = a && a.score ? a.score * p : 0; pts += sc; if (q.tag === 'exit') { exitMax += p; exit += sc; } }
+    return { pts, max, exit, exitMax, fr, frMax, answered, total: QS.filter(q => q.qt !== 'fr').length }; }
+  function header() { const n = L.sections.filter(s => s.type !== 'summary').length, d = L.sections.filter((s, i) => s.type !== 'summary' && secStatus(i) === 'done').length, sc = scores();
+    $('#hdrProg').innerHTML = `<span>Progress</span><div class="bar" title="${d} of ${n} sections complete"><i style="width:${(100 * d / n).toFixed(0)}%"></i></div><span>${d}/${n} sections · ${fmt(sc.pts, sc.pts % 1 ? 2 : 0)}/${sc.max} pts</span>` + (storageOK ? '' : ' <span style="color:#ffb4a8">⚠ progress not saving — keep this tab open</span>');
+    $('#who').innerHTML = S.name ? '👤 ' + esc(S.name) : ''; }
+  function nav() { $('#side').innerHTML = `<div class="panel"><h3>Lesson map</h3><button class="navi ${S.cur === -1 ? 'on' : ''}" data-i="-1"><span class="st ${S.name ? 'done' : ''}">${S.name ? '✓' : ''}</span><span>Start here<small>name + instructions</small></span></button>` +
+      L.sections.map((s, i) => { const st = secStatus(i); return `<button class="navi ${S.cur === i ? 'on' : ''}" data-i="${i}"><span class="st ${st}">${st === 'done' ? '✓' : ''}</span><span>${i + 1}. ${s.title}<small>${s.time ? s.time + ' · ' : ''}${s.ced ? 'CED ' + s.ced.join(', ') : ''}</small></span></button>`; }).join('') +
+      `<div class="g" style="padding:6px 4px">✓ = complete · half = started.<br>Your work saves automatically in this browser.</div></div>`;
+    $$('#side .navi').forEach(b => b.onclick = () => go(+b.dataset.i)); }
+  function cleanup() { for (const a of active) { try { a && a.destroy && a.destroy(); } catch (e) { console.error(e); } } active = []; loops.forEach(l => l.stop = true); loops = []; }
+  function loop(fn) { const L0 = { stop: false }; let last = performance.now(); const f = now => { if (L0.stop) return; const dt = Math.min(0.05, (now - last) / 1000); last = now; try { fn(dt); } catch (e) { console.error(e); L0.stop = true; } requestAnimationFrame(f); }; requestAnimationFrame(f); loops.push(L0); return L0; }
+  function go(i) { if (!S.name && i !== -1) { toast('Type your name first, then press Start.'); i = -1; } cleanup(); S.cur = i; save(); render(); window.scrollTo(0, 0); }
+  function render() { header(); nav(); const m = $('#main'); if (S.cur === -1) return renderStart(m); const sec = L.sections[S.cur]; if (sec.type === 'summary') return renderSummary(m); renderSection(m, sec, S.cur); }
+  function renderStart(m) { m.innerHTML = `<div class="panel startcard"><h2>${L.title}</h2><div class="chips">${L.ced.map(c => `<span class="chip">${c}</span>`).join('')}<span class="chip time">about ${L.minutes} minutes</span></div>
+    <p>${L.intro}</p><h3>Today you will be able to…</h3><ul>${L.goals.map(g => `<li>${g}</li>`).join('')}</ul>
+    <h3>How this works</h3><ul><li>Work through the sections <b>in order</b> using the lesson map on the left or the <b>Next ▶</b> button.</li><li>Read the short explanations, try the worked examples <b>before</b> you reveal the solution, and use each simulation.</li>
+    <li>Questions give instant feedback. Full credit on the 1st try, half credit on the 2nd, a quarter after that. Hints are free. After 2 misses you may reveal the answer (0 points).</li>
+    <li>Your work saves automatically <b>in this browser on this Chromebook</b>. A refresh will not lose it. Do not use Incognito or clear browsing data.</li>
+    <li>At the end, open the <b>Summary</b>, then print or save it as a PDF (<kbd>Ctrl</kbd>+<kbd>P</kbd>) or take a screenshot, and turn it in the way your teacher asked.</li></ul>
+    <div class="panel" style="background:#f3f6ff"><label><b>Your full name:</b> <input type="text" id="nm" value="${esc(S.name)}" maxlength="60" placeholder="First Last" autocomplete="name"></label>
+    &nbsp; <label>Class period: <input type="text" id="per" value="${esc(S.period)}" maxlength="12" style="width:80px"></label>
+    <div class="row" style="margin-top:10px"><button class="go big" id="startBtn">${S.name ? 'Continue ▶' : 'Start ▶'}</button>${S.started ? `<span class="g">Started ${new Date(S.started).toLocaleString()}</span>` : ''}</div>
+    ${storageOK ? '' : '<p class="mis">⚠ This browser is blocking saved progress. Keep this tab open until you finish and print your summary.</p>'}</div>
+    ${S.started ? `<p class="g">Not your work, or need a fresh start? <button id="wipe" class="warn">Erase all saved work for this lesson</button></p>` : ''}</div>`;
+    $('#startBtn').onclick = () => { const n = $('#nm').value.trim(); if (n.length < 2) { toast('Please type your full name.'); $('#nm').focus(); return; } S.name = n; S.period = $('#per').value.trim(); if (!S.started) S.started = Date.now(); save(); go(firstUnfinished()); };
+    $('#nm').onkeydown = e => { if (e.key === 'Enter') $('#startBtn').click(); };
+    const w = $('#wipe'); if (w) w.onclick = () => { if (prompt('Type ERASE to delete all saved answers for this lesson on this device.') === 'ERASE') { S = fresh(); save(); render(); toast('Erased.'); } }; }
+  function firstUnfinished() { for (let i = 0; i < L.sections.length; i++) if (L.sections[i].type !== 'summary' && secStatus(i) !== 'done') return i; return L.sections.length - 1; }
+  function renderSection(m, sec, i) { m.innerHTML = `<div class="panel"><h2>${i + 1}. ${sec.title}</h2><div class="chips">${sec.time ? `<span class="chip time">⏱ ${sec.time}</span>` : ''}${(sec.ced || []).map(c => `<span class="chip">CED ${c}</span>`).join('')}${(sec.sp || []).map(c => `<span class="chip" style="background:#f4ecff;border-color:#cbb8ef">Practice ${c}</span>`).join('')}</div><div id="blocks"></div></div>
+      <div class="navbtns noprint"><button id="prev" ${i === 0 ? '' : ''}>◀ Back</button><span class="g" id="secMsg"></span><button class="go big" id="next">${i + 1 < L.sections.length ? 'Next ▶' : 'Summary ▶'}</button></div>`;
+    const host = $('#blocks');
+    for (const b of sec.blocks) {
+      if (b.type === 'html') UI.html(host, b.html);
+      else if (b.type === 'mis') UI.html(host, `<div class="mis"><b class="t">⚠ Common misconception:</b> ${b.html}</div>`);
+      else if (b.type === 'tip') UI.html(host, `<div class="tip">${b.html}</div>`);
+      else if (b.type === 'example') { const d = UI.html(host, `<div class="ex"><b>📘 Worked example${b.title ? ': ' + b.title : ''}</b><div>${b.problem}</div><button class="showsol" style="margin-top:6px">Show worked solution</button><div class="sol">${b.solution}</div></div>`); $('.showsol', d).onclick = e => { d.classList.toggle('open'); e.target.textContent = d.classList.contains('open') ? 'Hide solution' : 'Show worked solution'; }; }
+      else if (b.type === 'sim') { const d = UI.html(host, `<div class="sim" id="sim-${b.id}"><h4>🧪 ${b.title}</h4><div class="simbody"></div></div>`); try { active.push(b.mount($('.simbody', d), simApi(b.id))); } catch (e) { console.error(e); $('.simbody', d).textContent = 'Simulation failed to load: ' + e.message; } }
+      else if (b.type === 'q') renderQ(host, b);
+    }
+    S.seen[sec.id] = S.seen[sec.id] || (secQs(sec).length ? Date.now() : 0); save();
+    $('#prev').onclick = () => go(i - 1); if (i === 0) $('#prev').disabled = true;
+    $('#next').onclick = () => { if (!secQs(sec).length) S.seen[sec.id] = Date.now(); const qs = secQs(sec).filter(q => !(S.ans[q.id] && S.ans[q.id].done)); if (qs.length && !$('#next').dataset.warned) { $('#next').dataset.warned = 1; $('#secMsg').innerHTML = `⚠ ${qs.length} question${qs.length > 1 ? 's' : ''} in this section not finished. Press Next again to move on anyway.`; return; } save(); go(i + 1); };
+    header(); nav(); }
+  function simApi(id) { return { id, UI, PHYS, loop, fmt, save: (k, v) => { S['sim_' + id + '_' + k] = v; save(); }, load: (k, d) => S['sim_' + id + '_' + k] !== undefined ? S['sim_' + id + '_' + k] : d,
+    log: (txt) => { S.log.push({ t: Date.now(), sim: id, txt }); if (S.log.length > 60) S.log.shift(); save(); } }; }
+  // ---------- questions ----------
+  const TYPEL = { mc: 'Multiple choice', multi: 'Select all that apply', num: 'Numeric answer', fbd: 'Free-body diagram', fr: 'Written response' };
+  function renderQ(host, q) { const a = S.ans[q.id] || (S.ans[q.id] = { tries: 0 });
+    const d = UI.html(host, `<div class="q" id="q-${q.id}"><div class="qh"><b>${q.tag === 'exit' ? 'Exit ' : ''}Q${q.n}</b><span class="badge">${TYPEL[q.qt]}</span>${q.tag === 'ap' ? '<span class="badge ap">AP-style</span>' : ''}${q.tag === 'exit' ? '<span class="badge exit">Exit ticket</span>' : ''}${q.tag === 'sim' ? '<span class="badge">use the sim</span>' : ''}<span class="qstat"></span></div><div class="qp">${q.prompt}</div><div class="qbody"></div>
+      <div class="qbtns"><button class="chk go">Check</button>${q.hint ? '<button class="hintb">💡 Hint</button>' : ''}<button class="showb hide">Show answer</button><span class="g tries"></span></div><div class="hintbox hide">${q.hint || ''}</div><div class="fb"></div></div>`);
+    const body = $('.qbody', d), fb = $('.fb', d), chk = $('.chk', d);
+    if (q.hint) $('.hintb', d).onclick = () => { $('.hintbox', d).classList.toggle('hide'); a.hinted = true; save(); };
+    let getVal;
+    if (q.qt === 'mc' || q.qt === 'multi') { const multi = q.qt === 'multi'; body.innerHTML = `<div class="choices ${q.grid ? 'grid' : ''}">` + q.choices.map((c, i) => `<label class="choice"><input type="${multi ? 'checkbox' : 'radio'}" name="r-${q.id}" value="${i}"><span><b>${String.fromCharCode(65 + i)}.</b> ${c}</span></label>`).join('') + '</div>';
+      const ins = $$('input', body); ins.forEach(x => x.onchange = () => { $$('.choice', body).forEach((l, i) => l.classList.toggle('picked', ins[i].checked)); a.draft = getVal(); save(); });
+      getVal = () => multi ? ins.filter(x => x.checked).map(x => +x.value) : (ins.find(x => x.checked) ? +ins.find(x => x.checked).value : null);
+      const v = a.done ? a.value : a.draft; if (v !== undefined && v !== null) { (multi ? v : [v]).forEach(i => { if (ins[i]) ins[i].checked = true; }); $$('.choice', body).forEach((l, i) => l.classList.toggle('picked', ins[i].checked)); } }
+    else if (q.qt === 'num') { body.innerHTML = `<div class="numrow"><input type="text" inputmode="decimal" autocomplete="off" placeholder="number"> <span class="eq">${q.unit || ''}</span>${q.note ? `<span class="g">${q.note}</span>` : ''}</div>`; const inp = $('input', body);
+      inp.value = a.done ? a.value : (a.draft || ''); inp.oninput = () => { a.draft = inp.value; save(); }; inp.onkeydown = e => { if (e.key === 'Enter') chk.click(); }; getVal = () => inp.value.trim(); }
+    else if (q.qt === 'fbd') { const fb2 = fbdBuilder(body, q, a.done ? a.value : a.draft, v => { a.draft = v; save(); }); getVal = () => fb2.get(); d._fbd = fb2; }
+    else if (q.qt === 'fr') { body.innerHTML = `<textarea placeholder="Write your answer here in complete sentences…">${esc(a.value || a.draft || '')}</textarea><div class="g cnt"></div>`; const ta = $('textarea', body), cnt = $('.cnt', body);
+      const upd = () => { const w = ta.value.trim().split(/\s+/).filter(Boolean).length; cnt.textContent = w + ' words' + (w < (q.minWords || 25) ? ` · write at least ${q.minWords || 25} words to unlock the sample answer` : ''); };
+      ta.oninput = () => { a.draft = ta.value; save(); upd(); }; upd(); getVal = () => ta.value.trim(); chk.textContent = a.done ? 'Update my answer' : 'Submit & see sample answer'; }
+    const finish = () => { d.classList.add('done', a.revealed ? 'shown' : 'right'); $('.qstat', d).innerHTML = q.qt === 'fr' ? '<span style="color:#2b6cb0">✎ submitted</span>' : a.revealed ? '<span style="color:#a66b00">answer shown · 0 pts</span>' : `<span style="color:#1d7a35">✔ ${a.score === 1 ? 'first try' : a.tries + ' tries'} · ${a.score * (q.pts || 1)} pt</span>`;
+      if (q.qt !== 'fr') { chk.disabled = true; $$('input', body).forEach(x => x.disabled = true); if (d._fbd) d._fbd.lock(); $('.showb', d).classList.add('hide'); }
+      if (q.qt === 'mc' || q.qt === 'multi') { const corr = Array.isArray(q.answer) ? q.answer : [q.answer]; $$('.choice', body).forEach((l, i) => { if (corr.includes(i)) l.classList.add('good'); }); }
+      if (q.qt === 'fr') { if (!$('.sample', d)) { const sd = UI.html(d, `<div class="sample"><b>Sample answer</b> — compare it with yours:<div style="margin-top:4px">${q.sample}</div>${q.rubric ? `<div class="rubric" style="margin-top:8px"><b>Self-check — tick what your answer included:</b>${q.rubric.map((r, i) => `<label><input type="checkbox" data-i="${i}"> ${r}</label>`).join('')}</div>` : ''}</div>`);
+        $$('.rubric input', sd).forEach(x => { x.checked = !!(a.rub && a.rub[x.dataset.i]); x.onchange = () => { a.rub = a.rub || {}; a.rub[x.dataset.i] = x.checked; save(); }; }); } }
+      else fb.innerHTML = (a.revealed ? `<span class="w">Answer: ${answerText(q)}</span>` : `<span class="r">✔ Correct!</span>`) + (q.explain ? `<div class="explain">${q.explain}</div>` : ''); };
+    chk.onclick = () => { const v = getVal();
+      if (q.qt === 'fr') { const w = v.split(/\s+/).filter(Boolean).length; if (w < (q.minWords || 25)) { fb.innerHTML = `<span class="w">Write a bit more (at least ${q.minWords || 25} words) before you see the sample answer.</span>`; return; } a.value = v; a.done = true; a.at = Date.now(); chk.textContent = 'Update my answer'; save(); finish(); header(); nav(); toast('Saved.'); return; }
+      if (v === null || v === '' || (Array.isArray(v) && !v.length) || (q.qt === 'fbd' && !Object.keys(v).length)) { fb.innerHTML = '<span class="w">Answer first, then press Check.</span>'; return; }
+      const res = grade(q, v); if (res.bad) { fb.innerHTML = `<span class="w">${res.msg}</span>`; return; }
+      a.tries++; a.last = v;
+      if (res.ok) { a.done = true; a.value = v; a.score = a.tries === 1 ? 1 : a.tries === 2 ? 0.5 : 0.25; a.at = Date.now(); save(); finish(); header(); nav(); }
+      else { save(); fb.innerHTML = `<span class="w">✘ Not yet.</span> ${res.msg || ''}`; if (a.tries >= 1 && q.hint) $('.hintbox', d).classList.remove('hide'); if (a.tries >= 2) $('.showb', d).classList.remove('hide'); }
+      $('.tries', d).textContent = a.done ? '' : `tries: ${a.tries}`; };
+    $('.showb', d).onclick = () => { if (!confirm('Reveal the answer? This question will be worth 0 points.')) return; a.done = true; a.revealed = true; a.score = 0; a.value = getVal(); a.at = Date.now(); save(); finish(); header(); nav(); };
+    if (a.done) finish(); else { if (a.tries) $('.tries', d).textContent = `tries: ${a.tries}`; if (a.tries >= 2) $('.showb', d).classList.remove('hide'); } }
+  function grade(q, v) {
+    if (q.qt === 'mc') { const ok = v === q.answer; return { ok, msg: ok ? '' : (q.why && q.why[v]) || 'Re-read the question and think about which physics idea applies.' }; }
+    if (q.qt === 'multi') { const ok = PHYS.sameSet(v, q.answer); if (ok) return { ok }; const miss = q.answer.filter(i => !v.includes(i)).length, extra = v.filter(i => !q.answer.includes(i)).length; return { ok, msg: `${extra ? 'At least one choice you picked does not belong. ' : ''}${miss ? 'You are missing at least one correct choice.' : ''}` }; }
+    if (q.qt === 'num') { const r = PHYS.checkNum(v, q.answer, q.tol, { g10: q.g10 }); if (r.bad) return { bad: true, msg: 'Type a number (you can leave off the units), e.g. 4.9' };
+      if (r.ok) return { ok: true }; let msg = r.g10 ? 'It looks like you used g = 10 m/s². In these lessons use <b>g = 9.8 m/s²</b>.' : r.sign ? 'Right size, wrong sign. Check your direction (which way is positive?).' : r.close ? 'Close! Check your rounding: don’t round until the end and keep 3 significant figures.' : (q.miss || 'Check your free-body diagram and set up ΣF = ma again.'); if (q.traps) for (const t of q.traps) if (PHYS.checkNum(v, t.v, { rel: 0.01 }).ok) msg = t.msg; return { ok: false, msg }; }
+    if (q.qt === 'fbd') { const r = PHYS.checkFBD(v, q); if (r.ok) return { ok: true }; const nm = k => `<b>${FORCES[k].sym}</b>`, msgs = [];
+      for (const k of r.extra) msgs.push(FORCES[k].why || (q.extraMsg && q.extraMsg[k]) || `Remove ${nm(k)}: ask “what object exerts this force?” Nothing in this situation does.`);
+      if (r.missing.length) msgs.push(r.missing.length === 1 ? 'One force is missing. List every object <b>touching</b> the object, plus Earth.' : `${r.missing.length} forces are missing. List every object touching it, plus Earth.`);
+      for (const k of r.wrongDir) msgs.push(`Check the direction of ${nm(k)}.` + (q.dirMsg && q.dirMsg[k] ? ' ' + q.dirMsg[k] : ''));
+      for (const rr of r.relFail) msgs.push(q.relMsg || `Check the relative lengths: ${nm(rr[0])} should be ${rr[1] === '>' ? 'longer than' : rr[1] === '<' ? 'shorter than' : 'the same length as'} ${nm(rr[2])}.`);
+      return { ok: false, msg: '<ul style="margin:4px 0 0 0">' + msgs.map(x => `<li>${x}</li>`).join('') + '</ul>' }; }
+    return { ok: false }; }
+  function answerText(q) { if (q.qt === 'mc') return String.fromCharCode(65 + q.answer) + '. ' + (q.choiceText || q.choices)[q.answer]; if (q.qt === 'multi') return q.answer.map(i => String.fromCharCode(65 + i)).join(', ');
+    if (q.qt === 'num') return (q.answerText || fmtAns(q.answer)) + ' ' + (q.unit || ''); if (q.qt === 'fbd') return q.expect.map(e => FORCES[e.f].sym + ' ' + dirName(PHYS.normAng(e.dir))).join(', ') + (q.rel && q.rel.length ? ' (' + q.rel.map(r => FORCES[r[0]].sym + ' ' + r[1] + ' ' + FORCES[r[2]].sym).join(', ') + ')' : ''); return ''; }
+  const fmtAns = x => Math.abs(x) >= 1000 ? x.toPrecision(4) : +x.toPrecision(3) + '';
+  function studentText(q, a) { if (!a || a.value === undefined) return a && a.last !== undefined ? studentText(q, { value: a.last }) : '—'; const v = a.value;
+    if (q.qt === 'mc') return v === null ? '—' : String.fromCharCode(65 + v) + '. ' + strip((q.choiceText || q.choices)[v]).slice(0, 70); if (q.qt === 'multi') return (v || []).map(i => String.fromCharCode(65 + i)).join(', ') || '—';
+    if (q.qt === 'num') return esc(v) + ' ' + (q.unit || ''); if (q.qt === 'fbd') return Object.keys(v || {}).map(k => FORCES[k].txt + ' ' + dirName(v[k].dir) + ' (len ' + v[k].len + ')').join('; ') || '—'; return esc(v).slice(0, 80); }
+  // ---------- FBD builder ----------
+  function fbdBuilder(host, q, init, onChange) { let placed = JSON.parse(JSON.stringify(init || {})), sel = null, locked = false, drag = false;
+    const snaps = (q.snap || [0, 45, 90, 135, 180, 225, 270, 315]).map(PHYS.normAng);
+    host.innerHTML = `<div class="fbdwrap">${q.pic ? `<div class="scene">${q.pic}<div class="g" style="margin-top:3px">The situation</div></div>` : ''}<div><div class="cvh" style="width:330px"></div><div class="g" style="max-width:330px">1) Pick a force on the right. 2) Press on the dot area and <b>drag</b> (or tap) toward the direction it points. Farther = longer arrow. Drag an arrow tip to change it.</div></div>
+      <div class="fbdpal"><b style="font-size:13px">Forces (pick one, then draw):</b>${q.forces.map(k => `<button class="fchip" data-k="${k}"><i style="background:${FORCES[k].col}"></i><span>${FORCES[k].sym} <span class="g">${FORCES[k].name}</span></span></button>`).join('')}
+      <div class="row"><button class="del">✕ Remove selected</button><button class="clr">Clear all</button></div><div class="g lst"></div></div></div>`;
+    const c = UI.canvas($('.cvh', host), 300); const ctx = c.ctx, U = 25, cx = () => c.w / 2, cy = 150;
+    const chips = $$('.fchip', host);
+    const selF = k => { sel = k; chips.forEach(b => b.classList.toggle('on', b.dataset.k === k)); draw(); };
+    chips.forEach(b => b.onclick = () => { if (!locked) selF(b.dataset.k); });
+    $('.del', host).onclick = () => { if (locked || !sel) return; delete placed[sel]; onChange(placed); draw(); };
+    $('.clr', host).onclick = () => { if (locked) return; placed = {}; onChange(placed); draw(); };
+    const tipOf = k => { const p = placed[k], o = offsets()[k] || 0, a = p.dir * Math.PI / 180; return { x: cx() + Math.cos(a) * p.len * U - Math.sin(a) * o, y: cy - Math.sin(a) * p.len * U - Math.cos(a) * o }; };
+    function offsets() { const by = {}, o = {}; for (const k in placed) (by[placed[k].dir] = by[placed[k].dir] || []).push(k); for (const d in by) { const ks = by[d]; ks.forEach((k, i) => o[k] = (i - (ks.length - 1) / 2) * 9); } return o; }
+    function setFrom(e) { const r = c.cv.getBoundingClientRect(), x = e.clientX - r.left - cx(), y = cy - (e.clientY - r.top), dist = Math.hypot(x, y); if (dist < 8) return; const ang = Math.atan2(y, x) * 180 / Math.PI;
+      placed[sel] = { dir: PHYS.snapAngle(ang, snaps), len: Math.max(1, Math.min(5, Math.round(dist / U))) }; draw(); }
+    c.cv.addEventListener('pointerdown', e => { if (locked) return; const r = c.cv.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
+      for (const k in placed) { const t = tipOf(k); if (Math.hypot(t.x - px, t.y - py) < 13) { selF(k); drag = true; c.cv.setPointerCapture(e.pointerId); return; } }
+      if (!sel) { flash = 'Pick a force from the list first →'; draw(); return; } drag = true; c.cv.setPointerCapture(e.pointerId); setFrom(e); });
+    c.cv.addEventListener('pointermove', e => { if (drag && sel) setFrom(e); });
+    const up = () => { if (drag) { drag = false; onChange(placed); draw(); } }; c.cv.addEventListener('pointerup', up); c.cv.addEventListener('pointercancel', up);
+    let flash = '';
+    function draw() { ctx.clearRect(0, 0, c.w, c.h); ctx.fillStyle = '#fbfcfe'; ctx.fillRect(0, 0, c.w, c.h); ctx.strokeStyle = '#ccd'; ctx.strokeRect(.5, .5, c.w - 1, c.h - 1);
+      ctx.strokeStyle = '#eceff5'; for (let r = 1; r <= 5; r++) { ctx.beginPath(); ctx.arc(cx(), cy, r * U, 0, 7); ctx.stroke(); }
+      ctx.setLineDash([3, 5]); ctx.strokeStyle = '#d7dce6'; for (const s of snaps) { const a = s * Math.PI / 180; ctx.beginPath(); ctx.moveTo(cx(), cy); ctx.lineTo(cx() + Math.cos(a) * 5.4 * U, cy - Math.sin(a) * 5.4 * U); ctx.stroke(); } ctx.setLineDash([]);
+      const o = offsets(); for (const k in placed) { const p = placed[k], a = p.dir * Math.PI / 180, off = o[k] || 0, sx = cx() - Math.sin(a) * off, sy = cy - Math.cos(a) * off; UI.arrow(ctx, sx, sy, Math.cos(a) * p.len * U, -Math.sin(a) * p.len * U, FORCES[k].col, FORCES[k].txt, { w: k === sel ? 4.5 : 3 }); }
+      ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(cx(), cy, 6, 0, 7); ctx.fill();
+      ctx.font = '11px system-ui'; ctx.fillStyle = '#889'; ctx.textAlign = 'left'; ctx.fillText('rings = 1 unit of force', 6, c.h - 6);
+      if (flash) { ctx.fillStyle = '#b02a1e'; ctx.font = 'bold 13px system-ui'; ctx.textAlign = 'center'; ctx.fillText(flash, cx(), 16); flash = ''; }
+      chips.forEach(b => b.classList.toggle('placed', !!placed[b.dataset.k]));
+      $('.lst', host).innerHTML = Object.keys(placed).length ? 'On your diagram: ' + Object.keys(placed).map(k => `${FORCES[k].sym} ${dirName(placed[k].dir)} (${placed[k].len})`).join(', ') : 'Nothing drawn yet.'; }
+    draw(); return { get: () => JSON.parse(JSON.stringify(placed)), lock: () => { locked = true; sel = null; chips.forEach(b => { b.disabled = true; b.classList.remove('on'); }); draw(); }, set: v => { placed = v; draw(); } }; }
+  // ---------- summary ----------
+  function summaryHTML() { const sc = scores(), pct = sc.max ? Math.round(100 * sc.pts / sc.max) : 0, now = new Date();
+    const rows = QS.filter(q => q.qt !== 'fr').map(q => { const a = S.ans[q.id]; const res = !a || !a.done ? (a && a.tries ? `not finished (${a.tries} tries)` : 'not answered') : a.revealed ? 'answer revealed' : a.tries === 1 ? '✔ 1st try' : `✔ after ${a.tries} tries`;
+      return `<tr><td>${q.tag === 'exit' ? 'Exit ' : ''}Q${q.n}</td><td>${q.secIdx + 1}. ${esc(q.secTitle)}</td><td>${TYPEL[q.qt]}</td><td>${studentText(q, a)}</td><td>${res}</td><td>${a && a.done ? a.score * (q.pts || 1) : 0} / ${q.pts || 1}</td></tr>`; }).join('');
+    const frs = QS.filter(q => q.qt === 'fr').map(q => { const a = S.ans[q.id] || {}; const nr = q.rubric ? q.rubric.filter((_, i) => a.rub && a.rub[i]).length : 0; return `<div class="panel"><b>Q${q.n} (${esc(q.secTitle)})</b> — ${strip(q.prompt).slice(0, 220)}…<div style="white-space:pre-wrap;border-left:4px solid #2b6cb0;padding:4px 8px;margin-top:4px;background:#f6f8fb">${a.done ? esc(a.value) : '<i>not submitted</i>'}</div>${q.rubric ? `<div class="g">Student self-check: ${nr} of ${q.rubric.length} rubric points ticked</div>` : ''}</div>`; }).join('');
+    const secs = L.sections.filter(s => s.type !== 'summary').map(s => { const i = L.sections.indexOf(s), st = secStatus(i); return `${st === 'done' ? '✅' : st === 'part' ? '◐' : '⬜'} ${i + 1}. ${esc(s.title)}`; }).join(' &nbsp; ');
+    const preds = S.log.length ? `<div class="panel"><b>Simulation predictions (${S.log.length})</b><ul style="margin:4px 0">${S.log.slice(-12).map(l => `<li>${esc(l.txt)}</li>`).join('')}</ul></div>` : '';
+    return `<div class="panel"><h2 style="margin-bottom:0">${L.title} — Completion summary</h2><div class="row" style="font-size:15px;gap:18px;margin:8px 0"><span>Name: <b style="font-size:18px">${esc(S.name)}</b></span>${S.period ? `<span>Period: <b>${esc(S.period)}</b></span>` : ''}<span>Printed: ${now.toLocaleString()}</span><span>Time in lesson: about ${Math.round(S.secs / 60)} min</span></div>
+      <div class="row" style="gap:24px;align-items:baseline"><span class="bigscore">${fmt(sc.pts, sc.pts % 1 ? 2 : 0)} / ${sc.max} pts (${pct}%)</span><span>Auto-checked questions answered: <b>${sc.answered}/${sc.total}</b></span><span>Exit ticket: <b>${fmt(sc.exit, sc.exit % 1 ? 2 : 0)}/${sc.exitMax}</b></span><span>Written responses: <b>${sc.fr}/${sc.frMax}</b> (teacher-scored)</span></div>
+      <div class="g" style="margin-top:6px">${secs}</div>${allDone() ? '<div class="tip" style="margin-top:6px">🎉 All sections complete.</div>' : '<div class="mis" style="margin-top:6px">Some sections are not finished yet. Use the lesson map to go back.</div>'}</div>
+      <div class="panel"><b>Answers</b><table class="t sumtbl"><thead><tr><th>#</th><th>Section</th><th>Type</th><th>Your answer</th><th>Result</th><th>Points</th></tr></thead><tbody>${rows}</tbody></table></div>${frs}${preds}`; }
+  function renderSummary(m) { m.innerHTML = `<div class="panel noprint"><h2>Summary — turn this in</h2><p>Check that your name is correct, then <b>print or save as PDF</b> (<kbd>Ctrl</kbd>+<kbd>P</kbd> → Destination: <i>Save as PDF</i>) or take a screenshot (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Show windows</kbd> on a Chromebook). Submit it the way your teacher asked (for example, attach it in Google Classroom).</p>
+      <div class="row"><button class="go big" id="printB">🖨 Print / Save as PDF</button><button id="copyB">📋 Copy summary as text</button><button id="backB">◀ Back to lesson</button></div></div><div id="sumBody">${summaryHTML()}</div>`;
+    $('#printB').onclick = () => { fillPrint(); window.print(); }; $('#backB').onclick = () => go(firstUnfinished() === L.sections.length - 1 ? 0 : firstUnfinished());
+    $('#copyB').onclick = () => { const t = textSummary(); const done = () => toast('Copied! Paste it into Google Classroom or a Doc.'); if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(done, () => fallbackCopy(t, done)); else fallbackCopy(t, done); };
+    S.seen.summary = Date.now(); save(); }
+  function fallbackCopy(t, done) { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) { toast('Copy failed — use Print instead.'); } ta.remove(); }
+  function textSummary() { const sc = scores(); let t = `${strip(L.title)} — ${S.name}${S.period ? ' (Period ' + S.period + ')' : ''}\nScore: ${sc.pts}/${sc.max} · Exit ticket ${sc.exit}/${sc.exitMax} · Written ${sc.fr}/${sc.frMax} · ${new Date().toLocaleString()}\n\n`;
+    for (const q of QS) { const a = S.ans[q.id]; t += `${q.tag === 'exit' ? 'Exit ' : ''}Q${q.n}: ${q.qt === 'fr' ? (a && a.done ? a.value : '(not submitted)') : strip(studentText(q, a))}${q.qt !== 'fr' ? ' [' + (a && a.done ? (a.revealed ? 'revealed' : 'correct, ' + a.tries + ' tries') : 'not finished') + ']' : ''}\n`; } return t; }
+  function fillPrint() { $('#printArea').innerHTML = summaryHTML(); }
+  // ---------- boot ----------
+  function start(lesson) { L = lesson; KEY = 'ap1forces:' + L.id; let n = 0;
+    L.sections.forEach((s, si) => (s.blocks || []).forEach(b => { if (b.qtype) { b.type = 'q'; b.qt = b.qtype; } if (b.type === 'q') { b.n = ++n; b.secIdx = si; b.secTitle = s.title; QS.push(b); } }));
+    document.title = strip(L.title);
+    document.body.innerHTML = `<header><h1>${L.short}</h1><div id="hdrProg"></div><span id="who"></span><button id="sumBtn" title="Summary / print">🖨 Summary</button></header><div id="wrap"><nav id="side"></nav><main id="main"></main></div><div id="printArea"></div><div id="toast" class="toast"></div>`;
+    $('#sumBtn').onclick = () => go(L.sections.length - 1); load();
+    try { localStorage.setItem('ap1forces:test', '1'); localStorage.removeItem('ap1forces:test'); } catch (e) { storageOK = false; }
+    if (S.cur >= L.sections.length || !S.name) S.cur = -1; render();
+    window.addEventListener('beforeprint', fillPrint);
+    tick = setInterval(() => { if (document.visibilityState === 'visible' && S.name) { S.secs += 15; save(); } }, 15000);
+    let lastW = innerWidth; window.addEventListener('resize', () => { clearTimeout(window._rs); window._rs = setTimeout(() => { if (Math.abs(innerWidth - lastW) < 40) return; lastW = innerWidth; const ae = document.activeElement; if (ae && (ae.tagName === 'TEXTAREA' || ae.tagName === 'INPUT') && ae.type !== 'range') return; if (S.cur >= 0 && L.sections[S.cur].type !== 'summary') { const y = scrollY; cleanup(); render(); scrollTo(0, y); } }, 250); }); }
+  return { start, go, get state() { return S; }, get lesson() { return L; }, QS, scores, grade, summaryHTML, textSummary, answerText, toast, loop };
+})();
+
+</script>
+<script>
+// ===== DAY 1: Forces, systems, free-body diagrams, Newton's 1st and 3rd laws =====
+// ---------- sim: center of mass ----------
+function simCM(el, api) {
+  const { UI } = api; const COL = ['#2563eb', '#d9480f', '#2b8a3e'];
+  const M = api.load('m', [{ m: 2, x: 1 }, { m: 6, x: 5 }, { m: 0, x: 8 }]); let guess = api.load('g', 7), pm = false, revealed = false, dragI = null;
+  el.innerHTML = `<div class="row"><label><input type="checkbox" class="pm"> <b>Predict mode:</b> hide the center of mass, drag the purple ▲ to your guess, then press Reveal</label><button class="rev hide go">Reveal</button><span class="pout g"></span></div>
+    <div class="cvh"></div><div class="two"><div class="ctrl sls"></div><div class="formula out" style="font-size:15px"></div></div><div class="g">Drag the blocks along the 10 m board. Set a mass to 0 to remove that block.</div>`;
+  const c = UI.canvas($('.cvh', el), 150), ctx = c.ctx;
+  const X = x => 40 + x / 10 * (c.w - 80), WX = px => (px - 40) / (c.w - 80) * 10;
+  const sls = M.map((b, i) => UI.slider($('.sls', el), { label: `<b style="color:${COL[i]}">m${i + 1}</b> mass`, min: 0, max: 6, step: 0.5, val: b.m, unit: 'kg', oninput: v => { b.m = v; upd(); } }));
+  const cm = () => api.PHYS.centerOfMass(M.map(b => b.m), M.map(b => b.x));
+  function upd() { api.save('m', M); draw(); const xc = cm(), used = M.filter(b => b.m > 0);
+    $('.out', el).innerHTML = used.length ? `x<sub>cm</sub> = (${used.map(b => `${b.m.toFixed(1)}·${b.x.toFixed(1)}`).join(' + ')}) / (${used.map(b => b.m.toFixed(1)).join(' + ')})<br>= ${(used.reduce((s, b) => s + b.m * b.x, 0)).toFixed(1)} kg·m / ${used.reduce((s, b) => s + b.m, 0).toFixed(1)} kg = <b>${pm && !revealed ? '?' : xc.toFixed(2) + ' m'}</b>` : 'Add some mass!'; }
+  function draw() { ctx.clearRect(0, 0, c.w, c.h); ctx.fillStyle = '#fbfcfe'; ctx.fillRect(0, 0, c.w, c.h);
+    ctx.fillStyle = '#c8a26b'; ctx.fillRect(X(0), 92, X(10) - X(0), 10); ctx.strokeStyle = '#7a5a2a'; ctx.strokeRect(X(0), 92, X(10) - X(0), 10);
+    ctx.fillStyle = '#334'; ctx.font = '11px system-ui'; ctx.textAlign = 'center'; const xc0 = cm(), showC = isFinite(xc0) && (!pm || revealed); for (let x = 0; x <= 10; x++) { ctx.fillRect(X(x) - .5, 102, 1, 6); if (!(showC && Math.abs(x - xc0) < 0.45) && !(pm && Math.abs(x - guess) < 0.45)) ctx.fillText(x + ' m', X(x), 120); }
+    M.forEach((b, i) => { if (b.m <= 0) return; const s = 20 + 9 * Math.sqrt(b.m); ctx.fillStyle = COL[i]; ctx.fillRect(X(b.x) - s / 2, 92 - s, s, s); ctx.fillStyle = '#fff'; ctx.font = 'bold 12px system-ui'; ctx.fillText(b.m + ' kg', X(b.x), 92 - s / 2 + 4); ctx.fillStyle = COL[i]; ctx.fillText('m' + (i + 1), X(b.x), 92 - s - 5); });
+    const xc = cm(); if (isFinite(xc) && (!pm || revealed)) { ctx.fillStyle = '#c92a2a'; ctx.beginPath(); ctx.moveTo(X(xc), 104); ctx.lineTo(X(xc) - 9, 124); ctx.lineTo(X(xc) + 9, 124); ctx.fill(); ctx.font = 'bold 12px system-ui'; ctx.fillText('CM ' + xc.toFixed(2) + ' m', X(xc), 140); }
+    if (pm) { ctx.fillStyle = '#7b3fd0'; ctx.beginPath(); ctx.moveTo(X(guess), 104); ctx.lineTo(X(guess) - 9, 124); ctx.lineTo(X(guess) + 9, 124); ctx.fill(); ctx.font = 'bold 12px system-ui'; ctx.fillText('my guess ' + guess.toFixed(1), X(guess), revealed ? 30 : 140); } }
+  c.cv.addEventListener('pointerdown', e => { const r = c.cv.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
+    if (pm && py > 100 && Math.abs(px - X(guess)) < 22) dragI = 'g'; else { let best = null, bd = 40; M.forEach((b, i) => { if (b.m > 0 && Math.abs(px - X(b.x)) < bd && py < 110) { bd = Math.abs(px - X(b.x)); best = i; } }); dragI = best; }
+    if (dragI !== null) c.cv.setPointerCapture(e.pointerId); });
+  c.cv.addEventListener('pointermove', e => { if (dragI === null) return; const r = c.cv.getBoundingClientRect(), x = Math.max(0, Math.min(10, Math.round(WX(e.clientX - r.left) * 2) / 2));
+    if (dragI === 'g') { guess = x; api.save('g', guess); } else { M[dragI].x = x; if (pm) revealed = false; } upd(); });
+  c.cv.addEventListener('pointerup', () => dragI = null);
+  $('.pm', el).onchange = e => { pm = e.target.checked; revealed = false; $('.rev', el).classList.toggle('hide', !pm); $('.pout', el).textContent = ''; upd(); };
+  $('.rev', el).onclick = () => { revealed = true; const xc = cm(), err = Math.abs(guess - xc); $('.pout', el).innerHTML = `Actual x<sub>cm</sub> = ${xc.toFixed(2)} m · you were off by <b>${err.toFixed(2)} m</b> ${err <= 0.5 ? '🎯' : ''}`; api.log(`CM: guessed ${guess.toFixed(1)} m, actual ${xc.toFixed(2)} m`); upd(); };
+  upd(); return { destroy() { } };
+}
+
+// ---------- sim: ice puck (Newton's 1st law) ----------
+function simPuck(el, api) {
+  const { UI, PHYS } = api; const SURF = { ice: { n: 'Frictionless ice', mus: 0, muk: 0 }, rough: { n: 'Rough floor (μs 0.40, μk 0.30)', mus: 0.40, muk: 0.30 } };
+  const p = { m: 2, F: 0, ang: 0, mus: 0, muk: 0 }; let s = { t: 0, x: 0, v: 0 }, push = 0, pts = [], surf = 'ice', pred = null, rel = null, run = true;
+  el.innerHTML = `<div class="simgrid"><div><div class="cv1"></div><div class="cv2" style="margin-top:6px"></div></div><div class="ctrl">
+    <div class="row">Surface: <select class="sf">${Object.entries(SURF).map(([k, o]) => `<option value="${k}">${o.n}</option>`).join('')}</select></div><div class="sls"></div>
+    <div class="row"><button class="pl big" style="flex:1">◀ Hold to push left</button><button class="pr big go" style="flex:1">Hold to push right ▶</button></div>
+    <div class="row"><button class="p1">Push right for 1.0 s</button><button class="rs">⟲ Reset</button></div>
+    <div class="readout ro"></div>
+    <div class="pred"><label><input type="checkbox" class="pm"> <b>Predict mode</b></label><div class="pq hide">After I <b>stop</b> pushing, the puck will…<br>${['speed up', 'keep moving at a constant velocity', 'slow down and stop', 'stop immediately'].map((t, i) => `<label style="display:block"><input type="radio" name="pp-${api.id}" value="${i}"> ${t}</label>`).join('')}<div class="pres"></div></div></div></div></div>`;
+  const c1 = UI.canvas($('.cv1', el), 190), c2 = UI.canvas($('.cv2', el), 160);
+  const sm = UI.slider($('.sls', el), { label: 'Mass of puck', min: 1, max: 5, step: 0.5, val: 2, unit: 'kg', oninput: v => p.m = v });
+  const sf = UI.slider($('.sls', el), { label: 'Push strength', min: 2, max: 20, step: 1, val: 10, unit: 'N' });
+  $('.sf', el).onchange = e => { surf = e.target.value; p.mus = SURF[surf].mus; p.muk = SURF[surf].muk; };
+  const hold = (b, d) => { const on = e => { e.preventDefault(); push = d; if (pred !== null) $$('input[type=radio]', el).forEach(x => x.disabled = true); }, off = () => { if (push === d) { push = 0; rel = s.t; } };
+    b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointerleave', off); b.addEventListener('pointercancel', off); };
+  hold($('.pl', el), -1); hold($('.pr', el), 1);
+  let timed = 0; $('.p1', el).onclick = () => { push = 1; timed = 1.0; };
+  $('.rs', el).onclick = () => { s = { t: 0, x: 0, v: 0 }; pts = []; push = 0; rel = null; timed = 0; $$('input[type=radio]', el).forEach(x => x.disabled = false); $('.pres', el).textContent = ''; };
+  $('.pm', el).onchange = e => { $('.pq', el).classList.toggle('hide', !e.target.checked); pred = e.target.checked ? -1 : null; };
+  $$('input[type=radio]', el).forEach(x => x.onchange = () => { pred = +x.value; });
+  function step(dt) { if (timed > 0) { timed -= dt; if (timed <= 0) { push = 0; timed = 0; rel = s.t; } }
+    p.F = push * sf.get(); const n = 8; for (let i = 0; i < n; i++) s = PHYS.boxStep(p, s, dt / n);
+    pts.push([s.t, s.v]); while (pts.length && pts[0][0] < s.t - 10) pts.shift();
+    if (rel !== null && pred !== null && pred >= 0 && s.t - rel > 2) { const actual = Math.abs(s.v) < 1e-6 ? 2 : 1; const ok = pred === actual; $('.pres', el).innerHTML = ok ? '✔ Your prediction matched!' : `✘ You predicted “${['speed up', 'constant velocity', 'slow down and stop', 'stop immediately'][pred]}”. Watch the v–t graph: ${actual === 1 ? 'with no friction the net force is zero, so v stays constant.' : 'friction is the only horizontal force, so the puck slows to a stop.'}`;
+      api.log(`Puck on ${SURF[surf].n}: predicted "${['speed up', 'constant velocity', 'slow & stop', 'stop immediately'][pred]}" → ${ok ? 'correct' : 'incorrect'}`); rel = null; }
+    draw(); }
+  function draw() { const ctx = c1.ctx, W = c1.w, H = c1.h, sc = 70, gy = 130, ox = W / 2 - s.x * sc, fr = PHYS.boxForces(p, s.v);
+    ctx.clearRect(0, 0, W, H); ctx.fillStyle = '#eef6ff'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = surf === 'ice' ? '#d6efff' : '#d9c6a5'; ctx.fillRect(0, gy, W, H - gy);
+    ctx.fillStyle = '#456'; ctx.font = '11px system-ui'; ctx.textAlign = 'center'; for (let m = Math.floor((0 - ox) / sc); m <= (W - ox) / sc; m++) { ctx.fillRect(ox + m * sc, gy, 1, 8); ctx.fillText(m + ' m', ox + m * sc, gy + 20); }
+    const px = W / 2; ctx.fillStyle = '#222'; ctx.beginPath(); ctx.ellipse(px, gy - 8, 30, 9, 0, 0, 7); ctx.fill(); ctx.fillRect(px - 30, gy - 16, 60, 8); ctx.fillStyle = '#555'; ctx.beginPath(); ctx.ellipse(px, gy - 16, 30, 9, 0, 0, 7); ctx.fill();
+    const k = 5; if (p.F) UI.arrow(ctx, px, gy - 40, p.F * k, 0, '#2b8a3e', 'F_app ' + Math.abs(p.F).toFixed(0) + ' N'); if (Math.abs(fr.f) > 1e-6) UI.arrow(ctx, px, gy - 40, fr.f * k, 0, '#d9480f', 'F_f ' + Math.abs(fr.f).toFixed(1) + ' N', { ly: -14 });
+    if (Math.abs(s.v) > 1e-3) UI.arrow(ctx, px - 30 * Math.sign(s.v), gy - 75, s.v * 25, 0, '#555', 'v', { dash: true });
+    // inset FBD
+    const bx = W - 80, by = 70, q = 2; ctx.fillStyle = '#fff'; ctx.fillRect(bx - 70, 6, 140, 120); ctx.strokeStyle = '#ccd'; ctx.strokeRect(bx - 70, 6, 140, 120); ctx.fillStyle = '#234'; ctx.font = 'bold 11px system-ui'; ctx.fillText('Free-body diagram', bx, 19);
+    UI.arrow(ctx, bx, by, 0, fr.W * q * 0.7, '#7b3fd0', 'F_g'); UI.arrow(ctx, bx, by, 0, -fr.N * q * 0.7, '#2563eb', 'F_N'); if (p.F) UI.arrow(ctx, bx, by, p.F * q, 0, '#2b8a3e', ''); if (Math.abs(fr.f) > 1e-6) UI.arrow(ctx, bx, by, fr.f * q, 0, '#d9480f', '');
+    ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(bx, by, 4, 0, 7); ctx.fill();
+    $('.ro', el).textContent = `t = ${s.t.toFixed(1)} s   x = ${s.x.toFixed(2)} m\nv = ${s.v.toFixed(2)} m/s\nF_app = ${p.F.toFixed(1)} N   F_f = ${fr.f.toFixed(1)} N (${fr.regime})\nF_net = ${fr.Fnet.toFixed(1)} N   a = ${fr.a.toFixed(2)} m/s²\nVertical: F_N = F_g = ${fr.W.toFixed(1)} N (balanced)`;
+    const t0 = Math.max(0, s.t - 10); UI.plot(c2.ctx, 0, 0, c2.w, c2.h, [{ pts, col: '#1f6feb' }], { xmin: t0, xmax: t0 + 10, title: 'velocity v (m/s) vs time', xlabel: 't (s)', minSpan: 2 }); }
+  const lp = api.loop(dt => { if (run) step(dt); });
+  return { destroy() { lp.stop = true; } };
+}
+
+// ---------- sim: skaters push off (Newton's 3rd law) ----------
+function simSkate(el, api) {
+  const { UI, PHYS } = api; const p = { mA: 50, mB: 80, F: 200, tp: 0.5, xA0: -0.55, xB0: 0.55 }; let t = 0, running = false, pred = false, checked = false;
+  el.innerHTML = `<div class="simgrid"><div><div class="cv1"></div><div class="readout ro" style="margin-top:6px"></div></div><div class="ctrl"><div class="sls"></div>
+    <div class="row"><button class="go big pu" style="flex:1">🤜 Push!</button><button class="rs">⟲ Reset</button></div><div class="g">The push lasts 0.50 s. The ice is frictionless.</div>
+    <div class="pred"><label><input type="checkbox" class="pm"> <b>Predict mode</b></label><div class="pq hide">Predict the speeds after the push:<br>Skater A: <input type="number" class="pa" step="0.1"> m/s &nbsp; Skater B: <input type="number" class="pb" step="0.1"> m/s<div class="pres"></div></div></div></div></div>`;
+  const c = UI.canvas($('.cv1', el), 250);
+  const reset = () => { t = 0; running = false; checked = false; draw(); };
+  UI.slider($('.sls', el), { label: '<b style="color:#2563eb">Skater A</b> mass', min: 30, max: 120, step: 5, val: p.mA, unit: 'kg', oninput: v => { p.mA = v; reset(); } });
+  UI.slider($('.sls', el), { label: '<b style="color:#d9480f">Skater B</b> mass', min: 30, max: 120, step: 5, val: p.mB, unit: 'kg', oninput: v => { p.mB = v; reset(); } });
+  UI.slider($('.sls', el), { label: 'Push force', min: 50, max: 400, step: 10, val: p.F, unit: 'N', oninput: v => { p.F = v; reset(); } });
+  $('.pu', el).onclick = () => { reset(); running = true; }; $('.rs', el).onclick = reset;
+  $('.pm', el).onchange = e => { pred = e.target.checked; $('.pq', el).classList.toggle('hide', !pred); };
+  function fig(ctx, x, y, m, col, lab, dir, pushing) { const w = 10 + m / 8; ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(x, y - 92, 11, 0, 7); ctx.fill(); ctx.fillRect(x - w / 2, y - 80, w, 42); ctx.beginPath(); ctx.moveTo(x - 4, y - 38); ctx.lineTo(x - 10, y - 4); ctx.moveTo(x + 4, y - 38); ctx.lineTo(x + 10, y - 4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x, y - 70); ctx.lineTo(x + dir * (pushing ? 22 : 14), y - (pushing ? 66 : 50)); ctx.stroke(); ctx.fillStyle = '#333'; ctx.fillRect(x - 16, y - 3, 32, 3);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'center'; ctx.fillText(m + '', x, y - 56); ctx.fillStyle = col; ctx.font = 'bold 12px system-ui'; ctx.fillText(lab, x, y - 108); }
+  function draw() { const ctx = c.ctx, W = c.w, H = c.h, sc = Math.min(28, W / 26), cx = W / 2, gy = 200, st = PHYS.skaters(p, t);
+    ctx.clearRect(0, 0, W, H); ctx.fillStyle = '#f0f8ff'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#dff1fb'; ctx.fillRect(0, gy, W, H - gy);
+    ctx.fillStyle = '#7a99b0'; ctx.font = '11px system-ui'; ctx.textAlign = 'center'; for (let m = -12; m <= 12; m += 2) { ctx.fillRect(cx + m * sc, gy, 1, 6); ctx.fillText(m + ' m', cx + m * sc, gy + 18); }
+    const xa = cx + st.xA * sc - 14, xb = cx + st.xB * sc + 14; fig(ctx, xa, gy, p.mA, '#2563eb', 'A', 1, st.pushing && running); fig(ctx, xb, gy, p.mB, '#d9480f', 'B', -1, st.pushing && running);
+    const xcm = cx + st.xcm * sc; ctx.fillStyle = '#c92a2a'; ctx.beginPath(); ctx.moveTo(xcm, gy + 22); ctx.lineTo(xcm - 7, gy + 36); ctx.lineTo(xcm + 7, gy + 36); ctx.fill(); ctx.font = '11px system-ui'; ctx.fillText('center of mass of A+B', xcm, gy + 48);
+    const k = 0.22; if (running && st.pushing) { UI.arrow(ctx, xb, gy - 128, p.F * k, 0, '#d9480f', `F on B by A = ${p.F} N`); UI.arrow(ctx, xa, gy - 128, -p.F * k, 0, '#2563eb', `F on A by B = ${p.F} N`, { ly: -14 }); }
+    if (t > 0) { UI.arrow(ctx, xa, gy - 20, st.vA * 22, 0, '#555', 'v', { dash: true }); UI.arrow(ctx, xb, gy - 20, st.vB * 22, 0, '#555', 'v', { dash: true }); }
+    ctx.fillStyle = '#234'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'left'; ctx.fillText(running ? (st.pushing ? 'PUSHING… (equal and opposite forces)' : 'Gliding: no horizontal force → constant velocity (1st law)') : 'Press Push!', 8, 18);
+    $('.ro', el).textContent = `Force on A by B: ${p.F} N ←      Force on B by A: ${p.F} N →\na_A = F/m_A = ${(p.F / p.mA).toFixed(2)} m/s²    a_B = F/m_B = ${(p.F / p.mB).toFixed(2)} m/s²  (during the 0.50 s push)\nNow: v_A = ${st.vA.toFixed(2)} m/s   v_B = ${st.vB.toFixed(2)} m/s   (t = ${t.toFixed(2)} s)`; }
+  const lp = api.loop(dt => { if (!running) return; t += dt; const st = PHYS.skaters(p, t); if (Math.abs(st.xA) > 12 || Math.abs(st.xB) > 12 || t > 12) running = false;
+    if (pred && !checked && t > p.tp) { checked = true; const ga = parseFloat($('.pa', el).value), gb = parseFloat($('.pb', el).value), va = Math.abs(st.vA), vb = Math.abs(st.vB);
+      const e = (g, v) => isFinite(g) ? Math.abs(Math.abs(g) - v) / v * 100 : NaN; const ea = e(ga, va), eb = e(gb, vb);
+      $('.pres', el).innerHTML = `Actual: A ${va.toFixed(2)} m/s, B ${vb.toFixed(2)} m/s · your errors: ${isFinite(ea) ? ea.toFixed(0) + '%' : '—'}, ${isFinite(eb) ? eb.toFixed(0) + '%' : '—'}`;
+      api.log(`Skaters (A ${p.mA} kg, B ${p.mB} kg, ${p.F} N): predicted ${isFinite(ga) ? ga : '—'} / ${isFinite(gb) ? gb : '—'} m/s, actual ${va.toFixed(2)} / ${vb.toFixed(2)} m/s`); }
+    draw(); });
+  draw(); return { destroy() { lp.stop = true; } };
+}
+
+const D1F = ['Fg', 'FN', 'Ff', 'FT', 'Fapp', 'Fmotion'];
+const LESSON = {
+  id: 'day1-v1', short: 'AP Physics 1 · Day 1 — Forces &amp; Free-Body Diagrams', title: 'Day 1: Forces, Systems, Free-Body Diagrams & Newton’s 1st and 3rd Laws', minutes: '40–45',
+  ced: ['Unit 2: Force and Translational Dynamics', 'Topics 2.1, 2.2, 2.3, 2.4'],
+  intro: 'Your teacher is out, but physics isn’t! Today you will learn what a force really is, how to draw a free-body diagram the way the AP exam expects, and two of Newton’s three laws. Tomorrow builds on this, so take your time.',
+  goals: ['Describe a force as an interaction between two objects, and tell internal from external forces for a chosen system (2.1.A, 2.2.A).', 'Locate the center of mass of a simple system (2.1.B).', 'Draw correct free-body diagrams (2.2.B).', 'Use Newton’s first law: zero net force means constant velocity (2.4.A).', 'Use Newton’s third law to identify force pairs, and explain why they never cancel (2.3.A).'],
+  sections: [
+    { id: 's1', title: 'Forces are interactions', time: '5 min', ced: ['2.1.A', '2.2.A'], sp: ['3.B'], blocks: [
+      { type: 'html', html: `<p>A <b>force</b> is a push or a pull that <b>one object exerts on another object</b>. Every force is part of an <b>interaction between two objects</b>, so every force has an <i>agent</i> (the object exerting it, “by”) and a <i>receiver</i> (the object it acts “on”). For example, F<sub>g, Earth on box</sub> is the gravitational force exerted <b>by Earth on the box</b>.</p>
+        <ul><li>Forces are <b>vectors</b>: they have a magnitude (in newtons, 1 N = 1 kg·m/s²) and a direction.</li>
+        <li><b>Contact forces</b> (normal, friction, tension, spring, applied, air resistance) happen when objects touch. They come from electric forces between atoms at the surfaces.</li>
+        <li>In AP Physics 1, the only force that acts <b>at a distance</b> is the <b>gravitational force</b>.</li></ul>
+        <h3>Systems</h3><p>A <b>system</b> is whatever object or group of objects you choose to study. Forces between objects <i>inside</i> the system are <b>internal</b>. Forces exerted by objects <i>outside</i> the system are <b>external</b>. If the internal details don’t matter, we can treat the whole system as a single object (a dot) at its center of mass.</p>
+        <p><b>Key rule:</b> an object or system <b>cannot exert a net force on itself</b>. You can’t lift yourself by pulling up on your own shoelaces.</p>` },
+      { type: 'mis', html: '“A moving object carries a <i>force of motion</i>.” No. A force is not something an object <i>has</i>; it is an interaction. <b>If you can’t name the other object exerting it, it isn’t a force.</b>' },
+      { type: 'q', id: 'd1q1', qtype: 'mc', prompt: 'A hockey puck slides across the ice after it has left the stick. Ignoring friction and air resistance, which forces are exerted on the puck while it slides?', choices: ['Gravity, the normal force from the ice, and the force of the stick', 'Gravity and the normal force from the ice only', 'Gravity, the normal force, and a “force of motion” forward', 'No forces at all, because it moves at constant speed'], answer: 1,
+        why: ['The stick is no longer touching the puck, so it can’t exert a force any more.', '', 'There is no “force of motion.” Who would exert it?', 'Earth still pulls down on the puck and the ice still pushes up. Those two forces balance.'], hint: 'Make a list of everything that is touching the puck right now, then add Earth.', explain: 'Only Earth (gravity, down) and the ice (normal force, up) interact with the puck. They balance, so the puck keeps its velocity.' },
+      { type: 'q', id: 'd1q2', qtype: 'mc', prompt: 'Ana and Ben stand on skateboards. Ana pushes Ben. You choose the <b>system = Ana + Ben</b>. For this system, Ana’s push on Ben is…', choices: ['an external force that speeds up the system’s center of mass', 'an internal force, so it cannot change the velocity of the system’s center of mass', 'an internal force that speeds up the center of mass toward Ben', 'not a force, because Ben pushes back equally'], answer: 1, hint: 'Are both Ana and Ben inside the system?', explain: 'Both objects are inside the system, so the push (and Ben’s equal push back) are internal. Internal forces cannot change the motion of the system’s center of mass (2.3.A.2). The individual skaters do accelerate.', why: ['Both objects are inside the system, so the force is internal, not external.', '', 'Internal forces cannot accelerate the system’s center of mass.', 'It is a real force. Ben’s push back is its third-law partner; both are real.'] },
+      { type: 'q', id: 'd1q3', qtype: 'multi', prompt: 'Which of these are <b>contact</b> forces? Select all that apply.', choices: ['Friction from the floor', 'Tension from a rope', 'Gravitational force from Earth', 'Normal force from a table', 'Air resistance'], answer: [0, 1, 3, 4], hint: 'Only one of these can act across empty space.', explain: 'Gravity is the only non-contact (field) force in AP Physics 1. All the others need the objects to touch.' },
+    ] },
+    { id: 's2', title: 'Center of mass', time: '5 min', ced: ['2.1.B'], sp: ['2.B'], blocks: [
+      { type: 'html', html: `<p>The <b>center of mass</b> (CM) is the average position of a system’s mass. We draw a free-body diagram as a dot because <b>a system can be modeled as a single object located at its center of mass</b>.</p>
+        <div class="formula">x<sub>cm</sub> = (m<sub>1</sub>x<sub>1</sub> + m<sub>2</sub>x<sub>2</sub> + m<sub>3</sub>x<sub>3</sub> + …) / (m<sub>1</sub> + m<sub>2</sub> + m<sub>3</sub> + …)</div>
+        <p>For a symmetric object (a uniform ball, ruler, or box) the CM is on its line(s) of symmetry, for example at the middle of a uniform meter stick. The CM is always <b>closer to the heavier mass</b>.</p>` },
+      { type: 'example', title: 'two masses on a light rod', problem: 'A 2.0 kg mass sits at x = 0 and a 6.0 kg mass sits at x = 4.0 m. Where is the center of mass?', solution: 'x<sub>cm</sub> = (2.0·0 + 6.0·4.0)/(2.0 + 6.0) = 24/8.0 = <b>3.0 m</b>. That is closer to the 6.0 kg mass, as expected.' },
+      { type: 'sim', id: 'cm', title: 'Center-of-mass balance board', mount: simCM },
+      { type: 'q', id: 'd1q4', qtype: 'num', prompt: 'A 3.0 kg ball is at x = 1.0 m and a 1.0 kg ball is at x = 5.0 m. Find x<sub>cm</sub>. (You can check yours with the board above.)', answer: 2.0, tol: { abs: 0.05 }, unit: 'm', hint: 'x<sub>cm</sub> = (3.0·1.0 + 1.0·5.0)/(3.0 + 1.0)', explain: 'x<sub>cm</sub> = (3.0 + 5.0)/4.0 = 2.0 m.', traps: [{ v: 3, msg: '3.0 m is the midpoint. That would only be true if the masses were equal. Weight each position by its mass.' }] },
+      { type: 'q', id: 'd1q5', qtype: 'mc', prompt: 'Three identical 1.0 kg masses sit at (0, 0), (2 m, 0) and (0, 2 m). Where is the center of mass?', choices: ['(0.67 m, 0.67 m)', '(1.0 m, 1.0 m)', '(0.5 m, 0.5 m)', '(1.0 m, 0.67 m)'], answer: 0, hint: 'Do x and y separately. x<sub>cm</sub> = (1·0 + 1·2 + 1·0)/3', explain: 'x<sub>cm</sub> = 2/3 ≈ 0.67 m and y<sub>cm</sub> = 2/3 ≈ 0.67 m.', why: ['', '(1, 1) is the midpoint of the two outer masses only. Use all three masses.', 'Check the arithmetic: (0 + 2 + 0)/3.', 'Do the x-coordinate again: (0 + 2 + 0)/3.'] },
+    ] },
+    { id: 's3', title: 'Free-body diagrams', time: '10 min', ced: ['2.2.B'], sp: ['1.A'], blocks: [
+      { type: 'html', html: `<p>A <b>free-body diagram</b> (FBD) shows <b>every force exerted on one object or system by its environment</b>, and nothing else.</p>
+        <ol><li>Choose the object or system. Draw it as a <b>dot</b> (its center of mass).</li><li>Find every object that <b>touches</b> it (each can push or pull), and add <b>Earth</b> (gravity).</li>
+        <li>Draw each force as a <b>straight arrow that starts on the dot</b> and points the way the force acts. Longer arrow = bigger force.</li><li>Label each arrow (F<sub>g</sub>, F<sub>N</sub>, F<sub>f</sub>, F<sub>T</sub>, F<sub>app</sub>…).</li></ol>
+        <table class="t"><tr><th>Force</th><th>Exerted by</th><th>Direction</th></tr>
+        <tr><td>Gravitational F<sub>g</sub> = mg</td><td>Earth</td><td>Straight down (toward Earth’s center)</td></tr>
+        <tr><td>Normal F<sub>N</sub></td><td>A surface</td><td><b>Perpendicular</b> to the surface, pushing away from it</td></tr>
+        <tr><td>Friction F<sub>f</sub></td><td>A surface</td><td><b>Parallel</b> to the surface, opposing sliding (or the tendency to slide)</td></tr>
+        <tr><td>Tension F<sub>T</sub></td><td>A rope or string</td><td>Along the rope, <b>pulling</b> away from the object (ropes can’t push)</td></tr>
+        <tr><td>Applied F<sub>app</sub></td><td>A person or hand</td><td>Whichever way it pushes or pulls</td></tr></table>
+        <div class="tip"><b>AP exam rules:</b> draw each force as one full arrow (<b>no components</b> on the FBD). Draw forces in the same direction <b>side by side</b>, not overlapping. <b>Never</b> draw velocity, acceleration, “ma” or “net force” on a free-body diagram.</div>` },
+      { type: 'example', title: 'a book at rest on a table', problem: 'Draw the FBD of a book resting on a level table.', solution: 'Touching the book: only the table → normal force F<sub>N</sub> <b>up</b>. Plus Earth → F<sub>g</sub> <b>down</b>. The book is at rest (a = 0), so the arrows have <b>equal length</b>: F<sub>N</sub> = F<sub>g</sub>. That is not because of the third law; it is because the net force on the book is zero.' },
+      { type: 'mis', html: '“A ball thrown upward has an upward force on it while it rises.” After it leaves your hand, <b>only gravity</b> acts on it (ignoring air). It rises because it <i>already has</i> an upward velocity, and gravity slows it down.' },
+      { type: 'q', id: 'd1q6', qtype: 'fbd', prompt: '<b>Build the FBD:</b> a lamp hangs at rest from a single vertical cord.', pic: PIC.lamp(), forces: D1F, expect: [{ f: 'Fg', dir: 270 }, { f: 'FT', dir: 90 }], rel: [['FT', '=', 'Fg']], relMsg: 'The lamp is at rest, so the net force is zero. Make F<sub>T</sub> and F<sub>g</sub> the <b>same length</b>.', hint: 'Two things interact with the lamp: the cord (touching it) and Earth.', explain: 'F<sub>T</sub> up (the cord pulls) and F<sub>g</sub> down, equal in size because the lamp is in equilibrium.' },
+      { type: 'q', id: 'd1q7', qtype: 'fbd', prompt: '<b>Build the FBD:</b> a box is pushed to the right across a rough floor by a horizontal push. It moves at a <b>constant velocity</b>.', pic: PIC.box({ push: 1, v: '(constant)', note: 'rough floor · constant velocity' }), forces: D1F, expect: [{ f: 'Fg', dir: 270 }, { f: 'FN', dir: 90 }, { f: 'Fapp', dir: 0 }, { f: 'Ff', dir: 180 }], rel: [['FN', '=', 'Fg'], ['Fapp', '=', 'Ff']], relMsg: 'Constant velocity means zero net force: make F<sub>app</sub> = F<sub>f</sub> and F<sub>N</sub> = F<sub>g</sub> in length.', dirMsg: { Ff: 'Kinetic friction opposes the sliding, so it points opposite the motion.' }, hint: 'Four forces: Earth, the floor (two forces: one perpendicular, one parallel to it) and the hand. Constant velocity → balanced.', explain: 'F<sub>N</sub> balances F<sub>g</sub>, and the push balances kinetic friction. There is <b>no</b> leftover forward force. A constant velocity needs zero net force.' },
+      { type: 'q', id: 'd1q8', qtype: 'fbd', prompt: '<b>Build the FBD:</b> a ball has been thrown straight up and is still rising. Ignore air resistance.', pic: PIC.ball(), forces: ['Fg', 'Fthrow', 'FN', 'Fair', 'Fmotion'], expect: [{ f: 'Fg', dir: 270 }], extraMsg: { FN: 'Nothing is touching the ball, so there is no normal force.', Fair: 'The problem says to ignore air resistance.' }, hint: 'What is touching the ball right now?', explain: 'Only F<sub>g</sub>. The upward motion comes from the ball’s velocity, not from a force. Its acceleration is 9.8 m/s² downward the whole time it is in the air.' },
+      { type: 'q', id: 'd1q9', qtype: 'fbd', prompt: '<b>Build the FBD (challenge):</b> a sled is pulled to the right across snow (with friction) by a rope at <b>30° above the horizontal</b>. It is speeding up. Think about the normal force!', pic: PIC.box({ rope: 1, note: 'snow (friction) · speeding up →' }), forces: ['Fg', 'FN', 'Ff', 'FT', 'Fapp', 'Fmotion'], snap: [0, 30, 45, 90, 135, 180, 225, 270, 315], expect: [{ f: 'Fg', dir: 270 }, { f: 'FN', dir: 90 }, { f: 'Ff', dir: 180 }, { f: 'FT', dir: 30 }], rel: [['Fg', '>', 'FN']], relMsg: 'The rope pulls partly <b>upward</b>, so the snow doesn’t have to push up as hard. Make F<sub>N</sub> <b>shorter</b> than F<sub>g</sub>.', dirMsg: { FT: 'A rope pulls along its own direction: 30° above horizontal.' }, hint: 'The rope’s force goes along the rope (one arrow at 30°). Vertically: F<sub>N</sub> + (upward part of F<sub>T</sub>) = F<sub>g</sub>.', explain: 'F<sub>T</sub> at 30°, F<sub>f</sub> backward, F<sub>g</sub> down, F<sub>N</sub> up. Because the rope pulls partly upward, F<sub>N</sub> &lt; F<sub>g</sub>. On the AP exam you draw the tension as <b>one</b> arrow at 30°, not as components.' },
+    ] },
+    { id: 's4', title: 'Newton’s first law', time: '7 min', ced: ['2.4.A'], sp: ['3.B', '3.C'], blocks: [
+      { type: 'html', html: `<p>The <b>net force</b> is the vector sum of <i>all</i> forces exerted on a system: <span class="eq">F<sub>net</sub> = ΣF</span>.</p>
+        <div class="formula"><b>Newton’s first law:</b> if the net force on a system is zero, its velocity stays constant: it stays at rest, or keeps moving in a straight line at a steady speed.</div>
+        <ul><li><b>Translational equilibrium</b> means ΣF = 0. That includes objects at rest <i>and</i> objects moving at constant velocity.</li><li>Forces can be balanced in one direction and unbalanced in another. The velocity changes <b>only in the direction of the unbalanced force</b>.</li>
+        <li><b>Inertia</b> is an object’s resistance to changes in its velocity. Mass measures inertia.</li><li>An <b>inertial reference frame</b> is one where the first law works: a frame that is not accelerating.</li></ul>` },
+      { type: 'mis', html: '“Keeping something moving needs a net force.” No! On frictionless ice a puck keeps going on its own. When you push a box at steady speed, your push only <b>cancels friction</b>. The <b>net</b> force is zero.' },
+      { type: 'example', title: 'cruising car', problem: 'A 1200 kg car drives at a constant 25 m/s on a level highway. Air drag and rolling friction add up to 600 N backward. How big is the forward force from the road on the tires?', solution: 'Constant velocity → ΣF = 0 → forward force = <b>600 N</b>. Vertically, F<sub>N</sub> = mg = 1200·9.8 = 11,760 N. The 25 m/s doesn’t enter the calculation at all.' },
+      { type: 'sim', id: 'puck', title: 'Ice puck: what keeps it moving?', mount: simPuck },
+      { type: 'tip', html: '<b>Try this:</b> (1) On <b>ice</b>, push right for 1 s, then let go. Watch the v–t graph. (2) Switch to the <b>rough floor</b> and repeat. (3) On the rough floor, can you hold the puck at a constant speed? Look at F<sub>net</sub> while you do. Turn on <b>Predict mode</b> first.' },
+      { type: 'q', id: 'd1q10', qtype: 'mc', tag: 'sim', prompt: 'On <b>frictionless ice</b>, after you stop pushing, the v–t graph is…', choices: ['a horizontal line (constant velocity), because F<sub>net</sub> = 0', 'a line sloping down to zero, because the push force runs out', 'a line sloping up, because the puck has momentum', 'a vertical drop to zero'], answer: 0, why: ['', 'A force isn’t stored inside the puck, so nothing “runs out.” With no friction, nothing slows it.', 'Speeding up would need a net force forward. There is none.', 'An instant stop would need an enormous force.'], explain: 'No horizontal forces → zero net force → constant velocity (first law).' },
+      { type: 'q', id: 'd1q11', qtype: 'mc', prompt: 'An elevator moves <b>upward at a constant speed</b>. How does the upward tension in its cable compare with the elevator’s weight?', choices: ['Tension is greater than weight, since it is moving up', 'Tension equals weight', 'Tension is less than weight', 'You can’t tell without knowing the speed'], answer: 1, why: ['That would be true only if it were <i>speeding up</i> while going up.', '', 'That would mean it is slowing down while going up (or speeding up downward).', 'Constant velocity tells you everything: ΣF = 0.'], explain: 'Constant velocity → a = 0 → ΣF = 0 → F<sub>T</sub> = F<sub>g</sub>. The direction of motion doesn’t matter.' },
+      { type: 'q', id: 'd1q12', qtype: 'num', prompt: 'A 50 kg crate slides at constant velocity across a floor while being pulled by a 120 N horizontal rope. What is the magnitude of the friction force on the crate?', answer: 120, unit: 'N', tol: { rel: 0.005 }, hint: 'Constant velocity. What must the net force be?', explain: 'ΣF<sub>x</sub> = 0 → F<sub>f</sub> = F<sub>T</sub> = 120 N. (The mass is extra information.)', traps: [{ v: 490, msg: '490 N is the crate’s weight (mg). The question asks for the friction force. Use the horizontal direction.' }] },
+    ] },
+    { id: 's5', title: 'Newton’s third law', time: '8 min', ced: ['2.3.A'], sp: ['1.A', '3.B'], blocks: [
+      { type: 'html', html: `<div class="formula"><b>Newton’s third law:</b> &nbsp; <span class="eq">F<sub>A on B</sub> = −F<sub>B on A</sub></span> &nbsp; Whenever A pushes or pulls on B, B pushes or pulls on A with a force of the <b>same magnitude</b> in the <b>opposite direction</b>.</div>
+        <ul><li>The two forces of a pair are the <b>same type</b> (both gravitational, both normal, both friction…).</li><li>They act on <b>different objects</b>, so they <b>never appear on the same FBD</b> and they <b>never cancel each other</b>.</li>
+        <li>To find a partner, swap the words: “Earth pulls the book down” ↔ “the book pulls Earth up.”</li><li>The pair is equal even if the objects have very different masses. The <i>effects</i> (accelerations) are different: a = F/m.</li></ul>
+        <h3>Tension and ideal strings</h3><p>An <b>ideal string</b> has negligible mass and doesn’t stretch, so the tension is the <b>same at every point</b> along it. An <b>ideal pulley</b> is massless and frictionless: it only changes the direction of the string. A string with real mass has more tension near the top, because the top has to hold up more of the string.</p>` },
+      { type: 'mis', html: 'The book on a table: “F<sub>N</sub> and F<sub>g</sub> are a third-law pair.” <b>No.</b> Both act on the <i>book</i>, and they are different types. The partner of F<sub>g, Earth on book</sub> is F<sub>g, book on Earth</sub>. The partner of F<sub>N, table on book</sub> is F<sub>N, book on table</sub> (the book pushing down on the table).' },
+      { type: 'sim', id: 'skate', title: 'Skaters push off (third law + center of mass)', mount: simSkate },
+      { type: 'tip', html: '<b>Try this:</b> make skater B twice as massive as A and push. Compare the two force arrows, then the two speeds. Watch the red center-of-mass marker: does it move? (2.3.A.2: internal forces don’t move the system’s CM.)' },
+      { type: 'q', id: 'd1q13', qtype: 'mc', prompt: 'A 1,500 kg car collides head-on with a 15,000 kg truck. During the collision, the force exerted <b>by the car on the truck</b> is…', choices: ['10 times larger than the force by the truck on the car', 'equal in magnitude to the force by the truck on the car', '10 times smaller than the force by the truck on the car', 'zero, because the truck barely changes speed'], answer: 1, why: ['The third law doesn’t care about mass or speed.', '', 'The forces are equal. The <i>accelerations</i> are what differ by a factor of 10.', 'The truck does accelerate, just 10 times less than the car.'], explain: 'Third-law forces are always equal and opposite. The car’s acceleration is 10× larger because a = F/m.' },
+      { type: 'q', id: 'd1q14', qtype: 'mc', prompt: 'A book rests on a table. What is the third-law partner of the <b>gravitational force exerted by Earth on the book</b>?', choices: ['The normal force exerted by the table on the book', 'The gravitational force exerted by the book on Earth', 'The force exerted by the book on the table', 'The normal force exerted by the floor on the table'], answer: 1, why: ['Same object (the book) and a different type of force, so it can’t be a pair. It balances F<sub>g</sub> because a = 0.', '', 'That is the partner of the normal force, not of gravity.', 'That force involves the floor and the table, not Earth and the book.'], hint: 'Swap the words “by” and “on.”', explain: 'Earth pulls the book down; the book pulls Earth up with the same size force.' },
+      { type: 'q', id: 'd1q15', qtype: 'num', tag: 'sim', prompt: 'A 40 kg skater pushes off an 80 kg skater with a 160 N force for 0.50 s on frictionless ice. What speed does the <b>40 kg</b> skater have afterward? (Set it up in the sim to check.)', answer: 2.0, unit: 'm/s', hint: 'a = F/m = 160/40. Then v = a·t.', explain: 'a = 160/40 = 4.0 m/s² for 0.50 s → v = 2.0 m/s. The 80 kg skater gets a = 2.0 m/s² and ends at 1.0 m/s. Same force, different accelerations.', traps: [{ v: 1, msg: '1.0 m/s is the 80 kg skater’s speed. The question asks for the 40 kg skater.' }, { v: 4, msg: '4.0 m/s² is the acceleration. Multiply by the 0.50 s push time to get the speed.' }] },
+      { type: 'q', id: 'd1q16', qtype: 'mc', prompt: 'A horse pulls a cart forward. By the third law, the cart pulls back on the horse equally. So how can the horse and cart speed up?', choices: ['The horse pulls slightly harder than the cart pulls back', 'The two forces act on different objects. The horse speeds up because the ground pushes it forward (friction on its hooves) harder than the cart pulls back', 'They can’t speed up. They can only move at constant speed', 'The cart’s force arrives slightly later, so the horse gets a head start'], answer: 1, why: ['Third-law forces are always exactly equal.', '', 'Of course they can. Look at the forces on each object separately.', 'Third-law forces exist at the same moment.'], explain: 'Look at the horse’s FBD: the ground’s forward friction is bigger than the cart’s backward pull → net force forward. The cart’s FBD: the horse’s forward pull is bigger than the friction on the cart. Pair forces never cancel because they act on different objects.' },
+    ] },
+    { id: 's6', title: 'AP-style reasoning', time: '7 min', ced: ['2.3.A', '2.4.A', '2.7.B'], sp: ['3.B', '3.C'], blocks: [
+      { type: 'html', html: '<p>AP free-response questions often ask for a <b>paragraph-length argument</b>: make a claim, support it with evidence (forces on a diagram), and connect them with a physics law. Write your answer <b>first</b>. The sample answer appears after you submit.</p>' },
+      { type: 'q', id: 'd1q17', qtype: 'fr', tag: 'ap', minWords: 35, prompt: 'A student pushes horizontally on a heavy crate, but the crate does not move. Another student says: <i>“The crate doesn’t move because, by Newton’s third law, the crate pushes back on the student with an equal force, so the forces cancel.”</i><br><br>Is this reasoning correct? In a clear, coherent, paragraph-length response, explain why the crate stays at rest. Refer to the specific forces exerted <b>on the crate</b> and to Newton’s laws.',
+        sample: 'The reasoning is <b>incorrect</b>. The student’s push on the crate and the crate’s push on the student are a third-law pair. They act on <b>different objects</b>, so they cannot cancel each other. To explain the crate’s motion, look only at the forces exerted <b>on the crate</b>. Horizontally, the student’s push is balanced by <b>static friction from the floor</b>. Static friction adjusts to match the push (up to its maximum μ<sub>s</sub>F<sub>N</sub>). Vertically, the floor’s normal force balances the gravitational force. The net force on the crate is therefore zero, so by <b>Newton’s first law</b> its velocity stays constant, which here means it stays at rest.',
+        rubric: ['Says the reasoning is incorrect', 'Explains that third-law pair forces act on different objects, so they can’t cancel', 'Names static friction (from the floor) as the force balancing the push', 'Concludes ΣF = 0 on the crate → velocity constant (first law)'] },
+      { type: 'q', id: 'd1q18', qtype: 'mc', tag: 'ap', prompt: 'A hockey puck slides to the right across a horizontal surface and gradually slows down. Which statement is correct?', choices: ['The net force on the puck points right, in the direction it moves', 'The net force on the puck points left, opposite its velocity', 'The net force is zero because the puck is still moving', 'The net force points right but is decreasing'], answer: 1, why: ['A net force in the direction of motion would make it speed up.', '', 'Zero net force would mean constant velocity, but it is slowing down.', 'Slowing down means the velocity is changing toward the left. The net force points that way.'], explain: 'Velocity changes in the direction of the net force. Slowing a rightward-moving object needs a leftward net force (here, friction).' },
+    ] },
+    { id: 's7', title: 'Exit ticket', time: '4 min', ced: ['2.2.B', '2.3.A', '2.4.A'], blocks: [
+      { type: 'html', html: '<p>Three quick questions to show what you learned today. Try your best on the first attempt. These are scored separately.</p>' },
+      { type: 'q', id: 'd1e1', qtype: 'fbd', tag: 'exit', prompt: 'A box sits <b>at rest</b> on a level floor while a person pushes horizontally to the right on it. The box does not move. Draw its FBD.', pic: PIC.box({ push: 1, note: 'rough floor · box does NOT move' }), forces: D1F, expect: [{ f: 'Fg', dir: 270 }, { f: 'FN', dir: 90 }, { f: 'Fapp', dir: 0 }, { f: 'Ff', dir: 180 }], rel: [['FN', '=', 'Fg'], ['Fapp', '=', 'Ff']], relMsg: 'The box is at rest, so the forces balance: F<sub>app</sub> = F<sub>f</sub> (static friction) and F<sub>N</sub> = F<sub>g</sub>.', hint: 'Static friction is still a force from the floor, even though the box isn’t sliding.', explain: 'Static friction matches the push, so the net force is zero.' },
+      { type: 'q', id: 'd1e2', qtype: 'mc', tag: 'exit', prompt: 'Which statement about an object moving at constant velocity must be true?', choices: ['No forces are exerted on it', 'The net force on it is zero', 'There is a small net force in the direction of motion', 'Its mass must be small'], answer: 1, explain: 'Constant velocity ⇔ ΣF = 0. There can be many forces, as long as they balance.', why: ['Forces can be exerted on it, as long as they add to zero.', '', 'Any net force would change the velocity.', 'Mass doesn’t decide whether velocity changes.'] },
+      { type: 'q', id: 'd1e3', qtype: 'mc', tag: 'exit', prompt: 'A mosquito splats on the windshield of a moving car. Which is true during the impact?', choices: ['The windshield exerts a bigger force on the mosquito than the mosquito exerts on the windshield', 'The forces are equal in magnitude, and the mosquito has the much larger acceleration', 'The forces are equal, and the two have equal accelerations', 'The mosquito exerts no force on the windshield'], answer: 1, explain: 'Third-law pair: equal forces. The mosquito’s tiny mass gives it an enormous acceleration (a = F/m).', why: ['Third-law forces are always equal in size.', '', 'Equal forces on very different masses give very different accelerations.', 'Every interaction has two equal forces.'] },
+    ] },
+    { id: 'sum', title: 'Summary & submit', type: 'summary', time: '2 min', blocks: [] },
+  ] };
+
+Engine.start(LESSON);
+</script>
+</body></html>

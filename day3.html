@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AP Physics 1 Day 3: Applications and Review</title>
+<!-- Self-contained offline lesson for AP Physics 1 (Southold UFSD, Mr. Tiu). No internet, install or login needed. Open in Chrome. -->
+<style>
+*{box-sizing:border-box}
+body{font-family:system-ui,"Segoe UI",Roboto,Arial,sans-serif;margin:0;background:#f4f6fa;color:#222;font-size:15px;line-height:1.45}
+header{background:#234;color:#fff;padding:6px 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:20;min-height:46px}
+header h1{font-size:16px;margin:0;white-space:nowrap}
+#hdrProg{display:flex;align-items:center;gap:8px;font-size:13px;color:#cde;flex:1;min-width:240px}
+.bar{flex:1;max-width:320px;height:12px;background:#3a5068;border-radius:6px;overflow:hidden;border:1px solid #567}.bar i{display:block;height:100%;background:#ffd76a;transition:width .4s}
+#who{font-size:13px;color:#ffd76a;font-weight:bold}
+header button{background:#3a5068;color:#fff;border:1px solid #567}
+#wrap{display:flex;gap:10px;padding:8px;align-items:flex-start}
+#side{width:228px;flex:none;position:sticky;top:54px;max-height:calc(100vh - 62px);overflow:auto}
+#side .panel{padding:6px}
+#side h3{margin:2px 4px 6px;font-size:13px;color:#456;text-transform:uppercase;letter-spacing:.04em}
+.navi{display:flex;gap:7px;align-items:flex-start;width:100%;text-align:left;border:1px solid transparent;background:none;border-radius:6px;padding:6px 6px;font-size:13px;cursor:pointer;color:#234;line-height:1.25}
+.navi:hover{background:#eef2f8}.navi.on{background:#ffd76a;border-color:#e0b93e;font-weight:bold}
+.navi .st{flex:none;width:19px;height:19px;border-radius:50%;border:2px solid #9ab;display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:bold;margin-top:-1px}
+.navi .st.done{background:#2b8a3e;border-color:#2b8a3e}.navi .st.part{background:linear-gradient(90deg,#e8a33d 50%,#fff 50%);border-color:#e8a33d}
+.navi small{display:block;color:#678;font-weight:normal;font-size:11px}
+main{flex:1;min-width:0;max-width:1120px}
+.panel{background:#fff;border-radius:8px;box-shadow:0 1px 3px #0002;padding:10px 14px;margin-bottom:10px}
+h2{font-size:21px;margin:2px 0 4px;color:#234}h3{font-size:16px;margin:8px 0 6px;color:#234}h4{margin:6px 0 4px;font-size:15px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px}.chip{font-size:11.5px;background:#e6eefb;color:#234;border:1px solid #b8c9e6;border-radius:10px;padding:1px 8px}
+.chip.time{background:#e6f4ea;border-color:#a6d4b2}
+button{font:inherit;font-size:14px;padding:6px 12px;border:1px solid #889;border-radius:6px;background:#eef;cursor:pointer;color:#222;touch-action:manipulation}
+button:hover:not(:disabled){filter:brightness(.96)}button:disabled{opacity:.5;cursor:default}
+button.on{background:#ffd76a;border-color:#c9a237}button.go{background:#2b6cb0;color:#fff;border-color:#1f4f82;font-weight:bold}button.big{font-size:16px;padding:8px 18px}
+button.warn{background:#ffd2c8;border-color:#c55}button.ok{background:#d3f0dc;border-color:#3a9b57}
+input[type=text],input[type=number],textarea,select{font:inherit;font-size:15px;padding:5px 7px;border:1px solid #99a;border-radius:5px;background:#fff}
+input[type=range]{width:100%;accent-color:#2b6cb0}
+.formula{font-family:Georgia,"Times New Roman",serif;font-size:16px;background:#f3f6ff;padding:6px 10px;border-radius:6px;line-height:1.7;margin:6px 0}
+.eq{font-family:Georgia,"Times New Roman",serif;font-size:16px;white-space:nowrap}
+.mis{background:#fff4e5;border:1px solid #f0b46a;border-left:5px solid #e8890c;border-radius:6px;padding:7px 12px;margin:8px 0}
+.mis b.t{color:#b35c00}
+.tip{background:#e9f7ef;border:1px solid #9fd3b1;border-left:5px solid #2b8a3e;border-radius:6px;padding:7px 12px;margin:8px 0}
+.ex{background:#f3f6ff;border:1px solid #c5d2ee;border-left:5px solid #2b6cb0;border-radius:6px;padding:7px 12px;margin:8px 0}
+.ex .sol{display:none;border-top:1px dashed #b5c4e3;margin-top:6px;padding-top:6px}.ex.open .sol{display:block}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+table.t{border-collapse:collapse;font-size:13.5px;width:100%;margin:6px 0}table.t th,table.t td{border:1px solid #ccd;padding:3px 6px;text-align:left;vertical-align:top}table.t th{background:#eef2f8}
+.q{border:1px solid #cfd8e6;border-radius:8px;padding:9px 12px;margin:10px 0;background:#fcfdff}
+.q.done.right{border-color:#8fcfa1;background:#f4fbf6}.q.done.shown{border-color:#e3c27a;background:#fffbef}
+.qh{display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:4px}.qh b{font-size:15px;color:#234}
+.badge{font-size:11px;background:#eef2f8;border:1px solid #c8d3e4;border-radius:8px;padding:0 7px;color:#456}.badge.ap{background:#ede4ff;border-color:#bca6ea;color:#4b2a91}.badge.exit{background:#ffe8d6;border-color:#f0b48a;color:#8a3d00}
+.qstat{margin-left:auto;font-weight:bold}
+.qp{margin:2px 0 8px}
+.choices{display:flex;flex-direction:column;gap:5px}
+.choice{display:flex;gap:8px;align-items:flex-start;border:1px solid #cfd6e2;border-radius:6px;padding:6px 9px;cursor:pointer;background:#fff}
+.choice:hover{background:#f2f6ff}.choice input{margin-top:3px;flex:none;width:17px;height:17px}
+.choice.picked{border-color:#2b6cb0;background:#eef4ff}.choice.good{border-color:#2b8a3e;background:#e6f6ea}.choice.badc{border-color:#c33;background:#fdecea}
+.choices.grid{display:grid;grid-template-columns:repeat(4,1fr)}
+.numrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.numrow input{width:140px}
+.qbtns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.fb{margin-top:7px;font-size:14px}.fb:empty{display:none}
+.fb .r{color:#1d7a35;font-weight:bold}.fb .w{color:#b02a1e;font-weight:bold}
+.hintbox{background:#fffbe6;border:1px solid #e8d48a;border-radius:6px;padding:5px 9px;margin-top:6px;font-size:14px}
+.explain{background:#f1f5fb;border-radius:6px;padding:5px 9px;margin-top:6px;font-size:14px}
+textarea{width:100%;min-height:110px;resize:vertical;line-height:1.4}
+.sample{background:#f4fbf6;border:1px solid #9fd3b1;border-radius:6px;padding:8px 11px;margin-top:8px}
+.rubric label{display:block;font-size:14px;margin:3px 0}
+.navbtns{display:flex;justify-content:space-between;gap:10px;margin:8px 0 18px}
+.sim{border:1px solid #b9c6da;border-radius:8px;background:#fff;padding:8px;margin:10px 0}
+.sim h4{margin:0 0 6px;display:flex;gap:8px;align-items:center}
+.simgrid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:10px}
+.ctrl{font-size:13px}.ctrl .sl{display:grid;grid-template-columns:112px 1fr 58px;gap:6px;align-items:center;margin:3px 0}
+.ctrl .sl output{font-weight:bold;text-align:right;font-size:13px}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px;margin:5px 0}
+.status{background:#fffbe6;border:1px solid #e8d48a;border-radius:6px;padding:5px 8px;font-size:13px;line-height:1.5}
+.readout{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;background:#f6f8fb;border:1px solid #dde3ec;border-radius:6px;padding:5px 7px;line-height:1.55;white-space:pre-wrap}
+.pred{background:#f5efff;border:1px solid #cbb8ef;border-radius:6px;padding:5px 8px;font-size:13px;margin:5px 0}
+.pred input[type=number]{width:74px;font-size:13px;padding:2px 4px}
+canvas{display:block;max-width:100%;touch-action:none}
+.fbdwrap{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.fbdpal{display:flex;flex-direction:column;gap:5px;min-width:210px;max-width:250px}
+.fchip{display:flex;align-items:center;gap:7px;text-align:left;font-size:13.5px;padding:5px 9px;background:#fff}
+.fchip i{display:inline-block;width:22px;height:5px;border-radius:2px;flex:none}
+.fchip.on{background:#ffd76a;border-color:#c9a237}.fchip.placed:after{content:"✓";margin-left:auto;color:#2b8a3e;font-weight:bold}
+.scene{min-width:170px;max-width:240px}
+.scene svg{width:100%;height:auto;border:1px solid #dde3ec;border-radius:6px;background:#fbfcfe}
+.g{font-size:12.5px;color:#556}
+.hide{display:none!important}
+.startcard{max-width:780px;margin:18px auto}
+.startcard input[type=text]{font-size:18px;width:300px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#234;color:#fff;padding:8px 16px;border-radius:8px;font-size:14px;z-index:50;opacity:0;transition:opacity .3s;pointer-events:none}.toast.show{opacity:1}
+.sumtbl td:nth-child(4){max-width:330px;word-break:break-word}
+.bigscore{font-size:30px;font-weight:bold;color:#234}
+#printArea{display:none}
+kbd{background:#eee;border:1px solid #bbb;border-radius:3px;padding:0 4px;font-size:12px}
+@media (max-width:1100px){.simgrid{grid-template-columns:1fr}#side{width:190px}}
+@media (max-width:820px){#wrap{flex-direction:column}#side{position:static;width:100%;max-height:none}.two{grid-template-columns:1fr}}
+@media print{
+  body{background:#fff;font-size:12px}header,#wrap,.toast,.noprint{display:none!important}
+  #printArea{display:block!important;padding:0 6px}
+  #printArea .panel{box-shadow:none;border:1px solid #ccc;padding:6px 10px}
+  table.t{font-size:11px}table.t tr{page-break-inside:avoid}
+}
+.qp > svg{width:260px;max-width:100%;height:auto;border:1px solid #dde3ec;border-radius:6px;background:#fbfcfe;margin:6px 0}
+
+</style></head><body>
+<noscript><p style="padding:20px;font:16px sans-serif">This lesson needs JavaScript. Open the downloaded file in Google Chrome.</p></noscript>
+<p id="boot" style="padding:20px;font:16px sans-serif">Loading lesson… If this message stays, download the file and open it in Chrome (Google Drive’s preview can’t run it).</p>
+<script>
+// ===== Forces sub-days: shared physics + answer-checking core (pure functions; also run by node tests) =====
+// Conventions: g = 9.8 m/s^2. Angles in degrees, measured counter-clockwise from +x (right), y up.
+const G = 9.8;
+const D2R = Math.PI / 180;
+
+// ---------- answer checking ----------
+// Accepts "4.9", "4.9 m/s^2", "-3", "−3" (unicode minus), "1.2e3", "1.2 x 10^3", "1,200"
+function parseNum(s) {
+  if (s === null || s === undefined) return NaN;
+  s = String(s).trim().replace(/[\u2212\u2013\u2014]/g, '-').replace(/(\d),(\d{3})/g, '$1$2').replace(/^\+/, '');
+  const m = s.match(/^([-]?\s*\d*\.?\d+(?:e[-+]?\d+)?)\s*(?:(?:x|\u00d7|\*)\s*10\s*\^\s*([-+]?\d+))?/i);
+  if (!m) return NaN;
+  let v = parseFloat(m[1].replace(/\s+/g, ''));
+  if (m[2] !== undefined) v *= Math.pow(10, +m[2]);
+  return v;
+}
+// tol: {rel: fraction} and/or {abs: value}. Default: 1.5 % relative.
+// Returns {ok, v, bad (unparseable), close (within 5 %), sign (right magnitude, wrong sign), g10 (looks like g = 10 was used)}
+function checkNum(input, ans, tol, opt) {
+  const v = parseNum(input);
+  if (!isFinite(v)) return { ok: false, bad: true, v };
+  tol = tol || {};
+  const rel = tol.rel !== undefined ? tol.rel : (tol.abs !== undefined ? 0 : 0.015);
+  const allowed = Math.max(tol.abs || 0, rel * Math.abs(ans), 1e-12);
+  const ok = Math.abs(v - ans) <= allowed;
+  const sign = !ok && ans !== 0 && Math.abs(v + ans) <= allowed;
+  const close = !ok && Math.abs(v - ans) <= Math.max(0.05 * Math.abs(ans), allowed * 3);
+  let g10 = false;
+  if (!ok && opt && opt.g10 !== undefined) g10 = Math.abs(v - opt.g10) <= Math.max(0.01 * Math.abs(opt.g10), 1e-9);
+  return { ok, v, bad: false, sign, close, g10 };
+}
+function sameSet(a, b) { a = [...a].sort(); b = [...b].sort(); return a.length === b.length && a.every((x, i) => x === b[i]); }
+function checkMC(choice, ans) { return Array.isArray(ans) ? sameSet(choice || [], ans) : choice === ans; }
+
+// ---------- free-body diagrams ----------
+const normAng = a => ((Math.round(a) % 360) + 360) % 360;
+function snapAngle(deg, allowed) {
+  let best = allowed[0], bd = 1e9;
+  for (const a of allowed) { const d = Math.abs(((deg - a + 540) % 360) - 180); if (d < bd) { bd = d; best = a; } }
+  return normAng(best);
+}
+// placed: {key: {dir, len}}; spec: {expect:[{f, dir}], rel:[[keyA, '>'|'<'|'=', keyB]]}
+// Returns {ok, missing:[keys], extra:[keys], wrongDir:[keys], relFail:[[a,op,b]]}
+function checkFBD(placed, spec) {
+  placed = placed || {};
+  const exp = {}; for (const e of spec.expect) exp[e.f] = normAng(e.dir);
+  const missing = [], extra = [], wrongDir = [], relFail = [];
+  for (const k in exp) { if (!placed[k]) missing.push(k); else if (normAng(placed[k].dir) !== exp[k]) wrongDir.push(k); }
+  for (const k in placed) if (!(k in exp)) extra.push(k);
+  if (!missing.length && !extra.length && !wrongDir.length) {
+    for (const r of (spec.rel || [])) {
+      const A = placed[r[0]].len, B = placed[r[2]].len;
+      const good = r[1] === '>' ? A > B : r[1] === '<' ? A < B : A === B;
+      if (!good) relFail.push(r);
+    }
+  }
+  return { ok: !missing.length && !extra.length && !wrongDir.length && !relFail.length, missing, extra, wrongDir, relFail };
+}
+
+// ---------- 2.1 center of mass ----------
+function centerOfMass(ms, xs) { let M = 0, s = 0; for (let i = 0; i < ms.length; i++) { M += ms[i]; s += ms[i] * xs[i]; } return M > 0 ? s / M : NaN; }
+
+// ---------- 2.5 / 2.7 box on a level floor, applied force F at angle ang above horizontal ----------
+// p: {m, F, ang, mus, muk, g}. v = current velocity (m/s, + right). Static friction adopts the value needed (up to mus*N).
+function boxForces(p, v) {
+  const g = p.g || G, th = (p.ang || 0) * D2R;
+  const Fx = p.F * Math.cos(th), Fy = p.F * Math.sin(th), W = p.m * g;
+  const lift = Fy > W;
+  const N = Math.max(0, W - Fy), fsMax = p.mus * N, fk = p.muk * N;
+  let f, regime;
+  if (v === 0) {
+    if (Math.abs(Fx) <= fsMax + 1e-12) { f = -Fx; regime = 'static'; }
+    else { f = -Math.sign(Fx) * fk; regime = 'kinetic'; }
+  } else { f = -Math.sign(v) * fk; regime = 'kinetic'; }
+  if (lift) { f = 0; regime = 'none'; }
+  const Fnet = Fx + f;
+  return { Fx, Fy, W, N, fsMax, fk, f, regime, Fnet, a: Fnet / p.m, lift };
+}
+// one time step with the "friction can't reverse the motion" rule: if v would cross zero, the object stops there.
+function stepWithStop(forcesFn, p, s, dt) {
+  const fr = forcesFn(p, s.v);
+  const v2 = s.v + fr.a * dt;
+  if (s.v !== 0 && Math.sign(v2) !== Math.sign(s.v)) {
+    const tz = -s.v / fr.a;
+    return { t: s.t + dt, x: s.x + s.v * tz + 0.5 * fr.a * tz * tz, v: 0, fr: forcesFn(p, 0) };
+  }
+  return { t: s.t + dt, x: s.x + s.v * dt + 0.5 * fr.a * dt * dt, v: v2, fr };
+}
+const boxStep = (p, s, dt) => stepWithStop(boxForces, p, s, dt);
+
+// ---------- inclines (2.2.B.4, 2.5, 2.7): v measured DOWN the slope ----------
+function inclineForces(p, v) {
+  const g = p.g || G, th = p.ang * D2R, W = p.m * g;
+  const Wpar = W * Math.sin(th), N = W * Math.cos(th), fsMax = p.mus * N, fk = p.muk * N;
+  let f, regime;
+  if (v === 0) {
+    if (Wpar <= fsMax + 1e-12) { f = -Wpar; regime = 'static'; }
+    else { f = -fk; regime = 'kinetic'; }
+  } else { f = -Math.sign(v) * fk; regime = 'kinetic'; }
+  const Fnet = Wpar + f;
+  return { W, Wpar, Wperp: N, N, fsMax, fk, f, regime, Fnet, a: Fnet / p.m };
+}
+const inclineStep = (p, s, dt) => stepWithStop(inclineForces, p, s, dt);
+const criticalAngle = mus => Math.atan(mus) / D2R;
+
+// ---------- connected objects (2.1 systems, 2.3.A.3 tension, 2.5) ----------
+// Modified Atwood: m1 on a horizontal table (friction mus/muk), string over ideal pulley to hanging m2. + = m2 moving down.
+function tableAtwood(p, moving) {
+  const g = p.g || G, drive = p.m2 * g, fsMax = p.mus * p.m1 * g, fk = p.muk * p.m1 * g;
+  if (!moving && drive <= fsMax + 1e-12) return { a: 0, T: drive, f: drive, regime: 'static', drive, fsMax, fk };
+  const a = (drive - fk) / (p.m1 + p.m2);
+  return { a, T: p.m2 * (g - a), f: fk, regime: 'kinetic', drive, fsMax, fk };
+}
+// Classic Atwood: two hanging masses on an ideal pulley. + = m2 moving down.
+function atwood(p) {
+  const g = p.g || G, a = (p.m2 - p.m1) * g / (p.m1 + p.m2), T = 2 * p.m1 * p.m2 * g / (p.m1 + p.m2);
+  return { a, T };
+}
+
+// ---------- apparent weight in an elevator (2.6.C) + springs (2.8) ----------
+// a = elevator acceleration (+ up). Scale reading (normal force) N = m (g + a), never negative.
+const apparentWeight = (m, a, g) => Math.max(0, m * ((g || G) + a));
+const springStretch = (k, m, a, g) => m * ((g || G) + a) / k; // Hooke: k x = m (g + a)
+// Elevator trips (+ = up). Presets: 'up' / 'down' match the v-t graph in Day 3 Q13 (speed up 0-2 s, cruise 2-6 s, slow 6-8 s, rest 8-10 s).
+// 'custom': A = { v0, a } -> cruise at v0 for 2 s, then accelerate at a (until it stops if a opposes v0, else for 3 s), then constant velocity.
+function elevatorProfile(type, A) {
+  if (type === 'up') return [{ t0: 0, t1: 2, a: A }, { t0: 2, t1: 6, a: 0 }, { t0: 6, t1: 8, a: -A }, { t0: 8, t1: 10, a: 0 }];
+  if (type === 'down') return [{ t0: 0, t1: 2, a: -A }, { t0: 2, t1: 6, a: 0 }, { t0: 6, t1: 8, a: A }, { t0: 8, t1: 10, a: 0 }];
+  if (type === 'custom') { const v0 = A.v0 || 0, a = A.a || 0; let segs;
+    if (Math.abs(a) < 1e-9) segs = [{ t0: 0, t1: 10, a: 0 }];
+    else { const opp = Math.abs(v0) > 1e-9 && Math.sign(a) !== Math.sign(v0), dur = opp ? Math.min(7, Math.abs(v0 / a)) : 3;
+      segs = [{ t0: 0, t1: 2, a: 0 }, { t0: 2, t1: 2 + dur, a }, { t0: 2 + dur, t1: 10, a: 0 }]; }
+    segs.v0 = v0; return segs; }
+  // 'drop': cable fails -> free fall 1 s, then emergency brakes decelerate at +g for 1 s
+  return [{ t0: 0, t1: 1, a: 0 }, { t0: 1, t1: 2, a: -G }, { t0: 2, t1: 3, a: G }, { t0: 3, t1: 10, a: 0 }];
+}
+function elevatorAt(segs, t) {
+  let v = segs.v0 || 0, y = 0;
+  for (const s of segs) {
+    const d = Math.max(0, Math.min(t, s.t1) - s.t0);
+    if (t < s.t1) { y += v * d + 0.5 * s.a * d * d; v += s.a * d; return { a: s.a, v: Math.abs(v) < 1e-9 ? 0 : v, y }; }
+    y += v * d + 0.5 * s.a * d * d; v += s.a * d;
+  }
+  return { a: 0, v: Math.abs(v) < 1e-9 ? 0 : v, y };
+}
+// words for the motion: "slowing down, moving down" etc.
+function motionLabel(v, a) {
+  if (Math.abs(a) < 1e-9) return Math.abs(v) < 1e-6 ? 'at rest' : 'constant velocity ' + (v > 0 ? 'up' : 'down');
+  if (Math.abs(v) < 1e-6) return 'starting from rest, speeding up ' + (a > 0 ? 'upward' : 'downward');
+  return (Math.sign(a) === Math.sign(v) ? 'speeding up' : 'slowing down') + ', moving ' + (v > 0 ? 'up' : 'down');
+}
+
+// ---------- Newton's 3rd law skaters (2.3) ----------
+// Push of magnitude F lasting tp seconds; A on the left (moves left, -), B on the right (moves right, +). Frictionless ice.
+function skaters(p, t) {
+  const aA = -p.F / p.mA, aB = p.F / p.mB, tt = Math.min(t, p.tp), after = Math.max(0, t - p.tp);
+  const vA = aA * tt, vB = aB * tt;
+  const xA = p.xA0 + 0.5 * aA * tt * tt + vA * after, xB = p.xB0 + 0.5 * aB * tt * tt + vB * after;
+  return { aA: t < p.tp ? aA : 0, aB: t < p.tp ? aB : 0, vA, vB, xA, xB, pushing: t < p.tp, xcm: (p.mA * xA + p.mB * xB) / (p.mA + p.mB) };
+}
+
+const PHYS = { G, D2R, parseNum, checkNum, checkMC, sameSet, normAng, snapAngle, checkFBD, centerOfMass, boxForces, boxStep, stepWithStop,
+  inclineForces, inclineStep, criticalAngle, tableAtwood, atwood, apparentWeight, springStretch, elevatorProfile, elevatorAt, motionLabel, skaters };
+if (typeof module !== 'undefined') module.exports = PHYS;
+
+</script>
+<script>
+// ===== Self-guided lesson engine (sections, progress, questions, FBD builder, sim helpers, summary) =====
+const $ = (s, r) => (r || document).querySelector(s), $$ = (s, r) => [...(r || document).querySelectorAll(s)];
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const strip = h => { const d = document.createElement('div'); d.innerHTML = h; return (d.textContent || '').replace(/\s+/g, ' ').trim(); };
+const fmt = (x, d) => { if (!isFinite(x)) return '—'; if (d !== undefined) return (Math.abs(x) < 0.5 * Math.pow(10, -d) ? 0 : x).toFixed(d); const a = Math.abs(x); return a >= 100 ? x.toFixed(0) : a >= 10 ? x.toFixed(1) : x.toFixed(2); };
+
+// ---------- force palette for free-body diagrams ----------
+const FORCES = {
+  Fg: { sym: 'F<sub>g</sub>', txt: 'F_g', name: 'Gravitational force (by Earth)', col: '#7b3fd0' },
+  FN: { sym: 'F<sub>N</sub>', txt: 'F_N', name: 'Normal force (by surface)', col: '#2563eb' },
+  Ff: { sym: 'F<sub>f</sub>', txt: 'F_f', name: 'Friction (by surface)', col: '#d9480f' },
+  FT: { sym: 'F<sub>T</sub>', txt: 'F_T', name: 'Tension (by rope / string)', col: '#0b7285' },
+  Fapp: { sym: 'F<sub>app</sub>', txt: 'F_app', name: 'Applied force (by hand / person)', col: '#2b8a3e' },
+  Fsp: { sym: 'F<sub>s</sub>', txt: 'F_s', name: 'Spring force (by spring)', col: '#c2255c' },
+  Fair: { sym: 'F<sub>air</sub>', txt: 'F_air', name: 'Air resistance (by air)', col: '#868e96' },
+  Fmotion: { sym: 'F<sub>motion</sub>', txt: 'F_motion', name: '“Force of motion”', col: '#a61e4d', why: 'There is no “force of motion.” Every force is exerted BY some other object. Moving objects keep moving because of inertia, not because a force pushes them along.' },
+  Fthrow: { sym: 'F<sub>throw</sub>', txt: 'F_throw', name: '“Force of the throw” (by hand)', col: '#a61e4d', why: 'After the ball leaves the hand, the hand is no longer touching it, so the hand exerts no force on it. The ball keeps rising because of the velocity it already has.' },
+  Finertia: { sym: 'F<sub>inertia</sub>', txt: 'F_inertia', name: '“Inertia force”', col: '#a61e4d', why: 'Inertia is a property of matter (measured by mass). It is not a force, and nothing exerts it.' },
+  Fnet: { sym: 'F<sub>net</sub>', txt: 'F_net', name: 'Net force', col: '#495057', why: 'The net force is the vector SUM of the forces on the diagram. It is never drawn as an extra force on a free-body diagram.' },
+};
+const DIRNAME = { 0: '→ right', 45: '↗ up-right', 90: '↑ up', 135: '↖ up-left', 180: '← left', 225: '↙ down-left', 270: '↓ down', 315: '↘ down-right', 30: '↗ 30° above horizontal', 60: '↗ 60° above horizontal', 120: '↖ 30° left of vertical', 150: '↖ 30° above horizontal (left)', 210: '↙ 30° below horizontal (left)', 240: '↙ 30° left of straight down', 300: '↘ 30° right of straight down', 330: '↘ 30° below horizontal' };
+const dirName = a => DIRNAME[a] || (a + '°');
+
+// ---------- small situation pictures (inline SVG) ----------
+const PIC = {
+  _w: (inner, h) => `<svg viewBox="0 0 240 ${h || 150}" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Arial" font-size="12">${inner}</svg>`,
+  floor: (y, rough) => `<rect x="0" y="${y}" width="240" height="${150 - y}" fill="${rough ? '#d9c6a5' : '#cfe8f7'}"/>` + (rough ? Array.from({ length: 24 }, (_, i) => `<line x1="${i * 10}" y1="${y + 10}" x2="${i * 10 + 8}" y2="${y + 2}" stroke="#a88f68"/>`).join('') : ''),
+  arrow: (x1, y1, x2, y2, c, lab, dash) => { const a = Math.atan2(y2 - y1, x2 - x1), h = 8; return `<line x1="${x1}" y1="${y1}" x2="${x2 - Math.cos(a) * 4}" y2="${y2 - Math.sin(a) * 4}" stroke="${c}" stroke-width="3" ${dash ? 'stroke-dasharray="5 4"' : ''}/><polygon points="${x2},${y2} ${x2 - h * Math.cos(a - .45)},${y2 - h * Math.sin(a - .45)} ${x2 - h * Math.cos(a + .45)},${y2 - h * Math.sin(a + .45)}" fill="${c}"/>` + (lab ? `<text x="${(x1 + x2) / 2}" y="${Math.min(y1, y2) - 6}" text-anchor="middle" fill="${c}" font-weight="bold">${lab}</text>` : ''); },
+  lamp: () => PIC._w(`<rect x="0" y="0" width="240" height="14" fill="#bbb"/><line x1="120" y1="14" x2="120" y2="70" stroke="#333" stroke-width="2"/><path d="M95 100 L120 70 L145 100 Z" fill="#f2c94c" stroke="#8a6d1e"/><circle cx="120" cy="104" r="6" fill="#fff6c8" stroke="#8a6d1e"/><text x="8" y="140" fill="#456">at rest</text>`),
+  box: (o) => { o = o || {}; const y = 110; let s = PIC.floor(y, o.rough !== false) + `<rect x="95" y="${y - 44}" width="54" height="44" fill="#c8894b" stroke="#7a4f26" stroke-width="2"/><text x="122" y="${y - 18}" text-anchor="middle" fill="#fff" font-weight="bold">box</text>`;
+    if (o.push) s += PIC.arrow(40, y - 22, 92, y - 22, '#2b8a3e', 'push');
+    if (o.pushDown) s += PIC.arrow(48, y - 76, 96, y - 46, '#2b8a3e', 'push 30° below horizontal');
+    if (o.rope) s += `<line x1="149" y1="${y - 26}" x2="215" y2="${y - 64}" stroke="#333" stroke-width="2"/><text x="170" y="${y - 70}" fill="#333">rope, 30°</text>`;
+    if (o.v) s += PIC.arrow(98, y - 58, 146, y - 58, '#555', 'v ' + (o.v || ''), true);
+    if (o.note) s += `<text x="8" y="144" fill="#333">${o.note}</text>`;
+    return PIC._w(s); },
+  ball: () => PIC._w(`<rect x="0" y="130" width="240" height="20" fill="#9bd18b"/><circle cx="120" cy="70" r="16" fill="#f08a1c" stroke="#8a4b00" stroke-width="2"/>${PIC.arrow(150, 92, 150, 40, '#555', '', true)}<text x="158" y="66" fill="#555">v (rising)</text><text x="8" y="22" fill="#456">already left the hand · ignore air</text>`),
+  incline: (deg, o) => { o = o || {}; const th = deg * Math.PI / 180, x0 = 20, y0 = 135, L = 210, x1 = x0 + L * Math.cos(th), y1 = y0 - L * Math.sin(th);
+    const cx = x0 + 0.55 * L * Math.cos(th), cy = y0 - 0.55 * L * Math.sin(th);
+    return PIC._w(`<polygon points="${x0},${y0} ${x1},${y0} ${x1},${y1}" fill="#d9c6a5" stroke="#8a7350"/><g transform="translate(${cx},${cy}) rotate(${-deg})"><rect x="-20" y="-30" width="40" height="30" fill="#c8894b" stroke="#7a4f26" stroke-width="2"/></g><text x="${x0 + 34}" y="${y0 - 5}" fill="#333">${deg}°</text><text x="8" y="18" fill="#456">${o.note || 'at rest on a rough incline'}</text>`); },
+  elevator: () => PIC._w(`<rect x="70" y="6" width="100" height="138" fill="#eef2f8" stroke="#456" stroke-width="2"/><line x1="120" y1="6" x2="120" y2="60" stroke="#333" stroke-width="2"/><rect x="104" y="60" width="32" height="28" fill="#c8894b" stroke="#7a4f26" stroke-width="2"/>${PIC.arrow(200, 110, 200, 50, '#c026d3', 'a')}<text x="8" y="140" fill="#456">accelerating upward</text>`, 150),
+  wall: () => PIC._w(`<rect x="170" y="0" width="70" height="150" fill="#bbb"/><rect x="128" y="55" width="42" height="40" fill="#c8894b" stroke="#7a4f26" stroke-width="2"/>${PIC.arrow(60, 75, 124, 75, '#2b8a3e', 'F')}<text x="8" y="140" fill="#456">held at rest against wall</text>`),
+};
+
+// ---------- sim UI helpers ----------
+const UI = {
+  canvas(host, hCss) { const cv = document.createElement('canvas'); host.appendChild(cv); const o = { cv, ctx: cv.getContext('2d'), w: 600, h: hCss };
+    o.fit = () => { const dpr = window.devicePixelRatio || 1; o.w = Math.max(280, host.clientWidth - 2); o.h = typeof hCss === 'function' ? hCss(o.w) : hCss; cv.width = o.w * dpr; cv.height = o.h * dpr; cv.style.width = o.w + 'px'; cv.style.height = o.h + 'px'; o.ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+    o.fit(); return o; },
+  arrow(ctx, x0, y0, dx, dy, col, label, opt) { opt = opt || {}; const L = Math.hypot(dx, dy); if (L < 2) return; ctx.save(); ctx.strokeStyle = ctx.fillStyle = col; ctx.lineWidth = opt.w || 3; if (opt.dash) ctx.setLineDash([6, 4]);
+    const ux = dx / L, uy = dy / L, hl = Math.min(12, L * 0.45); ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x0 + dx - ux * hl * 0.8, y0 + dy - uy * hl * 0.8); ctx.stroke(); ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(x0 + dx, y0 + dy); ctx.lineTo(x0 + dx - ux * hl - uy * hl * 0.5, y0 + dy - uy * hl + ux * hl * 0.5); ctx.lineTo(x0 + dx - ux * hl + uy * hl * 0.5, y0 + dy - uy * hl - ux * hl * 0.5); ctx.closePath(); ctx.fill();
+    if (label) { ctx.font = 'bold 13px system-ui'; ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; const lx = x0 + dx + ux * 10 + (opt.lx || 0) - (ux < -0.3 ? ctx.measureText(label).width : ux < 0.3 ? ctx.measureText(label).width / 2 : 0), ly = y0 + dy + uy * 12 + 4 + (opt.ly || 0); ctx.strokeText(label, lx, ly); ctx.fillText(label, lx, ly); }
+    ctx.restore(); },
+  // series: [{pts:[[x,y],...], col, label, dash}] ; o: {xmax, ymin, ymax, xlabel, ylabel, title, hlines:[{y,col,label}]}
+  plot(ctx, X, Y, W, H, series, o) { o = o || {}; ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(X, Y, W, H); ctx.strokeStyle = '#ccd'; ctx.strokeRect(X + .5, Y + .5, W - 1, H - 1);
+    const L = X + 44, R = X + W - 8, T = Y + 18, B = Y + H - 22; let ymin = o.ymin, ymax = o.ymax;
+    if (ymin === undefined || ymax === undefined) { let lo = 0, hi = 0; for (const s of series) for (const p of s.pts) { lo = Math.min(lo, p[1]); hi = Math.max(hi, p[1]); } for (const h of (o.hlines || [])) { lo = Math.min(lo, h.y); hi = Math.max(hi, h.y); } if (hi - lo < (o.minSpan || 1)) { const c = (hi + lo) / 2, sp = (o.minSpan || 1) / 2; if (lo >= 0 && c - sp < 0) { lo = 0; hi = 2 * sp; } else { lo = c - sp; hi = c + sp; } } const pad = (hi - lo) * 0.1; if (ymin === undefined) ymin = lo < 0 ? lo - pad : 0; if (ymax === undefined) ymax = hi + pad; }
+    const xmin = o.xmin || 0, xmax = o.xmax || 10, sx = x => L + (x - xmin) / (xmax - xmin) * (R - L), sy = y => B - (y - ymin) / (ymax - ymin) * (B - T);
+    ctx.font = '11px system-ui'; ctx.fillStyle = '#556'; ctx.strokeStyle = '#eef0f4'; ctx.lineWidth = 1;
+    const nice = span => { const raw = span / 5, p = Math.pow(10, Math.floor(Math.log10(raw))); for (const m of [1, 2, 2.5, 5, 10]) if (m * p >= raw) return m * p; return 10 * p; };
+    const ys = nice(ymax - ymin); for (let v = Math.ceil(ymin / ys) * ys; v <= ymax + 1e-9; v += ys) { const yy = sy(v); ctx.beginPath(); ctx.moveTo(L, yy); ctx.lineTo(R, yy); ctx.stroke(); ctx.textAlign = 'right'; ctx.fillText(+v.toFixed(6) + '', L - 4, yy + 4); }
+    const xs = nice(xmax - xmin); for (let v = Math.ceil(xmin / xs) * xs; v <= xmax + 1e-9; v += xs) { const xx = sx(v); ctx.beginPath(); ctx.moveTo(xx, T); ctx.lineTo(xx, B); ctx.stroke(); ctx.textAlign = 'center'; ctx.fillText(+v.toFixed(6) + '', xx, B + 13); }
+    ctx.strokeStyle = '#334'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(L, T); ctx.lineTo(L, B); ctx.lineTo(R, B); ctx.stroke();
+    if (ymin < 0 && ymax > 0) { ctx.strokeStyle = '#99a'; ctx.beginPath(); ctx.moveTo(L, sy(0)); ctx.lineTo(R, sy(0)); ctx.stroke(); }
+    for (const h of (o.hlines || [])) { ctx.strokeStyle = h.col || '#888'; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(L, sy(h.y)); ctx.lineTo(R, sy(h.y)); ctx.stroke(); ctx.setLineDash([]); if (h.label) { ctx.fillStyle = h.col || '#888'; ctx.textAlign = 'right'; ctx.fillText(h.label, R - 2, sy(h.y) - 3); } }
+    ctx.save(); ctx.beginPath(); ctx.rect(L, T - 2, R - L, B - T + 4); ctx.clip();
+    for (const s of series) { if (!s.pts.length) continue; ctx.strokeStyle = s.col; ctx.lineWidth = s.w || 2.2; if (s.dash) ctx.setLineDash([6, 4]); ctx.beginPath(); s.pts.forEach((p, i) => { const xx = sx(p[0]), yy = sy(p[1]); i ? ctx.lineTo(xx, yy) : ctx.moveTo(xx, yy); }); ctx.stroke(); ctx.setLineDash([]);
+      if (s.dot !== false) { const p = s.pts[s.pts.length - 1]; ctx.fillStyle = s.col; ctx.beginPath(); ctx.arc(sx(p[0]), sy(p[1]), 3.5, 0, 7); ctx.fill(); } }
+    ctx.restore();
+    ctx.fillStyle = '#234'; ctx.font = 'bold 12px system-ui'; ctx.textAlign = 'left'; ctx.fillText(o.title || '', L + 4, Y + 13); ctx.font = '11px system-ui'; ctx.fillStyle = '#556'; ctx.textAlign = 'right'; ctx.fillText(o.xlabel || '', R, Y + 13);
+    ctx.restore(); return { sx, sy }; },
+  slider(host, o) { const d = document.createElement('div'); d.className = 'sl'; d.innerHTML = `<span>${o.label}</span><input type="range" min="${o.min}" max="${o.max}" step="${o.step}" value="${o.val}"><output></output>`; host.appendChild(d);
+    const inp = $('input', d), out = $('output', d), dec = o.dec !== undefined ? o.dec : (o.step < 1 ? (String(o.step).split('.')[1] || '').length : 0);
+    const show = () => { out.textContent = (+inp.value).toFixed(dec) + (o.unit ? ' ' + o.unit : ''); };
+    inp.addEventListener('input', () => { show(); o.oninput && o.oninput(+inp.value); }); show();
+    return { el: d, input: inp, get: () => +inp.value, set: v => { inp.value = v; show(); }, disable: b => { inp.disabled = b; d.style.opacity = b ? .5 : 1; } }; },
+  html(host, h) { const d = document.createElement('div'); d.innerHTML = h; while (d.firstChild) host.appendChild(d.firstChild); return host.lastChild; },
+};
+
+// ---------- the engine ----------
+const Engine = (() => {
+  let L, S, KEY, storageOK = true, active = [], loops = [], tick = null;
+  const QS = [];
+  function load() { try { S = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { S = null; storageOK = false; } if (!S || S.v !== 1) S = fresh(); }
+  function fresh() { return { v: 1, name: '', period: '', cur: -1, seen: {}, ans: {}, log: [], started: null, updated: null, secs: 0 }; }
+  function save() { S.updated = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); storageOK = true; } catch (e) { storageOK = false; } }
+  function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200); }
+  const secQs = sec => (sec.blocks || []).filter(b => b.type === 'q');
+  function secStatus(i) { const sec = L.sections[i]; if (sec.type === 'summary') return allDone() ? 'done' : 'todo'; const qs = secQs(sec);
+    if (!qs.length) return S.seen[sec.id] ? 'done' : 'todo'; const d = qs.filter(q => S.ans[q.id] && S.ans[q.id].done).length; return d === qs.length ? 'done' : d || S.seen[sec.id] ? 'part' : 'todo'; }
+  const allDone = () => L.sections.every((s, i) => s.type === 'summary' || secStatus(i) === 'done');
+  function scores() { let pts = 0, max = 0, exit = 0, exitMax = 0, fr = 0, frMax = 0, answered = 0;
+    for (const q of QS) { const a = S.ans[q.id]; if (q.qt === 'fr') { frMax++; if (a && a.done) fr++; continue; } const p = q.pts || 1; max += p; if (a && a.done) answered++; const sc = a && a.score ? a.score * p : 0; pts += sc; if (q.tag === 'exit') { exitMax += p; exit += sc; } }
+    return { pts, max, exit, exitMax, fr, frMax, answered, total: QS.filter(q => q.qt !== 'fr').length }; }
+  function header() { const n = L.sections.filter(s => s.type !== 'summary').length, d = L.sections.filter((s, i) => s.type !== 'summary' && secStatus(i) === 'done').length, sc = scores();
+    $('#hdrProg').innerHTML = `<span>Progress</span><div class="bar" title="${d} of ${n} sections complete"><i style="width:${(100 * d / n).toFixed(0)}%"></i></div><span>${d}/${n} sections · ${fmt(sc.pts, sc.pts % 1 ? 2 : 0)}/${sc.max} pts</span>` + (storageOK ? '' : ' <span style="color:#ffb4a8">⚠ progress not saving — keep this tab open</span>');
+    $('#who').innerHTML = S.name ? '👤 ' + esc(S.name) : ''; }
+  function nav() { $('#side').innerHTML = `<div class="panel"><h3>Lesson map</h3><button class="navi ${S.cur === -1 ? 'on' : ''}" data-i="-1"><span class="st ${S.name ? 'done' : ''}">${S.name ? '✓' : ''}</span><span>Start here<small>name + instructions</small></span></button>` +
+      L.sections.map((s, i) => { const st = secStatus(i); return `<button class="navi ${S.cur === i ? 'on' : ''}" data-i="${i}"><span class="st ${st}">${st === 'done' ? '✓' : ''}</span><span>${i + 1}. ${s.title}<small>${s.time ? s.time + ' · ' : ''}${s.ced ? 'CED ' + s.ced.join(', ') : ''}</small></span></button>`; }).join('') +
+      `<div class="g" style="padding:6px 4px">✓ = complete · half = started.<br>Your work saves automatically in this browser.</div></div>`;
+    $$('#side .navi').forEach(b => b.onclick = () => go(+b.dataset.i)); }
+  function cleanup() { for (const a of active) { try { a && a.destroy && a.destroy(); } catch (e) { console.error(e); } } active = []; loops.forEach(l => l.stop = true); loops = []; }
+  function loop(fn) { const L0 = { stop: false }; let last = performance.now(); const f = now => { if (L0.stop) return; const dt = Math.min(0.05, (now - last) / 1000); last = now; try { fn(dt); } catch (e) { console.error(e); L0.stop = true; } requestAnimationFrame(f); }; requestAnimationFrame(f); loops.push(L0); return L0; }
+  function go(i) { if (!S.name && i !== -1) { toast('Type your name first, then press Start.'); i = -1; } cleanup(); S.cur = i; save(); render(); window.scrollTo(0, 0); }
+  function render() { header(); nav(); const m = $('#main'); if (S.cur === -1) return renderStart(m); const sec = L.sections[S.cur]; if (sec.type === 'summary') return renderSummary(m); renderSection(m, sec, S.cur); }
+  function renderStart(m) { m.innerHTML = `<div class="panel startcard"><h2>${L.title}</h2><div class="chips">${L.ced.map(c => `<span class="chip">${c}</span>`).join('')}<span class="chip time">about ${L.minutes} minutes</span></div>
+    <p>${L.intro}</p><h3>Today you will be able to…</h3><ul>${L.goals.map(g => `<li>${g}</li>`).join('')}</ul>
+    <h3>How this works</h3><ul><li>Work through the sections <b>in order</b> using the lesson map on the left or the <b>Next ▶</b> button.</li><li>Read the short explanations, try the worked examples <b>before</b> you reveal the solution, and use each simulation.</li>
+    <li>Questions give instant feedback. Full credit on the 1st try, half credit on the 2nd, a quarter after that. Hints are free. After 2 misses you may reveal the answer (0 points).</li>
+    <li>Your work saves automatically <b>in this browser on this Chromebook</b>. A refresh will not lose it. Do not use Incognito or clear browsing data.</li>
+    <li>At the end, open the <b>Summary</b>, then print or save it as a PDF (<kbd>Ctrl</kbd>+<kbd>P</kbd>) or take a screenshot, and turn it in the way your teacher asked.</li></ul>
+    <div class="panel" style="background:#f3f6ff"><label><b>Your full name:</b> <input type="text" id="nm" value="${esc(S.name)}" maxlength="60" placeholder="First Last" autocomplete="name"></label>
+    &nbsp; <label>Class period: <input type="text" id="per" value="${esc(S.period)}" maxlength="12" style="width:80px"></label>
+    <div class="row" style="margin-top:10px"><button class="go big" id="startBtn">${S.name ? 'Continue ▶' : 'Start ▶'}</button>${S.started ? `<span class="g">Started ${new Date(S.started).toLocaleString()}</span>` : ''}</div>
+    ${storageOK ? '' : '<p class="mis">⚠ This browser is blocking saved progress. Keep this tab open until you finish and print your summary.</p>'}</div>
+    ${S.started ? `<p class="g">Not your work, or need a fresh start? <button id="wipe" class="warn">Erase all saved work for this lesson</button></p>` : ''}</div>`;
+    $('#startBtn').onclick = () => { const n = $('#nm').value.trim(); if (n.length < 2) { toast('Please type your full name.'); $('#nm').focus(); return; } S.name = n; S.period = $('#per').value.trim(); if (!S.started) S.started = Date.now(); save(); go(firstUnfinished()); };
+    $('#nm').onkeydown = e => { if (e.key === 'Enter') $('#startBtn').click(); };
+    const w = $('#wipe'); if (w) w.onclick = () => { if (prompt('Type ERASE to delete all saved answers for this lesson on this device.') === 'ERASE') { S = fresh(); save(); render(); toast('Erased.'); } }; }
+  function firstUnfinished() { for (let i = 0; i < L.sections.length; i++) if (L.sections[i].type !== 'summary' && secStatus(i) !== 'done') return i; return L.sections.length - 1; }
+  function renderSection(m, sec, i) { m.innerHTML = `<div class="panel"><h2>${i + 1}. ${sec.title}</h2><div class="chips">${sec.time ? `<span class="chip time">⏱ ${sec.time}</span>` : ''}${(sec.ced || []).map(c => `<span class="chip">CED ${c}</span>`).join('')}${(sec.sp || []).map(c => `<span class="chip" style="background:#f4ecff;border-color:#cbb8ef">Practice ${c}</span>`).join('')}</div><div id="blocks"></div></div>
+      <div class="navbtns noprint"><button id="prev" ${i === 0 ? '' : ''}>◀ Back</button><span class="g" id="secMsg"></span><button class="go big" id="next">${i + 1 < L.sections.length ? 'Next ▶' : 'Summary ▶'}</button></div>`;
+    const host = $('#blocks');
+    for (const b of sec.blocks) {
+      if (b.type === 'html') UI.html(host, b.html);
+      else if (b.type === 'mis') UI.html(host, `<div class="mis"><b class="t">⚠ Common misconception:</b> ${b.html}</div>`);
+      else if (b.type === 'tip') UI.html(host, `<div class="tip">${b.html}</div>`);
+      else if (b.type === 'example') { const d = UI.html(host, `<div class="ex"><b>📘 Worked example${b.title ? ': ' + b.title : ''}</b><div>${b.problem}</div><button class="showsol" style="margin-top:6px">Show worked solution</button><div class="sol">${b.solution}</div></div>`); $('.showsol', d).onclick = e => { d.classList.toggle('open'); e.target.textContent = d.classList.contains('open') ? 'Hide solution' : 'Show worked solution'; }; }
+      else if (b.type === 'sim') { const d = UI.html(host, `<div class="sim" id="sim-${b.id}"><h4>🧪 ${b.title}</h4><div class="simbody"></div></div>`); try { active.push(b.mount($('.simbody', d), simApi(b.id))); } catch (e) { console.error(e); $('.simbody', d).textContent = 'Simulation failed to load: ' + e.message; } }
+      else if (b.type === 'q') renderQ(host, b);
+    }
+    S.seen[sec.id] = S.seen[sec.id] || (secQs(sec).length ? Date.now() : 0); save();
+    $('#prev').onclick = () => go(i - 1); if (i === 0) $('#prev').disabled = true;
+    $('#next').onclick = () => { if (!secQs(sec).length) S.seen[sec.id] = Date.now(); const qs = secQs(sec).filter(q => !(S.ans[q.id] && S.ans[q.id].done)); if (qs.length && !$('#next').dataset.warned) { $('#next').dataset.warned = 1; $('#secMsg').innerHTML = `⚠ ${qs.length} question${qs.length > 1 ? 's' : ''} in this section not finished. Press Next again to move on anyway.`; return; } save(); go(i + 1); };
+    header(); nav(); }
+  function simApi(id) { return { id, UI, PHYS, loop, fmt, save: (k, v) => { S['sim_' + id + '_' + k] = v; save(); }, load: (k, d) => S['sim_' + id + '_' + k] !== undefined ? S['sim_' + id + '_' + k] : d,
+    log: (txt) => { S.log.push({ t: Date.now(), sim: id, txt }); if (S.log.length > 60) S.log.shift(); save(); } }; }
+  // ---------- questions ----------
+  const TYPEL = { mc: 'Multiple choice', multi: 'Select all that apply', num: 'Numeric answer', fbd: 'Free-body diagram', fr: 'Written response' };
+  function renderQ(host, q) { const a = S.ans[q.id] || (S.ans[q.id] = { tries: 0 });
+    const d = UI.html(host, `<div class="q" id="q-${q.id}"><div class="qh"><b>${q.tag === 'exit' ? 'Exit ' : ''}Q${q.n}</b><span class="badge">${TYPEL[q.qt]}</span>${q.tag === 'ap' ? '<span class="badge ap">AP-style</span>' : ''}${q.tag === 'exit' ? '<span class="badge exit">Exit ticket</span>' : ''}${q.tag === 'sim' ? '<span class="badge">use the sim</span>' : ''}<span class="qstat"></span></div><div class="qp">${q.prompt}</div><div class="qbody"></div>
+      <div class="qbtns"><button class="chk go">Check</button>${q.hint ? '<button class="hintb">💡 Hint</button>' : ''}<button class="showb hide">Show answer</button><span class="g tries"></span></div><div class="hintbox hide">${q.hint || ''}</div><div class="fb"></div></div>`);
+    const body = $('.qbody', d), fb = $('.fb', d), chk = $('.chk', d);
+    if (q.hint) $('.hintb', d).onclick = () => { $('.hintbox', d).classList.toggle('hide'); a.hinted = true; save(); };
+    let getVal;
+    if (q.qt === 'mc' || q.qt === 'multi') { const multi = q.qt === 'multi'; body.innerHTML = `<div class="choices ${q.grid ? 'grid' : ''}">` + q.choices.map((c, i) => `<label class="choice"><input type="${multi ? 'checkbox' : 'radio'}" name="r-${q.id}" value="${i}"><span><b>${String.fromCharCode(65 + i)}.</b> ${c}</span></label>`).join('') + '</div>';
+      const ins = $$('input', body); ins.forEach(x => x.onchange = () => { $$('.choice', body).forEach((l, i) => l.classList.toggle('picked', ins[i].checked)); a.draft = getVal(); save(); });
+      getVal = () => multi ? ins.filter(x => x.checked).map(x => +x.value) : (ins.find(x => x.checked) ? +ins.find(x => x.checked).value : null);
+      const v = a.done ? a.value : a.draft; if (v !== undefined && v !== null) { (multi ? v : [v]).forEach(i => { if (ins[i]) ins[i].checked = true; }); $$('.choice', body).forEach((l, i) => l.classList.toggle('picked', ins[i].checked)); } }
+    else if (q.qt === 'num') { body.innerHTML = `<div class="numrow"><input type="text" inputmode="decimal" autocomplete="off" placeholder="number"> <span class="eq">${q.unit || ''}</span>${q.note ? `<span class="g">${q.note}</span>` : ''}</div>`; const inp = $('input', body);
+      inp.value = a.done ? a.value : (a.draft || ''); inp.oninput = () => { a.draft = inp.value; save(); }; inp.onkeydown = e => { if (e.key === 'Enter') chk.click(); }; getVal = () => inp.value.trim(); }
+    else if (q.qt === 'fbd') { const fb2 = fbdBuilder(body, q, a.done ? a.value : a.draft, v => { a.draft = v; save(); }); getVal = () => fb2.get(); d._fbd = fb2; }
+    else if (q.qt === 'fr') { body.innerHTML = `<textarea placeholder="Write your answer here in complete sentences…">${esc(a.value || a.draft || '')}</textarea><div class="g cnt"></div>`; const ta = $('textarea', body), cnt = $('.cnt', body);
+      const upd = () => { const w = ta.value.trim().split(/\s+/).filter(Boolean).length; cnt.textContent = w + ' words' + (w < (q.minWords || 25) ? ` · write at least ${q.minWords || 25} words to unlock the sample answer` : ''); };
+      ta.oninput = () => { a.draft = ta.value; save(); upd(); }; upd(); getVal = () => ta.value.trim(); chk.textContent = a.done ? 'Update my answer' : 'Submit & see sample answer'; }
+    const finish = () => { d.classList.add('done', a.revealed ? 'shown' : 'right'); $('.qstat', d).innerHTML = q.qt === 'fr' ? '<span style="color:#2b6cb0">✎ submitted</span>' : a.revealed ? '<span style="color:#a66b00">answer shown · 0 pts</span>' : `<span style="color:#1d7a35">✔ ${a.score === 1 ? 'first try' : a.tries + ' tries'} · ${a.score * (q.pts || 1)} pt</span>`;
+      if (q.qt !== 'fr') { chk.disabled = true; $$('input', body).forEach(x => x.disabled = true); if (d._fbd) d._fbd.lock(); $('.showb', d).classList.add('hide'); }
+      if (q.qt === 'mc' || q.qt === 'multi') { const corr = Array.isArray(q.answer) ? q.answer : [q.answer]; $$('.choice', body).forEach((l, i) => { if (corr.includes(i)) l.classList.add('good'); }); }
+      if (q.qt === 'fr') { if (!$('.sample', d)) { const sd = UI.html(d, `<div class="sample"><b>Sample answer</b> — compare it with yours:<div style="margin-top:4px">${q.sample}</div>${q.rubric ? `<div class="rubric" style="margin-top:8px"><b>Self-check — tick what your answer included:</b>${q.rubric.map((r, i) => `<label><input type="checkbox" data-i="${i}"> ${r}</label>`).join('')}</div>` : ''}</div>`);
+        $$('.rubric input', sd).forEach(x => { x.checked = !!(a.rub && a.rub[x.dataset.i]); x.onchange = () => { a.rub = a.rub || {}; a.rub[x.dataset.i] = x.checked; save(); }; }); } }
+      else fb.innerHTML = (a.revealed ? `<span class="w">Answer: ${answerText(q)}</span>` : `<span class="r">✔ Correct!</span>`) + (q.explain ? `<div class="explain">${q.explain}</div>` : ''); };
+    chk.onclick = () => { const v = getVal();
+      if (q.qt === 'fr') { const w = v.split(/\s+/).filter(Boolean).length; if (w < (q.minWords || 25)) { fb.innerHTML = `<span class="w">Write a bit more (at least ${q.minWords || 25} words) before you see the sample answer.</span>`; return; } a.value = v; a.done = true; a.at = Date.now(); chk.textContent = 'Update my answer'; save(); finish(); header(); nav(); toast('Saved.'); return; }
+      if (v === null || v === '' || (Array.isArray(v) && !v.length) || (q.qt === 'fbd' && !Object.keys(v).length)) { fb.innerHTML = '<span class="w">Answer first, then press Check.</span>'; return; }
+      const res = grade(q, v); if (res.bad) { fb.innerHTML = `<span class="w">${res.msg}</span>`; return; }
+      a.tries++; a.last = v;
+      if (res.ok) { a.done = true; a.value = v; a.score = a.tries === 1 ? 1 : a.tries === 2 ? 0.5 : 0.25; a.at = Date.now(); save(); finish(); header(); nav(); }
+      else { save(); fb.innerHTML = `<span class="w">✘ Not yet.</span> ${res.msg || ''}`; if (a.tries >= 1 && q.hint) $('.hintbox', d).classList.remove('hide'); if (a.tries >= 2) $('.showb', d).classList.remove('hide'); }
+      $('.tries', d).textContent = a.done ? '' : `tries: ${a.tries}`; };
+    $('.showb', d).onclick = () => { if (!confirm('Reveal the answer? This question will be worth 0 points.')) return; a.done = true; a.revealed = true; a.score = 0; a.value = getVal(); a.at = Date.now(); save(); finish(); header(); nav(); };
+    if (a.done) finish(); else { if (a.tries) $('.tries', d).textContent = `tries: ${a.tries}`; if (a.tries >= 2) $('.showb', d).classList.remove('hide'); } }
+  function grade(q, v) {
+    if (q.qt === 'mc') { const ok = v === q.answer; return { ok, msg: ok ? '' : (q.why && q.why[v]) || 'Re-read the question and think about which physics idea applies.' }; }
+    if (q.qt === 'multi') { const ok = PHYS.sameSet(v, q.answer); if (ok) return { ok }; const miss = q.answer.filter(i => !v.includes(i)).length, extra = v.filter(i => !q.answer.includes(i)).length; return { ok, msg: `${extra ? 'At least one choice you picked does not belong. ' : ''}${miss ? 'You are missing at least one correct choice.' : ''}` }; }
+    if (q.qt === 'num') { const r = PHYS.checkNum(v, q.answer, q.tol, { g10: q.g10 }); if (r.bad) return { bad: true, msg: 'Type a number (you can leave off the units), e.g. 4.9' };
+      if (r.ok) return { ok: true }; let msg = r.g10 ? 'It looks like you used g = 10 m/s². In these lessons use <b>g = 9.8 m/s²</b>.' : r.sign ? 'Right size, wrong sign. Check your direction (which way is positive?).' : r.close ? 'Close! Check your rounding: don’t round until the end and keep 3 significant figures.' : (q.miss || 'Check your free-body diagram and set up ΣF = ma again.'); if (q.traps) for (const t of q.traps) if (PHYS.checkNum(v, t.v, { rel: 0.01 }).ok) msg = t.msg; return { ok: false, msg }; }
+    if (q.qt === 'fbd') { const r = PHYS.checkFBD(v, q); if (r.ok) return { ok: true }; const nm = k => `<b>${FORCES[k].sym}</b>`, msgs = [];
+      for (const k of r.extra) msgs.push(FORCES[k].why || (q.extraMsg && q.extraMsg[k]) || `Remove ${nm(k)}: ask “what object exerts this force?” Nothing in this situation does.`);
+      if (r.missing.length) msgs.push(r.missing.length === 1 ? 'One force is missing. List every object <b>touching</b> the object, plus Earth.' : `${r.missing.length} forces are missing. List every object touching it, plus Earth.`);
+      for (const k of r.wrongDir) msgs.push(`Check the direction of ${nm(k)}.` + (q.dirMsg && q.dirMsg[k] ? ' ' + q.dirMsg[k] : ''));
+      for (const rr of r.relFail) msgs.push(q.relMsg || `Check the relative lengths: ${nm(rr[0])} should be ${rr[1] === '>' ? 'longer than' : rr[1] === '<' ? 'shorter than' : 'the same length as'} ${nm(rr[2])}.`);
+      return { ok: false, msg: '<ul style="margin:4px 0 0 0">' + msgs.map(x => `<li>${x}</li>`).join('') + '</ul>' }; }
+    return { ok: false }; }
+  function answerText(q) { if (q.qt === 'mc') return String.fromCharCode(65 + q.answer) + '. ' + (q.choiceText || q.choices)[q.answer]; if (q.qt === 'multi') return q.answer.map(i => String.fromCharCode(65 + i)).join(', ');
+    if (q.qt === 'num') return (q.answerText || fmtAns(q.answer)) + ' ' + (q.unit || ''); if (q.qt === 'fbd') return q.expect.map(e => FORCES[e.f].sym + ' ' + dirName(PHYS.normAng(e.dir))).join(', ') + (q.rel && q.rel.length ? ' (' + q.rel.map(r => FORCES[r[0]].sym + ' ' + r[1] + ' ' + FORCES[r[2]].sym).join(', ') + ')' : ''); return ''; }
+  const fmtAns = x => Math.abs(x) >= 1000 ? x.toPrecision(4) : +x.toPrecision(3) + '';
+  function studentText(q, a) { if (!a || a.value === undefined) return a && a.last !== undefined ? studentText(q, { value: a.last }) : '—'; const v = a.value;
+    if (q.qt === 'mc') return v === null ? '—' : String.fromCharCode(65 + v) + '. ' + strip((q.choiceText || q.choices)[v]).slice(0, 70); if (q.qt === 'multi') return (v || []).map(i => String.fromCharCode(65 + i)).join(', ') || '—';
+    if (q.qt === 'num') return esc(v) + ' ' + (q.unit || ''); if (q.qt === 'fbd') return Object.keys(v || {}).map(k => FORCES[k].txt + ' ' + dirName(v[k].dir) + ' (len ' + v[k].len + ')').join('; ') || '—'; return esc(v).slice(0, 80); }
+  // ---------- FBD builder ----------
+  function fbdBuilder(host, q, init, onChange) { let placed = JSON.parse(JSON.stringify(init || {})), sel = null, locked = false, drag = false;
+    const snaps = (q.snap || [0, 45, 90, 135, 180, 225, 270, 315]).map(PHYS.normAng);
+    host.innerHTML = `<div class="fbdwrap">${q.pic ? `<div class="scene">${q.pic}<div class="g" style="margin-top:3px">The situation</div></div>` : ''}<div><div class="cvh" style="width:330px"></div><div class="g" style="max-width:330px">1) Pick a force on the right. 2) Press on the dot area and <b>drag</b> (or tap) toward the direction it points. Farther = longer arrow. Drag an arrow tip to change it.</div></div>
+      <div class="fbdpal"><b style="font-size:13px">Forces (pick one, then draw):</b>${q.forces.map(k => `<button class="fchip" data-k="${k}"><i style="background:${FORCES[k].col}"></i><span>${FORCES[k].sym} <span class="g">${FORCES[k].name}</span></span></button>`).join('')}
+      <div class="row"><button class="del">✕ Remove selected</button><button class="clr">Clear all</button></div><div class="g lst"></div></div></div>`;
+    const c = UI.canvas($('.cvh', host), 300); const ctx = c.ctx, U = 25, cx = () => c.w / 2, cy = 150;
+    const chips = $$('.fchip', host);
+    const selF = k => { sel = k; chips.forEach(b => b.classList.toggle('on', b.dataset.k === k)); draw(); };
+    chips.forEach(b => b.onclick = () => { if (!locked) selF(b.dataset.k); });
+    $('.del', host).onclick = () => { if (locked || !sel) return; delete placed[sel]; onChange(placed); draw(); };
+    $('.clr', host).onclick = () => { if (locked) return; placed = {}; onChange(placed); draw(); };
+    const tipOf = k => { const p = placed[k], o = offsets()[k] || 0, a = p.dir * Math.PI / 180; return { x: cx() + Math.cos(a) * p.len * U - Math.sin(a) * o, y: cy - Math.sin(a) * p.len * U - Math.cos(a) * o }; };
+    function offsets() { const by = {}, o = {}; for (const k in placed) (by[placed[k].dir] = by[placed[k].dir] || []).push(k); for (const d in by) { const ks = by[d]; ks.forEach((k, i) => o[k] = (i - (ks.length - 1) / 2) * 9); } return o; }
+    function setFrom(e) { const r = c.cv.getBoundingClientRect(), x = e.clientX - r.left - cx(), y = cy - (e.clientY - r.top), dist = Math.hypot(x, y); if (dist < 8) return; const ang = Math.atan2(y, x) * 180 / Math.PI;
+      placed[sel] = { dir: PHYS.snapAngle(ang, snaps), len: Math.max(1, Math.min(5, Math.round(dist / U))) }; draw(); }
+    c.cv.addEventListener('pointerdown', e => { if (locked) return; const r = c.cv.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
+      for (const k in placed) { const t = tipOf(k); if (Math.hypot(t.x - px, t.y - py) < 13) { selF(k); drag = true; c.cv.setPointerCapture(e.pointerId); return; } }
+      if (!sel) { flash = 'Pick a force from the list first →'; draw(); return; } drag = true; c.cv.setPointerCapture(e.pointerId); setFrom(e); });
+    c.cv.addEventListener('pointermove', e => { if (drag && sel) setFrom(e); });
+    const up = () => { if (drag) { drag = false; onChange(placed); draw(); } }; c.cv.addEventListener('pointerup', up); c.cv.addEventListener('pointercancel', up);
+    let flash = '';
+    function draw() { ctx.clearRect(0, 0, c.w, c.h); ctx.fillStyle = '#fbfcfe'; ctx.fillRect(0, 0, c.w, c.h); ctx.strokeStyle = '#ccd'; ctx.strokeRect(.5, .5, c.w - 1, c.h - 1);
+      ctx.strokeStyle = '#eceff5'; for (let r = 1; r <= 5; r++) { ctx.beginPath(); ctx.arc(cx(), cy, r * U, 0, 7); ctx.stroke(); }
+      ctx.setLineDash([3, 5]); ctx.strokeStyle = '#d7dce6'; for (const s of snaps) { const a = s * Math.PI / 180; ctx.beginPath(); ctx.moveTo(cx(), cy); ctx.lineTo(cx() + Math.cos(a) * 5.4 * U, cy - Math.sin(a) * 5.4 * U); ctx.stroke(); } ctx.setLineDash([]);
+      const o = offsets(); for (const k in placed) { const p = placed[k], a = p.dir * Math.PI / 180, off = o[k] || 0, sx = cx() - Math.sin(a) * off, sy = cy - Math.cos(a) * off; UI.arrow(ctx, sx, sy, Math.cos(a) * p.len * U, -Math.sin(a) * p.len * U, FORCES[k].col, FORCES[k].txt, { w: k === sel ? 4.5 : 3 }); }
+      ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(cx(), cy, 6, 0, 7); ctx.fill();
+      ctx.font = '11px system-ui'; ctx.fillStyle = '#889'; ctx.textAlign = 'left'; ctx.fillText('rings = 1 unit of force', 6, c.h - 6);
+      if (flash) { ctx.fillStyle = '#b02a1e'; ctx.font = 'bold 13px system-ui'; ctx.textAlign = 'center'; ctx.fillText(flash, cx(), 16); flash = ''; }
+      chips.forEach(b => b.classList.toggle('placed', !!placed[b.dataset.k]));
+      $('.lst', host).innerHTML = Object.keys(placed).length ? 'On your diagram: ' + Object.keys(placed).map(k => `${FORCES[k].sym} ${dirName(placed[k].dir)} (${placed[k].len})`).join(', ') : 'Nothing drawn yet.'; }
+    draw(); return { get: () => JSON.parse(JSON.stringify(placed)), lock: () => { locked = true; sel = null; chips.forEach(b => { b.disabled = true; b.classList.remove('on'); }); draw(); }, set: v => { placed = v; draw(); } }; }
+  // ---------- summary ----------
+  function summaryHTML() { const sc = scores(), pct = sc.max ? Math.round(100 * sc.pts / sc.max) : 0, now = new Date();
+    const rows = QS.filter(q => q.qt !== 'fr').map(q => { const a = S.ans[q.id]; const res = !a || !a.done ? (a && a.tries ? `not finished (${a.tries} tries)` : 'not answered') : a.revealed ? 'answer revealed' : a.tries === 1 ? '✔ 1st try' : `✔ after ${a.tries} tries`;
+      return `<tr><td>${q.tag === 'exit' ? 'Exit ' : ''}Q${q.n}</td><td>${q.secIdx + 1}. ${esc(q.secTitle)}</td><td>${TYPEL[q.qt]}</td><td>${studentText(q, a)}</td><td>${res}</td><td>${a && a.done ? a.score * (q.pts || 1) : 0} / ${q.pts || 1}</td></tr>`; }).join('');
+    const frs = QS.filter(q => q.qt === 'fr').map(q => { const a = S.ans[q.id] || {}; const nr = q.rubric ? q.rubric.filter((_, i) => a.rub && a.rub[i]).length : 0; return `<div class="panel"><b>Q${q.n} (${esc(q.secTitle)})</b> — ${strip(q.prompt).slice(0, 220)}…<div style="white-space:pre-wrap;border-left:4px solid #2b6cb0;padding:4px 8px;margin-top:4px;background:#f6f8fb">${a.done ? esc(a.value) : '<i>not submitted</i>'}</div>${q.rubric ? `<div class="g">Student self-check: ${nr} of ${q.rubric.length} rubric points ticked</div>` : ''}</div>`; }).join('');
+    const secs = L.sections.filter(s => s.type !== 'summary').map(s => { const i = L.sections.indexOf(s), st = secStatus(i); return `${st === 'done' ? '✅' : st === 'part' ? '◐' : '⬜'} ${i + 1}. ${esc(s.title)}`; }).join(' &nbsp; ');
+    const preds = S.log.length ? `<div class="panel"><b>Simulation predictions (${S.log.length})</b><ul style="margin:4px 0">${S.log.slice(-12).map(l => `<li>${esc(l.txt)}</li>`).join('')}</ul></div>` : '';
+    return `<div class="panel"><h2 style="margin-bottom:0">${L.title} — Completion summary</h2><div class="row" style="font-size:15px;gap:18px;margin:8px 0"><span>Name: <b style="font-size:18px">${esc(S.name)}</b></span>${S.period ? `<span>Period: <b>${esc(S.period)}</b></span>` : ''}<span>Printed: ${now.toLocaleString()}</span><span>Time in lesson: about ${Math.round(S.secs / 60)} min</span></div>
+      <div class="row" style="gap:24px;align-items:baseline"><span class="bigscore">${fmt(sc.pts, sc.pts % 1 ? 2 : 0)} / ${sc.max} pts (${pct}%)</span><span>Auto-checked questions answered: <b>${sc.answered}/${sc.total}</b></span><span>Exit ticket: <b>${fmt(sc.exit, sc.exit % 1 ? 2 : 0)}/${sc.exitMax}</b></span><span>Written responses: <b>${sc.fr}/${sc.frMax}</b> (teacher-scored)</span></div>
+      <div class="g" style="margin-top:6px">${secs}</div>${allDone() ? '<div class="tip" style="margin-top:6px">🎉 All sections complete.</div>' : '<div class="mis" style="margin-top:6px">Some sections are not finished yet. Use the lesson map to go back.</div>'}</div>
+      <div class="panel"><b>Answers</b><table class="t sumtbl"><thead><tr><th>#</th><th>Section</th><th>Type</th><th>Your answer</th><th>Result</th><th>Points</th></tr></thead><tbody>${rows}</tbody></table></div>${frs}${preds}`; }
+  function renderSummary(m) { m.innerHTML = `<div class="panel noprint"><h2>Summary — turn this in</h2><p>Check that your name is correct, then <b>print or save as PDF</b> (<kbd>Ctrl</kbd>+<kbd>P</kbd> → Destination: <i>Save as PDF</i>) or take a screenshot (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Show windows</kbd> on a Chromebook). Submit it the way your teacher asked (for example, attach it in Google Classroom).</p>
+      <div class="row"><button class="go big" id="printB">🖨 Print / Save as PDF</button><button id="copyB">📋 Copy summary as text</button><button id="backB">◀ Back to lesson</button></div></div><div id="sumBody">${summaryHTML()}</div>`;
+    $('#printB').onclick = () => { fillPrint(); window.print(); }; $('#backB').onclick = () => go(firstUnfinished() === L.sections.length - 1 ? 0 : firstUnfinished());
+    $('#copyB').onclick = () => { const t = textSummary(); const done = () => toast('Copied! Paste it into Google Classroom or a Doc.'); if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(done, () => fallbackCopy(t, done)); else fallbackCopy(t, done); };
+    S.seen.summary = Date.now(); save(); }
+  function fallbackCopy(t, done) { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) { toast('Copy failed — use Print instead.'); } ta.remove(); }
+  function textSummary() { const sc = scores(); let t = `${strip(L.title)} — ${S.name}${S.period ? ' (Period ' + S.period + ')' : ''}\nScore: ${sc.pts}/${sc.max} · Exit ticket ${sc.exit}/${sc.exitMax} · Written ${sc.fr}/${sc.frMax} · ${new Date().toLocaleString()}\n\n`;
+    for (const q of QS) { const a = S.ans[q.id]; t += `${q.tag === 'exit' ? 'Exit ' : ''}Q${q.n}: ${q.qt === 'fr' ? (a && a.done ? a.value : '(not submitted)') : strip(studentText(q, a))}${q.qt !== 'fr' ? ' [' + (a && a.done ? (a.revealed ? 'revealed' : 'correct, ' + a.tries + ' tries') : 'not finished') + ']' : ''}\n`; } return t; }
+  function fillPrint() { $('#printArea').innerHTML = summaryHTML(); }
+  // ---------- boot ----------
+  function start(lesson) { L = lesson; KEY = 'ap1forces:' + L.id; let n = 0;
+    L.sections.forEach((s, si) => (s.blocks || []).forEach(b => { if (b.qtype) { b.type = 'q'; b.qt = b.qtype; } if (b.type === 'q') { b.n = ++n; b.secIdx = si; b.secTitle = s.title; QS.push(b); } }));
+    document.title = strip(L.title);
+    document.body.innerHTML = `<header><h1>${L.short}</h1><div id="hdrProg"></div><span id="who"></span><button id="sumBtn" title="Summary / print">🖨 Summary</button></header><div id="wrap"><nav id="side"></nav><main id="main"></main></div><div id="printArea"></div><div id="toast" class="toast"></div>`;
+    $('#sumBtn').onclick = () => go(L.sections.length - 1); load();
+    try { localStorage.setItem('ap1forces:test', '1'); localStorage.removeItem('ap1forces:test'); } catch (e) { storageOK = false; }
+    if (S.cur >= L.sections.length || !S.name) S.cur = -1; render();
+    window.addEventListener('beforeprint', fillPrint);
+    tick = setInterval(() => { if (document.visibilityState === 'visible' && S.name) { S.secs += 15; save(); } }, 15000);
+    let lastW = innerWidth; window.addEventListener('resize', () => { clearTimeout(window._rs); window._rs = setTimeout(() => { if (Math.abs(innerWidth - lastW) < 40) return; lastW = innerWidth; const ae = document.activeElement; if (ae && (ae.tagName === 'TEXTAREA' || ae.tagName === 'INPUT') && ae.type !== 'range') return; if (S.cur >= 0 && L.sections[S.cur].type !== 'summary') { const y = scrollY; cleanup(); render(); scrollTo(0, y); } }, 250); }); }
+  return { start, go, get state() { return S; }, get lesson() { return L; }, QS, scores, grade, summaryHTML, textSummary, answerText, toast, loop };
+})();
+
+</script>
+<script>
+// ===== DAY 3 sims: incline, pulleys, elevator =====
+const SURF3 = { none: { n: 'Frictionless', mus: 0, muk: 0 }, ice: { n: 'Ice (μs 0.10, μk 0.05)', mus: 0.10, muk: 0.05 }, wood: { n: 'Wood (μs 0.50, μk 0.30)', mus: 0.50, muk: 0.30 }, rubber: { n: 'Rubber (μs 1.0, μk 0.80)', mus: 1.0, muk: 0.80 } };
+function predBox(api, label) { return `<div class="pred"><label><input type="checkbox" class="pm"> <b>Predict mode</b></label><div class="pq hide">${label} <input class="pa" type="text" inputmode="decimal" style="width:70px"> m/s²<div class="pres g"></div></div></div>`; }
+
+// ---------- incline ----------
+function simIncline(el, api) {
+  const { UI, PHYS } = api; const p = { m: 5, ang: 30, mus: 0, muk: 0 }; let surf = 'none', s = { t: 0, x: 0, v: 0 }, running = false, comps = true, vpts = [], pred = null, predDone = false, done = false;
+  const LEN = 4;
+  el.innerHTML = `<div class="simgrid"><div><div class="cv1"></div><div class="cv2" style="margin-top:6px"></div></div><div class="ctrl">
+    <div class="row">Surface: <select class="sf">${Object.entries(SURF3).map(([k, o]) => `<option value="${k}">${o.n}</option>`).join('')}</select></div><div class="sls"></div>
+    <label class="row"><input type="checkbox" class="cp" checked> Show components of F<sub>g</sub> (dashed)</label>
+    <div class="row"><button class="run go big" style="flex:1">▶ Release</button><button class="kick">Shove down the slope</button><button class="rs">⟲ Reset</button></div>
+    <div class="readout ro"></div>${predBox(api, 'Before you release it, predict the block’s acceleration down the slope (0 if it stays put):')}</div></div>`;
+  const c1 = UI.canvas($('.cv1', el), 260), c2 = UI.canvas($('.cv2', el), 150);
+  const sA = UI.slider($('.sls', el), { label: 'Incline angle θ', min: 0, max: 60, step: 1, val: 30, unit: '°', oninput: v => { p.ang = v; predDone = false; } });
+  UI.slider($('.sls', el), { label: 'Mass m', min: 1, max: 20, step: 1, val: 5, unit: 'kg', oninput: v => p.m = v });
+  $('.sf', el).onchange = e => { surf = e.target.value; p.mus = SURF3[surf].mus; p.muk = SURF3[surf].muk; predDone = false; };
+  $('.cp', el).onchange = e => comps = e.target.checked;
+  const rb = $('.run', el);
+  const reset = () => { s = { t: 0, x: 0, v: 0 }; running = false; done = false; vpts = []; predDone = false; rb.textContent = '▶ Release'; $('.pres', el).textContent = ''; };
+  rb.onclick = () => { if (done) reset(); if (!running && pred !== null && !predDone) { const g = PHYS.parseNum($('.pa', el).value); if (g === null || isNaN(g)) { $('.pres', el).textContent = 'Type your prediction first (or turn off predict mode).'; return; } pred = g; } running = !running; rb.textContent = running ? '⏸ Pause' : '▶ Release'; };
+  $('.kick', el).onclick = () => { if (done) reset(); s.v = 2; if (!running) { running = true; rb.textContent = '⏸ Pause'; } };
+  $('.rs', el).onclick = reset;
+  $('.pm', el).onchange = e => { $('.pq', el).classList.toggle('hide', !e.target.checked); pred = e.target.checked ? NaN : null; predDone = false; };
+  function step(dt) { for (let i = 0; i < 10; i++) s = PHYS.inclineStep(p, s, dt / 10); vpts.push([s.t, s.v]);
+    const fr = PHYS.inclineForces(p, s.v);
+    if (pred !== null && isFinite(pred) && !predDone && s.t > 0.3) { predDone = true; const ok = Math.abs(pred - fr.a) <= Math.max(0.1, 0.05 * Math.abs(fr.a));
+      $('.pres', el).innerHTML = `Predicted ${pred} · actual ${fmt(fr.a, 2)} m/s² ${ok ? '✔ nice!' : '✘ Use a = g sin θ − μ g cos θ (if it slides at all).'}`; api.log(`Incline (${p.ang}°, ${SURF3[surf].n}, ${p.m} kg): predicted a = ${pred}, actual ${fmt(fr.a, 2)} m/s²`); }
+    if (s.x >= LEN || s.t > 20) { s.x = Math.min(s.x, LEN); running = false; done = true; rb.textContent = '⟲ Again'; } }
+  function draw() { const ctx = c1.ctx, W = c1.w, H = c1.h, th = p.ang * Math.PI / 180, fr = PHYS.inclineForces(p, s.v);
+    ctx.clearRect(0, 0, W, H); ctx.fillStyle = '#f7fbff'; ctx.fillRect(0, 0, W, H);
+    const xR = W - 20, yB = H - 24; const Lpx = Math.min((W - 220) / Math.max(Math.cos(th), 0.2), (H - 60) / Math.max(Math.sin(th), 1e-3), W - 220), x0 = xR - Lpx * Math.cos(th), yT = yB - Lpx * Math.sin(th);
+    ctx.fillStyle = surf === 'none' ? '#cfe8f7' : '#d9c6a5'; ctx.strokeStyle = '#8a7350'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x0, yB); ctx.lineTo(xR, yB); ctx.lineTo(xR, yT); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#9bd18b'; ctx.fillRect(0, yB, W, H - yB);
+    ctx.strokeStyle = '#334'; ctx.beginPath(); ctx.arc(x0, yB, 34, -th, 0); ctx.stroke(); ctx.fillStyle = '#334'; ctx.font = 'bold 13px system-ui'; ctx.textAlign = 'left'; ctx.fillText('θ = ' + p.ang + '°', x0 + 40, yB - 6);
+    // block: s.x measured down the slope from the top
+    const d = Math.max(0, LEN - s.x) / LEN * (Lpx - 40) + 20, cx = x0 + d * Math.cos(th), cy = yB - d * Math.sin(th), side = 30 + 7 * Math.cbrt(p.m);
+    const nx = -Math.sin(th), ny = -Math.cos(th), dx = -Math.cos(th), dy = Math.sin(th); // outward normal, down-slope (screen)
+    const bcx = cx + nx * side / 2, bcy = cy + ny * side / 2;
+    ctx.save(); ctx.translate(bcx, bcy); ctx.rotate(-th); ctx.fillStyle = '#c8894b'; ctx.strokeStyle = '#7a4f26'; ctx.lineWidth = 2; ctx.fillRect(-side / 2, -side / 2, side, side); ctx.strokeRect(-side / 2, -side / 2, side, side); ctx.fillStyle = '#fff'; ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'center'; ctx.fillText(p.m + ' kg', 0, 4); ctx.restore();
+    const k = 80 / fr.W;
+    UI.arrow(ctx, bcx, bcy, 0, fr.W * k, '#7b3fd0', 'F_g');
+    UI.arrow(ctx, bcx, bcy, nx * fr.N * k, ny * fr.N * k, '#2563eb', 'F_N');
+    if (Math.abs(fr.f) > 1e-6) UI.arrow(ctx, bcx, bcy, dx * fr.f * k, dy * fr.f * k, '#d9480f', 'F_f');
+    if (comps) { UI.arrow(ctx, bcx, bcy, dx * fr.Wpar * k, dy * fr.Wpar * k, '#a78bfa', 'mg sinθ', { dash: true, w: 2 }); UI.arrow(ctx, bcx, bcy, -nx * fr.Wperp * k, -ny * fr.Wperp * k, '#a78bfa', 'mg cosθ', { dash: true, w: 2 }); }
+    // inset FBD (no components, AP style)
+    const ix = 80, iy = 90, q = 55 / fr.W; ctx.fillStyle = '#fff'; ctx.fillRect(6, 6, 148, 168); ctx.strokeStyle = '#ccd'; ctx.lineWidth = 1; ctx.strokeRect(6, 6, 148, 168); ctx.fillStyle = '#234'; ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'center'; ctx.fillText('FBD (AP style)', ix, 19);
+    UI.arrow(ctx, ix, iy, 0, fr.W * q, '#7b3fd0', 'F_g'); UI.arrow(ctx, ix, iy, nx * fr.N * q, ny * fr.N * q, '#2563eb', 'F_N'); if (Math.abs(fr.f) > 1e-6) UI.arrow(ctx, ix, iy, dx * fr.f * q, dy * fr.f * q, '#d9480f', 'F_f');
+    ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(ix, iy, 4, 0, 7); ctx.fill();
+    ctx.textAlign = 'left'; ctx.font = 'bold 13px system-ui'; ctx.fillStyle = fr.regime === 'static' ? '#1d7a35' : '#a14a00'; ctx.fillText(fr.regime === 'static' ? (s.v === 0 && fr.Wpar > 0 ? 'Static friction holds the block in place' : 'At rest') : 'Sliding' + (p.muk ? ' (kinetic friction)' : ' (no friction)'), 165, 20);
+    const crit = p.mus > 0 ? PHYS.criticalAngle(p.mus).toFixed(1) + '°' : '0° (any slope slides)';
+    $('.ro', el).textContent = `v = ${s.v.toFixed(2)} m/s down the slope\nF_g = mg = ${fr.W.toFixed(1)} N\nF_g∥ = mg sinθ = ${fr.Wpar.toFixed(1)} N\nF_g⊥ = mg cosθ = ${fr.Wperp.toFixed(1)} N\nF_N = F_g⊥ = ${fr.N.toFixed(1)} N\nf_s,max = ${fr.fsMax.toFixed(1)} N · f_k = ${fr.fk.toFixed(1)} N\nfriction now: ${Math.abs(fr.f).toFixed(1)} N (${fr.regime})\nF_net = ${fr.Fnet.toFixed(1)} N → a = ${fr.a.toFixed(2)} m/s²\nslips above θ = tan⁻¹(μs) = ${crit}`;
+    UI.plot(c2.ctx, 0, 0, c2.w, c2.h, [{ pts: vpts, col: '#1f6feb' }], { xmin: 0, xmax: Math.max(4, Math.ceil(s.t)), title: 'speed down the slope v (m/s) vs time', xlabel: 't (s)', minSpan: 2 }); }
+  const lp = api.loop(dt => { if (running) step(dt); draw(); });
+  return { destroy() { lp.stop = true; } };
+}
+
+// ---------- pulleys: modified Atwood (table) and classic Atwood ----------
+function simPulley(el, api) {
+  const { UI, PHYS } = api; const p = { m1: 3, m2: 1, mus: 0, muk: 0 }; let mode = 'table', s = 0, v = 0, t = 0, running = false, done = false, vpts = [], pred = null, predDone = false;
+  el.innerHTML = `<div class="simgrid"><div><div class="cv1"></div><div class="cv2" style="margin-top:6px"></div></div><div class="ctrl">
+    <div class="row tabs"><button data-m="table" class="on">Block on table + hanging mass</button><button data-m="atwood">Two hanging masses (Atwood)</button></div><div class="sls"></div><div class="sls2"></div>
+    <div class="row"><button class="run go big" style="flex:1">▶ Release</button><button class="rs">⟲ Reset</button></div>
+    <div class="readout ro"></div>${predBox(api, 'Predict the acceleration of the masses:')}</div></div>`;
+  const c1 = UI.canvas($('.cv1', el), 270), c2 = UI.canvas($('.cv2', el), 140);
+  const s1 = UI.slider($('.sls', el), { label: 'm<sub>1</sub>', min: 0.5, max: 10, step: 0.5, val: 3, unit: 'kg', oninput: x => { p.m1 = x; predDone = false; } });
+  UI.slider($('.sls', el), { label: 'm<sub>2</sub> (hanging)', min: 0.5, max: 10, step: 0.5, val: 1, unit: 'kg', oninput: x => { p.m2 = x; predDone = false; } });
+  const sS = UI.slider($('.sls2', el), { label: 'μs (table)', min: 0, max: 1, step: 0.05, val: 0, oninput: x => { p.mus = x; if (p.muk > x) { p.muk = x; sK.set(x); } predDone = false; } });
+  const sK = UI.slider($('.sls2', el), { label: 'μk (table)', min: 0, max: 1, step: 0.05, val: 0, oninput: x => { p.muk = Math.min(x, p.mus); sK.set(p.muk); predDone = false; } });
+  const rb = $('.run', el);
+  const reset = () => { s = 0; v = 0; t = 0; running = false; done = false; vpts = []; predDone = false; rb.textContent = '▶ Release'; $('.pres', el).textContent = ''; };
+  $$('.tabs button', el).forEach(b => b.onclick = () => { mode = b.dataset.m; $$('.tabs button', el).forEach(x => x.classList.toggle('on', x === b)); $('.sls2', el).classList.toggle('hide', mode !== 'table'); s1.el.querySelector('span').innerHTML = mode === 'table' ? 'm<sub>1</sub> (on table)' : 'm<sub>1</sub> (left)'; reset(); });
+  s1.el.querySelector('span').innerHTML = 'm<sub>1</sub> (on table)';
+  rb.onclick = () => { if (done) reset(); if (!running && pred !== null && !predDone) { const g = PHYS.parseNum($('.pa', el).value); if (g === null || isNaN(g)) { $('.pres', el).textContent = 'Type your prediction first (or turn off predict mode).'; return; } pred = g; } running = !running; rb.textContent = running ? '⏸ Pause' : '▶ Release'; };
+  $('.rs', el).onclick = reset;
+  $('.pm', el).onchange = e => { $('.pq', el).classList.toggle('hide', !e.target.checked); pred = e.target.checked ? NaN : null; predDone = false; };
+  const state = () => { if (mode === 'atwood') { const r = PHYS.atwood(p); return { a: r.a, T: r.T, f: 0, regime: '' }; } return PHYS.tableAtwood(p, v > 0); };
+  function step(dt) { const n = 10; for (let i = 0; i < n; i++) { const r = state(), h = dt / n; let v2 = v + r.a * h; if (mode === 'table' && v > 0 && v2 < 0) v2 = 0; s += (v + v2) / 2 * h; v = v2; t += h; }
+    vpts.push([t, v]);
+    const r = state(); if (pred !== null && isFinite(pred) && !predDone && t > 0.3) { predDone = true; const ok = Math.abs(Math.abs(pred) - Math.abs(r.a)) <= Math.max(0.1, 0.05 * Math.abs(r.a));
+      $('.pres', el).innerHTML = `Predicted ${pred} · actual ${fmt(Math.abs(r.a), 2)} m/s² ${ok ? '✔ nice!' : '✘ Treat both masses as one system: a = (net external force)/(m₁ + m₂).'}`; api.log(`Pulley (${mode}, m1 ${p.m1}, m2 ${p.m2}${mode === 'table' ? ', μk ' + p.muk : ''}): predicted a = ${pred}, actual ${fmt(Math.abs(r.a), 2)} m/s²`); }
+    const lim = mode === 'table' ? 1.5 : 1.0; if (Math.abs(s) >= lim || t > 15) { s = Math.sign(s) * Math.min(Math.abs(s), lim); running = false; done = true; v = 0; rb.textContent = '⟲ Again'; } }
+  function blk(ctx, x, y, w, h, lab, col) { ctx.fillStyle = col; ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.fillRect(x - w / 2, y - h / 2, w, h); ctx.strokeRect(x - w / 2, y - h / 2, w, h); ctx.fillStyle = '#fff'; ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'center'; ctx.fillText(lab, x, y + 4); }
+  function draw() { const ctx = c1.ctx, W = c1.w, H = c1.h, r = state(), PX = 70, g = 9.8; ctx.clearRect(0, 0, W, H); ctx.fillStyle = '#f7fbff'; ctx.fillRect(0, 0, W, H);
+    const sz = m => 26 + 9 * Math.cbrt(m), kF = 60 / (9.8 * Math.max(p.m1, p.m2));
+    if (mode === 'table') { const tY = 90, px = W * 0.62, prad = 14; ctx.fillStyle = '#c8a26b'; ctx.fillRect(30, tY, px - 30, 14); ctx.fillRect(40, tY + 14, 10, H - tY - 14); ctx.fillRect(px - 20, tY + 14, 10, H - tY - 14);
+      const w1 = sz(p.m1) * 1.3, h1 = sz(p.m1), x1 = px - 60 - w1 / 2 - (1.5 - s) * PX, y1 = tY - h1 / 2;
+      ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x1 + w1 / 2, y1); ctx.lineTo(px, tY - prad); ctx.stroke();
+      ctx.fillStyle = '#777'; ctx.beginPath(); ctx.arc(px, tY - prad + prad, prad, 0, 7); ctx.fill(); ctx.fillStyle = '#ddd'; ctx.beginPath(); ctx.arc(px, tY, 4, 0, 7); ctx.fill();
+      const h2 = sz(p.m2), y2 = tY + 40 + s * PX + h2 / 2; ctx.beginPath(); ctx.moveTo(px + prad, tY); ctx.lineTo(px + prad, y2 - h2 / 2); ctx.stroke();
+      blk(ctx, x1, y1, w1, h1, 'm₁ ' + p.m1 + ' kg', '#2563eb'); blk(ctx, px + prad, y2, h2, h2, 'm₂ ' + p.m2, '#d9480f');
+      UI.arrow(ctx, x1 + w1 / 2 + 2, y1, r.T * kF, 0, '#0b7285', 'F_T', { ly: -8 }); if (r.f > 0) UI.arrow(ctx, x1 - w1 / 2, tY - 3, -r.f * kF, 0, '#d9480f', 'F_f', { ly: -8 });
+      UI.arrow(ctx, px + prad + h2 / 2 + 12, y2, 0, -r.T * kF, '#0b7285', 'F_T'); UI.arrow(ctx, px + prad + h2 / 2 + 22, y2, 0, p.m2 * g * kF, '#7b3fd0', 'F_g');
+      ctx.fillStyle = '#9bd18b'; ctx.fillRect(px - 10, H - 10, W, 10); }
+    else { const px = W * 0.45, pY = 40, prad = 30; ctx.fillStyle = '#556'; ctx.fillRect(px - 4, 0, 8, pY); ctx.fillStyle = '#777'; ctx.beginPath(); ctx.arc(px, pY, prad, 0, 7); ctx.fill(); ctx.fillStyle = '#ddd'; ctx.beginPath(); ctx.arc(px, pY, 5, 0, 7); ctx.fill();
+      const base = 150, h1 = sz(p.m1), h2 = sz(p.m2), y1 = base - s * PX, y2 = base + s * PX; ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(px - prad, pY); ctx.lineTo(px - prad, y1 - h1 / 2); ctx.moveTo(px + prad, pY); ctx.lineTo(px + prad, y2 - h2 / 2); ctx.stroke();
+      blk(ctx, px - prad, y1, h1, h1, 'm₁ ' + p.m1, '#2563eb'); blk(ctx, px + prad, y2, h2, h2, 'm₂ ' + p.m2, '#d9480f');
+      UI.arrow(ctx, px - prad - h1 / 2 - 14, y1, 0, -r.T * kF, '#0b7285', 'F_T'); UI.arrow(ctx, px - prad - h1 / 2 - 24, y1, 0, p.m1 * g * kF, '#7b3fd0', 'F_g');
+      UI.arrow(ctx, px + prad + h2 / 2 + 14, y2, 0, -r.T * kF, '#0b7285', 'F_T'); UI.arrow(ctx, px + prad + h2 / 2 + 24, y2, 0, p.m2 * g * kF, '#7b3fd0', 'F_g');
+      ctx.fillStyle = '#9bd18b'; ctx.fillRect(0, H - 10, W, 10); }
+    const a = r.a, sysTxt = mode === 'table' ? `System (m₁+m₂): a = (m₂g − f)/(m₁+m₂)\n = (${(p.m2 * g).toFixed(1)} − ${r.f.toFixed(1)})/${(p.m1 + p.m2).toFixed(1)}` : `System (m₁+m₂): a = (m₂ − m₁)g/(m₁+m₂)\n = ${((p.m2 - p.m1) * g).toFixed(1)}/${(p.m1 + p.m2).toFixed(1)}`;
+    $('.ro', el).textContent = `${sysTxt}\na = ${Math.abs(a).toFixed(2)} m/s²${mode === 'atwood' && Math.abs(a) > 1e-9 ? (a > 0 ? ' (m₂ goes down)' : ' (m₁ goes down)') : ''}${mode === 'table' && r.regime === 'static' ? ' (static friction holds it)' : ''}\nTension F_T = ${r.T.toFixed(2)} N\nm₂g = ${(p.m2 * g).toFixed(1)} N${mode === 'atwood' ? ` · m₁g = ${(p.m1 * g).toFixed(1)} N` : ''}\nCheck on m₂: m₂g − F_T = ${(p.m2 * g - r.T).toFixed(2)} N = m₂a ✓`;
+    UI.plot(c2.ctx, 0, 0, c2.w, c2.h, [{ pts: vpts, col: '#1f6feb' }], { xmin: 0, xmax: Math.max(3, Math.ceil(t)), title: mode === 'table' ? 'speed of the masses (m/s) vs time' : 'velocity of m₂ (+ = down) vs time', xlabel: 't (s)', minSpan: 2 }); }
+  $('.sls2', el).classList.toggle('hide', mode !== 'table');
+  const lp = api.loop(dt => { if (running) step(dt); draw(); });
+  return { destroy() { lp.stop = true; } };
+}
+
+// ---------- elevator: apparent weight (2.6.C) and spring scale (2.8) ----------
+// Trips: presets (up / down / cable snap) or Custom: starting velocity v0 and signed acceleration a (+ = up),
+// which covers all four cases (speeding up / slowing down while moving up / down) plus constant velocity.
+function simElevator(el, api) {
+  const { UI, PHYS } = api; const p = { trip: 'up', A: 2, v0: -4, a: 1.5, m: 60, ms: 2, k: 200 }; let t = 0, running = false, segs, Np = [], ap = [], vp = [], gtab = 'N', predOn = false, preds = null, yLo = 0, yHi = 5;
+  const opts = ['while speeding up', 'at constant velocity', 'while slowing down'];
+  el.innerHTML = `<div class="simgrid"><div><div class="cv1"></div><div class="row tabs" style="margin:6px 0 4px"><span class="g">Graph:</span><button data-g="N" class="on">scale reading vs t</button><button data-g="a">a vs t</button><button data-g="v">v vs t</button></div><div class="cv2"></div></div><div class="ctrl">
+    <div class="row">Trip: <select class="tp"><option value="up">Ride UP (ground → top floor)</option><option value="down">Ride DOWN (top → ground)</option><option value="custom">Custom: choose v₀ and a</option><option value="drop">Cable snaps (free fall, then brakes)</option></select></div>
+    <div class="slp"></div><div class="slc hide"></div><div class="g cnote hide" style="font-size:12px;margin:-2px 0 4px"></div><div class="sls"></div>
+    <div class="row"><button class="run go big" style="flex:1">▶ Start trip</button><button class="rs">⟲ Reset</button></div><div class="readout ro"></div>
+    <div class="pred"><label><input type="checkbox" class="pm"> <b>Predict mode</b></label><div class="pq hide"><div class="pq3">Compared with your normal weight mg, the scale will read…${opts.map((ph, i) => `<div class="row" style="margin:2px 0">${ph}: <select data-i="${i}"><option value="">?</option><option value="more">more</option><option value="same">the same</option><option value="less">less</option></select></div>`).join('')}</div>
+      <div class="pq1 hide">While the elevator accelerates (the middle part of the trip), compared with mg the scale will read: <select data-i="c"><option value="">?</option><option value="more">more</option><option value="same">the same</option><option value="less">less</option></select></div><div class="pres g"></div></div></div></div></div>`;
+  const c1 = UI.canvas($('.cv1', el), 280), c2 = UI.canvas($('.cv2', el), 160);
+  const sA = UI.slider($('.slp', el), { label: 'Elevator |a| (speed-up / slow-down)', min: 0.5, max: 4, step: 0.1, val: 2, unit: 'm/s²', oninput: x => { p.A = x; reset(); } });
+  UI.slider($('.slc', el), { label: 'Starting velocity v₀ (+ up, − down)', min: -5, max: 5, step: 0.5, val: p.v0, dec: 1, unit: 'm/s', oninput: x => { p.v0 = x; reset(); } });
+  UI.slider($('.slc', el), { label: 'Acceleration a (+ up, − down)', min: -4, max: 4, step: 0.1, val: p.a, unit: 'm/s²', oninput: x => { p.a = Math.round(x * 10) / 10; reset(); } });
+  UI.slider($('.sls', el), { label: 'Your mass', min: 30, max: 100, step: 1, val: 60, unit: 'kg', oninput: x => { p.m = x; } });
+  UI.slider($('.sls', el), { label: 'Mass on spring', min: 0.5, max: 5, step: 0.5, val: 2, dec: 1, unit: 'kg', oninput: x => { p.ms = x; } });
+  UI.slider($('.sls', el), { label: 'Spring constant k', min: 50, max: 500, step: 10, val: 200, unit: 'N/m', oninput: x => { p.k = x; } });
+  const rb = $('.run', el);
+  const custom = () => p.trip === 'custom';
+  function reset() { t = 0; running = false; segs = PHYS.elevatorProfile(p.trip, custom() ? { v0: p.v0, a: p.a } : p.A); Np = []; ap = []; vp = []; rb.textContent = '▶ Start trip'; $('.pres', el).textContent = ''; sA.disable(p.trip === 'drop');
+    $('.slp', el).classList.toggle('hide', custom()); $('.slc', el).classList.toggle('hide', !custom()); $('.pq3', el).classList.toggle('hide', custom()); $('.pq1', el).classList.toggle('hide', !custom());
+    let lo = 0, hi = 0; for (let k = 0; k <= 100; k++) { const y = PHYS.elevatorAt(segs, k / 10).y; lo = Math.min(lo, y); hi = Math.max(hi, y); } if (hi - lo < 5) { const mid = (hi + lo) / 2; lo = mid - 2.5; hi = mid + 2.5; } yLo = lo; yHi = hi;
+    const cn = $('.cnote', el); cn.classList.toggle('hide', !custom());
+    if (custom()) { const s2 = segs[1]; cn.innerHTML = Math.abs(p.a) < 1e-9 ? `Trip: v = ${p.v0} m/s the whole time (a = 0).` : `Trip: 0–2 s at v₀ = ${p.v0} m/s, then a = ${p.a > 0 ? '+' : ''}${p.a} m/s² for ${(s2.t1 - s2.t0).toFixed(1)} s (${PHYS.motionLabel(p.v0 || p.a * 1e-3, p.a)}), then ${Math.abs(PHYS.elevatorAt(segs, 9.99).v) < 1e-6 ? 'at rest' : 'constant velocity'}.`; } }
+  $('.tp', el).onchange = e => { p.trip = e.target.value; reset(); };
+  $$('.tabs button', el).forEach(b => b.onclick = () => { gtab = b.dataset.g; $$('.tabs button', el).forEach(x => x.classList.toggle('on', x === b)); });
+  rb.onclick = () => { if (t >= 10) reset();
+    if (!running && predOn && t === 0 && p.trip !== 'drop') { const box = custom() ? $('.pq1', el) : $('.pq3', el); preds = $$('select', box).map(x => x.value); if (preds.some(x => !x)) { $('.pres', el).textContent = custom() ? 'Make your prediction first (or turn off predict mode).' : 'Make all three predictions first (or turn off predict mode).'; return; } }
+    else if (!running && t === 0) preds = null;
+    running = !running; rb.textContent = running ? '⏸ Pause' : '▶ Resume'; };
+  $('.rs', el).onclick = reset;
+  $('.pm', el).onchange = e => { predOn = e.target.checked; $('.pq', el).classList.toggle('hide', !predOn); };
+  const label = st => { if (p.trip !== 'drop') return PHYS.motionLabel(st.v, st.a); return t < 1 ? 'at rest' : t < 2 ? 'cable snaps: free fall!' : t < 3 ? 'emergency brakes (still moving down, slowing)' : 'stopped'; };
+  function finish() { running = false; rb.textContent = '⟲ Ride again';
+    if (!(predOn && preds && p.trip !== 'drop')) return;
+    if (custom()) { const tr = p.a > 1e-9 ? 'more' : p.a < -1e-9 ? 'less' : 'same', ok = preds[0] === tr;
+      $('.pres', el).innerHTML = `${ok ? '✔ Correct' : '✘ Not quite'}: with a = ${p.a > 0 ? '+' : ''}${p.a} m/s² the scale read <b>${tr}</b> than mg (${PHYS.apparentWeight(p.m, p.a).toFixed(0)} N vs ${(p.m * 9.8).toFixed(0)} N). Only the direction of <b>a</b> matters, not the direction of v.`;
+      api.log(`Elevator custom trip (v₀ = ${p.v0} m/s, a = ${p.a} m/s²): predicted ${preds[0]} → ${ok ? 'correct' : 'actual ' + tr}`); return; }
+    const truth = ['more', 'same', 'less'], tr = p.trip === 'up' ? truth : ['less', 'same', 'more']; const right = preds.filter((x, i) => x === tr[i]).length;
+    $('.pres', el).innerHTML = `You got ${right}/3. Actual: speeding up → <b>${tr[0]}</b>, constant v → <b>same</b>, slowing → <b>${tr[2]}</b>. The reading depends on the direction of <b>a</b>, not of v.`; api.log(`Elevator ${p.trip} trip: predicted ${preds.join('/')} → ${right}/3 correct`); }
+  function step(dt) { t = Math.min(10, t + dt); const st = PHYS.elevatorAt(segs, t); Np.push([t, PHYS.apparentWeight(p.m, st.a)]); ap.push([t, st.a]); vp.push([t, st.v]); if (t >= 10) finish(); }
+  function draw() { const ctx = c1.ctx, W = c1.w, H = c1.h, st = t === 0 && !running ? { a: 0, v: segs.v0 || 0, y: 0 } : PHYS.elevatorAt(segs, t), N = PHYS.apparentWeight(p.m, st.a), mg = p.m * 9.8, ph = label(st);
+    ctx.clearRect(0, 0, W, H); ctx.fillStyle = '#eef2f8'; ctx.fillRect(0, 0, W, H);
+    // shaft view (left): car position mapped from y over the whole trip
+    const shX = 20, shW = 70;
+    ctx.fillStyle = '#dfe5ee'; ctx.fillRect(shX, 10, shW, H - 20); ctx.strokeStyle = '#99a'; ctx.lineWidth = 1; for (let i = 0; i <= 5; i++) { const yy = 10 + i * (H - 20) / 5; ctx.beginPath(); ctx.moveTo(shX, yy); ctx.lineTo(shX + shW, yy); ctx.stroke(); }
+    const frac = Math.max(0, Math.min(1, (st.y - yLo) / (yHi - yLo))), carY = H - 10 - frac * (H - 60) - 40; ctx.fillStyle = '#2563eb'; ctx.fillRect(shX + 12, carY, shW - 24, 40); ctx.fillStyle = '#334'; ctx.font = '11px system-ui'; ctx.textAlign = 'center'; ctx.fillText('shaft', shX + shW / 2, H - 2);
+    // car interior (center)
+    const cx0 = 120, cw = Math.min(300, W - 360), cy0 = 14, ch = H - 28; ctx.fillStyle = '#fff'; ctx.strokeStyle = '#456'; ctx.lineWidth = 3; ctx.fillRect(cx0, cy0, cw, ch); ctx.strokeRect(cx0, cy0, cw, ch);
+    const fy = cy0 + ch - 8; ctx.fillStyle = '#ccd'; ctx.fillRect(cx0 + 3, fy, cw - 6, 5);
+    // person on scale
+    const px = cx0 + cw * 0.3; ctx.fillStyle = '#666'; ctx.fillRect(px - 32, fy - 12, 64, 12); ctx.fillStyle = '#111'; ctx.fillRect(px - 22, fy - 10, 44, 8);
+    ctx.fillStyle = '#7CFC00'; ctx.font = 'bold 8px monospace'; ctx.fillText(N.toFixed(0) + ' N', px, fy - 3);
+    const squash = Math.max(0.7, Math.min(1.2, 1 - (N - mg) / mg * 0.15)), bodyH = 120 * squash; ctx.strokeStyle = '#334'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+    const hip = fy - 12 - bodyH * 0.45, sh = fy - 12 - bodyH * 0.85; ctx.beginPath(); ctx.moveTo(px - 10, fy - 13); ctx.lineTo(px, hip); ctx.lineTo(px + 10, fy - 13); ctx.moveTo(px, hip); ctx.lineTo(px, sh); ctx.moveTo(px - 18, sh + 30); ctx.lineTo(px, sh + 5); ctx.lineTo(px + 18, sh + 30); ctx.stroke(); ctx.fillStyle = '#f2c9a0'; ctx.beginPath(); ctx.arc(px, sh - 14, 13, 0, 7); ctx.fill(); ctx.lineCap = 'butt';
+    // spring + mass from ceiling, drawn to scale (4 px per cm) with a ruler and the stretch marked
+    const sx = cx0 + cw * 0.72, x = PHYS.springStretch(p.k, p.ms, st.a), L0 = 50, PXCM = 4, maxX = 150, xs = Math.min(maxX, x * 100 * PXCM), Lp = L0 + xs;
+    ctx.strokeStyle = '#555'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx, cy0); for (let i = 0; i <= 16; i++) ctx.lineTo(sx + (i % 2 ? 9 : -9) * (i > 0 && i < 16 ? 1 : 0), cy0 + Lp * i / 16); ctx.stroke();
+    const bs = 18 + 6 * Math.cbrt(p.ms); ctx.fillStyle = '#c8894b'; ctx.fillRect(sx - bs / 2, cy0 + Lp, bs, bs);
+    const rx0 = sx + 22; ctx.strokeStyle = '#99a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(rx0, cy0 + L0); ctx.lineTo(rx0, cy0 + L0 + maxX); ctx.stroke();
+    ctx.fillStyle = '#778'; ctx.font = '9px system-ui'; ctx.textAlign = 'left'; for (let cm = 0; cm * PXCM <= maxX; cm += 5) { const yy = cy0 + L0 + cm * PXCM; ctx.fillRect(rx0, yy - .5, cm % 10 ? 4 : 7, 1); if (cm % 10 === 0) ctx.fillText(cm + '', rx0 + 9, yy + 3); }
+    ctx.setLineDash([4, 3]); ctx.strokeStyle = '#2b8a3e'; ctx.beginPath(); ctx.moveTo(sx - 16, cy0 + L0); ctx.lineTo(rx0, cy0 + L0); ctx.stroke(); ctx.strokeStyle = '#c2255c'; ctx.beginPath(); ctx.moveTo(sx - 16, cy0 + Lp); ctx.lineTo(rx0, cy0 + Lp); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = '#2b8a3e'; ctx.textAlign = 'right'; ctx.fillText('natural length', sx - 18, cy0 + L0 - 3);
+    const lx = sx - bs / 2 - 6, ly = Math.max(cy0 + Lp + 8, cy0 + L0 + 12); ctx.fillStyle = '#c2255c'; ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'right'; ctx.fillText('Δx = ' + (x * 100).toFixed(1) + ' cm' + (x * 100 * PXCM > maxX ? ' (off ruler)' : ''), lx, ly);
+    ctx.fillStyle = '#556'; ctx.font = '10px system-ui'; ctx.fillText('k = ' + p.k + ' N/m · m = ' + p.ms + ' kg', lx, ly + 13);
+    // big readouts and FBD (right)
+    const rx = cx0 + cw + 16; ctx.textAlign = 'left'; ctx.fillStyle = '#111'; ctx.fillRect(rx, 14, 170, 52); ctx.fillStyle = '#7CFC00'; ctx.font = 'bold 26px monospace'; ctx.fillText(N.toFixed(0) + ' N', rx + 10, 50); ctx.fillStyle = '#aaa'; ctx.font = '10px system-ui'; ctx.fillText('SCALE READING (= F_N)', rx + 10, 26);
+    ctx.fillStyle = '#334'; ctx.font = '12px system-ui'; ctx.fillText('normal weight mg = ' + mg.toFixed(0) + ' N', rx, 84); ctx.font = 'bold 13px system-ui'; ctx.fillStyle = N > mg + 0.5 ? '#c92a2a' : N < mg - 0.5 ? '#1f6feb' : '#1d7a35'; ctx.fillText(N > mg + 0.5 ? 'feels HEAVIER' : N < mg - 0.5 ? (N < 0.5 ? 'WEIGHTLESS!' : 'feels lighter') : 'feels normal', rx, 102);
+    ctx.fillStyle = '#234'; ctx.font = 'bold 12px system-ui'; ctx.fillText(ph, rx, 122, W - rx - 4);
+    const fx = rx + 60, fyy = 200, q = 55 / (p.m * 9.8 * 2); UI.arrow(ctx, fx - 3, fyy, 0, mg * q, '#7b3fd0', 'F_g'); if (N > 0.5) UI.arrow(ctx, fx + 3, fyy, 0, -N * q, '#2563eb', 'F_N'); ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(fx, fyy, 4, 0, 7); ctx.fill();
+    if (Math.abs(st.a) > 1e-6) UI.arrow(ctx, fx + 55, fyy, 0, -Math.sign(st.a) * 34, '#c026d3', 'a', { dash: true });
+    if (Math.abs(st.v) > 1e-3) UI.arrow(ctx, fx + 85, fyy, 0, -Math.sign(st.v) * 34, '#555', 'v', { dash: true });
+    ctx.fillStyle = '#556'; ctx.font = '10px system-ui'; ctx.textAlign = 'left'; ctx.fillText('FBD of you', fx - 25, 145);
+    const Fs = p.ms * (9.8 + st.a);
+    $('.ro', el).textContent = `t = ${t.toFixed(1)} s · ${ph}\na = ${st.a >= 0 ? '+' : '−'}${Math.abs(st.a).toFixed(2)} m/s² (+ = up) · v = ${st.v >= 0 ? '+' : '−'}${Math.abs(st.v).toFixed(2)} m/s\nF_N − mg = ma → F_N = m(g + a)\nF_N = ${p.m}·(9.8 ${st.a < 0 ? '−' : '+'} ${Math.abs(st.a).toFixed(2)}) = ${N.toFixed(0)} N\nspring: kΔx − m_s g = m_s a → Δx = m_s(g + a)/k\nΔx = ${p.ms}·(9.8 ${st.a < 0 ? '−' : '+'} ${Math.abs(st.a).toFixed(2)})/${p.k} = ${(x * 100).toFixed(1)} cm\ncheck: kΔx = ${p.k}·${x.toFixed(4)} = ${(p.k * x).toFixed(1)} N = m_s(g + a) = ${Fs.toFixed(1)} N ✓`;
+    const W2 = c2.w, H2 = c2.h;
+    if (gtab === 'N') UI.plot(c2.ctx, 0, 0, W2, H2, [{ pts: Np, col: '#2563eb' }], { xmin: 0, xmax: 10, ymin: 0, ymax: Math.max(2.2 * mg, 100), title: 'scale reading F_N (N) vs time', xlabel: 't (s)', hlines: [{ y: mg, col: '#7b3fd0', label: 'mg' }] });
+    else if (gtab === 'a') UI.plot(c2.ctx, 0, 0, W2, H2, [{ pts: ap, col: '#c026d3' }], { xmin: 0, xmax: 10, ymin: p.trip === 'drop' ? -10.5 : -4.2, ymax: p.trip === 'drop' ? 10.5 : 4.2, title: 'acceleration a (m/s², + = up) vs time', xlabel: 't (s)' });
+    else UI.plot(c2.ctx, 0, 0, W2, H2, [{ pts: vp, col: '#1f6feb' }], { xmin: 0, xmax: 10, title: 'velocity v (m/s, + = up) vs time', xlabel: 't (s)', minSpan: 4 }); }
+  reset();
+  const lp = api.loop(dt => { if (running) step(dt); draw(); });
+  return { destroy() { lp.stop = true; } };
+}
+
+// ===== DAY 3: inclines, connected objects, elevators & springs, mixed review =====
+const D3F = ['Fg', 'FN', 'Ff', 'FT', 'Fapp', 'Fsp', 'Fmotion', 'Fnet'];
+const INCL_SNAP = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330];
+const vtGraph = () => `<svg viewBox="0 0 300 130" width="300" height="130" style="background:#fff;border:1px solid #ccd;border-radius:4px"><line x1="30" y1="110" x2="290" y2="110" stroke="#334"/><line x1="30" y1="110" x2="30" y2="10" stroke="#334"/><path d="M30,110 L90,40 L200,40 L260,110 L290,110" fill="none" stroke="#1f6feb" stroke-width="3"/><g font-size="10" fill="#334" text-anchor="middle"><text x="30" y="123">0</text><text x="90" y="123">2</text><text x="200" y="123">6</text><text x="260" y="123">8</text><text x="282" y="123">t (s)</text></g><text x="12" y="60" font-size="10" fill="#334" transform="rotate(-90 12 60)" text-anchor="middle">v (up +)</text></svg>`;
+const hangPic = () => PIC._w(`<rect x="70" y="6" width="100" height="138" fill="#eef2f8" stroke="#456" stroke-width="2"/><line x1="120" y1="6" x2="120" y2="60" stroke="#333" stroke-width="2"/><rect x="104" y="60" width="32" height="28" fill="#c8894b" stroke="#7a4f26" stroke-width="2"/>${PIC.arrow(200, 110, 200, 50, '#c026d3', 'a')}<text x="8" y="140" fill="#456">elevator speeding up, moving up</text>`);
+const atwPic = () => PIC._w(`<circle cx="120" cy="30" r="18" fill="#777"/><rect x="117" y="0" width="6" height="30" fill="#556"/><line x1="102" y1="30" x2="102" y2="70" stroke="#333" stroke-width="2"/><line x1="138" y1="30" x2="138" y2="100" stroke="#333" stroke-width="2"/><rect x="88" y="70" width="28" height="28" fill="#2563eb"/><text x="102" y="88" fill="#fff" text-anchor="middle" font-weight="bold">m₁</text><rect x="122" y="100" width="32" height="32" fill="#d9480f"/><text x="138" y="120" fill="#fff" text-anchor="middle" font-weight="bold">m₂</text>`);
+const contactPic = () => PIC._w(PIC.floor(110, false) + `<rect x="80" y="62" width="56" height="48" fill="#2563eb"/><text x="108" y="90" fill="#fff" text-anchor="middle" font-weight="bold">3.0 kg</text><rect x="136" y="80" width="32" height="30" fill="#d9480f"/><text x="152" y="99" fill="#fff" text-anchor="middle" font-weight="bold">1.0</text>${PIC.arrow(30, 86, 78, 86, '#2b8a3e', '8.0 N')}<text x="8" y="140" fill="#456">frictionless floor</text>`);
+
+const LESSON = {
+  id: 'day3-v1', short: 'AP Physics 1 · Day 3 — Inclines, Pulleys, Elevators', title: 'Day 3: Inclines, Connected Objects, Elevators & Review', minutes: '40–45',
+  ced: ['Unit 2: Force and Translational Dynamics', 'Topics 2.1, 2.2, 2.3, 2.5, 2.6, 2.7, 2.8'],
+  intro: 'Today you put Newton’s laws to work on classic AP situations: blocks on ramps, masses connected by strings over pulleys, and the scale in an accelerating elevator. Then a mixed review pulls the three days together.',
+  goals: ['Choose axes parallel and perpendicular to the acceleration, and solve incline problems (2.2.B.4, 2.5.A, 2.7.A).', 'Treat connected objects as one system or as separate objects, and find the acceleration and tension (2.1.A, 2.3.A.3, 2.5.A).', 'Explain apparent weight in an accelerating elevator and the stretch of a spring scale (2.6.C, 2.8.A).', 'Mix all of the Unit 2 force skills on review problems.'],
+  sections: [
+    { id: 's1', title: 'Choosing axes', time: '3 min', ced: ['2.2.B'], sp: ['1.A'], blocks: [
+      { type: 'html', html: `<p>You can pick <b>any</b> coordinate system, but a smart choice makes the math easy: <b>put one axis along the direction of the acceleration</b> (CED 2.2.B.4). Then the other axis has a = 0, and its forces simply balance.</p>
+        <ul><li>Level floor → x horizontal, y vertical.</li><li><b>Incline</b> → x <b>along the slope</b>, y perpendicular to it. Only F<sub>g</sub> needs to be split into components: <span class="eq">F<sub>g∥</sub> = mg sin θ</span> (down the slope) and <span class="eq">F<sub>g⊥</sub> = mg cos θ</span> (into the slope).</li><li>Pulleys → let “+” follow the string around the pulley, in the direction the system moves.</li></ul>
+        <div class="tip">Memory check: as θ → 0 the slope is flat, so the along-slope part of gravity must → 0. sin 0 = 0 ✓. That is how you know it is <b>sin θ</b> along the slope.</div>` },
+      { type: 'q', id: 'd3q1', qtype: 'mc', prompt: 'A block slides down a ramp tilted at θ. Which axis choice makes ΣF = ma easiest?', choices: ['x horizontal, y vertical', 'x along the ramp, y perpendicular to the ramp', 'x along the normal force, y along gravity', 'It doesn’t matter, so always use horizontal and vertical'], answer: 1, explain: 'The acceleration is along the ramp, so make that an axis. Perpendicular to the ramp, a = 0, so F<sub>N</sub> = mg cos θ.', why: ['Then the acceleration has both x and y parts, and so do F<sub>N</sub> and friction: more work.', '', 'Those two forces are not perpendicular to each other on a ramp.', 'Any choice gives the right answer if done correctly, but the tilted axes make it much easier.'] },
+    ] },
+    { id: 's2', title: 'Inclines', time: '9 min', ced: ['2.2.B', '2.5.A', '2.7.A'], sp: ['1.A', '2.B', '3.C'], blocks: [
+      { type: 'html', html: `<div class="two"><div class="formula">⊥ to slope (a = 0):<br>F<sub>N</sub> = mg cos θ</div><div class="formula">∥ to slope, sliding down:<br>ma = mg sin θ − μ<sub>k</sub> mg cos θ<br><b>a = g(sin θ − μ<sub>k</sub> cos θ)</b></div></div>
+        <p>The mass cancels: a heavy block and a light block (same surface) slide down with the same acceleration. A block resting on a slope stays put as long as mg sin θ ≤ μ<sub>s</sub>mg cos θ, that is, as long as <b>tan θ ≤ μ<sub>s</sub></b>.</p>` },
+      { type: 'example', title: 'two ramps', problem: 'A block slides down a 30° incline. Find its acceleration if (a) the incline is frictionless, (b) μ<sub>k</sub> = 0.20.', solution: '(a) a = g sin 30° = 9.8·0.50 = <b>4.9 m/s²</b>.<br>(b) a = 9.8(sin 30° − 0.20 cos 30°) = 9.8(0.500 − 0.173) = <b>3.20 m/s²</b>.' },
+      { type: 'mis', html: '“The normal force always equals mg.” On an incline F<sub>N</sub> = mg cos θ, which is <b>less</b> than mg. F<sub>N</sub> is whatever the surface must push to stop the object from moving into it.' },
+      { type: 'sim', id: 'incl', title: 'Incline lab', mount: simIncline },
+      { type: 'tip', html: '<b>Try:</b> ① Frictionless: check a = 9.8 sin θ at a few angles. Change the mass. ② Wood: slowly raise θ until the block slips. Compare with tan⁻¹(0.50). ③ Rubber at 30°: press <b>Shove</b>. Why does it stop?' },
+      { type: 'q', id: 'd3q2', qtype: 'num', tag: 'sim', prompt: 'A block is released on a <b>frictionless</b> 25° incline. What is its acceleration? Check it in the sim.', answer: 4.14, unit: 'm/s²', g10: 4.226, hint: 'a = g sin θ', explain: 'a = 9.8 · sin 25° = 9.8 · 0.423 = 4.14 m/s².', traps: [{ v: 8.88, msg: 'That is g cos θ. Along the slope you need g <b>sin</b> θ.' }] },
+      { type: 'q', id: 'd3q3', qtype: 'num', tag: 'sim', prompt: 'A box sits on a ramp whose angle can be adjusted. μ<sub>s</sub> = 0.40. At what angle will the box just begin to slide?', answer: 21.8, tol: { abs: 0.4 }, unit: '°', hint: 'At the slipping point, mg sin θ = μ<sub>s</sub> mg cos θ → tan θ = μ<sub>s</sub>.', explain: 'θ = tan⁻¹(0.40) = 21.8°. Note that the mass cancels.', traps: [{ v: 23.6, msg: 'That is sin⁻¹(0.40). Use tan θ = μ<sub>s</sub>.' }, { v: 66.4, msg: 'That is cos⁻¹(0.40). Use tan θ = μ<sub>s</sub>.' }] },
+      { type: 'q', id: 'd3q4', qtype: 'fbd', prompt: '<b>Build the FBD:</b> a block sits <b>at rest</b> on a rough 30° incline that rises to the right. Draw whole forces (no components!).', pic: PIC.incline(30), forces: D3F, snap: INCL_SNAP, expect: [{ f: 'Fg', dir: 270 }, { f: 'FN', dir: 120 }, { f: 'Ff', dir: 30 }], rel: [['Fg', '>', 'FN'], ['FN', '>', 'Ff']], relMsg: 'Sizes: F<sub>N</sub> = mg cos 30° ≈ 0.87 mg and F<sub>f</sub> = mg sin 30° = 0.5 mg. Make F<sub>g</sub> longest, then F<sub>N</sub>, then F<sub>f</sub>.', dirMsg: { FN: 'The normal force is <b>perpendicular to the incline surface</b>, not straight up. For a 30° slope rising to the right, that is 30° left of vertical.', Ff: 'Static friction points <b>up the slope</b> (parallel to the surface), stopping the block from sliding down.' }, hint: 'The surface pushes perpendicular to itself (F<sub>N</sub>) and along itself (F<sub>f</sub>). Gravity is still straight down.', explain: 'F<sub>g</sub> straight down; F<sub>N</sub> perpendicular to the slope (up-left, 120°); static friction up the slope (30°). F<sub>N</sub> = mg cos θ and F<sub>f</sub> = mg sin θ.' },
+      { type: 'q', id: 'd3q5', qtype: 'mc', prompt: 'A 2 kg block and a 10 kg block are released on the same frictionless incline. Compare their accelerations.', choices: ['The 10 kg block’s is 5 times larger', 'The 2 kg block’s is larger', 'They are equal', 'It depends on the angle'], answer: 2, explain: 'a = g sin θ, with no mass in it. The bigger gravitational force is exactly matched by the bigger inertia.', why: ['More mass means more force, but also more inertia.', 'Less mass means less force, too.', '', 'Both depend on the angle the same way; at any angle they are equal.'] },
+    ] },
+    { id: 's3', title: 'Connected objects & pulleys', time: '9 min', ced: ['2.1.A', '2.3.A', '2.5.A', '2.7.A'], sp: ['1.A', '2.B', '3.C'], blocks: [
+      { type: 'html', html: `<p>Two objects joined by a light string move with the <b>same magnitude of acceleration</b>. An ideal (light, frictionless) pulley only changes the string’s direction. The tension is the same all along the string (CED 2.3.A.3).</p>
+        <ul><li><b>Whole-system view:</b> treat both objects as one system. Tension is now an <b>internal</b> force and drops out: <span class="eq">a = (net external force along the string) / (m<sub>1</sub> + m<sub>2</sub>)</span>.</li><li><b>Single-object view:</b> use one object’s FBD to find the tension.</li></ul>
+        <div class="two"><div class="formula">Block on frictionless table (m<sub>1</sub>) + hanging m<sub>2</sub>:<br>a = m<sub>2</sub>g/(m<sub>1</sub>+m<sub>2</sub>), F<sub>T</sub> = m<sub>1</sub>a</div><div class="formula">Atwood (two hanging):<br>a = (m<sub>2</sub>−m<sub>1</sub>)g/(m<sub>1</sub>+m<sub>2</sub>)</div></div>` },
+      { type: 'example', title: 'block on a table', problem: 'A 3.0 kg block on a frictionless table is tied over a pulley to a hanging 1.0 kg mass. Find a and the tension.', solution: 'System: the only external force along the string is the hanging weight m<sub>2</sub>g = 9.8 N. a = 9.8/(3.0 + 1.0) = <b>2.45 m/s²</b>.<br>Block on table: F<sub>T</sub> = m<sub>1</sub>a = 3.0·2.45 = <b>7.35 N</b>. Check with the hanging mass: m<sub>2</sub>g − F<sub>T</sub> = 9.8 − 7.35 = 2.45 = m<sub>2</sub>a ✓.' },
+      { type: 'example', title: 'Atwood machine', problem: 'A 2.0 kg and a 3.0 kg mass hang on either side of an ideal pulley. Find a and F<sub>T</sub>.', solution: 'a = (3.0 − 2.0)(9.8)/(5.0) = <b>1.96 m/s²</b> (3.0 kg goes down). For the 2.0 kg: F<sub>T</sub> − 2.0·9.8 = 2.0·1.96 → F<sub>T</sub> = <b>23.5 N</b>. That is between the two weights (19.6 N and 29.4 N), as it must be.' },
+      { type: 'mis', html: '“The tension equals the hanging weight.” Only if nothing accelerates! If the hanging mass accelerates downward, the string must pull up <b>less</b> than m<sub>2</sub>g, or the net force on it would not point down.' },
+      { type: 'sim', id: 'pulley', title: 'Pulley lab', mount: simPulley },
+      { type: 'q', id: 'd3q6', qtype: 'num', tag: 'sim', prompt: 'A 4.0 kg cart on a frictionless table is connected over a pulley to a hanging 2.0 kg mass. What is the acceleration?', answer: 3.27, unit: 'm/s²', g10: 3.333, hint: 'a = m<sub>2</sub>g/(m<sub>1</sub> + m<sub>2</sub>)', explain: 'a = 2.0·9.8/6.0 = 3.27 m/s².', traps: [{ v: 9.8, msg: 'The hanging mass has to drag the cart too, so a &lt; g. Divide by the <b>total</b> mass.' }, { v: 4.9, msg: 'You divided by m<sub>1</sub> only. The force accelerates both masses.' }] },
+      { type: 'q', id: 'd3q7', qtype: 'num', tag: 'sim', prompt: 'Same setup (4.0 kg on the table, 2.0 kg hanging). What is the tension in the string?', answer: 13.07, unit: 'N', g10: 13.33, hint: 'Use the cart’s FBD: the only horizontal force on it is F<sub>T</sub>, so F<sub>T</sub> = m<sub>1</sub>a.', explain: 'F<sub>T</sub> = 4.0·3.27 = 13.1 N (less than the hanging weight of 19.6 N).', traps: [{ v: 19.6, msg: 'That is the hanging weight. Since m<sub>2</sub> accelerates downward, the tension must be less than m<sub>2</sub>g.' }] },
+      { type: 'q', id: 'd3q8', qtype: 'mc', prompt: 'In an Atwood machine with m<sub>2</sub> &gt; m<sub>1</sub>, how does the string tension compare with the two weights?', choices: ['F<sub>T</sub> = m<sub>2</sub>g', 'F<sub>T</sub> = m<sub>1</sub>g', 'm<sub>1</sub>g &lt; F<sub>T</sub> &lt; m<sub>2</sub>g', 'F<sub>T</sub> = (m<sub>1</sub> + m<sub>2</sub>)g'], answer: 2, explain: 'm<sub>1</sub> accelerates up, so F<sub>T</sub> &gt; m<sub>1</sub>g. m<sub>2</sub> accelerates down, so F<sub>T</sub> &lt; m<sub>2</sub>g.', why: ['Then m<sub>2</sub> would have zero net force and could not accelerate.', 'Then m<sub>1</sub> would have zero net force and could not accelerate up.', '', 'That would be the force on the pulley’s support if nothing moved, not the tension.'] },
+      { type: 'q', id: 'd3q9', qtype: 'num', prompt: 'A 5.0 kg block on a table (μ<sub>k</sub> = 0.20) is pulled by a string over a pulley by a hanging 2.0 kg mass. The block is sliding. Find the acceleration. (Try it in the sim: set m<sub>1</sub>, m<sub>2</sub> and μ.)', answer: 1.4, unit: 'm/s²', g10: 1.429, hint: 'System: driving force m<sub>2</sub>g, opposing force μ<sub>k</sub>m<sub>1</sub>g, total mass 7.0 kg.', explain: 'a = (2.0·9.8 − 0.20·5.0·9.8)/7.0 = (19.6 − 9.8)/7.0 = 1.4 m/s².', traps: [{ v: 2.8, msg: 'You left out friction on the block.' }, { v: 1.96, msg: 'Divide by the <b>total</b> mass (7.0 kg), not just the block’s.' }] },
+    ] },
+    { id: 's4', title: 'Elevators, apparent weight & springs', time: '9 min', ced: ['2.6.C', '2.8.A', '2.5.A'], sp: ['1.B', '2.B', '3.C'], blocks: [
+      { type: 'html', html: `<p>A bathroom scale reads the <b>normal force</b> it exerts on you, not your weight. That is your <b>apparent weight</b> (CED 2.6.C). Take up as +:</p>
+        <div class="formula" style="font-size:17px">F<sub>N</sub> − mg = ma &nbsp;→&nbsp; <b>F<sub>N</sub> = m(g + a)</b></div>
+        <ul><li>a <b>up</b> (speeding up going up, or slowing down going down) → reading <b>more</b> than mg.</li><li>a <b>down</b> (speeding up going down, or slowing down going up) → reading <b>less</b> than mg.</li><li>Constant velocity, either direction → a = 0 → reading = mg.</li><li>Free fall (a = −g) → reading 0: “weightless,” even though gravity still acts.</li></ul>
+        <p>A <b>spring</b> exerts F<sub>sp</sub> = kΔx (Hooke’s law, CED 2.8.A). A mass hanging from a spring in the elevator stretches it by Δx = m(g + a)/k. That is a spring scale.</p>` },
+      { type: 'example', title: 'scale in an elevator', problem: 'A 60 kg student stands on a scale in an elevator that accelerates upward at 2.0 m/s². What does the scale read? What if the elevator moves at a constant 3 m/s?', solution: 'F<sub>N</sub> = 60(9.8 + 2.0) = <b>708 N</b> (normal weight 588 N). At constant velocity a = 0 → <b>588 N</b>. The speed does not matter, only the acceleration does.' },
+      { type: 'example', title: 'spring scale', problem: 'A 2.0 kg mass hangs at rest from a spring with k = 200 N/m. How far is the spring stretched?', solution: 'At rest: kΔx = mg → Δx = 2.0·9.8/200 = <b>0.098 m ≈ 9.8 cm</b>.' },
+      { type: 'mis', html: '“The scale reads more when the elevator is moving up.” Not if it is moving at constant velocity! The reading depends on the <b>direction of the acceleration</b>, not the direction of motion.' },
+      { type: 'sim', id: 'elev', title: 'Elevator & spring-scale lab', mount: simElevator },
+      { type: 'tip', html: '<b>Try:</b> ① Turn on <b>Predict mode</b>, make your three predictions, then ride UP. Predict again and ride DOWN. ② Choose <b>Trip → Custom</b> to set any motion yourself: a starting velocity v₀ (+ up, − down) and an acceleration a (+ up, − down). With v₀ and a in the <b>same</b> direction the elevator speeds up; in <b>opposite</b> directions it slows down and stops. Use it to check the questions below. ③ Change the <b>spring constant k</b> and the mass on the spring, and compare the stretch Δx with Δx = m(g + a)/k. ④ Try the cable-snap trip.' },
+      { type: 'q', id: 'd3q10', qtype: 'num', tag: 'sim', prompt: 'A 70 kg person rides an elevator that is moving <b>down</b> and <b>slowing down</b> at 1.5 m/s². What does the scale read?<br><span class="g">Check it in the lab: <b>Trip → Custom</b>, set your mass to 70 kg, give the elevator a <b>downward</b> starting velocity, and choose the acceleration (size 1.5 m/s²) that makes it slow down. Read the scale while it is slowing.</span>', answer: 791, unit: 'N', g10: 805, hint: 'Moving down and slowing → the acceleration points <b>up</b>. Then F<sub>N</sub> = m(g + a). (In the lab: v₀ negative, e.g. −4 m/s, and a = +1.5 m/s².)', explain: 'a = +1.5 m/s² (up). F<sub>N</sub> = 70(9.8 + 1.5) = 70·11.3 = 791 N, which is more than mg = 686 N.', traps: [{ v: 581, msg: 'Slowing while moving down means the acceleration is <b>upward</b>, so the reading goes up.' }, { v: 686, msg: 'That is the reading at constant velocity. Here the elevator is accelerating.' }] },
+      { type: 'q', id: 'd3q11', qtype: 'mc', tag: 'sim', prompt: 'An elevator moves upward at a constant 4 m/s. Compared with your weight mg, the scale reads…<br><span class="g">Try it: <b>Trip → Custom</b> with v₀ = +4 m/s and a = 0.</span>', choices: ['more than mg', 'exactly mg', 'less than mg', 'zero'], answer: 1, explain: 'Constant velocity → a = 0 → F<sub>N</sub> = mg.', why: ['Moving up is not the same as accelerating up.', '', 'Less would need a downward acceleration.', 'Zero only happens in free fall.'] },
+      { type: 'q', id: 'd3q12', qtype: 'num', tag: 'sim', prompt: 'A 1.0 kg mass hangs from a spring (k = 250 N/m) in an elevator accelerating <b>upward</b> at 2.2 m/s². How much is the spring stretched, in <b>centimeters</b>?<br><span class="g">Simulate it: set <b>Spring constant k</b> = 250 N/m and <b>Mass on spring</b> = 1.0 kg. Then choose <b>Trip → Custom</b> with v₀ = 0 and a = +2.2 m/s² (or Ride UP with |a| = 2.2 m/s²), and read Δx while it accelerates.</span>', answer: 4.8, unit: 'cm', g10: 4.88, hint: 'kΔx − mg = ma → Δx = m(g + a)/k. Then convert m → cm.', explain: 'Δx = 1.0(9.8 + 2.2)/250 = 12/250 = 0.048 m = 4.8 cm.', traps: [{ v: 0.048, msg: 'Right number, but the question asks for centimeters.' }, { v: 3.04, msg: 'The elevator accelerates upward: use g + a, not g − a.' }, { v: 3.92, msg: 'That is the stretch at rest. Include the acceleration.' }] },
+      { type: 'q', id: 'd3q13', qtype: 'mc', prompt: 'The graph shows an elevator’s velocity (up is +) during a trip:<br>' + vtGraph() + '<br>During which time interval does the scale under a passenger read the <b>greatest</b> value?<br><span class="g">(This is the <b>Ride UP</b> trip in the elevator lab. Ride it and watch the scale-reading graph.)</span>', choices: ['0 to 2 s', '2 to 6 s', '6 to 8 s', '8 to 10 s'], answer: 0, explain: 'From 0 to 2 s the velocity increases upward, so a points up and F<sub>N</sub> = m(g + a) &gt; mg. From 2 to 6 s, a = 0 (reading = mg). From 6 to 8 s, a points down (reading &lt; mg).', why: ['', 'The slope (acceleration) is zero there, so the reading is just mg.', 'The velocity is decreasing, so a points down: the reading is <b>less</b> than mg.', 'The elevator is at rest: the reading is mg.'] },
+    ] },
+    { id: 's5', title: 'Mixed review', time: '6 min', ced: ['2.2.B', '2.3.A', '2.4.A', '2.5.A', '2.7.A', '2.7.B'], sp: ['1.A', '2.B', '3.B'], blocks: [
+      { type: 'html', html: '<p>Questions from all three days. Draw a quick FBD on scratch paper for each one. It really helps.</p>' },
+      { type: 'q', id: 'd3q14', qtype: 'mc', prompt: 'A crate rides in the back of a pickup truck that speeds up forward. The crate does not slide. Which force makes the crate speed up?', choices: ['Static friction from the truck bed, pointing forward', 'Kinetic friction, pointing backward', 'The normal force from the truck bed', 'No force is needed because the crate is at rest relative to the truck'], answer: 0, explain: 'The crate accelerates forward with the truck, so it needs a forward net force: static friction from the bed (it is not sliding, so it is <b>static</b>).', why: ['', 'It is not sliding, so the friction is static. And a backward force can’t speed it up.', 'The normal force is vertical; it can’t speed the crate up horizontally.', 'It is accelerating relative to the ground, which is an inertial frame. That needs a net force.'] },
+      { type: 'q', id: 'd3q15', qtype: 'mc', prompt: 'You hold a book at rest against a vertical wall by pressing horizontally on it.<br>' + PIC.wall() + '<br>If you <b>double</b> your push, the friction force from the wall on the book…', choices: ['doubles', 'stays the same', 'halves', 'becomes zero'], answer: 1, explain: 'The book is at rest, so vertically friction = mg, no matter how hard you push. Pushing harder raises the <b>maximum</b> possible friction (μ<sub>s</sub>F<sub>N</sub>), not the actual friction.', why: ['Doubling the push doubles the <b>maximum</b> static friction, but the book only needs friction = mg.', '', 'Friction must still hold up the book’s weight.', 'Then the book would fall.'] },
+      { type: 'q', id: 'd3q16', qtype: 'num', prompt: 'A 3.0 kg block and a 1.0 kg block sit side by side on a frictionless floor. You push the 3.0 kg block with 8.0 N, so it pushes the 1.0 kg block ahead of it.<br>' + contactPic() + '<br>What force does the 3.0 kg block exert on the 1.0 kg block?', answer: 2.0, unit: 'N', hint: 'First the whole system: a = 8.0/4.0. Then the 1.0 kg block alone: the only horizontal force on it is the push from the 3.0 kg block.', explain: 'a = 8.0/4.0 = 2.0 m/s². On the 1.0 kg block: F = 1.0·2.0 = 2.0 N. (By the third law the 1.0 kg block pushes back on the 3.0 kg block with 2.0 N.)', traps: [{ v: 8, msg: 'The 8.0 N push is on the 3.0 kg block. The force passed on to the small block is smaller. Use its own FBD.' }, { v: 6, msg: '6.0 N is the net force on the 3.0 kg block. The question asks about the force on the 1.0 kg block.' }] },
+      { type: 'q', id: 'd3q17', qtype: 'mc', prompt: 'A skydiver falls at a constant <b>terminal velocity</b>. Which is true?', choices: ['Air resistance is greater than gravity', 'Air resistance equals gravity in magnitude, so the net force is zero', 'Gravity is greater than air resistance, which is why she keeps falling', 'There is no air resistance at terminal velocity'], answer: 1, explain: 'Constant velocity → ΣF = 0 → drag = mg. She keeps falling because she already has a downward velocity (first law).', why: ['Then she would slow down.', '', 'A net downward force would make her speed up.', 'Drag is what balances gravity.'] },
+      { type: 'q', id: 'd3q18', qtype: 'mc', prompt: 'A block slides down a ramp at a <b>constant velocity</b> when the ramp is at angle θ. What is μ<sub>k</sub>?', choices: ['sin θ', 'cos θ', 'tan θ', 'It can’t be found without the mass'], answer: 2, explain: 'a = 0 → mg sin θ = μ<sub>k</sub> mg cos θ → μ<sub>k</sub> = tan θ.', why: ['Divide mg sin θ by the normal force mg cos θ.', 'Divide mg sin θ by the normal force mg cos θ.', '', 'The mass cancels from both sides.'] },
+    ] },
+    { id: 's6', title: 'AP-style reasoning', time: '5 min', ced: ['2.1.A', '2.5.A'], sp: ['3.B', '3.C'], blocks: [
+      { type: 'html', html: '<p>Answer in words first, then use equations to back yourself up. The sample answer appears after you submit.</p>' },
+      { type: 'q', id: 'd3q19', qtype: 'fr', tag: 'ap', minWords: 40, prompt: 'An Atwood machine holds masses m<sub>1</sub> and m<sub>2</sub> (m<sub>2</sub> &gt; m<sub>1</sub>) over an ideal pulley.<br>' + atwPic() + '<br>A student adds the <b>same</b> extra mass Δm to <b>both</b> sides. Does the magnitude of the acceleration increase, decrease, or stay the same? Justify your answer using the system of both masses, then support it with an equation for a.',
+        sample: 'The acceleration <b>decreases</b>. For the system of both masses, the only unbalanced external force along the string is the difference in weights, (m<sub>2</sub> − m<sub>1</sub>)g. Tension is internal and cancels. Adding Δm to both sides does not change that difference, because (m<sub>2</sub> + Δm − m<sub>1</sub> − Δm)g is the same. But the total mass being accelerated increases from m<sub>1</sub> + m<sub>2</sub> to m<sub>1</sub> + m<sub>2</sub> + 2Δm. The same net force on a larger mass gives a smaller acceleration: a = (m<sub>2</sub> − m<sub>1</sub>)g/(m<sub>1</sub> + m<sub>2</sub> + 2Δm), which is smaller than before because the denominator is larger.',
+        rubric: ['Claims the acceleration decreases', 'Net external force on the system (weight difference) is unchanged', 'Total mass (inertia) of the system increases', 'Gives a = (m₂ − m₁)g/(m₁ + m₂ + 2Δm) or equivalent and links it to the claim'] },
+    ] },
+    { id: 's7', title: 'Exit ticket', time: '4 min', ced: ['2.2.B', '2.5.A', '2.6.C'], blocks: [
+      { type: 'html', html: '<p>Three questions to show what you learned today. They are scored separately.</p>' },
+      { type: 'q', id: 'd3e1', qtype: 'num', tag: 'exit', prompt: 'A sled slides down a frictionless 40° snowy hill. What is the magnitude of its acceleration?', answer: 6.30, unit: 'm/s²', g10: 6.428, hint: 'a = g sin θ', explain: 'a = 9.8 · sin 40° = 9.8 · 0.643 = 6.30 m/s².', traps: [{ v: 7.51, msg: 'That is g cos θ. Along the slope it is g sin θ.' }] },
+      { type: 'q', id: 'd3e2', qtype: 'mc', tag: 'exit', prompt: 'An elevator is moving <b>up</b> and <b>slowing down</b> as it approaches the top floor. The scale under a passenger reads…', choices: ['more than mg', 'exactly mg', 'less than mg', 'zero'], answer: 2, explain: 'Moving up and slowing → a points <b>down</b> → F<sub>N</sub> = m(g − |a|) &lt; mg.', why: ['That happens when a points up (speeding up on the way up).', 'Only if a = 0.', '', 'Only in free fall.'] },
+      { type: 'q', id: 'd3e3', qtype: 'fbd', tag: 'exit', prompt: '<b>Build the FBD:</b> a box hangs from a string attached to the ceiling of an elevator that is <b>speeding up while moving upward</b>.', pic: hangPic(), forces: D3F, expect: [{ f: 'Fg', dir: 270 }, { f: 'FT', dir: 90 }], rel: [['FT', '>', 'Fg']], relMsg: 'The box accelerates <b>upward</b>, so the net force points up: make F<sub>T</sub> <b>longer</b> than F<sub>g</sub>.', hint: 'Only two things interact with the box. Which way is the acceleration?', explain: 'F<sub>T</sub> up and F<sub>g</sub> down, with F<sub>T</sub> &gt; F<sub>g</sub> because the acceleration is upward (F<sub>T</sub> = m(g + a)).' },
+    ] },
+    { id: 'sum', title: 'Summary & submit', type: 'summary', time: '2 min', blocks: [] },
+  ] };
+
+Engine.start(LESSON);
+</script>
+</body></html>
