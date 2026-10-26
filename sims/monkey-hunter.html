@@ -1,0 +1,795 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Banana Launcher — Monkey &amp; Hunter</title>
+<style>
+body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6fa;color:#222}
+header{background:#234;color:#fff;padding:6px 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}header h1{font-size:17px;margin:0}
+#tabs button{background:#3a5068;color:#fff;border:1px solid #567;font-size:14px;padding:5px 13px}#tabs button.on{background:#ffd76a;color:#222;font-weight:bold}
+header .hb{background:#3a5068;color:#fff;border:1px solid #567}header .hb.on{background:#ffd76a;color:#222}
+#wrap{display:flex;gap:10px;padding:8px}#left{flex:1;min-width:0}#right{width:440px;flex:none}
+.panel{background:#fff;border-radius:8px;box-shadow:0 1px 3px #0002;padding:8px;margin-bottom:8px}
+canvas{display:block}label{font-size:13px}.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px;margin:4px 0}
+button{padding:5px 9px;border:1px solid #889;border-radius:5px;background:#eef;cursor:pointer;font-size:13px}button:disabled{opacity:.45;cursor:default}
+button.on{background:#ffd76a}button.big{font-size:16px;padding:7px 14px;font-weight:bold}#fire{background:#ffe27a;border-color:#b98d00}
+.preset{background:#e6f4ea}.g{font-size:12px;color:#555}h3{font-size:14px;margin:2px 0 6px}
+input[type=range]{width:100%}.sl{display:grid;grid-template-columns:158px 1fr 66px;gap:6px;align-items:center;font-size:13px;margin:3px 0}
+.sl input[type=number]{width:62px}.sl.lock{opacity:.5}.sl.lock span::after{content:" 🔒"}
+table{border-collapse:collapse;font-size:12px;width:100%}th,td{border:1px solid #ccd;padding:2px 4px;text-align:center}th{background:#eef2f8}
+.formula{font-family:Georgia,serif;font-size:14px;background:#f3f6ff;padding:6px 8px;border-radius:5px;line-height:1.6}
+.status{background:#fffbe6;border:1px solid #e8d48a;border-radius:6px;padding:5px 8px;font-size:13px}
+#sceneBox{position:relative}#scene{touch-action:none;cursor:default}
+details>summary{cursor:pointer;font-weight:bold;font-size:14px}
+.sw{display:inline-block;width:22px;height:4px;vertical-align:middle;margin-right:3px}
+#credit{font-size:11px;color:#666;text-align:center;padding:4px 0 10px}
+.hide{display:none!important}
+.pred button{background:#fff}.pred button.on{background:#ffd76a;font-weight:bold}
+#levelGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}#levelGrid button{padding:4px 2px;font-size:12px;line-height:1.25;background:#e6f4ea}
+#levelGrid button.cur{outline:3px solid #ffb300}#levelGrid button.locked{background:#e3e3e3}
+.stars{color:#e0a000;letter-spacing:1px}.bigstat{font-size:22px;font-weight:bold}
+.bet button{font-size:15px;padding:8px 6px;flex:1;min-width:46%}
+.ok{color:#0a7d32;font-weight:bold}.bad{color:#c22;font-weight:bold}
+#why{background:#eef8ee;border:1px solid #9c9;border-radius:6px;padding:6px 8px;font-size:13px;line-height:1.45}
+.modal{position:fixed;inset:0;background:#0006;display:flex;align-items:center;justify-content:center;z-index:10}
+.modal>div{background:#fff;border-radius:10px;padding:16px 20px;max-width:640px;width:92%;max-height:92vh;overflow:auto}
+#cert{border:6px double #b98d00;padding:16px 22px;text-align:center;background:#fffdf3}
+#cert h2{font-family:Georgia,serif;font-size:26px;margin:4px 0}#cert .nm{font-family:Georgia,serif;font-size:30px;color:#234;border-bottom:1px solid #999;display:inline-block;padding:0 30px;margin:6px 0}
+#cert table{margin:8px auto;width:auto}
+@media print{body.printing>*:not(#certBox){display:none!important}body.printing #certBox{position:static;background:none;display:block}body.printing #certBox>div{max-height:none;box-shadow:none;width:100%;max-width:none}.noprint{display:none!important}}
+</style></head><body>
+<header><h1>🍌 Banana Launcher — Monkey &amp; Hunter</h1>
+ <div id="tabs"><button data-mode="lab">🧪 Lab</button><button data-mode="levels">🏆 Levels</button><button data-mode="bet">🎲 Will it hit?</button><button data-mode="timed">⏱ Timed</button></div>
+ <span style="flex:1"></span><button class="hb" id="certBtn">📜 Certificate</button><button class="hb" id="nameBtn">👤 <span id="nameLbl">Add name</span></button><button class="hb on" id="sndBtn" title="sound on/off">🔊 Sound</button></header>
+<div id="wrap"><div id="left">
+ <div class="panel"><div id="sceneBox"><canvas id="scene"></canvas></div>
+  <div class="row"><button class="big" id="fire" title="Space">🍌 Launch</button><button id="reset" title="R">⟲ Reset</button><button id="play">⏸ Pause</button><button id="step">Step ▶ 0.05 s</button>
+   <span>Slow-mo:</span><select id="slow"><option value="1">1× real time</option><option value="0.5">½×</option><option value="0.25">¼×</option><option value="0.1">⅒×</option></select>
+   <span style="flex:1"></span><span class="g" id="hint">Drag the barrel to aim · drag the stand for height · drag Mango (Lab)</span></div>
+  <div class="row"><b>Show:</b><label><input type="checkbox" id="aimOn" checked> dashed no-gravity line</label>
+   <label><input type="checkbox" id="dotsOn" checked> strobe dots every</label><select id="dotDt"><option>0.1</option><option selected>0.2</option><option>0.25</option><option>0.5</option></select> s
+   <label><input type="checkbox" id="dropOn" checked> ½gt² drops</label><label><input type="checkbox" id="vecOn" checked> velocity</label><label><input type="checkbox" id="cmpOn"> components</label><label><input type="checkbox" id="accOn"> g vectors</label>
+   <label><input type="checkbox" id="gridOn" checked> grid</label><label><input type="checkbox" id="zoneOn"> catch zone</label></div>
+ </div>
+ <div class="panel"><details id="graphsBox" open><summary>📈 Live graphs — y vs t for the banana &amp; Mango, and their vertical separation vs t<span class="g" style="font-weight:normal"> · dashed = no gravity</span></summary><canvas id="graphs"></canvas></details></div>
+ <div class="panel"><div class="row"><h3 style="margin:0">Data table</h3><span style="flex:1"></span><button id="csv">⬇ Export CSV</button><button id="clearTbl">Clear table</button></div>
+  <div style="max-height:220px;overflow:auto"><table id="tbl"><thead><tr><th>#</th><th>Mode</th><th>g (m/s²)</th><th>v₀ (m/s)</th><th>θ (°)</th><th>h (m)</th><th>x<sub>tree</sub> (m)</th><th>y<sub>monkey</sub> (m)</th><th>Drop</th><th>Wind (m/s²)</th><th>T (s)</th><th>½gT² (m)</th><th>y<sub>banana</sub>(T) (m)</th><th>y<sub>monkey</sub>(T) (m)</th><th>Miss (m)</th><th>Result</th><th>Prediction</th></tr></thead><tbody></tbody></table></div></div>
+ <div class="panel"><details id="notesBox"><summary>📘 AP Physics 1 notes — why aiming at the monkey works</summary><div class="formula" id="notes"></div></details></div>
+</div>
+<div id="right">
+ <!-- LAB -->
+ <div class="panel" id="labPanel"><h3>🧪 Lab — set up any shot</h3>
+  <div class="row"><button class="preset" id="aimBtn">🎯 Aim at Mango</button><button class="preset" id="classicBtn">Classic demo</button><button class="preset" id="randBtn">🎲 Random setup</button></div>
+  <div class="row"><label><input type="checkbox" id="predOn"> <b>Predict mode</b>: call it before you launch</label></div>
+  <div class="row pred hide" id="predRow"><button data-p="hit">🍌 Caught</button><button data-p="over">⬆ Over</button><button data-p="under">⬇ Under</button><button data-p="ground">🌱 Lands short</button></div>
+  <div class="g" id="predScore"></div>
+ </div>
+ <!-- LEVELS -->
+ <div class="panel hide" id="levelsPanel"><div class="row"><h3 style="margin:0" id="lvlTitle">Level</h3><span style="flex:1"></span><span class="stars" id="lvlStars"></span></div>
+  <div id="lvlStory" style="font-size:13px"></div><div id="lvlGoal" class="status" style="margin-top:5px"></div>
+  <div class="row"><span>Bananas left: <b id="lvlBananas"></b></span><span style="flex:1"></span><button id="lvlRetry">⟲ Restart level</button><button id="lvlNext" class="hide" style="background:#c8f0d2">Next level ▶</button></div>
+  <div id="levelGrid"></div><div class="g" style="margin-top:4px">Stars: catch Mango with fewer bananas. <a href="#" id="unlockAll">Teacher: unlock all</a> · <span id="totStars"></span></div>
+ </div>
+ <!-- BET -->
+ <div class="panel hide" id="betPanel"><h3>🎲 Will it hit? — call the shot!</h3>
+  <div id="betInfo" class="status"></div>
+  <div class="row bet" id="betRow"><button data-b="hit">🍌 Caught!</button><button data-b="over">⬆ Flies over</button><button data-b="under">⬇ Passes under</button><button data-b="ground">🌱 Lands short</button></div>
+  <div class="row"><span>Streak <span class="bigstat" id="betStreak">0</span></span><span>Best <b id="betBest">0</b></span><span>Score <b id="betScore">0</b></span><span>Correct <b id="betAcc">0/0</b></span><span style="flex:1"></span><button id="betNext" class="hide" style="background:#c8f0d2">Next ▶</button></div>
+  <div class="g">Points = 10 × your streak. The dashed line shows exactly where the launcher points.</div>
+ </div>
+ <!-- TIMED -->
+ <div class="panel hide" id="timedPanel"><h3>⏱ Timed challenge — 90 seconds</h3>
+  <div class="row"><button class="big" id="timedStart">▶ Start</button><span>Time <span class="bigstat" id="tLeft">90.0</span> s</span><span>Score <span class="bigstat" id="tScore">0</span></span><span>Combo ×<b id="tCombo">0</b></span></div>
+  <div class="g">Mango moves after every catch. Aim by dragging the barrel or the angle slider (no auto-aim!). Catch = 100 + 25 × combo.</div>
+  <h3 style="margin-top:6px">🏅 Scoreboard (this computer)</h3><table id="scoreTbl"><thead><tr><th>#</th><th>Name</th><th>Score</th><th>Catches</th><th>Date</th></tr></thead><tbody></tbody></table>
+ </div>
+ <div class="panel" id="ctrlPanel"><h3>Launcher &amp; Mango</h3>
+  <div class="sl" id="rowV"><span>Launch speed v₀ (m/s)</span><input type="range" id="v" min="1" max="60" step="0.5"><input type="number" id="vN" min="0.1" max="80" step="0.1"></div>
+  <div class="sl" id="rowTh"><span>Angle θ (°)</span><input type="range" id="th" min="-30" max="80" step="0.5"><input type="number" id="thN" min="-89" max="89" step="0.1"></div>
+  <div class="sl" id="rowH"><span>Launcher height h (m)</span><input type="range" id="h" min="0" max="15" step="0.5"><input type="number" id="hN" min="0" max="30" step="0.1"></div>
+  <div class="sl" id="rowX"><span>Mango distance x (m)</span><input type="range" id="X" min="5" max="60" step="0.5"><input type="number" id="XN" min="2" max="100" step="0.1"></div>
+  <div class="sl" id="rowY"><span>Mango height y (m)</span><input type="range" id="Y" min="1" max="30" step="0.5"><input type="number" id="YN" min="0.5" max="50" step="0.1"></div>
+  <div class="row" id="rowDrop">Mango lets go: <select id="drop"><option value="launch">at launch</option><option value="early">early (before launch)</option><option value="late">late (after launch)</option><option value="never">never</option></select>
+   <span id="dtWrap">by <input type="number" id="dtN" min="0" max="2" step="0.05" style="width:58px"> s</span></div>
+  <div class="row" id="rowG">Gravity: <select id="planet"><option value="earth">Earth 9.8</option><option value="moon">Moon 1.62</option><option value="mars">Mars 3.71</option><option value="jupiter">Jupiter 24.79</option><option value="zero">Zero g</option><option value="custom">Custom</option></select>
+   <input type="number" id="gN" step="0.01" min="0" max="50" style="width:70px"> m/s²</div>
+  <div class="row" id="rowWind"><label><input type="checkbox" id="windOn"> Wind on the banana</label><input type="range" id="wind" min="-5" max="5" step="0.5" style="width:140px"><span id="windLbl"></span></div>
+ </div>
+ <div class="panel"><h3>Readout</h3><div class="status" id="readout"></div>
+  <div class="row"><label><input type="checkbox" id="whyOn" checked> <b>Explain each shot</b> (why it hit or missed)</label></div><div id="why" class="hide"></div></div>
+</div></div>
+<div id="credit">Inspired by the classic “monkey and hunter” demonstration and ExploreLearning’s <i>Feed the Monkey</i> Gizmo. Original implementation; not affiliated with or endorsed by ExploreLearning. No monkeys were harmed — Mango only ever catches bananas.</div>
+<div class="modal hide" id="nameBox"><div><h3>👋 What's your name?</h3><p class="g">Used only on this computer for your certificate and the timed-challenge scoreboard.</p>
+ <div class="row"><input id="nameIn" maxlength="30" style="font-size:16px;padding:5px;flex:1" placeholder="First name + last initial"><button class="big" id="nameSave">Save</button><button id="nameSkip">Later</button></div></div></div>
+<div class="modal hide" id="certBox"><div><div id="cert"></div>
+ <div class="row noprint" style="justify-content:center;margin-top:10px"><button class="big" id="printBtn">🖨 Print / Save as PDF</button><button id="certClose">Close</button><span style="flex:1"></span><button id="resetProgress" style="background:#fde">Reset my progress</button></div></div></div>
+<script>
+// Monkey & Hunter ("Banana Launcher") physics core. Pure functions; works in the browser and in node.
+(function (root) {
+'use strict';
+const D2R = Math.PI / 180;
+const PLANETS = {
+  earth: { name: 'Earth', g: 9.8 }, moon: { name: 'Moon', g: 1.62 }, mars: { name: 'Mars', g: 3.71 },
+  jupiter: { name: 'Jupiter', g: 24.79 }, zero: { name: 'Zero g (deep space)', g: 0 }, custom: { name: 'Custom', g: null }
+};
+const R = 0.75;          // catch radius: |y_banana - y_monkey| at the monkey's x (m)
+const TRUNK = 1.4;       // tree trunk sits this far behind the monkey (m)
+// p = {v, th (deg), h, X, Y, g, drop:'launch'|'early'|'late'|'never', dt, wind (m/s^2, banana only), obstacles:[{x,w,h}]}
+function dropTime(p) { if (p.drop === 'never') return Infinity; if (p.drop === 'early') return -(p.dt || 0); if (p.drop === 'late') return (p.dt || 0); return 0; }
+function banana(p, t) {
+  const th = p.th * D2R, vx0 = p.v * Math.cos(th), vy0 = p.v * Math.sin(th), aw = p.wind || 0;
+  return { x: vx0 * t + 0.5 * aw * t * t, y: p.h + vy0 * t - 0.5 * p.g * t * t, vx: vx0 + aw * t, vy: vy0 - p.g * t };
+}
+function ghost(p, t) { return banana(Object.assign({}, p, { g: 0 }), t); }   // same launch, no gravity
+function monkeyLandTau(p) { return p.g > 0 ? Math.sqrt(2 * p.Y / p.g) : Infinity; }
+function monkey(p, t) {
+  const td = dropTime(p);
+  if (!(t > td)) return { x: p.X, y: p.Y, vy: 0, falling: false, landed: false, fall: 0 };
+  const tau = t - td, tl = monkeyLandTau(p);
+  if (tau >= tl) return { x: p.X, y: 0, vy: 0, falling: false, landed: true, fall: p.Y };
+  const fall = 0.5 * p.g * tau * tau;
+  return { x: p.X, y: p.Y - fall, vy: -p.g * tau, falling: p.g > 0, landed: false, fall };
+}
+function monkeyLandTime(p) { const td = dropTime(p); return td + monkeyLandTau(p); }
+// time for the banana to reach horizontal position X (null if it never does)
+function timeToX(p, X) {
+  if (X === undefined) X = p.X;
+  const vx0 = p.v * Math.cos(p.th * D2R), aw = p.wind || 0;
+  if (Math.abs(aw) < 1e-12) return vx0 > 1e-9 ? X / vx0 : null;
+  const disc = vx0 * vx0 + 2 * aw * X; if (disc < 0) return null;
+  const t = (-vx0 + Math.sqrt(disc)) / aw; return t > 0 ? t : null;
+}
+// time for the banana to reach the ground y = 0
+function groundTime(p) {
+  const vy0 = p.v * Math.sin(p.th * D2R);
+  if (p.g > 0) return (vy0 + Math.sqrt(vy0 * vy0 + 2 * p.g * p.h)) / p.g;
+  if (vy0 < 0) return p.h / -vy0; return Infinity;
+}
+function aimAngle(h, X, Y) { return Math.atan2(Y - h, X) / D2R; }
+function aimLineY(p) { return p.h + p.X * Math.tan(p.th * D2R); }  // where the dashed no-gravity line crosses the tree
+// minimum launch speed (at the current angle, no wind) so the banana is still above the ground at the monkey's x
+function vMin(p) {
+  const th = p.th * D2R, c = Math.cos(th), top = p.h + p.X * Math.tan(th);
+  if (c <= 1e-9 || top <= 0) return Infinity; if (p.g === 0) return 0;
+  return p.X / c * Math.sqrt(p.g / (2 * top));
+}
+function vMinAimed(h, X, Y, g) { return g === 0 ? 0 : Math.hypot(X, Y - h) * Math.sqrt(g / (2 * Y)); }
+function outcome(p) {
+  const T = timeToX(p), tg = groundTime(p), out = { T, tg, R, vmin: vMin(p), aimOffset: aimLineY(p) - p.Y, td: dropTime(p) };
+  if (T === null || T > tg + 1e-9) {
+    out.result = 'ground'; out.tStop = tg; const b = banana(p, tg); out.stopX = b.x; out.stopY = 0;
+  } else {
+    let blk = null;
+    for (const o of (p.obstacles || [])) for (const ex of [o.x - o.w / 2, o.x + o.w / 2]) {
+      const te = timeToX(p, ex); if (te !== null && te < T && banana(p, te).y < o.h && (!blk || te < blk.t)) blk = { t: te, o };
+    }
+    if (blk) { out.result = 'blocked'; out.obstacle = blk.o; out.tStop = blk.t; const b = banana(p, blk.t); out.stopX = b.x; out.stopY = b.y; }
+    else {
+      const b = banana(p, T), m = monkey(p, T);
+      out.yb = b.y; out.ym = m.y; out.miss = b.y - m.y; out.fallB = 0.5 * p.g * T * T; out.fallM = p.Y - m.y;
+      out.ghostY = ghost(p, T).y;
+      out.result = Math.abs(out.miss) <= R ? 'hit' : (out.miss > 0 ? 'over' : 'under');
+      if (out.result === 'hit') out.tStop = T;
+      else {
+        // after the miss: the banana hits the trunk (if low enough) or the ground
+        const tt = timeToX(p, p.X + TRUNK), treeTop = p.Y + 2.2;
+        if (tt !== null && tt < tg && banana(p, tt).y < treeTop) { out.tStop = tt; const q = banana(p, tt); out.stopX = q.x; out.stopY = q.y; out.trunk = true; }
+        else { out.tStop = Math.min(tg, 30); const q = banana(p, out.tStop); out.stopX = q.x; out.stopY = Math.max(0, q.y); }
+      }
+    }
+  }
+  if (out.T !== null && out.result !== 'ground' && out.result !== 'blocked' && out.fallB === undefined) out.fallB = 0.5 * p.g * T * T;
+  const ml = monkeyLandTime(p);
+  out.tEnd = Math.min(25, Math.max(out.tStop, isFinite(ml) ? ml : out.tStop) + 0.4);
+  if (out.result === 'hit' && p.g === 0) out.tEnd = out.tStop + 1.2;
+  return out;
+}
+// separation between the banana and the monkey (for the graphs)
+function separation(p, t) { const b = banana(p, t), m = monkey(p, t); return { dy: b.y - m.y, dx: p.X - b.x }; }
+
+// ---------- seeded RNG + generators for the games ----------
+function rng(seed) { let s = (seed >>> 0) || 1; return () => { s ^= s << 13; s >>>= 0; s ^= s >> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; }; }
+const r1 = (x, d = 1) => Math.round(x * Math.pow(10, d)) / Math.pow(10, d);
+function pick(r, a) { return a[Math.floor(r() * a.length)]; }
+// "Will it hit?" scenario: built to be unambiguous
+const BET_KINDS = ['aimed', 'aimed', 'above', 'below', 'slow', 'late', 'never', 'early', 'zero', 'fast'];
+function scenario(r) {
+  for (let tries = 0; tries < 200; tries++) {
+    const kind = pick(r, BET_KINDS);
+    const planet = kind === 'zero' ? 'zero' : pick(r, ['earth', 'earth', 'moon', 'mars', 'jupiter']);
+    const g = PLANETS[planet].g, h = r1(r() * 5), X = r1(15 + r() * 30), Y = r1(Math.max(h + 3, 8 + r() * 14));
+    const vm = vMinAimed(h, X, Y, g) || 8;
+    let v = r1(Math.max(12, vm * (1.25 + r() * 0.8))), th = r1(aimAngle(h, X, Y)), drop = 'launch', dt = 0;
+    if (kind === 'above') th = r1(aimAngle(h, X, Y + 2.5 + r() * 4));
+    if (kind === 'below') th = r1(aimAngle(h, X, Y - 2.5 - r() * 4));
+    if (kind === 'slow') v = r1(vm * (0.55 + r() * 0.25));
+    if (kind === 'fast') v = r1(Math.max(vm * 2.2, 30 + r() * 15));
+    if (kind === 'late') { drop = 'late'; dt = r1(0.3 + r() * 0.5, 2); }
+    if (kind === 'early') { drop = 'early'; dt = r1(0.3 + r() * 0.5, 2); }
+    if (kind === 'never') drop = 'never';
+    if (v > 60 || v < 3) continue;
+    const p = { v, th, h, X, Y, g, planet, drop, dt, wind: 0, obstacles: [] }, o = outcome(p);
+    const clear = o.result === 'hit' ? Math.abs(o.miss) < 0.5 * R
+      : o.result === 'ground' ? (o.T === null || o.T - o.tg > 0.12)
+        : (o.result === 'over' || o.result === 'under') ? Math.abs(o.miss) > 1.8 * R : false;
+    if (!clear) continue;
+    return { p, kind, answer: o.result, out: o };
+  }
+  throw new Error('no scenario');
+}
+// timed challenge round: speed is always fast enough; the player aims
+function timedRound(r, n) {
+  const planet = n < 3 ? 'earth' : pick(r, ['earth', 'earth', 'moon', 'mars']);
+  const g = PLANETS[planet].g, h = r1(r() * 6), X = r1(16 + r() * 28), Y = r1(Math.max(h + 3, 7 + r() * 15));
+  const v = r1(Math.max(15, vMinAimed(h, X, Y, g) * (1.35 + r() * 0.4)));
+  return { v, h, X, Y, g, planet, drop: 'launch', dt: 0, wind: 0, obstacles: [] };
+}
+// ---------- campaign levels ----------
+// ctrl: which inputs the player may change. stars: [bananas used for 3 stars, for 2 stars]
+const LEVELS = [
+  { id: 'breakfast', name: 'Breakfast Time', planet: 'earth', p: { v: 20, th: 10, h: 1, X: 24, Y: 12 }, ctrl: ['th'], bananas: 3, stars: [1, 2],
+    story: 'Mango the monkey is hungry. The launch makes a POP, and Mango lets go the instant the banana leaves.', goal: 'Drag the barrel (or the angle slider) so the dashed aim line points right at Mango, then launch.' },
+  { id: 'tooslow', name: 'Too Slow!', planet: 'earth', p: { v: 9, th: 0, h: 1, X: 30, Y: 10 }, ctrl: ['v'], autoAim: true, bananas: 3, stars: [1, 2],
+    story: 'The launcher is locked aiming straight at Mango, but the spring is set way too soft.', goal: 'Choose a launch speed that gets the banana to the tree before it reaches the ground.' },
+  { id: 'hedge', name: 'Over the Hedge', planet: 'earth', p: { v: 14, th: 0, h: 1, X: 28, Y: 13 }, ctrl: ['v', 'th'], bananas: 3, stars: [1, 2],
+    obstacles: [{ x: 14, w: 3, h: 5 }],
+    story: 'A tall hedge grows between you and the tree.', goal: 'Aim at Mango and pick a speed fast enough that the banana clears the 5 m hedge.' },
+  { id: 'moon', name: 'Moon Picnic', planet: 'moon', p: { v: 10, th: 20, h: 2, X: 36, Y: 18 }, ctrl: ['v', 'th'], bananas: 3, stars: [1, 2],
+    story: 'Mango is visiting a lunar greenhouse. Gravity is only 1.62 m/s² here.', goal: 'Does "aim at the monkey" still work on the Moon? Find out.' },
+  { id: 'mars', name: 'Mars Rover Snack', planet: 'mars', p: { v: 12, th: 15, h: 4, X: 40, Y: 14 }, ctrl: ['v', 'th', 'h'], bananas: 3, stars: [1, 2],
+    story: 'The launcher is bolted to a rover. You can raise or lower it.', goal: 'Any launcher height works — as long as you aim at Mango and launch fast enough.' },
+  { id: 'zero', name: 'Space Station', planet: 'zero', p: { v: 8, th: 0, h: 3, X: 22, Y: 12 }, ctrl: ['th', 'v'], bananas: 3, stars: [1, 2],
+    story: 'Mango floats in the space station. When the launcher pops, Mango lets go of the handrail… and just floats.', goal: 'With zero g, nothing falls. Where should you aim?' },
+  { id: 'hidden', name: 'Hide and Seek', planet: 'earth', p: { v: 24, th: 0, h: 1.5, X: 32, Y: 15.5 }, ctrl: ['th'], hidden: true, bananas: 3, stars: [1, 2],
+    story: 'Mango is hiding in thick leaves. A ranger radios Mango\'s position: x = 32.0 m, y = 15.5 m. The launcher is at height 1.5 m.', goal: 'Calculate the aim angle: tan θ = (y − h) / x. Type it in and launch.' },
+  { id: 'swing', name: 'Swinging Monkey', planet: 'earth', p: { v: 26, th: 25, h: 1, X: 27, Y: 13.6 }, ctrl: ['time'], swing: { A: 5, period: 4 }, bananas: 3, stars: [1, 2],
+    story: 'Mango scoots back and forth along a branch. The launcher is locked at 25°.', goal: 'Time your launch: fire when Mango crosses the dashed aim line.' },
+  { id: 'late', name: 'Sleepy Reflexes', planet: 'earth', p: { v: 22, th: 20, h: 1, X: 26, Y: 13, drop: 'late', dt: 0.3 }, ctrl: ['th'], bananas: 5, stars: [2, 4],
+    story: 'Mango is a little sleepy and lets go 0.30 s AFTER the launch.', goal: 'Mango stays up longer than the banana falls. Aim a little above Mango.' },
+  { id: 'never', name: 'Holding On', planet: 'earth', p: { v: 25, th: 20, h: 1, X: 25, Y: 12, drop: 'never' }, ctrl: ['th'], bananas: 5, stars: [2, 4],
+    story: 'Mango wears noise-cancelling headphones and never lets go.', goal: 'Aim above Mango by about ½gT² so the banana falls into Mango\'s hands. (T = x / (v cos θ))' },
+  { id: 'wind', name: 'Windy Canopy', planet: 'earth', p: { v: 22, th: 10, h: 1, X: 26, Y: 12, wind: -2.5 }, ctrl: ['th', 'v'], bananas: 5, stars: [2, 4],
+    story: 'A headwind pushes the banana backward at 2.5 m/s². The wind is blocked by the leaves, so Mango\'s fall is normal.', goal: 'The wind slows the banana sideways, so it spends longer climbing before it reaches the tree. Adjust your aim and speed.' },
+  { id: 'jupiter', name: 'Grand Finale: Jupiter Jungle', planet: 'jupiter', p: { v: 20, th: 20, h: 2, X: 30, Y: 18 }, ctrl: ['th', 'v', 'h'], bananas: 3, stars: [1, 2],
+    obstacles: [{ x: 15, w: 4, h: 9 }],
+    story: 'Jupiter-strength gravity: 24.8 m/s²! A wall of ferns 9 m tall stands in the way.', goal: 'Aim at Mango and launch fast enough to clear the ferns before everything falls.' }
+];
+function levelParams(L, extra) {
+  const p = Object.assign({ v: 20, th: 0, h: 1, X: 25, Y: 12, drop: 'launch', dt: 0, wind: 0 }, L.p, extra || {});
+  p.planet = L.planet; p.g = PLANETS[L.planet].g; p.obstacles = L.obstacles || [];
+  if (L.autoAim) p.th = aimAngle(p.h, p.X, p.Y);
+  return p;
+}
+function starsFor(L, used) { return used <= L.stars[0] ? 3 : used <= L.stars[1] ? 2 : 1; }
+// swing level: monkey x at real time s (seconds since level start)
+function swingX(L, s) { return L.p.X + L.swing.A * Math.sin(2 * Math.PI * s / L.swing.period); }
+
+const API = { D2R, PLANETS, R, TRUNK, dropTime, banana, ghost, monkey, monkeyLandTime, timeToX, groundTime, aimAngle, aimLineY, vMin, vMinAimed,
+  outcome, separation, rng, scenario, timedRound, LEVELS, levelParams, starsFor, swingX, r1 };
+if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.MH = API;
+})(this);
+
+</script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const PL = MH.PLANETS, f2 = x => (x === null || x === undefined || !isFinite(x)) ? '—' : x.toFixed(2);
+// ---------------- storage ----------------
+const KEY = 'monkeyhunter:v1', SKEY = 'monkeyhunter:scores';
+function load(k, d) { try { const s = localStorage.getItem(k); return s ? Object.assign(d, JSON.parse(s)) : d; } catch (e) { return d; } }
+const ST = load(KEY, { name: '', sound: true, levels: {}, bet: { best: 0, correct: 0, total: 0, score: 0 }, lab: { shots: 0, hits: 0, predOk: 0, predN: 0 }, timedBest: 0, rows: [], unlockAll: false, askedName: false });
+let SCORES = []; try { SCORES = JSON.parse(localStorage.getItem(SKEY) || '[]'); } catch (e) { SCORES = []; }
+function save() { try { ST.rows = ST.rows.slice(-300); localStorage.setItem(KEY, JSON.stringify(ST)); localStorage.setItem(SKEY, JSON.stringify(SCORES)); } catch (e) { } }
+// ---------------- sound (WebAudio, toggleable) ----------------
+let AC = null;
+function ac() { if (!ST.sound) return null; if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } } if (AC.state === 'suspended') AC.resume(); return AC; }
+function tone(freq, dur, type = 'sine', vol = 0.15, delay = 0, slideTo = null) {
+  const a = ac(); if (!a) return; const t0 = a.currentTime + delay, o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t0); if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t0 + dur);
+  g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g); g.connect(a.destination); o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const SND = {
+  launch() { tone(520, 0.18, 'triangle', 0.18, 0, 160); tone(90, 0.12, 'square', 0.05); },
+  catch() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.16, 'triangle', 0.16, i * 0.08)); tone(1568, 0.25, 'sine', 0.06, 0.32); },
+  miss() { tone(392, 0.22, 'sawtooth', 0.06, 0, 330); tone(330, 0.35, 'sawtooth', 0.06, 0.22, 220); },
+  thunk() { tone(140, 0.12, 'square', 0.08, 0, 70); },
+  boing() { tone(180, 0.35, 'sine', 0.14, 0, 420); },
+  star(i) { tone(880 + i * 220, 0.18, 'sine', 0.12, i * 0.15); },
+  tick() { tone(1200, 0.05, 'square', 0.04); },
+  click() { tone(700, 0.04, 'triangle', 0.05); },
+  win() { [523, 659, 784, 659, 784, 1047].forEach((f, i) => tone(f, 0.14, 'triangle', 0.14, i * 0.1)); }
+};
+// ---------------- state ----------------
+const S = { v: 20, th: 30, h: 1, X: 25, Y: 12, planet: 'earth', gCustom: 5, drop: 'launch', dt: 0.3, windOn: false, wind: -2, obstacles: [] };
+let MODE = 'lab', shot = null, paused = false, view = null, fx = [], banner = null, pred = null, lastFrame = performance.now(), dragging = null;
+let LV = { i: 0, used: 0, done: false, clock: 0 }, BET = { sc: null, streak: 0, waiting: true }, TM = { on: false, left: 90, score: 0, combo: 0, hits: 0, round: 0, rng: null };
+let locks = null; // null = everything editable
+const gNow = () => S.planet === 'custom' ? S.gCustom : PL[S.planet].g;
+function params() { return { v: S.v, th: S.th, h: S.h, X: S.X, Y: S.Y, g: gNow(), planet: S.planet, drop: S.drop, dt: S.dt, wind: S.windOn ? S.wind : 0, obstacles: S.obstacles }; }
+const canEdit = k => !locks || locks.includes(k);
+// ---------------- canvas setup ----------------
+const cv = $('scene'), ctx = cv.getContext('2d'), gcv = $('graphs'), gctx = gcv.getContext('2d');
+let W = 800, H = 420, GW = 800, GH = 210;
+function resize() {
+  const dpr = window.devicePixelRatio || 1;
+  W = Math.max(300, $('sceneBox').clientWidth); H = Math.round(Math.min(460, Math.max(300, window.innerHeight - 290)));
+  cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  GW = Math.max(300, $('graphsBox').clientWidth || W); GH = 210; gcv.width = GW * dpr; gcv.height = GH * dpr; gcv.style.width = GW + 'px'; gcv.style.height = GH + 'px'; gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fitView();
+}
+const GROUND = 26;
+function fitView() {
+  const p = params(); let xmax = Math.max(p.X + MH.TRUNK + 5, 16), ymax = Math.max(p.Y + 4.5, p.h + 4, 10);
+  if (LVL() && LVL().swing) xmax = Math.max(xmax, LVL().p.X + LVL().swing.A + 5);
+  const vy0 = p.v * Math.sin(p.th * MH.D2R);
+  if (p.g > 0 && vy0 > 0) { const ta = vy0 / p.g, xa = p.v * Math.cos(p.th * MH.D2R) * ta; if (xa < p.X) ymax = Math.max(ymax, Math.min(p.h + vy0 * vy0 / (2 * p.g) + 1.5, 3 * p.Y + 5)); }
+  const xmin = -3, sc = Math.min(W / (xmax - xmin), (H - GROUND - 8) / ymax);
+  view = { xmin, sc, xmax: xmin + W / sc, ymax: (H - GROUND) / sc };
+}
+const sx = x => (x - view.xmin) * view.sc, sy = y => H - GROUND - y * view.sc;
+// ---------------- UI binding ----------------
+const SLIDERS = [['v', 'vN', 1], ['th', 'thN', 1], ['h', 'hN', 1], ['X', 'XN', 1], ['Y', 'YN', 1]];
+function clampAll() { S.v = Math.max(0.1, S.v); S.h = Math.max(0, S.h); S.X = Math.max(2, S.X); S.Y = Math.max(0.5, S.Y); S.th = Math.max(-89, Math.min(89, S.th)); }
+function sync() {
+  clampAll();
+  for (const [k, n] of SLIDERS) { $(k).value = S[k]; if (document.activeElement !== $(n)) $(n).value = +(+S[k]).toFixed(k === 'th' ? 1 : 2); }
+  $('drop').value = S.drop; $('dtN').value = S.dt; $('dtWrap').classList.toggle('hide', S.drop === 'launch' || S.drop === 'never');
+  $('planet').value = S.planet; $('gN').value = gNow(); $('gN').disabled = S.planet !== 'custom' || !canEdit('g');
+  $('windOn').checked = S.windOn; $('wind').value = S.wind; $('wind').disabled = !S.windOn || !canEdit('wind'); $('windLbl').textContent = S.windOn ? (S.wind > 0 ? 'tailwind ' : S.wind < 0 ? 'headwind ' : '') + S.wind + ' m/s²' : 'off';
+  const rows = { rowV: 'v', rowTh: 'th', rowH: 'h', rowX: 'X', rowY: 'Y' };
+  const busy = shot && !shot.done;
+  for (const [r, k] of Object.entries(rows)) { const lk = !canEdit(k) || busy; $(r).classList.toggle('lock', !canEdit(k)); $(r).querySelectorAll('input').forEach(i => i.disabled = lk); }
+  const hid = LVL() && LVL().hidden; $('rowX').classList.toggle('hide', !!hid); $('rowY').classList.toggle('hide', !!hid);
+  $('drop').disabled = $('dtN').disabled = !canEdit('drop') || busy; $('planet').disabled = !canEdit('g') || busy; $('windOn').disabled = !canEdit('wind') || busy;
+  $('aimBtn').disabled = busy;
+  if (!busy) fitView(); updateNotes(); preReadout();
+}
+for (const [k, n] of SLIDERS) {
+  $(k).addEventListener('input', () => { S[k] = +$(k).value; onEdit(); });
+  $(n).addEventListener('change', () => { const v = parseFloat($(n).value); if (isFinite(v)) S[k] = v; onEdit(); });
+}
+$('drop').onchange = () => { S.drop = $('drop').value; onEdit(); };
+$('dtN').onchange = () => { S.dt = Math.max(0, Math.min(2, +$('dtN').value || 0)); onEdit(); };
+$('planet').onchange = () => { S.planet = $('planet').value; onEdit(); };
+$('gN').onchange = () => { S.gCustom = Math.max(0, Math.min(50, +$('gN').value || 0)); onEdit(); };
+$('windOn').onchange = () => { S.windOn = $('windOn').checked; onEdit(); };
+$('wind').oninput = () => { S.wind = +$('wind').value; onEdit(); };
+function onEdit() { if (shot && shot.done) shot = null; sync(); }
+['aimOn', 'dotsOn', 'dropOn', 'vecOn', 'cmpOn', 'accOn', 'gridOn', 'zoneOn', 'dotDt'].forEach(id => $(id).onchange = () => { });
+$('whyOn').onchange = () => $('why').classList.toggle('hide', !$('whyOn').checked || !$('why').innerHTML);
+// ---------------- launching ----------------
+function canFire() {
+  if (shot && !shot.done) return false;
+  if (MODE === 'lab' && $('predOn').checked && !pred) return false;
+  if (MODE === 'levels' && (LV.done || LV.used >= LVL().bananas)) return false;
+  if (MODE === 'bet') return false;            // bets launch automatically
+  if (MODE === 'timed' && !TM.on) return false;
+  return true;
+}
+function fire(force) {
+  if (!force && !canFire()) { if (MODE === 'lab' && $('predOn').checked && !pred) flash('Make a prediction first!'); return false; }
+  const p = params(); p.obstacles = S.obstacles.map(o => Object.assign({}, o));
+  shot = { p, out: MH.outcome(p), t: 0, done: false, pred: MODE === 'bet' ? BET.pick : pred, mode: modeLabel(), events: {} };
+  if (MODE === 'levels') LV.used++;
+  paused = false; $('play').textContent = '⏸ Pause'; fx = []; banner = null; $('why').classList.add('hide');
+  SND.launch(); sync(); updateModeUI(); return true;
+}
+function modeLabel() { return MODE === 'lab' ? 'Lab' : MODE === 'levels' ? 'Level ' + (LV.i + 1) : MODE === 'bet' ? 'Will it hit?' : 'Timed'; }
+function finishAll() { if (shot && !shot.done) { shot.t = shot.out.tEnd; step(0); } }
+$('fire').onclick = () => fire();
+$('reset').onclick = () => { shot = null; fx = []; banner = null; if (MODE === 'levels') startLevel(LV.i, true); sync(); updateModeUI(); };
+$('play').onclick = () => { paused = !paused; $('play').textContent = paused ? '▶ Play' : '⏸ Pause'; };
+$('step').onclick = () => { if (shot && !shot.done) { paused = true; $('play').textContent = '▶ Play'; shot.t = Math.min(shot.out.tEnd, shot.t + 0.05); step(0); } };
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox' && e.target.type !== 'range' || e.target.tagName === 'SELECT') return;
+  if (e.code === 'Space') { e.preventDefault(); fire(); } if (e.key === 'r' || e.key === 'R') $('reset').click();
+});
+// time evolution + events
+function step(dtReal) {
+  if (!shot || shot.done) return;
+  if (!paused) shot.t = Math.min(shot.out.tEnd, shot.t + dtReal * (+$('slow').value));
+  const o = shot.out, p = shot.p, ev = shot.events, t = shot.t;
+  if (o.result === 'hit' && t >= o.T && !ev.c) { ev.c = 1; SND.catch(); celebrate(); }
+  if (o.result !== 'hit' && t >= o.tStop && !ev.s) { ev.s = 1; if (o.result === 'over' || o.result === 'under' || o.result === 'blocked' || o.trunk) SND.thunk(); else SND.miss(); showBanner(resultText(o), o.result === 'hit'); }
+  const ml = MH.monkeyLandTime(p); if (isFinite(ml) && t >= ml && !ev.l && p.g > 0) { ev.l = 1; if (o.result !== 'hit' || ml > o.T) SND.boing(); }
+  if (t >= o.tEnd) { shot.done = true; onShotDone(); }
+}
+function resultText(o) { return { hit: 'Yum! Caught it! 🍌', over: 'Whoosh — over Mango’s head!', under: 'Zoom — under Mango!', ground: 'Plop — landed short!', blocked: 'Bonk — stuck in the hedge!' }[o.result]; }
+function showBanner(text, good) { banner = { text, good, t0: performance.now() }; }
+function celebrate() {
+  const o = shot.out, b = MH.banana(shot.p, o.T); showBanner(resultText(o), true);
+  for (let i = 0; i < 70; i++) { const a = Math.random() * Math.PI * 2, s = 80 + Math.random() * 220; fx.push({ x: sx(b.x), y: sy(b.y), vx: Math.cos(a) * s, vy: Math.sin(a) * s - 120, life: 1.6 + Math.random(), c: ['#ffd21f', '#ff7a59', '#4cc38a', '#6aa7ff', '#c77dff'][i % 5], r: 2 + Math.random() * 3 }); }
+}
+function flash(t) { showBanner(t, false); }
+let GEN = 0; function later(ms, text, good) { const g = GEN; setTimeout(() => { if (g === GEN) showBanner(text, good); }, ms); }
+// ---------------- after a shot ----------------
+function onShotDone() {
+  const o = shot.out, p = shot.p, hit = o.result === 'hit';
+  addRow(shot); $('why').innerHTML = explain(p, o) + (shot.pred ? `<br><b>Your prediction:</b> ${predName(shot.pred)} — ${shot.pred === o.result || (shot.pred === 'ground' && o.result === 'blocked') ? '<span class="ok">correct!</span>' : '<span class="bad">not this time.</span>'}` : '');
+  $('why').classList.toggle('hide', !$('whyOn').checked);
+  if (MODE === 'lab') { ST.lab.shots++; if (hit) ST.lab.hits++; if (shot.pred) { ST.lab.predN++; if (shot.pred === o.result || (shot.pred === 'ground' && o.result === 'blocked')) ST.lab.predOk++; } pred = null; }
+  if (MODE === 'levels') levelDone(hit);
+  if (MODE === 'bet') betDone();
+  if (MODE === 'timed') timedDone(hit);
+  save(); sync(); updateModeUI(); postReadout();
+}
+function predName(k) { return { hit: '🍌 Caught', over: '⬆ Over', under: '⬇ Under', ground: '🌱 Lands short', blocked: 'Blocked' }[k] || k; }
+// ---------------- explanation ----------------
+function explain(p, o) {
+  const L = [], g = p.g, nm = 'Mango';
+  if (o.result === 'ground') {
+    if (o.T === null) return `The headwind stopped the banana before it ever reached the tree. It landed at x = ${f2(o.stopX)} m. Launch faster or with less wind.`;
+    L.push(`The banana reached the ground at t = ${f2(o.tg)} s, but it needed T = ${f2(o.T)} s to travel the ${f2(p.X)} m to the tree.`);
+    if (Math.abs(o.aimOffset) < 0.3 && p.drop === 'launch' && !p.wind) L.push(`Your aim was perfect! Banana and ${nm} both fall ½gT² = ${f2(0.5 * g * o.T * o.T)} m below their no-gravity paths — more than ${nm}'s ${f2(p.Y)} m height, so they would only "meet" underground.`);
+    if (isFinite(o.vmin) && o.vmin > 0) L.push(`At this angle you need at least v₀ = ${f2(o.vmin)} m/s (a faster banana has less time to fall).`);
+    return L.join(' ');
+  }
+  if (o.result === 'blocked') return `The banana dipped to y = ${f2(o.stopY)} m at the hedge (x = ${f2(o.stopX)} m), below the hedge's ${f2(o.obstacle.h)} m top. In t = ${f2(o.tStop)} s it had fallen ½gt² = ${f2(0.5 * g * o.tStop * o.tStop)} m below the dashed line. Launch faster: less time in the air → less fall.`;
+  L.push(`<b>Time to reach the tree:</b> ${p.wind ? `with the wind, solve x = v₀cosθ·t + ½a<sub>wind</sub>t² → T = ${f2(o.T)} s` : `T = x / (v₀cos θ) = ${f2(p.X)} / (${f2(p.v)}·cos ${p.th.toFixed(1)}°) = ${f2(o.T)} s`}.`);
+  const off = o.ghostY - p.Y;
+  L.push(`With no gravity the banana would cross the tree at y = ${f2(o.ghostY)} m — ${Math.abs(off) < 0.3 ? `right at ${nm}` : `${f2(Math.abs(off))} m ${off > 0 ? 'above' : 'below'} ${nm}`}.`);
+  L.push(g > 0 ? `Gravity pulled the banana ½gT² = ${f2(o.fallB)} m below that line.` : `With g = 0 nothing falls: the banana flies along the dashed line and ${nm} just floats.`);
+  if (g > 0) {
+    if (p.drop === 'launch') L.push(`${nm} let go at launch and fell the <i>same</i> ½gT² = ${f2(o.fallM)} m${o.ym === 0 ? ' (reaching the leaf pile)' : ''} — gravity moves both equally, so it cancels out.`);
+    if (p.drop === 'late') L.push(`${nm} let go ${f2(p.dt)} s late, so fell only ½g(T − ${f2(p.dt)})² = ${f2(o.fallM)} m.`);
+    if (p.drop === 'early') L.push(`${nm} let go ${f2(p.dt)} s early, so had fallen ${f2(o.fallM)} m${o.ym === 0 ? ' — all the way to the leaf pile' : ''}.`);
+    if (p.drop === 'never') L.push(`${nm} held on and fell 0 m.`);
+  }
+  if (p.wind) L.push(`The wind pushes only the banana, so it changes how long the banana takes — the "aim at ${nm}" trick no longer works perfectly.`);
+  if (o.result === 'hit') L.push(`<span class="ok">Catch!</span> The banana arrived ${f2(Math.abs(o.miss))} m from ${nm}'s hands (catch zone ±${MH.R} m).`);
+  else {
+    L.push(`<span class="bad">Miss:</span> the banana passed ${f2(Math.abs(o.miss))} m ${o.miss > 0 ? 'above' : 'below'} ${nm}.`);
+    if (p.drop === 'launch' && !p.wind) L.push(`Tip: aim straight at ${nm} — then the miss distance is 0 no matter what g or v₀ is.`);
+    else if (g > 0 || p.wind) L.push(`Tip: aim about ${f2(Math.abs(o.miss))} m ${o.miss > 0 ? 'lower' : 'higher'}.`);
+  }
+  return L.join(' ');
+}
+// ---------------- readouts ----------------
+function hideNumbers() { return MODE === 'bet' || (MODE === 'levels' && LVL().hidden) || MODE === 'timed'; }
+function preReadout() {
+  if (shot) { postReadout(); return; }
+  const p = params();
+  if (hideNumbers()) { $('readout').innerHTML = MODE === 'bet' ? 'Make your call, then watch.' : 'Aim and launch! Numbers appear after the shot.'; return; }
+  const T = MH.timeToX(p);
+  $('readout').innerHTML = `Ready. g = ${f2(p.g)} m/s² · Mango at (${f2(p.X)}, ${f2(p.Y)}) m · launcher h = ${f2(p.h)} m<br>Angle that points at Mango: <b>${MH.aimAngle(p.h, p.X, p.Y).toFixed(1)}°</b> · time to reach Mango's x: ${T === null ? 'never' : f2(T) + ' s'}`;
+}
+function postReadout() {
+  if (!shot) return preReadout();
+  const o = shot.out, p = shot.p, t = shot.t, b = MH.banana(p, Math.min(t, o.tStop)), m = MH.monkey(p, t);
+  let s = `t = <b>${t.toFixed(2)} s</b> · banana (${f2(b.x)}, ${f2(Math.max(0, b.y))}) m · Mango y = ${f2(m.y)} m<br>`;
+  if (o.T !== null && o.result !== 'ground' && o.result !== 'blocked') s += `Time to reach Mango's x: <b>T = ${f2(o.T)} s</b> · both below no-gravity line by ½gT² = ${f2(o.fallB)} m (banana) / ${f2(o.fallM)} m (Mango)<br>`;
+  if (t >= o.tStop || shot.done) s += o.result === 'hit' || o.result === 'over' || o.result === 'under' ? `Miss distance at x = ${f2(p.X)} m: <b>${f2(o.miss)} m</b> ${o.result === 'hit' ? '<span class="ok">CAUGHT</span>' : o.miss > 0 ? '(above)' : '(below)'}` : `<span class="bad">${o.result === 'ground' ? 'Landed short' : 'Blocked by hedge'}</span> at x = ${f2(o.stopX)} m`;
+  $('readout').innerHTML = s;
+}
+function updateNotes() {
+  const p = params(), lab = MODE === 'lab', T = MH.timeToX(p);
+  const num = lab ? `<br><b>Your setup:</b> tan θ<sub>aim</sub> = (${f2(p.Y)} − ${f2(p.h)}) / ${f2(p.X)} → θ<sub>aim</sub> = ${MH.aimAngle(p.h, p.X, p.Y).toFixed(1)}° · T = ${f2(T)} s · ½gT² = ${T === null ? '—' : f2(0.5 * p.g * T * T)} m · v<sub>min</sub> (aimed) = ${f2(MH.vMinAimed(p.h, p.X, p.Y, p.g))} m/s` : '<br><i>(Live numbers for your setup appear in Lab mode.)</i>';
+  $('notes').innerHTML = `<b>Banana:</b> x<sub>b</sub> = v₀cos θ · t &nbsp;&nbsp; y<sub>b</sub> = h + v₀sin θ · t − ½gt²<br>
+<b>Mango (lets go at t = 0):</b> x<sub>m</sub> = x<sub>tree</sub> &nbsp;&nbsp; y<sub>m</sub> = y<sub>0</sub> − ½gt²<br>
+<b>Separation:</b> y<sub>b</sub> − y<sub>m</sub> = (h + v₀sin θ · t) − y<sub>0</sub> — the ½gt² terms cancel, so gravity never changes the gap. It is a straight line on the graph.<br>
+<b>Aim at the monkey:</b> tan θ = (y<sub>0</sub> − h)/x<sub>tree</sub> makes the gap exactly 0 when the banana reaches x<sub>tree</sub> at <b>T = x<sub>tree</sub>/(v₀cos θ)</b>. True for any g (even 0) and any v₀ …<br>
+<b>… as long as</b> they meet above the ground: y<sub>0</sub> − ½gT² ≥ 0 ⇒ v₀ ≥ L·√(g / 2y<sub>0</sub>), L = distance from launcher to monkey.<br>
+<b>Late drop by Δt:</b> Mango is higher by ½g[T² − (T − Δt)²] → aim higher. <b>Never drops:</b> aim ½gT² above.<br>
+<b>Big ideas (AP 1, Unit 1):</b> horizontal and vertical motions are independent; every object in free fall has the same a = g downward regardless of its velocity; the no-gravity path minus ½gt² gives the real path.${num}`;
+}
+// ---------------- drawing helpers ----------------
+const SKY = { earth: ['#a9dcff', '#e9f7ff'], moon: ['#05070f', '#1b2238'], mars: ['#e9a77c', '#f8dcc6'], jupiter: ['#d9b48a', '#f3e2c8'], zero: ['#0b1230', '#1f2b55'], custom: ['#b9d7f0', '#eef6ff'] };
+const GRD = { earth: '#5fb35a', moon: '#9a9a9a', mars: '#b5532f', jupiter: '#a9744a', zero: '#6b7690', custom: '#7cba6f' };
+const STARS = Array.from({ length: 90 }, (_, i) => [(i * 7919 % 1000) / 1000, (i * 104729 % 997) / 997, (i % 3) + 1]);
+function arrow(c, x1, y1, x2, y2, col, w = 2.5) {
+  const L = Math.hypot(x2 - x1, y2 - y1); if (L < 2) return; const a = Math.atan2(y2 - y1, x2 - x1), hd = Math.min(9, L * 0.45);
+  c.strokeStyle = c.fillStyle = col; c.lineWidth = w; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2 - hd * 0.7 * Math.cos(a), y2 - hd * 0.7 * Math.sin(a)); c.stroke();
+  c.beginPath(); c.moveTo(x2, y2); c.lineTo(x2 - hd * Math.cos(a - 0.42), y2 - hd * Math.sin(a - 0.42)); c.lineTo(x2 - hd * Math.cos(a + 0.42), y2 - hd * Math.sin(a + 0.42)); c.closePath(); c.fill();
+}
+function ell(c, x, y, rx, ry, col) { c.fillStyle = col; c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); c.fill(); }
+function drawMonkey(cx, cy, u, state, wig) {
+  const c = ctx, br = '#8a5a2b', fc = '#f1c99b'; c.save(); c.translate(cx, cy);
+  c.strokeStyle = br; c.lineCap = 'round'; c.lineWidth = u * 0.2;
+  c.beginPath(); c.moveTo(u * 0.35, u * 0.75); c.bezierCurveTo(u * 1.4, u * 1.0, u * 1.5, -u * 0.1, u * 1.0, -u * 0.25); c.stroke(); // tail
+  c.lineWidth = u * 0.22; const arm = (sx1, ex, ey) => { c.beginPath(); c.moveTo(sx1 * u, u * 0.05); c.lineTo(ex * u, ey * u); c.stroke(); };
+  if (state === 'hang' || state === 'float') { arm(-0.3, -0.28, -1.25); arm(0.3, 0.28, -1.25); }
+  else if (state === 'fall') { const w = Math.sin(wig * 18) * 0.25; arm(-0.35, -1.0, -0.8 + w); arm(0.35, 1.0, -0.8 - w); }
+  else if (state === 'catch') { arm(-0.35, -0.75, 0.1); arm(0.35, -0.55, 0.3); }
+  else { arm(-0.35, -0.6, 0.7); arm(0.35, 0.6, 0.7); }
+  ell(c, -u * 0.28, u * 1.0, u * 0.2, u * 0.14, br); ell(c, u * 0.28, u * 1.0, u * 0.2, u * 0.14, br);
+  ell(c, 0, u * 0.42, u * 0.55, u * 0.62, br); ell(c, 0, u * 0.5, u * 0.33, u * 0.42, fc);
+  ell(c, -u * 0.5, -u * 0.55, u * 0.2, u * 0.2, br); ell(c, u * 0.5, -u * 0.55, u * 0.2, u * 0.2, br); ell(c, -u * 0.5, -u * 0.55, u * 0.11, u * 0.11, fc); ell(c, u * 0.5, -u * 0.55, u * 0.11, u * 0.11, fc);
+  ell(c, 0, -u * 0.55, u * 0.48, u * 0.46, br); ell(c, 0, -u * 0.42, u * 0.35, u * 0.3, fc);
+  ell(c, -u * 0.14, -u * 0.6, u * 0.065, u * 0.08, '#222'); ell(c, u * 0.14, -u * 0.6, u * 0.065, u * 0.08, '#222');
+  c.strokeStyle = '#5a3412'; c.lineWidth = Math.max(1.2, u * 0.07); c.beginPath();
+  if (state === 'fall') { c.arc(0, -u * 0.3, u * 0.08, 0, Math.PI * 2); } else if (state === 'catch') { c.arc(0, -u * 0.38, u * 0.17, 0.1 * Math.PI, 0.9 * Math.PI); } else c.arc(0, -u * 0.36, u * 0.1, 0.15 * Math.PI, 0.85 * Math.PI);
+  c.stroke(); c.restore();
+}
+function drawBanana(x, y, ang, s) {
+  const c = ctx; c.save(); c.translate(x, y); c.rotate(ang); c.fillStyle = '#ffd21f'; c.strokeStyle = '#a87b00'; c.lineWidth = 1.5;
+  c.beginPath(); c.moveTo(-s, -s * 0.15); c.quadraticCurveTo(0, s * 0.95, s, -s * 0.15); c.quadraticCurveTo(0, s * 0.35, -s, -s * 0.15); c.closePath(); c.fill(); c.stroke();
+  ell(c, s * 0.98, -s * 0.15, s * 0.13, s * 0.13, '#6b4a00'); c.restore();
+}
+function bananaState(sh, t) { // position of the banana on screen time t
+  const o = sh.out, p = sh.p;
+  if (t <= o.tStop) { const b = MH.banana(p, t); return { x: b.x, y: b.y, vx: b.vx, vy: b.vy, fly: true }; }
+  if (o.result === 'hit') { const m = MH.monkey(p, t); return { x: p.X - 0.35, y: m.y + 0.1, vx: 0, vy: m.vy, fly: false, held: true }; }
+  return { x: o.stopX, y: o.stopY, vx: 0, vy: 0, fly: false };
+}
+const LVL = () => MODE === 'levels' ? MH.LEVELS[LV.i] : null;
+// ---------------- scene ----------------
+function draw() {
+  const c = ctx, p = shot ? shot.p : params(), t = shot ? shot.t : 0, pl = p.planet || 'earth', L = LVL();
+  const sk = c.createLinearGradient(0, 0, 0, H); sk.addColorStop(0, SKY[pl][0]); sk.addColorStop(1, SKY[pl][1]); c.fillStyle = sk; c.fillRect(0, 0, W, H);
+  if (pl === 'moon' || pl === 'zero') { c.fillStyle = '#fff'; for (const [a, b, r] of STARS) c.fillRect(a * W, b * (H - 40), r * 0.8, r * 0.8); }
+  if (pl === 'jupiter') { c.fillStyle = '#c9925f33'; for (let i = 0; i < 5; i++) c.fillRect(0, 20 + i * 45, W, 14); }
+  if ($('gridOn').checked) { // grid every 5 m
+    c.strokeStyle = (pl === 'moon' || pl === 'zero') ? '#ffffff22' : '#00000018'; c.fillStyle = (pl === 'moon' || pl === 'zero') ? '#ccd' : '#456'; c.lineWidth = 1; c.font = '11px system-ui';
+    for (let x = 0; x <= view.xmax; x += 5) { c.beginPath(); c.moveTo(sx(x), 0); c.lineTo(sx(x), sy(0)); c.stroke(); c.fillText(x + ' m', sx(x) + 2, H - 6); }
+    for (let y = 5; y <= view.ymax; y += 5) { c.beginPath(); c.moveTo(0, sy(y)); c.lineTo(W, sy(y)); c.stroke(); c.fillText(y + ' m', 3, sy(y) - 2); }
+  }
+  c.fillStyle = GRD[pl]; c.fillRect(0, sy(0), W, GROUND); c.fillStyle = '#0002'; c.fillRect(0, sy(0), W, 3);
+  const mx = (shot ? p.X : S.X), u = Math.max(9, Math.min(20, view.sc * 0.62));
+  // tree (or station pole), branch, leaf pile
+  const tx = sx(p.X + MH.TRUNK), top = p.Y + 2.2;
+  if (pl === 'zero') { c.fillStyle = '#9aa6c0'; c.fillRect(tx - 5, sy(top + 1), 10, sy(0) - sy(top + 1)); c.fillRect(sx(L && L.swing ? p.X - 6 : p.X - 1), sy(p.Y + 1.0) - 3, tx - sx(p.X - 1) + 4, 6); }
+  else {
+    const tw = Math.max(9, view.sc * 0.8); c.fillStyle = '#7a4a22'; c.fillRect(tx - tw / 2, sy(top), tw, sy(0) - sy(top));
+    c.strokeStyle = '#6b3f1c'; c.lineWidth = Math.max(5, view.sc * 0.3); c.lineCap = 'round'; c.beginPath(); c.moveTo(tx, sy(p.Y + 1.2));
+    c.lineTo(sx(L && L.swing ? L.p.X - L.swing.A - 1 : p.X - 0.8), sy(p.Y + 0.95)); c.stroke();
+    const cr = Math.max(26, view.sc * 2.2); for (const [dx, dy, k] of [[0, 0, 1], [-0.8, 0.3, 0.75], [0.8, 0.35, 0.8], [0, 0.8, 0.7]]) ell(c, tx + dx * cr, sy(top) - dy * cr, cr * k, cr * k * 0.8, pl === 'mars' ? '#3f8f5a' : '#3a9a47');
+    // soft leaf pile
+    for (let i = -3; i <= 3; i++) ell(c, sx(p.X) + i * view.sc * 0.5, sy(0.15), view.sc * 0.55, view.sc * 0.4, i % 2 ? '#9bc34a' : '#c6a43a');
+  }
+  for (const o of (shot ? p.obstacles : S.obstacles)) { c.fillStyle = pl === 'jupiter' ? '#4f8a3c' : '#2f7d3a'; c.beginPath(); c.roundRect(sx(o.x - o.w / 2), sy(o.h), o.w * view.sc, o.h * view.sc, [10, 10, 0, 0]); c.fill();
+    c.fillStyle = '#134'; c.font = 'bold 12px system-ui'; c.fillText('hedge ' + o.h + ' m', sx(o.x) - 26, sy(o.h) - 5); }
+  // no-gravity aim line
+  const P0x = sx(0), P0y = sy(p.h), th = p.th * MH.D2R;
+  if ($('aimOn').checked) { c.setLineDash([8, 6]); c.strokeStyle = (pl === 'moon' || pl === 'zero') ? '#ffe680' : '#b05f00'; c.lineWidth = 2; c.beginPath(); c.moveTo(P0x, P0y); const Lr = 3 * W; c.lineTo(P0x + Lr * Math.cos(th), P0y - Lr * Math.sin(th)); c.stroke(); c.setLineDash([]); }
+  // strobe dots + 1/2 g t^2 drops
+  if (shot) {
+    const o = shot.out, dtd = +$('dotDt').value, dots = $('dotsOn').checked, drops = $('dropOn').checked && p.g > 0, ml = MH.monkeyLandTime(p), td = MH.dropTime(p);
+    const bEnd = Math.min(t, o.tStop);
+    c.strokeStyle = '#f08c00'; c.lineWidth = 2.5; c.beginPath(); for (let k = 0; k <= 60; k++) { const b = MH.banana(p, bEnd * k / 60); k ? c.lineTo(sx(b.x), sy(b.y)) : c.moveTo(sx(b.x), sy(b.y)); } c.stroke();
+    if (dots) for (let tk = 0; tk <= bEnd + 1e-9; tk += dtd) {
+      const b = MH.banana(p, tk), gh = MH.ghost(p, tk), m = MH.monkey(p, Math.min(tk, t));
+      if (drops && tk > 0) { c.setLineDash([3, 3]); c.strokeStyle = '#8b3fd9'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(sx(gh.x), sy(gh.y)); c.lineTo(sx(b.x), sy(b.y)); c.stroke();
+        if (tk > td && m.falling || m.landed) { c.beginPath(); c.moveTo(sx(p.X) + 3, sy(p.Y)); c.lineTo(sx(p.X) + 3, sy(m.y)); c.stroke(); } c.setLineDash([]); }
+      if (p.g > 0) { c.strokeStyle = '#f08c00'; c.lineWidth = 1.5; c.beginPath(); c.arc(sx(gh.x), sy(gh.y), 3.5, 0, 7); c.stroke(); }
+      ell(c, sx(b.x), sy(b.y), 4, 4, '#f08c00');
+      if (p.drop !== 'never' && p.g > 0) ell(c, sx(p.X) - 7, sy(m.y), 3.5, 3.5, '#8a5a2b');
+    }
+    if (drops && bEnd > 0.05) { const b = MH.banana(p, bEnd), fall = 0.5 * p.g * bEnd * bEnd; c.fillStyle = '#6d28d9'; c.font = 'bold 12px system-ui';
+      const bl = 'banana fell ½gt² = ' + fall.toFixed(2) + ' m'; tag(bl, sx(b.x) - c.measureText(bl).width - 10, (sy(b.y) + sy(MH.ghost(p, bEnd).y)) / 2 + 4, '#6d28d9');
+      const m = MH.monkey(p, bEnd); if (p.drop !== 'never' && m.fall > 0.05) tag('Mango fell ' + m.fall.toFixed(2) + ' m', sx(p.X) + u + 8, (sy(p.Y) + sy(m.y)) / 2 + 18, '#4a2a0a'); }
+  }
+  // Mango
+  let mState = p.g === 0 ? 'float' : 'hang', mY = p.Y;
+  if (shot) { const m = MH.monkey(p, t); mY = m.y; if (shot.out.result === 'hit' && t >= shot.out.T) mState = m.landed ? 'catch' : (p.g ? 'catch' : 'catch'); else if (m.landed) mState = 'sit'; else if (m.falling) mState = 'fall'; }
+  const mcx = sx(mx), mcy = sy(mY);
+  if ($('zoneOn').checked) { c.strokeStyle = '#0a7d32'; c.setLineDash([4, 4]); c.lineWidth = 1.5; c.beginPath(); c.arc(mcx, mcy, MH.R * view.sc, 0, 7); c.stroke(); c.setLineDash([]); }
+  drawMonkey(mcx, mcy - u * 0.1, u, mState, t);
+  if (L && L.hidden && !(shot && mY < p.Y - 2.5)) { for (const [dx, dy, k] of [[0, 0, 1], [-1, 0.5, 0.8], [1, 0.4, 0.85], [0, -0.9, 0.8], [0.5, 1, 0.7]]) ell(c, mcx + dx * 2 * u, mcy + dy * 1.6 * u, 2.6 * u * k, 2.1 * u * k, k === 1 ? '#2e8b3e' : '#38a048');
+    c.fillStyle = '#fff'; c.font = 'bold 22px system-ui'; c.fillText('?', mcx - 6, mcy + 8); }
+  // banana
+  if (shot) { const b = bananaState(shot, t); drawBanana(sx(b.x), sy(b.y), b.fly ? -Math.atan2(b.vy, b.vx) + 0.3 : 0.4, 10);
+    if (b.fly || b.held) drawVectors(b, p, true); if (MH.monkey(p, t).falling) drawVectors({ x: p.X, y: mY, vx: 0, vy: MH.monkey(p, t).vy }, p, false); }
+  else drawBanana(P0x, P0y, -th, 8);
+  // launcher
+  c.strokeStyle = '#555'; c.lineWidth = 3; c.beginPath(); c.moveTo(P0x - 14, sy(0)); c.lineTo(P0x, P0y); c.lineTo(P0x + 14, sy(0)); c.moveTo(P0x, P0y); c.lineTo(P0x, sy(0)); c.stroke();
+  c.save(); c.translate(P0x, P0y); c.rotate(-th); c.fillStyle = '#3aa76d'; c.strokeStyle = '#1f5e3c'; c.lineWidth = 2; c.beginPath(); c.roundRect(-10, -8, 54, 16, 5); c.fill(); c.stroke();
+  c.fillStyle = '#ffd21f'; c.fillRect(8, -8, 7, 16); c.fillRect(22, -8, 7, 16); c.restore(); ell(c, P0x, P0y, 8, 8, '#1f5e3c');
+  if (!shot && canEdit('th')) { c.fillStyle = (pl === 'moon' || pl === 'zero') ? '#fff' : '#234'; c.font = '11px system-ui'; c.fillText('θ = ' + p.th.toFixed(1) + '°', P0x + 50, P0y + 18); }
+  // confetti + banner + HUD
+  const now = performance.now();
+  for (const q of fx) { ell(c, q.x, q.y, q.r, q.r, q.c); }
+  if (banner) { const age = (now - banner.t0) / 1000; if (age < 2.6) { c.globalAlpha = Math.min(1, 2.6 - age); c.font = 'bold 26px system-ui'; const tw2 = c.measureText(banner.text).width;
+    c.fillStyle = banner.good ? '#0a7d32ee' : '#7a2e00dd'; c.beginPath(); c.roundRect(W / 2 - tw2 / 2 - 14, 34, tw2 + 28, 40, 10); c.fill(); c.fillStyle = '#fff'; c.fillText(banner.text, W / 2 - tw2 / 2, 63); c.globalAlpha = 1; } }
+  hud();
+}
+function tag(t, x, y, col) { const c = ctx, w = c.measureText(t).width; c.fillStyle = '#ffffffcc'; c.fillRect(x - 3, y - 12, w + 6, 16); c.fillStyle = col; c.fillText(t, x, y); }
+function drawVectors(b, p, isBanana) {
+  const c = ctx, k = Math.max(1.2, Math.min(3, 45 / Math.max(5, shot.p.v))), x = sx(b.x), y = sy(b.y);
+  if ($('vecOn').checked) arrow(c, x, y, x + b.vx * k, y - b.vy * k, '#0a7d32', 3);
+  if ($('cmpOn').checked) { if (isBanana) arrow(c, x, y, x + b.vx * k, y, '#d33', 2); arrow(c, x, y, x, y - b.vy * k, '#2563eb', 2); }
+  if ($('accOn').checked && p.g > 0) arrow(c, x + (isBanana ? 0 : -14), y, x + (isBanana ? 0 : -14), y + Math.min(70, 4 * p.g), '#c026d3', 2.5);
+}
+function hud() {
+  const c = ctx, dark = ['moon', 'zero'].includes((shot ? shot.p : params()).planet); c.font = 'bold 14px system-ui'; c.fillStyle = dark ? '#fff' : '#123';
+  const p = shot ? shot.p : params(); let left = '';
+  if (MODE === 'levels') { const L = LVL(); left = `Level ${LV.i + 1}: ${L.name}   ` + '🍌'.repeat(Math.max(0, L.bananas - LV.used)) + '·'.repeat(Math.min(L.bananas, LV.used)); }
+  if (MODE === 'timed') left = `⏱ ${Math.max(0, TM.left).toFixed(1)} s   Score ${TM.score}   ×${TM.combo}`;
+  if (MODE === 'bet') left = `🎲 Streak ${BET.streak}   Score ${ST.bet.score}`;
+  if (MODE === 'lab') left = '🧪 Lab';
+  c.fillText(left, 10, 20);
+  const right = `${PL[p.planet] ? PL[p.planet].name.replace(' (deep space)', '') : 'Custom'}: g = ${p.g} m/s²   t = ${(shot ? shot.t : 0).toFixed(2)} s${+$('slow').value < 1 ? '  🐢 ' + $('slow').selectedOptions[0].text : ''}${paused && shot && !shot.done ? '  ⏸' : ''}`;
+  c.fillText(right, W - c.measureText(right).width - 10, 20);
+}
+// ---------------- graphs ----------------
+function niceStep(range, n) { const r = range / n, m = Math.pow(10, Math.floor(Math.log10(r))), q = r / m; return (q < 1.5 ? 1 : q < 3 ? 2 : q < 7 ? 5 : 10) * m; }
+function plot(c, x0, y0, w, h, tMax, yMin, yMax, series, title, ylab, Tm, band) {
+  c.fillStyle = '#fff'; c.fillRect(x0, y0, w, h); const L = 46, B = 26, Tp = 26, pw = w - L - 8, ph = h - B - Tp;
+  const X = t => x0 + L + t / tMax * pw, Y = y => y0 + Tp + (yMax - y) / (yMax - yMin) * ph;
+  c.font = '11px system-ui'; c.strokeStyle = '#e3e7ef'; c.fillStyle = '#555'; c.lineWidth = 1;
+  const ts = niceStep(tMax, 6); for (let t = 0; t <= tMax + 1e-9; t += ts) { c.beginPath(); c.moveTo(X(t), Y(yMax)); c.lineTo(X(t), Y(yMin)); c.stroke(); c.fillText(+t.toFixed(2) + '', X(t) - 6, y0 + h - 12); }
+  const ys = niceStep(yMax - yMin, 5); for (let y = Math.ceil(yMin / ys) * ys; y <= yMax + 1e-9; y += ys) { c.beginPath(); c.moveTo(X(0), Y(y)); c.lineTo(X(tMax), Y(y)); c.stroke(); c.fillText(+y.toFixed(1) + '', x0 + 4, Y(y) + 4); }
+  c.strokeStyle = '#999'; c.beginPath(); c.moveTo(X(0), Y(yMax)); c.lineTo(X(0), Y(yMin)); c.lineTo(X(tMax), Y(yMin)); c.stroke();
+  if (yMin < 0 && yMax > 0) { c.strokeStyle = '#666'; c.beginPath(); c.moveTo(X(0), Y(0)); c.lineTo(X(tMax), Y(0)); c.stroke(); }
+  if (band) { c.fillStyle = '#4cc38a33'; c.fillRect(X(0), Y(band), pw, Y(-band) - Y(band)); }
+  if (Tm !== null && Tm !== undefined && Tm <= tMax) { c.strokeStyle = '#c026d3'; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(X(Tm), Y(yMax)); c.lineTo(X(Tm), Y(yMin)); c.stroke(); c.setLineDash([]); c.fillStyle = '#c026d3'; c.fillText('T = ' + Tm.toFixed(2) + ' s', X(Tm) + 3, y0 + Tp + 10); }
+  for (const s of series) { c.strokeStyle = s.col; c.lineWidth = s.w || 2; c.setLineDash(s.dash ? [6, 4] : []); c.beginPath(); s.pts.forEach(([t, y], i) => i ? c.lineTo(X(t), Y(y)) : c.moveTo(X(t), Y(y))); c.stroke(); }
+  c.setLineDash([]); c.fillStyle = '#234'; c.font = 'bold 12px system-ui'; c.fillText(title, x0 + L, y0 + 12); c.font = '11px system-ui'; c.fillText(ylab, x0 + 4, y0 + 12 + (title ? 0 : 0) + 0); c.fillText('t (s)', x0 + w - 34, y0 + h - 2);
+  let lx = x0 + L + 8; for (const s of series) if (s.name) { c.fillStyle = s.col; c.fillRect(lx, y0 + Tp + ph - 14, 14, 3); c.fillStyle = '#333'; c.fillText(s.name, lx + 17, y0 + Tp + ph - 9); lx += c.measureText(s.name).width + 30; }
+}
+function drawGraphs() {
+  const c = gctx; c.clearRect(0, 0, GW, GH);
+  let sh = shot; if (!sh && MODE === 'lab') { const p = params(); sh = { p, out: MH.outcome(p), t: null, preview: true }; }
+  if (!sh) { c.fillStyle = '#666'; c.font = '14px system-ui'; c.fillText('Launch to see the graphs.', 20, 40); return; }
+  const p = sh.p, o = sh.out, tMax = Math.max(0.2, o.tEnd), tNow = sh.preview ? tMax : sh.t, N = 160, A = [], Bm = [], Gb = [], Gm = [], D = [];
+  for (let i = 0; i <= N; i++) { const t = tNow * i / N, b = bananaState(sh, t), m = MH.monkey(p, t); A.push([t, b.y]); Bm.push([t, m.y]); Gb.push([t, MH.ghost(p, t).y]); Gm.push([t, p.Y]); if (t <= o.tStop + 1e-9) D.push([t, b.y - m.y]); }
+  let ymax = p.Y + 2; for (const q of A.concat(Gb)) ymax = Math.max(ymax, q[1]); ymax = Math.min(ymax, 3 * p.Y + 10);
+  const half = GW / 2 - 4, al = sh.preview ? ' (preview)' : '';
+  const clip = pts => pts.map(([t, y]) => [t, Math.max(-0.5, Math.min(ymax, y))]);
+  plot(c, 0, 0, half, GH, tMax, 0, ymax, [{ pts: clip(Gb), col: '#f0a64d', dash: 1, w: 1.5 }, { pts: clip(Gm), col: '#b08968', dash: 1, w: 1.5 }, { pts: A, col: '#f08c00', name: 'banana' }, { pts: Bm, col: '#7a4a22', name: 'Mango' }], 'y vs t' + al, 'y (m)', o.result === 'blocked' || o.result === 'ground' ? null : o.T);
+  let dmin = -1, dmax = 1; for (const q of D) { dmin = Math.min(dmin, q[1]); dmax = Math.max(dmax, q[1]); }
+  plot(c, half + 8, 0, half, GH, tMax, dmin - 0.5, dmax + 0.5, [{ pts: D, col: '#6d28d9', name: 'Δy = y_banana − y_Mango' }], 'Vertical separation vs t' + al, 'Δy (m)', o.result === 'blocked' || o.result === 'ground' ? null : o.T, MH.R);
+}
+// ---------------- data table ----------------
+const COLS = ['#', 'Mode', 'g (m/s^2)', 'v0 (m/s)', 'theta (deg)', 'h (m)', 'x_tree (m)', 'y_monkey (m)', 'Drop', 'Wind (m/s^2)', 'T (s)', '1/2 g T^2 (m)', 'y_banana(T) (m)', 'y_monkey(T) (m)', 'Miss (m)', 'Result', 'Prediction'];
+function addRow(sh) {
+  const p = sh.p, o = sh.out, n = (ST.rows.length ? ST.rows[ST.rows.length - 1][0] : 0) + 1, num = x => (x === null || x === undefined || !isFinite(x)) ? '' : +x.toFixed(3);
+  const drop = p.drop === 'launch' ? 'at launch' : p.drop === 'never' ? 'never' : `${p.drop} ${p.dt}s`;
+  const predTxt = sh.pred ? `${predName(sh.pred)} ${sh.pred === o.result || (sh.pred === 'ground' && o.result === 'blocked') ? '✓' : '✗'}` : '';
+  ST.rows.push([n, sh.mode, p.g, p.v, +p.th.toFixed(2), p.h, p.X, p.Y, drop, p.wind || 0, num(o.T), num(o.fallB), num(o.yb), num(o.ym), num(o.miss), { hit: 'CAUGHT', over: 'over', under: 'under', ground: 'landed short', blocked: 'blocked' }[o.result], predTxt]);
+  renderTable();
+}
+function renderTable() { $('tbl').tBodies[0].innerHTML = ST.rows.slice().reverse().map(r => '<tr>' + r.map((x, i) => `<td${i === 15 && x === 'CAUGHT' ? ' class="ok"' : ''}>${x}</td>`).join('') + '</tr>').join(''); }
+function csvText() { const q = x => /[",\n]/.test(String(x)) ? '"' + String(x).replace(/"/g, '""') + '"' : String(x); return [COLS].concat(ST.rows).map(r => r.map(q).join(',')).join('\n'); }
+$('csv').onclick = () => { const b = new Blob(['\ufeff' + csvText()], { type: 'text/csv' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'monkey_hunter_data.csv'; document.body.appendChild(a); a.click(); a.remove(); };
+$('clearTbl').onclick = () => { if (confirm('Clear the data table?')) { ST.rows = []; save(); renderTable(); } };
+// ---------------- modes ----------------
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => { SND.click(); setMode(b.dataset.mode); });
+function setMode(m) { GEN++;
+  if (MODE === 'timed' && m !== 'timed' && TM.on) endTimed(true);
+  MODE = m; shot = null; fx = []; banner = null; pred = null; $('why').classList.add('hide');
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
+  for (const [id, k] of [['labPanel', 'lab'], ['levelsPanel', 'levels'], ['betPanel', 'bet'], ['timedPanel', 'timed']]) $(id).classList.toggle('hide', k !== m);
+  $('fire').classList.toggle('hide', m === 'bet');
+  if (m === 'lab') { locks = null; S.obstacles = []; }
+  if (m === 'levels') { let i = MH.LEVELS.findIndex((L, j) => unlocked(j) && !ST.levels[L.id]); startLevel(i < 0 ? 0 : i); }
+  if (m === 'bet') newBet();
+  if (m === 'timed') { locks = ['th']; TM.on = false; TM.left = 90; TM.score = 0; TM.combo = 0; TM.rng = MH.rng(Date.now() & 0xffffffff); Object.assign(S, MH.timedRound(TM.rng, 0), { th: 15, windOn: false, obstacles: [] }); renderScores(); }
+  $('hint').textContent = m === 'bet' ? 'Watch the dashed line — then call the shot!' : 'Drag the barrel to aim' + (canEdit('h') ? ' · drag the stand for height' : '') + (m === 'lab' ? ' · drag Mango to move the tree' : '');
+  sync(); updateModeUI();
+}
+function unlocked(i) { return ST.unlockAll || i === 0 || (ST.levels[MH.LEVELS[i - 1].id] || 0) > 0; }
+function startLevel(i) { GEN++;
+  const L = MH.LEVELS[i], p = MH.levelParams(L); LV = { i, used: 0, done: false, clock: 0 };
+  Object.assign(S, { v: p.v, th: p.th, h: p.h, X: p.X, Y: p.Y, planet: p.planet, drop: p.drop, dt: p.dt, windOn: !!p.wind, wind: p.wind || 0, obstacles: p.obstacles.map(o => Object.assign({}, o)) });
+  locks = L.ctrl.slice(); shot = null; fx = []; banner = null; $('why').classList.add('hide'); $('lvlNext').classList.add('hide'); sync(); updateModeUI();
+}
+function levelDone(hit) {
+  const L = LVL();
+  if (hit) { const st = MH.starsFor(L, LV.used); LV.done = true; ST.levels[L.id] = Math.max(ST.levels[L.id] || 0, st); for (let k = 0; k < st; k++) SND.star(k);
+    later(900, `${'★'.repeat(st)}${'☆'.repeat(3 - st)}  Level complete!`, true); if (LV.i < MH.LEVELS.length - 1) $('lvlNext').classList.remove('hide'); }
+  else if (LV.used >= L.bananas) { LV.done = true; later(900, 'Out of bananas — press Restart!', false); }
+}
+$('lvlRetry').onclick = () => { SND.click(); startLevel(LV.i); };
+$('lvlNext').onclick = () => { SND.click(); startLevel(Math.min(MH.LEVELS.length - 1, LV.i + 1)); };
+$('unlockAll').onclick = e => { e.preventDefault(); if (confirm('Unlock every level on this computer?')) { ST.unlockAll = true; save(); updateModeUI(); } };
+function newBet() { GEN++;
+  const sc = MH.scenario(MH.rng((Math.random() * 4294967295) >>> 0)); BET.sc = sc; BET.waiting = true; BET.pick = null; locks = [];
+  Object.assign(S, { v: sc.p.v, th: sc.p.th, h: sc.p.h, X: sc.p.X, Y: sc.p.Y, planet: sc.p.planet, drop: sc.p.drop, dt: sc.p.dt, windOn: false, obstacles: [] });
+  shot = null; fx = []; banner = null; $('why').classList.add('hide'); $('betNext').classList.add('hide'); sync(); updateModeUI();
+}
+document.querySelectorAll('#betRow button').forEach(b => b.onclick = () => { if (!BET.waiting) return; BET.pick = b.dataset.b; BET.waiting = false; fire(true); });
+$('betNext').onclick = () => { SND.click(); newBet(); };
+function betDone() {
+  const ok = BET.pick === BET.sc.answer; ST.bet.total++;
+  if (ok) { BET.streak++; ST.bet.correct++; ST.bet.score += 10 * BET.streak; ST.bet.best = Math.max(ST.bet.best, BET.streak); later(700, `Correct! +${10 * BET.streak}  (streak ${BET.streak})`, true); if (shot.out.result !== 'hit') SND.star(1); }
+  else { BET.streak = 0; later(700, 'Not quite — streak reset', false); }
+  $('betNext').classList.remove('hide');
+}
+$('timedStart').onclick = () => { SND.click(); TM = { on: true, left: 90, score: 0, combo: 0, hits: 0, round: 0, rng: MH.rng(Date.now() & 0xffffffff) }; newRound(); };
+function newRound() { GEN++; const th = S.th; Object.assign(S, MH.timedRound(TM.rng, TM.round++), { th, windOn: false, obstacles: [] }); shot = null; fx = []; sync(); updateModeUI(); }
+function timedDone(hit) {
+  if (hit) { TM.score += 100 + 25 * TM.combo; TM.combo++; TM.hits++; setTimeout(() => { if (TM.on && MODE === 'timed') newRound(); }, 600); } else TM.combo = 0;
+  if (TM.on && TM.left <= 0) endTimed();
+}
+function endTimed(quiet) {
+  if (!TM.on) return; TM.on = false;
+  if (!quiet) { SCORES.push({ name: ST.name || 'Anonymous', score: TM.score, hits: TM.hits, date: new Date().toLocaleDateString() }); SCORES.sort((a, b) => b.score - a.score); SCORES = SCORES.slice(0, 10);
+    ST.timedBest = Math.max(ST.timedBest || 0, TM.score); save(); SND.win(); showBanner(`Time! Score ${TM.score} (${TM.hits} catches)`, true); renderScores(); }
+  updateModeUI();
+}
+function renderScores() { $('scoreTbl').tBodies[0].innerHTML = SCORES.length ? SCORES.map((s, i) => `<tr><td>${i + 1}</td><td>${esc(s.name)}</td><td>${s.score}</td><td>${s.hits}</td><td>${esc(s.date)}</td></tr>`).join('') : '<tr><td colspan="5" class="g">No scores yet — be the first!</td></tr>'; }
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function updateModeUI() {
+  const busy = shot && !shot.done;
+  $('fire').disabled = !canFire() && !(MODE === 'lab' && $('predOn').checked && !busy);
+  if (MODE === 'lab') {
+    $('predRow').classList.toggle('hide', !$('predOn').checked);
+    document.querySelectorAll('#predRow button').forEach(b => { b.classList.toggle('on', b.dataset.p === pred); b.disabled = busy; });
+    $('predScore').textContent = ST.lab.predN ? `Predictions correct: ${ST.lab.predOk} / ${ST.lab.predN}` : '';
+  }
+  if (MODE === 'levels') {
+    const L = LVL(); $('lvlTitle').textContent = `Level ${LV.i + 1} of ${MH.LEVELS.length}: ${L.name}`; $('lvlStory').textContent = L.story; $('lvlGoal').innerHTML = '🎯 ' + esc(L.goal);
+    const best = ST.levels[L.id] || 0; $('lvlStars').textContent = '★'.repeat(best) + '☆'.repeat(3 - best);
+    $('lvlBananas').textContent = (L.bananas - LV.used) + ' of ' + L.bananas + (L.swing ? ' · launch when Mango crosses the line!' : '');
+    $('levelGrid').innerHTML = MH.LEVELS.map((l, j) => { const s = ST.levels[l.id] || 0, u = unlocked(j); return `<button data-l="${j}" class="${u ? '' : 'locked'} ${j === LV.i ? 'cur' : ''}" ${u ? '' : 'disabled'}>${j + 1}. ${esc(l.name.replace('Grand Finale: ', ''))}<br><span class="stars">${u ? '★'.repeat(s) + '☆'.repeat(3 - s) : '🔒'}</span></button>`; }).join('');
+    $('levelGrid').querySelectorAll('button').forEach(b => b.onclick = () => { SND.click(); startLevel(+b.dataset.l); });
+    const tot = MH.LEVELS.reduce((a, l) => a + (ST.levels[l.id] || 0), 0); $('totStars').textContent = `Total ★ ${tot} / ${3 * MH.LEVELS.length}`;
+  }
+  if (MODE === 'bet') {
+    const p = BET.sc.p, dropTxt = p.drop === 'launch' ? 'lets go at launch' : p.drop === 'never' ? 'never lets go' : `lets go ${p.dt.toFixed(2)} s ${p.drop === 'late' ? 'AFTER' : 'BEFORE'} launch`;
+    $('betInfo').innerHTML = `<b>${PL[p.planet].name}</b> (g = ${p.g} m/s²) · v₀ = <b>${p.v} m/s</b> · θ = ${p.th}° · launcher h = ${p.h} m<br>Mango at x = ${p.X} m, y = ${p.Y} m and <b>${dropTxt}</b>.<br>${BET.waiting ? 'What happens?' : 'Answer: <b>' + predName(BET.sc.answer) + '</b>'}`;
+    document.querySelectorAll('#betRow button').forEach(b => { b.disabled = !BET.waiting; b.classList.toggle('on', b.dataset.b === BET.pick); });
+    $('betStreak').textContent = BET.streak; $('betBest').textContent = ST.bet.best; $('betScore').textContent = ST.bet.score; $('betAcc').textContent = ST.bet.correct + '/' + ST.bet.total;
+  }
+  if (MODE === 'timed') { $('tLeft').textContent = Math.max(0, TM.left).toFixed(1); $('tScore').textContent = TM.score; $('tCombo').textContent = TM.combo; $('timedStart').disabled = TM.on; $('timedStart').textContent = TM.on ? 'Running…' : (TM.score ? '▶ Play again' : '▶ Start'); }
+}
+$('predOn').onchange = () => { pred = null; updateModeUI(); };
+document.querySelectorAll('#predRow button').forEach(b => b.onclick = () => { pred = b.dataset.p; SND.click(); updateModeUI(); });
+$('aimBtn').onclick = () => { S.th = MH.aimAngle(S.h, S.X, S.Y); onEdit(); };
+$('classicBtn').onclick = () => { Object.assign(S, { v: 22, h: 1, X: 25, Y: 12, planet: 'earth', drop: 'launch', windOn: false }); S.th = MH.aimAngle(1, 25, 12); ['aimOn', 'dotsOn', 'dropOn'].forEach(i => $(i).checked = true); onEdit(); };
+$('randBtn').onclick = () => { const r = Math.random; Object.assign(S, { v: Math.round(15 + r() * 25), h: Math.round(r() * 10) / 2, X: Math.round(15 + r() * 35), Y: Math.round(6 + r() * 16), th: Math.round(r() * 50) }); onEdit(); };
+// ---------------- pointer (mouse + touch) ----------------
+function ptr(e) { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+cv.addEventListener('pointerdown', e => {
+  ac(); if (shot && !shot.done) return; const q = ptr(e), px = sx(0), py = sy(S.h);
+  const onStand = Math.abs(q.x - px) < 18 && q.y > py + 10 && q.y < sy(0) + 6;
+  if (MODE === 'lab' && Math.hypot(q.x - sx(S.X), q.y - sy(S.Y)) < Math.max(26, view.sc)) dragging = 'monkey';
+  else if (onStand && canEdit('h')) dragging = 'h';
+  else if (Math.hypot(q.x - px, q.y - py) < 80 && canEdit('th') && !onStand) dragging = 'aim';
+  else return;
+  cv.setPointerCapture(e.pointerId); e.preventDefault(); drag(q);
+});
+cv.addEventListener('pointermove', e => { if (dragging) { e.preventDefault(); drag(ptr(e)); } else { const q = ptr(e), d = Math.hypot(q.x - sx(0), q.y - sy(S.h)); cv.style.cursor = (d < 80 && canEdit('th')) || (MODE === 'lab' && Math.hypot(q.x - sx(S.X), q.y - sy(S.Y)) < 26) ? 'grab' : 'default'; } });
+const endDrag = () => { if (dragging) { dragging = null; fitView(); sync(); } };
+cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
+function drag(q) {
+  if (shot && shot.done) shot = null;
+  if (dragging === 'aim') { const a = Math.atan2(sy(S.h) - q.y, q.x - sx(0)) / MH.D2R; S.th = Math.max(-30, Math.min(80, Math.round(a * 2) / 2)); }
+  if (dragging === 'h') S.h = Math.max(0, Math.min(15, Math.round((sy(0) - q.y) / view.sc * 2) / 2));
+  if (dragging === 'monkey') { S.X = Math.max(5, Math.min(60, Math.round((q.x / view.sc + view.xmin) * 2) / 2)); S.Y = Math.max(1, Math.min(30, Math.round((sy(0) - q.y) / view.sc * 2) / 2)); }
+  const v = view; sync(); view = v;   // keep the view still while dragging
+}
+// ---------------- name + certificate ----------------
+function showName() { $('nameIn').value = ST.name || ''; $('nameBox').classList.remove('hide'); setTimeout(() => $('nameIn').focus(), 50); }
+$('nameBtn').onclick = showName;
+$('nameSave').onclick = () => { ST.name = $('nameIn').value.trim().slice(0, 30); ST.askedName = true; save(); $('nameBox').classList.add('hide'); $('nameLbl').textContent = ST.name || 'Add name'; };
+$('nameIn').onkeydown = e => { if (e.key === 'Enter') $('nameSave').click(); };
+$('nameSkip').onclick = () => { ST.askedName = true; save(); $('nameBox').classList.add('hide'); };
+$('sndBtn').onclick = () => { ST.sound = !ST.sound; save(); $('sndBtn').classList.toggle('on', ST.sound); $('sndBtn').textContent = ST.sound ? '🔊 Sound' : '🔇 Muted'; if (ST.sound) SND.click(); };
+function certHTML() {
+  const tot = MH.LEVELS.reduce((a, l) => a + (ST.levels[l.id] || 0), 0), done = MH.LEVELS.filter(l => ST.levels[l.id]).length;
+  const rank = tot >= 33 ? 'Master Monkey Feeder' : tot >= 24 ? 'Expert Banana Launcher' : tot >= 12 ? 'Certified Banana Launcher' : 'Banana Launcher Trainee';
+  return `<div style="font-size:40px">🐒🍌</div><h2>${rank}</h2><div>This certifies that</div><div class="nm">${esc(ST.name || '________________')}</div>
+<div>completed <b>${done} of ${MH.LEVELS.length}</b> levels and earned <b>${tot} / ${3 * MH.LEVELS.length} ★</b> in the Banana Launcher (Monkey &amp; Hunter) lab.</div>
+<table><thead><tr><th>Level</th><th>Stars</th><th>Level</th><th>Stars</th></tr></thead><tbody>${[0, 1, 2, 3, 4, 5].map(i => [MH.LEVELS[i], MH.LEVELS[i + 6]].map(l => `<td style="text-align:left">${esc(l.name)}</td><td class="stars">${'★'.repeat(ST.levels[l.id] || 0)}${'☆'.repeat(3 - (ST.levels[l.id] || 0))}</td>`).join('')).map(r => '<tr>' + r + '</tr>').join('')}</tbody></table>
+<table><tr><th>“Will it hit?”</th><td>${ST.bet.correct} / ${ST.bet.total} correct · best streak ${ST.bet.best} · ${ST.bet.score} pts</td></tr><tr><th>Timed challenge best</th><td>${ST.timedBest || 0} pts</td></tr><tr><th>Lab shots</th><td>${ST.lab.shots} launched · ${ST.lab.hits} caught${ST.lab.predN ? ` · predictions ${ST.lab.predOk}/${ST.lab.predN}` : ''}</td></tr></table>
+<div style="font-family:Georgia,serif;font-style:italic;margin:6px 0">Key idea: banana and monkey fall the same ½gt² below their no-gravity paths, so aiming straight at the monkey always works — on any planet, at any (fast enough) speed.</div>
+<div class="g">${new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })} · AP Physics 1 · Unit 1 Kinematics</div>`;
+}
+$('certBtn').onclick = () => { SND.click(); $('cert').innerHTML = certHTML(); $('certBox').classList.remove('hide'); };
+$('certClose').onclick = () => $('certBox').classList.add('hide');
+$('printBtn').onclick = () => { document.body.classList.add('printing'); window.print(); setTimeout(() => document.body.classList.remove('printing'), 500); };
+window.addEventListener('afterprint', () => document.body.classList.remove('printing'));
+$('resetProgress').onclick = () => { if (confirm('Erase all stars, scores and stats on this computer?')) { ST.levels = {}; ST.bet = { best: 0, correct: 0, total: 0, score: 0 }; ST.lab = { shots: 0, hits: 0, predOk: 0, predN: 0 }; ST.timedBest = 0; ST.unlockAll = false; SCORES = []; save(); $('cert').innerHTML = certHTML(); renderScores(); updateModeUI(); } };
+// ---------------- main loop ----------------
+let lastTickSec = 99;
+function frame(now) {
+  const dt = Math.min(0.05, (now - lastFrame) / 1000); lastFrame = now;
+  const L = LVL(); if (L && L.swing && !shot) { LV.clock += dt; S.X = Math.round(MH.swingX(L, LV.clock) * 100) / 100; }
+  if (L && L.swing && shot && shot.done && !LV.done) { shot = null; }
+  if (MODE === 'timed' && TM.on) { TM.left -= dt; const s = Math.ceil(TM.left); if (s <= 5 && s >= 1 && s < lastTickSec) SND.tick(); lastTickSec = s;
+    if (TM.left <= 0 && !(shot && !shot.done)) endTimed(); updateModeUI(); } else lastTickSec = 99;
+  step(dt);
+  for (const q of fx) { q.x += q.vx * dt; q.y += q.vy * dt; q.vy += 400 * dt; q.life -= dt; } fx = fx.filter(q => q.life > 0 && q.y < H + 10);
+  draw(); drawGraphs(); if (shot && !shot.done) postReadout();
+  requestAnimationFrame(frame);
+}
+window.addEventListener('resize', () => { resize(); });
+$('graphsBox').addEventListener('toggle', resize);
+// init
+$('nameLbl').textContent = ST.name || 'Add name'; $('sndBtn').classList.toggle('on', ST.sound); $('sndBtn').textContent = ST.sound ? '🔊 Sound' : '🔇 Muted';
+resize(); renderTable(); renderScores(); setMode('lab');
+S.th = Math.round(MH.aimAngle(S.h, S.X, S.Y) * 100) / 100 + 8; sync();
+if (!ST.name && !ST.askedName) showName();
+requestAnimationFrame(frame);
+
+</script>
+</body></html>
