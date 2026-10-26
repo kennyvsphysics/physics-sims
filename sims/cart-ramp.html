@@ -1,0 +1,139 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Cart on a Ramp – Motion Detector Sim</title>
+<style>
+body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6fa;color:#222}
+header{background:#234;color:#fff;padding:8px 14px}header h1{font-size:18px;margin:0}
+#wrap{display:flex;gap:10px;padding:10px}#left{flex:1.25;min-width:0}#right{width:440px}
+.panel{background:#fff;border-radius:8px;box-shadow:0 1px 3px #0002;padding:8px;margin-bottom:10px}
+canvas{display:block;width:100%}label{display:block;font-size:13px;margin:5px 0}
+input[type=range]{width:100%}.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+button{padding:5px 9px;border:1px solid #889;border-radius:5px;background:#eef;cursor:pointer;font-size:13px}
+button.on{background:#ffd76a}.preset{background:#e6f4ea;text-align:left}
+#desc{font-size:13px;background:#fffbe6;padding:6px;border-radius:5px;min-height:34px}
+#readout{font-family:monospace;font-size:13px}.g{font-size:12px;color:#555}
+</style></head><body>
+<header><h1>Speeding Up &amp; Slowing Down — Cart on a Ramp with a Motion Detector</h1></header>
+<div id="wrap"><div id="left">
+ <div class="panel"><canvas id="ramp" width="900" height="260"></canvas>
+  <div class="row"><button id="play">▶ Play</button><button id="reset">⟲ Reset</button>
+   <label style="display:inline">Speed <select id="speed"><option value="1">1×</option><option value="0.5">0.5×</option><option value="0.25">0.25× (slow-mo)</option><option value="0.1">0.1×</option></select></label>
+   <button id="predict">✎ Predict mode: OFF</button><button id="clearPred">Clear sketches</button>
+   <span id="readout"></span></div>
+  <div id="desc"></div></div>
+ <div class="panel"><b>Lab scenarios (from handout)</b><div class="row" id="presets"></div></div>
+ <div class="panel"><b>Controls</b>
+  <div class="row"><span>Detector at:</span><button id="detTop">Top of ramp</button><button id="detBot">Bottom of ramp</button></div>
+  <label>Ramp angle θ: <b id="angV"></b>°<input type="range" id="angle" min="0" max="15" step="0.5"></label>
+  <label>Start position (distance from detector): <b id="s0V"></b> m<input type="range" id="s0" min="0.15" max="2" step="0.01"></label>
+  <label>Initial velocity (detector sign; <span id="upHint"></span>): <b id="v0V"></b> m/s<input type="range" id="v0" min="-2" max="2" step="0.05"></label>
+  <label>Rolling friction coefficient μ: <b id="muV"></b><input type="range" id="mu" min="0" max="0.1" step="0.005"></label>
+  <label>Zero position offset (scenario 6): <b id="zV"></b> m from detector<input type="range" id="zero" min="0" max="1.5" step="0.05"></label>
+  <div class="row"><span>At ends / min range (0.15 m):</span><button id="endCatch">Catch (stop)</button><button id="endBounce">Bounce (e=0.6)</button></div>
+  <p class="g">Ramp length 2.0 m. Ramp tilt drawn 2× exaggerated for visibility. g = 9.8 m/s². a = ±g sinθ − sign(v)·μ g cosθ.</p></div>
+</div>
+<div id="right"><div class="panel"><canvas id="graphs" width="440" height="660"></canvas>
+<p class="g">Graphs show what the detector reports: position = distance from detector − zero offset (+ = away from detector). Blue = measured; red = your prediction sketch.</p></div></div></div>
+<script>
+// ---- PHYSICS CORE (shared with headless test) ----
+// s = distance from detector along ramp (m). Detector coords: + = away from detector.
+function accel(p, v){
+  const g=9.8, th=p.angle*Math.PI/180;
+  const ag = (p.detector==='bottom' ? -1 : 1)*g*Math.sin(th); // downhill direction in detector coords
+  const af = p.mu*g*Math.cos(th);
+  if (Math.abs(v)>1e-9) return ag - Math.sign(v)*af;
+  return Math.abs(ag) <= af ? 0 : ag - Math.sign(ag)*af; // at rest: static check
+}
+function step(p, st, dt){
+  let {t,s,v}=st; let a=accel(p,v); let ev=null;
+  // split step if friction would reverse velocity
+  if (Math.abs(v)>1e-9 && p.mu>0 && Math.sign(a)!==Math.sign(v)){
+    const tStop=-v/a;
+    if (tStop<dt){ s+=v*tStop+0.5*a*tStop*tStop; v=0; t+=tStop; const r=step(p,{t,s,v},dt-tStop); return r; }
+  }
+  s+=v*dt+0.5*a*dt*dt; v+=a*dt; t+=dt;
+  const smin=p.minRange, smax=p.length;
+  if (s<smin){ s=smin; if(p.ends==='bounce'&&Math.abs(v)>0.02){v=-p.e*v;ev='bounce';} else {v=0;ev='caught';} }
+  if (s>smax){ s=smax; if(p.ends==='bounce'&&Math.abs(v)>0.02){v=-p.e*v;ev='bounce';} else {v=0;ev='caught';} }
+  const aNow = ev==='caught'? 0 : accel(p,v);
+  return {t,s,v,a:aNow,ev};
+}
+function simulate(p, T, dt){
+  dt=dt||0.001; let st={t:0,s:p.s0,v:p.v0,a:accel(p,p.v0)}; const out=[st];
+  while(st.t<T-1e-12){ st=step(p,st,dt); out.push(st); if(st.ev==='caught'&&p.ends!=='bounce'){st.done=true;break;} }
+  return out;
+}
+if (typeof module!=='undefined') module.exports={accel,step,simulate};
+
+const P={angle:5,mu:0,detector:'bottom',length:2,minRange:0.15,ends:'catch',e:0.6,s0:0.3,v0:1.2,zero:0};
+const PRESETS=[
+ {n:'1. Speeding up, + direction',d:'Detector at TOP. Cart released from rest near the detector and rolls down, away from it. v > 0 and increasing, a > 0 (constant).',p:{detector:'top',s0:0.25,v0:0,zero:0}},
+ {n:'2. Slowing down, + direction',d:'Detector at BOTTOM. Cart given a push up the ramp (away from detector); "stop the cart at its highest point." v > 0 and decreasing, a < 0.',p:{detector:'bottom',s0:0.25,v0:1.2,zero:0},stopAtApex:true},
+ {n:'3. Speeding up, − direction',d:'Detector at BOTTOM. Cart starts from rest at the top and rolls down toward the detector. v < 0 and getting more negative, a < 0.',p:{detector:'bottom',s0:1.9,v0:0,zero:0}},
+ {n:'4. Slowing down, − direction',d:'Detector at TOP. Cart pushed up the ramp toward the detector; stop it at its highest point. v < 0 and shrinking toward 0, a > 0.',p:{detector:'top',s0:1.9,v0:-1.2,zero:0},stopAtApex:true},
+ {n:'5. Up and down the ramp',d:'Detector at BOTTOM. Push the cart up the ramp, it coasts up, turns around, and is caught just before reaching the detector. v changes from + to −; a stays − (constant) the whole time, even at the top.',p:{detector:'bottom',s0:0.25,v0:1.3,zero:0}},
+ {n:'6. Up & down, different zero',d:'Same as 5 but the detector\'s zero is set partway up the ramp (0.7 m). Positions below the zero (A) are negative, above it (B) positive. v and a graphs are unchanged — only the x-t graph shifts.',p:{detector:'bottom',s0:0.25,v0:1.3,zero:0.7}},
+];
+let preset=null,st,data=[],running=false,last=null,preds={x:[],v:[],a:[]},predictOn=false,drawing=null;
+const $=id=>document.getElementById(id);
+function syncUI(){['angle','s0','v0','mu','zero'].forEach(k=>$(k).value=P[k]);
+ $('angV').textContent=(+P.angle).toFixed(1);$('s0V').textContent=(+P.s0).toFixed(2);$('v0V').textContent=(+P.v0).toFixed(2);$('muV').textContent=(+P.mu).toFixed(3);$('zV').textContent=(+P.zero).toFixed(2);
+ $('detTop').className=P.detector==='top'?'on':'';$('detBot').className=P.detector==='bottom'?'on':'';
+ $('endCatch').className=P.ends==='catch'?'on':'';$('endBounce').className=P.ends==='bounce'?'on':'';
+ $('upHint').textContent=P.detector==='bottom'?'push UP ramp = +':'push UP ramp = −';}
+function reset(){running=false;$('play').textContent='▶ Play';st={t:0,s:P.s0,v:P.v0,a:accel(P,P.v0)};data=[{...st}];draw();}
+['angle','s0','v0','mu','zero'].forEach(k=>$(k).oninput=e=>{P[k]=+e.target.value;preset=null;$('desc').textContent='Custom setup.';syncUI();reset();});
+$('detTop').onclick=()=>{P.detector='top';P.s0=P.length+P.minRange-P.s0;P.s0=Math.min(2,Math.max(.15,P.s0));P.v0=-P.v0;syncUI();reset();};
+$('detBot').onclick=()=>{P.detector='bottom';P.s0=Math.min(2,Math.max(.15,P.length+P.minRange-P.s0));P.v0=-P.v0;syncUI();reset();};
+$('endCatch').onclick=()=>{P.ends='catch';syncUI();reset();};$('endBounce').onclick=()=>{P.ends='bounce';syncUI();reset();};
+$('play').onclick=()=>{if(st.done)reset();running=!running;$('play').textContent=running?'⏸ Pause':'▶ Play';last=null;};
+$('reset').onclick=reset;
+$('predict').onclick=()=>{predictOn=!predictOn;$('predict').textContent='✎ Predict mode: '+(predictOn?'ON (draw on graphs)':'OFF');$('predict').className=predictOn?'on':'';};
+$('clearPred').onclick=()=>{preds={x:[],v:[],a:[]};draw();};
+PRESETS.forEach((pr,i)=>{const b=document.createElement('button');b.className='preset';b.textContent=pr.n;b.onclick=()=>{Object.assign(P,{angle:5,mu:0,ends:'catch'},pr.p);preset=pr;$('desc').innerHTML='<b>'+pr.n+':</b> '+pr.d;syncUI();reset();};$('presets').appendChild(b);});
+const TMAX=4;
+function tick(ts){if(running){if(last!=null){let dtw=Math.min(0.05,(ts-last)/1000)*(+$('speed').value);let n=Math.max(1,Math.round(dtw/0.001));
+ for(let i=0;i<n&&!st.done;i++){const pv=st.v;st=step(P,st,dtw/n);
+  if(preset&&preset.stopAtApex&&pv*st.v<=0&&pv!==0){st.v=0;st.a=0;st.done=true;st.ev='stopped at highest point';}
+  if(st.ev==='caught'&&P.ends==='catch')st.done=true;
+  if(st.t>=TMAX)st.done=true; data.push({...st});}
+ if(st.done){running=false;$('play').textContent='▶ Play';}}last=ts;draw();}requestAnimationFrame(tick);}
+function draw(){drawRamp();drawGraphs();$('readout').textContent=` t=${st.t.toFixed(2)}s  x=${(st.s-P.zero).toFixed(3)}m  v=${st.v.toFixed(3)}m/s  a=${st.a.toFixed(3)}m/s²`+(st.ev&&st.done?'  ['+st.ev+']':'');}
+function drawRamp(){const c=$('ramp'),g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);
+ const th=Math.atan(2*Math.tan(P.angle*Math.PI/180)),sc=380,x0=70,yMid=150;const dir=P.detector==='bottom'?1:-1; // ramp rises to right if detector at bottom
+ const pt=s=>[x0+s*sc*Math.cos(th),yMid+(P.detector==='bottom'?40:-40)-dir*s*sc*Math.sin(th)];
+ const [ax,ay]=pt(0),[bx,by]=pt(P.length+0.1);g.strokeStyle='#555';g.lineWidth=6;g.beginPath();g.moveTo(ax-20,ay);g.lineTo(bx,by);g.stroke();
+ g.fillStyle='#bbb';g.beginPath();g.moveTo(ax-20,ay);g.lineTo(bx,by);g.lineTo(bx,240);g.lineTo(ax-20,240);g.fill();
+ // detector
+ g.save();g.translate(ax-6,ay-3);g.rotate(-dir*th);g.fillStyle='#345';g.fillRect(-26,-46,22,44);g.fillStyle='#fff';g.font='10px sans-serif';g.save();g.translate(-12,-6);g.rotate(-Math.PI/2);g.fillText('detector',0,3);g.restore();g.restore();
+ // min range & zero marks, scale
+ g.font='11px sans-serif';for(let s=0;s<=2.001;s+=0.25){const[x,y]=pt(s);g.fillStyle='#333';g.fillRect(x-1,y+3,2,6);g.fillText(s.toFixed(2),x-10,y+20);}
+ let[mx,my]=pt(P.minRange);g.strokeStyle='#e33';g.lineWidth=1;g.setLineDash([3,3]);g.beginPath();g.moveTo(mx,my-50);g.lineTo(mx,my);g.stroke();g.setLineDash([]);g.fillStyle='#e33';g.fillText('min range',mx-20,my-54);
+ let[zx,zy]=pt(P.zero);g.fillStyle='#06c';g.font='bold 12px sans-serif';g.fillText('0 position',zx-25,zy+36);g.fillRect(zx-1,zy,3,22);
+ let[px,py]=pt(P.length);g.fillText('+',px+12,py+36);
+ // cart
+ const [cx,cy]=pt(st.s);g.save();g.translate(cx,cy-3);g.rotate(-dir*th);g.fillStyle='#d62';g.fillRect(0,-26,60,20);g.fillStyle='#fff';g.font='12px sans-serif';g.fillText('cart',18,-12);
+ g.fillStyle='#222';[12,48].forEach(w=>{g.beginPath();g.arc(w,-5,5,0,7);g.fill();});
+ // vectors (along ramp, detector coords + = right)
+ const arrow=(val,scale,col,yoff,lab)=>{if(Math.abs(val)<1e-3)return;const L=val*scale;g.strokeStyle=g.fillStyle=col;g.lineWidth=3;g.beginPath();g.moveTo(30,yoff);g.lineTo(30+L,yoff);g.stroke();g.beginPath();g.moveTo(30+L,yoff);g.lineTo(30+L-Math.sign(L)*8,yoff-5);g.lineTo(30+L-Math.sign(L)*8,yoff+5);g.fill();g.font='12px sans-serif';g.fillText(lab,30+L+(L>0?4:-14),yoff+4);};
+ arrow(st.v,60,'#06c',-40,'v');arrow(st.a,60,'#c0c',-56,'a');g.restore();
+ g.fillStyle='#333';g.font='12px sans-serif';g.fillText('Detector at '+P.detector.toUpperCase()+' of ramp — + direction = away from detector',10,16);}
+function ranges(){const g=9.8,th=P.angle*Math.PI/180;const amax=g*Math.sin(th)+P.mu*g*Math.cos(th);
+ const vmax=Math.max(Math.abs(P.v0),Math.sqrt(2*Math.max(amax,.01)*P.length))*1.15;
+ return{x:[-P.zero-0.1,P.length-P.zero+0.1],v:[-Math.max(.5,vmax),Math.max(.5,vmax)],a:[-Math.max(1,Math.ceil(amax+.3)),Math.max(1,Math.ceil(amax+.3))]};}
+const GR=[{k:'x',lab:'position (m)',f:d=>d.s-P.zero},{k:'v',lab:'velocity (m/s)',f:d=>d.v},{k:'a',lab:'acceleration (m/s²)',f:d=>d.a}];
+const GH=220,ML=48;
+function gmap(i,r){const top=i*GH+12,h=GH-40,w=440-ML-10;return{tx:t=>ML+t/TMAX*w,ty:y=>top+h-(y-r[0])/(r[1]-r[0])*h,ix:X=>(X-ML)/w*TMAX,iy:Y=>r[0]+(top+h-Y)/h*(r[1]-r[0]),top,h,w};}
+function drawGraphs(){const c=$('graphs'),g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);const R=ranges();
+ GR.forEach((G,i)=>{const r=R[G.k],m=gmap(i,r);g.strokeStyle='#ddd';g.lineWidth=1;g.font='10px sans-serif';g.fillStyle='#666';
+  for(let t=0;t<=TMAX;t+=0.5){g.beginPath();g.moveTo(m.tx(t),m.top);g.lineTo(m.tx(t),m.top+m.h);g.stroke();g.fillText(t,m.tx(t)-4,m.top+m.h+12);}
+  const nt=4;for(let j=0;j<=nt;j++){const y=r[0]+j*(r[1]-r[0])/nt;g.beginPath();g.moveTo(ML,m.ty(y));g.lineTo(ML+m.w,m.ty(y));g.stroke();g.fillText(y.toFixed(2),4,m.ty(y)+3);}
+  g.strokeStyle='#000';g.lineWidth=1.5;g.beginPath();g.moveTo(ML,m.ty(0));g.lineTo(ML+m.w,m.ty(0));g.moveTo(ML,m.top);g.lineTo(ML,m.top+m.h);g.stroke();
+  g.fillStyle='#000';g.font='bold 12px sans-serif';g.fillText(G.lab,ML+6,m.top+12);g.font='10px sans-serif';g.fillText('t (s)',ML+m.w-20,m.top+m.h+24);
+  g.strokeStyle='#d22';g.lineWidth=2;preds[G.k].forEach(str=>{g.beginPath();str.forEach((p,j)=>j?g.lineTo(m.tx(p[0]),m.ty(p[1])):g.moveTo(m.tx(p[0]),m.ty(p[1])));g.stroke();});
+  g.strokeStyle='#06c';g.lineWidth=2;g.beginPath();data.forEach((d,j)=>{const X=m.tx(d.t),Y=m.ty(G.f(d));j?g.lineTo(X,Y):g.moveTo(X,Y);});g.stroke();});}
+const gc=$('graphs');
+function evp(e){const b=gc.getBoundingClientRect();return[(e.clientX-b.left)*gc.width/b.width,(e.clientY-b.top)*gc.height/b.height];}
+gc.onpointerdown=e=>{if(!predictOn)return;const[X,Y]=evp(e);const i=Math.floor(Y/GH);if(i<0||i>2)return;const G=GR[i],m=gmap(i,ranges()[G.k]);drawing={k:G.k,m,str:[[m.ix(X),m.iy(Y)]]};preds[G.k].push(drawing.str);gc.setPointerCapture(e.pointerId);};
+gc.onpointermove=e=>{if(!drawing)return;const[X,Y]=evp(e);drawing.str.push([Math.max(0,drawing.m.ix(X)),drawing.m.iy(Y)]);draw();};
+gc.onpointerup=()=>drawing=null;
+syncUI();$('presets').children[4].click();requestAnimationFrame(tick);
+</script></body></html>

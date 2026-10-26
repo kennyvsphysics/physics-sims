@@ -1,0 +1,249 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Shoot for Your Grade – Projectile Lab Sim</title>
+<style>
+body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6fa;color:#222}
+header{background:#234;color:#fff;padding:6px 14px}header h1{font-size:17px;margin:0}
+#wrap{display:flex;gap:10px;padding:8px}#left{flex:1;min-width:0}#right{width:470px;flex:none}
+.panel{background:#fff;border-radius:8px;box-shadow:0 1px 3px #0002;padding:8px;margin-bottom:8px}
+canvas{display:block}label{font-size:13px}.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px;margin:4px 0}
+button{padding:5px 9px;border:1px solid #889;border-radius:5px;background:#eef;cursor:pointer;font-size:13px}button:disabled{opacity:.45;cursor:not-allowed}
+button.on{background:#ffd76a}button.big{font-size:16px;padding:8px 14px;font-weight:bold}#shoot{background:#ffd7d7}#practice{background:#d7f5dd}
+.g{font-size:12px;color:#555}input[type=number]{width:72px}input[type=range]{width:100%}
+.sl{display:grid;grid-template-columns:170px 1fr 70px;gap:6px;align-items:center;font-size:13px;margin:3px 0}
+table{border-collapse:collapse;font-size:12px;width:100%}th,td{border:1px solid #ccd;padding:2px 4px;text-align:center}th{background:#eef2f8}
+.formula{font-family:Georgia,serif;font-size:14px;background:#f3f6ff;padding:6px 8px;border-radius:5px;line-height:1.65}
+#status{font-size:14px;font-weight:bold;background:#fffbe6;border-radius:5px;padding:6px;min-height:20px}
+#scoreBadge{font:bold 44px system-ui;color:#fff;background:#2a8a3a;border-radius:12px;padding:4px 16px;text-align:center}
+details summary{cursor:pointer;font-weight:bold;font-size:14px}.key{background:#fff0f0;border:1px dashed #d55;padding:4px 6px;border-radius:5px;font-size:12px}
+.meas{font-family:monospace;font-size:12px;max-height:110px;overflow:auto;background:#f8f8fb;border:1px solid #dde;padding:4px}
+</style></head><body>
+<header><h1>Shoot for Your Grade — predict where the ball lands, place the target, take one shot</h1></header>
+<div id="wrap"><div id="left">
+ <div class="panel"><canvas id="scene"></canvas>
+  <div class="row"><button class="big" id="practice">▶ Practice roll (caught at the edge)</button><button id="testShot">Test shot onto floor (not graded)</button>
+   <button class="big" id="shoot">🎯 Shoot for your grade!</button>
+   <label>Speed <select id="speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option></select></label>
+   <button id="mH">📏 Measure H</button><button id="mh">📏 Measure h</button></div>
+  <div id="status"></div></div>
+ <div class="panel"><b>Floor (top view)</b> <span class="g">— drag the target along the floor, or type the bullseye distance. x is measured from the plumb line under the table edge.</span>
+  <canvas id="floor"></canvas>
+  <div class="row">Bullseye at x = <input type="number" id="tx" step="0.1"> cm <button id="placeBtn">Place target here</button> <span id="tState" class="g"></span></div></div>
+ <div class="panel"><div style="display:flex;gap:14px;flex-wrap:wrap">
+  <div style="flex:1;min-width:330px"><b>Lab setup</b>
+   <div class="row">Group: <input id="group" value="Group 1" style="width:110px"> <button id="newSetup">🎲 New lab table (next group)</button></div>
+   <div id="sliders">
+    <div class="sl"><span>Table height H (m)</span><input type="range" id="H" min="0.60" max="1.20" step="0.001"><input type="number" id="HN" step="0.001"></div>
+    <div class="sl"><span>Ramp release height h (m)</span><input type="range" id="h" min="0.02" max="0.40" step="0.001"><input type="number" id="hN" step="0.001"></div></div>
+   <div id="hiddenNote" class="g" style="display:none">🔒 Random lab table: H and h are hidden — measure them with the meter stick.</div>
+   <div class="row">Photogate spacing D = <input type="number" id="D" step="0.01" min="0.1" max="0.8"> m · Timer: <select id="timer"><option value="gate">photogates (0.1 ms)</option><option value="stopwatch">hand stopwatch</option></select></div>
+   <div class="g">Measurements (practice rolls):</div><div class="meas" id="measLog"></div>
+   <div class="row"><button id="clearMeas">Clear measurements</button><span class="g" id="measAvg"></span></div>
+  </div>
+  <div style="flex:1;min-width:330px"><b>Your prediction</b>
+   <div class="row">H = <input type="number" id="pH" step="0.001"> m &nbsp; D = <input type="number" id="pD" step="0.01"> m &nbsp; Δt = <input type="number" id="pt" step="0.0001"> s <button id="useAvg">use average Δt</button></div>
+   <div class="formula" id="calc"></div>
+   <div class="row"><button id="toTarget">Put the bullseye at my predicted x</button></div>
+  </div></div></div>
+</div>
+<div id="right">
+ <div class="panel"><div style="display:flex;gap:10px;align-items:flex-start"><canvas id="zoom" width="230" height="230"></canvas>
+  <div style="flex:1"><div id="scoreBadge" style="visibility:hidden">10</div><div id="result" style="font-size:13px;margin-top:6px"></div></div></div></div>
+ <div class="panel"><details open><summary>Teacher settings</summary>
+  <div class="row">Model: <select id="model"><option value="ideal">Ideal sliding: v = √(2gh)</option><option value="rolling" selected>Rolling solid sphere: v = √(10gh/7)</option><option value="real">Real lab: hidden 3–10 % speed loss (must measure v)</option></select></div>
+  <div class="row">g = <select id="g"><option>9.8</option><option>9.81</option><option>10</option></select> m/s² · <label><input type="checkbox" id="random"> random lab tables</label> · <label><input type="checkbox" id="allowTest"> allow test shots</label></div>
+  <div class="row">Bullseye radius <input type="number" id="bull" step="0.1" min="0.2"> cm · ring width <input type="number" id="ring" step="0.1" min="0.2"> cm · miss score <input type="number" id="miss" step="1" style="width:50px"></div>
+  <div class="row">Official shots per setup <input type="number" id="perSetup" min="1" max="5" style="width:45px"> · stopwatch error SD <select id="swSD"><option>0.05</option><option selected>0.08</option><option>0.10</option></select> s · <label><input type="checkbox" id="scatter"> small sideways scatter</label></div>
+  <div class="row"><label><input type="checkbox" id="showKey"> show answer key</label></div><div id="key" class="key" style="display:none"></div>
+ </details></div>
+ <div class="panel"><details><summary>Extension: reverse challenge — find the ramp height</summary>
+  <div class="g">The teacher puts a target at a fixed spot. Do practice rolls from any test height, measure v, then work out the release height h that lands the ball on the bullseye. Hint: x = v√(2H/g), and v ∝ √h, so h<sub>needed</sub> = h<sub>test</sub>·(v<sub>needed</sub>/v<sub>test</sub>)².</div>
+  <div class="row"><button id="revStart">Start reverse challenge</button><span id="revInfo" class="g"></span></div>
+  <div class="row" id="revRow" style="display:none">My release height h = <input type="number" id="revH" step="0.001"> m <button id="revShoot">Shoot from this height</button></div></details></div>
+ <div class="panel"><div class="row"><b>Results</b><button id="csv">⬇ CSV</button><button id="clearRes">Clear</button></div>
+  <div style="max-height:240px;overflow:auto" id="resWrap"><table id="res"><thead><tr><th>Group</th><th>Setup</th><th>H (m)</th><th>h (m)</th><th>Model</th><th>Pred. x (cm)</th><th>Actual x (cm)</th><th>Error (cm)</th><th>Error %</th><th>Score</th></tr></thead><tbody></tbody></table></div></div>
+</div></div>
+<script>
+// ---- SHOOT FOR YOUR GRADE: physics core (shared with headless tests) ----
+// Coordinates (m): x along the floor/table, x = 0 at the table edge (plumb point on the floor), + toward the target.
+// y up, floor y = 0, tabletop y = H. Ramp release height h = vertical drop of the ball down the ramp.
+// The ball is treated as leaving the edge horizontally when its center passes x = 0; its center then falls exactly H
+// (it starts r above the tabletop and lands when it is r above the floor), so x_land = v·√(2H/g) measured from the
+// plumb line to the point on the floor directly below the ball's center at touchdown.
+const MODELS={ideal:'Ideal sliding: v = √(2gh)',rolling:'Rolling solid sphere: v = √(10gh/7)',real:'Real lab: rolling with a hidden energy loss — measure v!'};
+function vIdeal(g,h){ return Math.sqrt(2*g*h); }
+function vRolling(g,h){ return Math.sqrt(10*g*h/7); }
+function launchSpeed(trial,g){ // deterministic for a given trial -> practice and official shots match
+  const m=trial.model; if(m==='ideal') return vIdeal(g,trial.h); const v=vRolling(g,trial.h); return m==='real'? v*(1-trial.loss) : v; }
+function flightTime(H,g){ return Math.sqrt(2*H/g); }
+function landingX(v,H,g){ return v*flightTime(H,g); }
+function gateTime(D,v,res){ res=res||1e-4; return Math.round(D/v/res)*res; }          // photogate, 0.1 ms resolution
+function stopwatchTime(D,v,sd,rng){ const z=gauss(rng); return Math.max(0.01,Math.round((D/v+sd*z)*100)/100); } // human, 0.01 s display
+function speedFromTiming(D,t){ return D/t; }
+function score(dist_m,bull_m,ring_m,missScore){ // inclusive boundaries: on the line counts for the inner (higher) ring
+  const pts=[10,9,8,7,6]; for(let i=0;i<5;i++){ if(dist_m<=bull_m+i*ring_m+1e-12) return pts[i]; } return missScore; }
+function ringRadii(bull_m,ring_m){ return [0,1,2,3,4].map(i=>bull_m+i*ring_m); }
+// reverse challenge: ramp height needed to land at X (rolling/ideal theory, or scaled from a measured test since v ∝ √h)
+function hForTarget(X,H,g,model){ const v=X/flightTime(H,g); return model==='ideal'? v*v/(2*g) : 7*v*v/(10*g); }
+function hScaled(X,H,g,hTest,vTest){ const v=X/flightTime(H,g); return hTest*(v/vTest)*(v/vTest); }
+// seeded RNG (mulberry32) + gaussian
+function rngFrom(seed){ let a=seed>>>0; return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}; }
+function gauss(rng){ rng=rng||Math.random; const u=1-rng(),v=rng(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+// a lab station: random setups draw H, h and a hidden loss from a seed
+function makeTrial(o){ const r=rngFrom(o.seed||1);
+  const t={seed:o.seed||1,model:o.model||'rolling',H:o.H,h:o.h,loss:0,lateral:0};
+  if(o.random){ t.H=Math.round((0.75+0.25*r())*1000)/1000; t.h=Math.round((0.06+0.20*r())*1000)/1000; } else { r(); r(); }
+  t.loss=0.03+0.07*r();                       // 3–10 % speed loss (used only in 'real' model)
+  t.lateral=gauss(r)*0.008;                    // optional sideways scatter (m), only if enabled
+  return t; }
+// timeline of one run: ramp (uniform accel along incline), table (constant v), flight (projectile)
+function timeline(trial,g,geo){ // geo:{rampAngleDeg, tableRun (ramp bottom -> edge), catchAtEdge}
+  const v=launchSpeed(trial,g), th=geo.rampAngleDeg*Math.PI/180, L=trial.h/Math.sin(th), aR=v*v/(2*L);
+  const tR=v>0?2*L/v:0, tT=geo.tableRun/v, tF=flightTime(trial.H,g), xR0=-geo.tableRun-L*Math.cos(th);
+  const pos=t=>{ if(t<=tR){const s=0.5*aR*t*t; return {phase:'ramp',x:xR0+s*Math.cos(th),y:trial.H+trial.h-s*Math.sin(th),vx:aR*t*Math.cos(th),vy:-aR*t*Math.sin(th)};}
+    t-=tR; if(t<=tT||geo.catchAtEdge){const tt=Math.min(t,tT); return {phase:t>tT?'caught':'table',x:-geo.tableRun+v*tt,y:trial.H,vx:t>tT?0:v,vy:0};}
+    t-=tT; const tf=Math.min(t,tF); return {phase:t>=tF?'landed':'flight',x:v*tf,y:trial.H-0.5*g*tf*tf,vx:v,vy:-g*tf}; };
+  return {v,tR,tT,tF,total:tR+tT+(geo.catchAtEdge?0:tF),pos,xLand:v*tF,L,xR0}; }
+if(typeof module!=='undefined') module.exports={MODELS,vIdeal,vRolling,launchSpeed,flightTime,landingX,gateTime,stopwatchTime,speedFromTiming,score,ringRadii,hForTarget,hScaled,rngFrom,gauss,makeTrial,timeline};
+
+const $=id=>document.getElementById(id);
+const GEO={rampAngleDeg:25,tableRun:1.10,ballR:0.0127};
+const S={g:9.8,model:'rolling',H:0.900,h:0.150,random:false,D:0.50,timer:'gate',swSD:0.08,allowTest:false,bull:2,ring:2,miss:5,perSetup:1,scatter:false,showKey:false,targetX:0.60,targetPlaced:false,setupNo:1,seed:(Math.random()*1e9)|0};
+let trial,run=null,last=null,meas=[],results=[],shotsThisSetup=0,meter=null,lastShot=null,rev=null,dragT=false;
+function newTrial(){trial=makeTrial({seed:S.seed,model:S.model,random:S.random,H:S.H,h:S.h});if(S.random){S.H=trial.H;S.h=trial.h;}}
+function gateX(){const b=-0.12;return [b-S.D,b];}             // gate A and B positions on the table (m, edge at 0)
+function setStatus(s){$('status').innerHTML=s;}
+// ---------- sync ----------
+function syncUI(){$('H').value=S.H;$('HN').value=S.H.toFixed(3);$('h').value=S.h;$('hN').value=S.h.toFixed(3);$('D').value=S.D.toFixed(2);$('timer').value=S.timer;
+ $('sliders').style.display=S.random?'none':'block';$('hiddenNote').style.display=S.random?'block':'none';
+ $('model').value=S.model;$('g').value=String(S.g);$('random').checked=S.random;$('allowTest').checked=S.allowTest;$('bull').value=S.bull;$('ring').value=S.ring;$('miss').value=S.miss;$('perSetup').value=S.perSetup;$('swSD').value=String(S.swSD);
+ $('scatter').checked=S.scatter;$('showKey').checked=S.showKey;$('testShot').disabled=!S.allowTest;$('tx').value=(S.targetX*100).toFixed(1);
+ if(!$('pD').value)$('pD').value=S.D.toFixed(2);
+ $('shoot').disabled=!!run||shotsThisSetup>=S.perSetup||!S.targetPlaced||!!rev;$('practice').disabled=!!run;
+ $('tState').textContent=S.targetPlaced?`target placed at ${(S.targetX*100).toFixed(1)} cm`:'target not placed yet';
+ const v=launchSpeed(trial,S.g);$('key').style.display=S.showKey?'block':'none';
+ $('key').innerHTML=`Answer key: H = ${trial.H.toFixed(3)} m, h = ${trial.h.toFixed(3)} m, v = ${v.toFixed(3)} m/s${S.model==='real'?` (loss ${(trial.loss*100).toFixed(1)} %)`:''}, t = ${flightTime(trial.H,S.g).toFixed(4)} s, x = <b>${(landingX(v,trial.H,S.g)*100).toFixed(1)} cm</b>`;
+ calc();}
+function setupChanged(){newTrial();meas=[];shotsThisSetup=0;lastShot=null;run=null;meter=null;renderMeas();$('scoreBadge').style.visibility='hidden';$('result').innerHTML='';syncUI();draw();}
+[['H','HN'],['h','hN']].forEach(([a,b])=>{const f=v=>{S[a]=+v;setupChanged();};$(a).oninput=e=>f(e.target.value);$(b).onchange=e=>f(e.target.value);});
+$('D').onchange=e=>{S.D=Math.min(0.8,Math.max(0.1,+e.target.value));$('pD').value=S.D.toFixed(2);meas=[];renderMeas();syncUI();draw();};
+$('timer').onchange=e=>{S.timer=e.target.value;};
+$('model').onchange=e=>{S.model=e.target.value;setupChanged();};$('g').onchange=e=>{S.g=+e.target.value;setupChanged();};
+$('random').onchange=e=>{S.random=e.target.checked;S.seed=(Math.random()*1e9)|0;setupChanged();};
+$('allowTest').onchange=e=>{S.allowTest=e.target.checked;syncUI();};
+['bull','ring','miss','perSetup'].forEach(k=>$(k).onchange=e=>{S[k]=+e.target.value;syncUI();draw();});
+$('swSD').onchange=e=>{S.swSD=+e.target.value;};$('scatter').onchange=e=>{S.scatter=e.target.checked;};$('showKey').onchange=e=>{S.showKey=e.target.checked;syncUI();};
+$('newSetup').onclick=()=>{S.seed=(Math.random()*1e9)|0;S.setupNo++;S.targetPlaced=false;rev=null;$('revRow').style.display='none';$('revInfo').textContent='';
+ const m=$('group').value.match(/^(.*?)(\d+)$/);if(m)$('group').value=m[1]+(+m[2]+1);['pH','pt'].forEach(i=>$(i).value='');setupChanged();setStatus('New lab table. Measure, practice, predict, place the target, then shoot!');};
+// ---------- runs ----------
+function startRun(kind,hOverride){if(run)return;let tr=trial;if(hOverride!=null)tr={...trial,h:hOverride};
+ const tl=timeline(tr,S.g,{...GEO,catchAtEdge:kind==='practice'});const [ga,gb]=gateX();
+ const tA=tl.tR+(ga+GEO.tableRun)/tl.v,tB=tl.tR+(gb+GEO.tableRun)/tl.v;
+ run={kind,tl,t:0,tA,tB,timed:false,lat:S.scatter?trial.lateral:0,h:tr.h};last=null;
+ setStatus(kind==='practice'?'Practice roll… the ball will be caught at the table edge.':kind==='test'?'Test shot (not graded)…':'🎯 Official shot!');syncUI();}
+$('practice').onclick=()=>startRun('practice');$('testShot').onclick=()=>{if(S.allowTest)startRun('test');};
+$('shoot').onclick=()=>{if(!S.targetPlaced){setStatus('Place the target first.');return;}if(shotsThisSetup>=S.perSetup)return;startRun('official');};
+function tick(ts){if(run){if(last!=null){let rate=+$('speed').value;const p=run.tl.pos(run.t);
+  if(run.kind!=='practice'&&p.phase==='flight'&&p.y<0.4*trial.H)rate*=0.15;                 // slow motion near landing
+  run.t+=Math.min(0.05,(ts-last)/1000)*rate;
+  if(!run.timed&&run.t>=run.tB){run.timed=true;const dt=S.timer==='gate'?gateTime(S.D,run.tl.v):stopwatchTime(S.D,run.tl.v,S.swSD);
+   meas.push({kind:run.kind,timer:S.timer,D:S.D,dt,h:run.h});renderMeas();}
+  if(run.t>=run.tl.total){run.t=run.tl.total;finishRun();}}last=ts;draw();}requestAnimationFrame(tick);}
+function finishRun(){const r=run;run=null;
+ if(r.kind==='practice'){setStatus(`Caught at the edge. ${S.timer==='gate'?'Photogates':'Stopwatch'}: Δt = ${meas.at(-1).dt.toFixed(S.timer==='gate'?4:2)} s over D = ${S.D.toFixed(2)} m.`);}
+ else{const x=r.tl.xLand,y=r.lat,d=Math.hypot(x-S.targetX,y),sc=score(d,S.bull/100,S.ring/100,S.miss);
+  lastShot={x,y,d,sc,kind:r.kind,pred:S.targetX};
+  if(r.kind==='official'){shotsThisSetup++;const err=x-S.targetX;results.push({group:$('group').value,setup:S.setupNo,H:trial.H,h:r.h,model:S.model,pred:S.targetX,x,err,pct:err/x*100,d,score:sc,rev:!!rev});renderResults();
+   $('scoreBadge').style.visibility='visible';$('scoreBadge').textContent=sc;$('scoreBadge').style.background=sc>=9?'#2a8a3a':sc>=6?'#c98a00':'#b33';ding(sc);}
+  $('result').innerHTML=`<b>${r.kind==='official'?'Official shot':'Test shot (not graded)'}</b><br>Landed at x = <b>${(x*100).toFixed(1)} cm</b>${y?` (${(y*100).toFixed(1)} cm sideways)`:''}<br>Bullseye at ${(S.targetX*100).toFixed(1)} cm → off by <b>${(d*100).toFixed(1)} cm</b> (${((x-S.targetX)/x*100).toFixed(1)} % ${x>S.targetX?'long':'short'})<br>Score: <b>${sc}</b>${sc===S.miss&&d>(S.bull+4*S.ring)/100?' (missed the target)':''}`;
+  setStatus(r.kind==='official'?`Score ${sc}! ${shotsThisSetup>=S.perSetup?'Click “New lab table” for the next group.':''}`:'Test shot done — this one does not count.');}
+ syncUI();}
+let actx=null;function ding(sc){try{actx=actx||new AudioContext();const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=sc>=9?880:sc>=6?660:220;g.gain.setValueAtTime(0.2,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+0.5);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+0.5);}catch(e){}}
+// ---------- measurements & prediction ----------
+function renderMeas(){$('measLog').innerHTML=meas.length?meas.map((m,i)=>`${i+1}. ${m.kind.padEnd(8)} ${m.timer==='gate'?'photogates':'stopwatch '}  D=${m.D.toFixed(2)} m  Δt=${m.dt.toFixed(m.timer==='gate'?4:2)} s  → v=${(m.D/m.dt).toFixed(3)} m/s${rev?'  (h='+m.h.toFixed(3)+')':''}`).join('<br>'):'<span class="g">No practice rolls yet — click “Practice roll”.</span>';
+ const cur=meas.filter(m=>m.D===S.D);if(cur.length){const a=cur.reduce((s,m)=>s+m.dt,0)/cur.length;$('measAvg').textContent=`average Δt = ${a.toFixed(4)} s (${cur.length} roll${cur.length>1?'s':''}) → v = ${(S.D/a).toFixed(3)} m/s`;}else $('measAvg').textContent='';}
+$('clearMeas').onclick=()=>{meas=[];renderMeas();};
+$('useAvg').onclick=()=>{const cur=meas.filter(m=>m.D===S.D);if(!cur.length){setStatus('Do a practice roll first.');return;}$('pt').value=(cur.reduce((s,m)=>s+m.dt,0)/cur.length).toFixed(4);$('pD').value=S.D.toFixed(2);calc();};
+['pH','pD','pt'].forEach(i=>$(i).oninput=calc);
+let predX=null;
+function calc(){const H=parseFloat($('pH').value),D=parseFloat($('pD').value),dt=parseFloat($('pt').value),g=S.g;let s='';predX=null;
+ if(D>0&&dt>0){const v=D/dt;s+=`Launch speed: v = D/Δt = ${D.toFixed(2)} m / ${dt.toFixed(4)} s = <b>${v.toFixed(3)} m/s</b><br>`;
+  if(H>0){const t=Math.sqrt(2*H/g);predX=v*t;s+=`Fall time: t = √(2H/g) = √(2 × ${H.toFixed(3)} m / ${g} m/s²) = <b>${t.toFixed(4)} s</b><br>Landing distance: x = v·t = ${v.toFixed(3)} × ${t.toFixed(4)} = <b>${predX.toFixed(3)} m = ${(predX*100).toFixed(1)} cm</b>`;}
+  else s+='<span class="g">Enter the table height H you measured.</span>';}
+ else s='<span class="g">Measure Δt over the photogate distance D with practice rolls, and H with the meter stick. Then: v = D/Δt, t = √(2H/g), x = v·t.</span>';
+ s+=`<br><span class="g">Theory check (from h): ideal √(2gh), rolling √(10gh/7). ${S.model==='real'?'In “real lab” mode the real ball is slower than the rolling formula — trust your measurement.':''} The ball leaves the table horizontally, so v<sub>y0</sub> = 0 and its horizontal speed stays v.</span>`;
+ $('calc').innerHTML=s;}
+$('toTarget').onclick=()=>{if(predX==null){setStatus('Complete the calculation first.');return;}if(rev)return;S.targetX=predX;S.targetPlaced=true;syncUI();draw();};
+$('tx').onchange=()=>{if(rev)return;const v=parseFloat($('tx').value);if(v>0){S.targetX=v/100;S.targetPlaced=true;syncUI();draw();}};$('placeBtn').onclick=$('tx').onchange;
+// meter stick
+$('mH').onclick=()=>{meter={what:'H'};draw();setStatus(`Meter stick (floor → tabletop): H = <b>${trial.H.toFixed(3)} m</b> (read to the nearest mm)`);if(!$('pH').value)$('pH').value=trial.H.toFixed(3);calc();};
+$('mh').onclick=()=>{meter={what:'h'};draw();setStatus(`Meter stick (tabletop → ball at the release mark): h = <b>${trial.h.toFixed(3)} m</b> (read to the nearest mm)`);};
+// reverse challenge
+$('revStart').onclick=()=>{const X=Math.round((0.35+0.4*Math.random())*1000)/1000;rev={X};S.targetX=X;S.targetPlaced=true;$('revRow').style.display='flex';$('revInfo').textContent=`Target fixed at x = ${(X*100).toFixed(1)} cm. Practice from any height, then shoot from your computed h.`;shotsThisSetup=0;syncUI();draw();};
+$('revShoot').onclick=()=>{const h=parseFloat($('revH').value);if(!(h>0&&h<=0.6)){setStatus('Enter a release height between 0 and 0.6 m.');return;}if(shotsThisSetup>=S.perSetup){setStatus('Official shots used up — New lab table to try again.');return;}startRun('official',h);};
+// ---------- results ----------
+function renderResults(){const tb=$('res').tBodies[0];tb.innerHTML=results.map(r=>`<tr><td>${r.group}</td><td>${r.setup}${r.rev?' (rev)':''}</td><td>${r.H.toFixed(3)}</td><td>${r.h.toFixed(3)}</td><td>${r.model}</td><td>${(r.pred*100).toFixed(1)}</td><td>${(r.x*100).toFixed(1)}</td><td>${(Math.abs(r.err)<0.0005?0:r.err*100).toFixed(1)}</td><td>${(Math.abs(r.pct)<0.05?0:r.pct).toFixed(1)}</td><td><b>${r.score}</b></td></tr>`).join('');$('resWrap').scrollTop=1e6;}
+$('clearRes').onclick=()=>{if(confirm('Clear all results?')){results=[];renderResults();}};
+$('csv').onclick=()=>{let s='Group,Setup,Reverse challenge,Table height H (m),Release height h (m),Model,g,Predicted x (cm),Actual x (cm),Error (cm),Error %,Distance from bullseye (cm),Score\n';
+ results.forEach(r=>s+=`"${r.group}",${r.setup},${r.rev?'yes':'no'},${r.H.toFixed(3)},${r.h.toFixed(3)},${r.model},${S.g},${(r.pred*100).toFixed(1)},${(r.x*100).toFixed(1)},${(r.err*100).toFixed(1)},${r.pct.toFixed(1)},${(r.d*100).toFixed(1)},${r.score}\n`);
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/csv'}));a.download='shoot_for_your_grade_results.csv';a.click();};
+// ---------- drawing ----------
+const SC={W:900,H:430},FL={W:900,H:150};let vw=null;
+function setupCanvas(id,W,H){const c=$(id),dpr=window.devicePixelRatio||1;c.style.width=W+'px';c.style.height=H+'px';c.width=W*dpr;c.height=H*dpr;const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);return g;}
+function layout(){const W=$('scene').parentNode.clientWidth-2;SC.W=W;FL.W=W;draw();}window.addEventListener('resize',layout);
+function rings(){return ringRadii(S.bull/100,S.ring/100);}
+function draw(){const g=setupCanvas('scene',SC.W,SC.H),W=SC.W,H=SC.H;
+ const L=trial.h/Math.sin(GEO.rampAngleDeg*Math.PI/180),xR0=-GEO.tableRun-L*Math.cos(GEO.rampAngleDeg*Math.PI/180);
+ const xmin=xR0-0.25,xmax=Math.max(1.6,S.targetX+0.25,lastShot?lastShot.x+0.2:0),ymax=trial.H+trial.h+0.25;
+ const s=Math.min((W-20)/(xmax-xmin),(H-30)/ymax),X=x=>10+(x-xmin)*s,Y=y=>H-20-y*s;vw={X,Y,s};
+ g.fillStyle='#eef4fb';g.fillRect(0,0,W,H);g.fillStyle='#c9b48f';g.fillRect(0,Y(0),W,H-Y(0));g.fillStyle='#a8916a';g.fillRect(0,Y(0),W,3);
+ // table
+ g.fillStyle='#7a5a3a';g.fillRect(X(xmin+0.05),Y(trial.H),X(0)-X(xmin+0.05),8);g.fillRect(X(xmin+0.12),Y(trial.H)+8,10,Y(0)-Y(trial.H)-8);g.fillRect(X(-0.1),Y(trial.H)+8,10,Y(0)-Y(trial.H)-8);
+ // plumb line
+ g.strokeStyle='#555';g.setLineDash([4,4]);g.lineWidth=1;g.beginPath();g.moveTo(X(0),Y(trial.H));g.lineTo(X(0),Y(0));g.stroke();g.setLineDash([]);g.fillStyle='#333';g.beginPath();g.moveTo(X(0)-4,Y(0)-8);g.lineTo(X(0)+4,Y(0)-8);g.lineTo(X(0),Y(0)-1);g.fill();
+ g.font='11px sans-serif';g.fillText('plumb line: x = 0',X(0)+4,Y(0)-12);
+ // ramp
+ const th=GEO.rampAngleDeg*Math.PI/180,rx1=-GEO.tableRun,ry=trial.H;g.fillStyle='#9aa7b8';g.beginPath();g.moveTo(X(xR0),Y(ry+trial.h));g.lineTo(X(rx1),Y(ry));g.lineTo(X(xR0),Y(ry));g.fill();g.strokeStyle='#567';g.lineWidth=2;g.beginPath();g.moveTo(X(xR0),Y(ry+trial.h));g.lineTo(X(rx1),Y(ry));g.stroke();
+ g.fillStyle='#c00';g.fillRect(X(xR0)-2,Y(ry+trial.h+GEO.ballR*2)-2,4,8);g.font='11px sans-serif';g.fillText('release',X(xR0)-14,Y(ry+trial.h)-14);
+ // gates
+ const [ga,gb]=gateX(),p=run?run.tl.pos(run.t):null;[ga,gb].forEach((x,i)=>{const blocked=p&&Math.abs(p.x-x)<GEO.ballR&&p.phase==='table';g.strokeStyle='#333';g.lineWidth=3;const top=Y(trial.H)-34;
+  g.beginPath();g.moveTo(X(x)-9,Y(trial.H));g.lineTo(X(x)-9,top);g.lineTo(X(x)+9,top);g.lineTo(X(x)+9,Y(trial.H));g.stroke();g.fillStyle=blocked?'#f22':'#4c4';g.beginPath();g.arc(X(x),top-6,4,0,7);g.fill();g.fillStyle='#000';g.font='bold 11px sans-serif';g.fillText(i?'B':'A',X(x)-4,top-13);});
+ g.strokeStyle='#333';g.lineWidth=1;g.beginPath();g.moveTo(X(ga),Y(trial.H)-48);g.lineTo(X(gb),Y(trial.H)-48);g.stroke();g.fillStyle='#000';g.font='11px sans-serif';g.fillText('D = '+S.D.toFixed(2)+' m',(X(ga)+X(gb))/2-26,Y(trial.H)-52);
+ // catcher at edge (practice)
+ if(run&&run.kind==='practice'||(!run&&meas.length&&!lastShot)){g.fillStyle='#e8b894';g.fillRect(X(0)+1,Y(trial.H)-18,9,18);g.font='10px sans-serif';g.fillStyle='#333';g.fillText('catch',X(0)+12,Y(trial.H)-8);}
+ // target on floor (side view)
+ const R=rings(),cols=['#d22','#fff','#d22','#fff','#d22'];if(S.targetPlaced){for(let i=4;i>=0;i--){g.fillStyle=cols[i];g.fillRect(X(S.targetX-R[i]),Y(0)-3,2*R[i]*s,4);}g.strokeStyle='#222';g.lineWidth=1;g.beginPath();g.moveTo(X(S.targetX),Y(0)-10);g.lineTo(X(S.targetX),Y(0));g.stroke();}
+ // floor tape
+ g.fillStyle='#333';g.font='10px sans-serif';for(let cm=0;cm<=xmax*100;cm+=10){const px=X(cm/100);g.fillRect(px,Y(0)+3,1,cm%50===0?8:4);if(cm%50===0)g.fillText(cm+' cm',px-12,Y(0)+18);}
+ // meter stick
+ if(meter){const [y0,y1,x]=meter.what==='H'?[0,trial.H,0.12]:[trial.H,trial.H+trial.h,xR0-0.06];g.fillStyle='#f5d76e';g.fillRect(X(x)-7,Y(y1+0.02),14,Y(y0)-Y(y1+0.02));g.strokeStyle='#000';
+  for(let mm=0;mm<=(y1-y0+0.02)*1000;mm+=10){const py=Y(y0+mm/1000);g.beginPath();g.moveTo(X(x)-7,py);g.lineTo(X(x)-7+(mm%100===0?12:6),py);g.stroke();}
+  g.strokeStyle='#06c';g.lineWidth=2;g.beginPath();g.moveTo(X(x)-12,Y(y1));g.lineTo(X(x)+12,Y(y1));g.stroke();g.fillStyle='#06c';g.font='bold 13px sans-serif';g.fillText((meter.what==='H'?'H = ':'h = ')+(y1-y0).toFixed(3)+' m',X(x)+12,Y((y0+y1)/2));}
+ // previous landing mark
+ if(lastShot){g.fillStyle='#000';g.beginPath();g.arc(X(lastShot.x),Y(0)-2,3,0,7);g.fill();}
+ // trajectory trail + ball
+ if(run){g.strokeStyle='#06c8';g.lineWidth=2;g.beginPath();for(let t=0;t<=run.t;t+=0.004){const q=run.tl.pos(t);t?g.lineTo(X(q.x),Y(q.y+GEO.ballR)):g.moveTo(X(q.x),Y(q.y+GEO.ballR));}g.stroke();}
+ const q=run?p:{x:xR0+0.0,y:trial.H+trial.h};const br=Math.max(5,GEO.ballR*s);g.fillStyle='#8899aa';g.strokeStyle='#223';g.lineWidth=1.5;g.beginPath();g.arc(X(q.x),Y(q.y)-br,br,0,7);g.fill();g.stroke();
+ if(run&&run.kind!=='practice'&&p.phase==='flight'&&p.y<0.4*trial.H){g.fillStyle='#c00';g.font='bold 14px sans-serif';g.fillText('slow motion',X(p.x)+12,Y(p.y)-10);}
+ g.fillStyle='#234';g.font='12px sans-serif';g.fillText(`Setup ${S.setupNo} · model: ${S.model==='real'?'real lab (hidden losses)':S.model} · g = ${S.g} m/s²`+(S.random?' · H and h hidden — measure them':` · H = ${trial.H.toFixed(3)} m, h = ${trial.h.toFixed(3)} m`),10,16);
+ drawFloor();drawZoom();}
+function drawFloor(){const W=FL.W,H=FL.H,g=setupCanvas('floor',W,H);const xmax=Math.max(1.6,S.targetX+0.25,lastShot?lastShot.x+0.2:0),s=(W-40)/(xmax+0.05),FX=x=>20+(x+0.05)*s,FY=y=>H/2-y*s;
+ g.fillStyle='#d8c6a3';g.fillRect(0,0,W,H);g.fillStyle='#7a5a3a';g.fillRect(0,0,FX(0),H);g.fillStyle='#fff';g.font='11px sans-serif';g.fillText('table',4,14);
+ g.strokeStyle='#555';g.setLineDash([4,4]);g.beginPath();g.moveTo(FX(0),0);g.lineTo(FX(0),H);g.stroke();g.setLineDash([]);
+ g.fillStyle='#f5d76e';g.fillRect(FX(0),H-22,FX(xmax)-FX(0),14);g.fillStyle='#000';for(let cm=0;cm<=xmax*100;cm+=5){const px=FX(cm/100);g.fillRect(px,H-22,1,cm%10===0?8:4);if(cm%10===0)g.fillText(cm,px-6,H-2);}
+ if(S.targetPlaced){const R=rings(),cols=['#d22','#fff','#d22','#fff','#d22'];for(let i=4;i>=0;i--){g.fillStyle=cols[i];g.strokeStyle='#600';g.beginPath();g.arc(FX(S.targetX),FY(0),R[i]*s,0,7);g.fill();g.stroke();}
+  g.fillStyle='#000';g.font='bold 11px sans-serif';g.fillText((S.targetX*100).toFixed(1)+' cm',FX(S.targetX)+R[4]*s+4,FY(0)+4);}
+ else{g.fillStyle='#555';g.font='13px sans-serif';g.fillText('Drag here (or type a distance) to place your target →',FX(0.1),FY(0));}
+ if(lastShot){g.fillStyle='#000';g.beginPath();g.arc(FX(lastShot.x),FY(lastShot.y),4,0,7);g.fill();g.strokeStyle='#ff0';g.lineWidth=1.5;g.stroke();}
+ FL.FX=FX;FL.inv=px=>(px-20)/s-0.05;}
+function drawZoom(){const c=$('zoom'),g=c.getContext('2d'),W=c.width,R=rings(),s=(W/2-14)/Math.max(R[4]*1.15,lastShot?Math.hypot(lastShot.x-S.targetX,lastShot.y)*1.1:0);g.clearRect(0,0,W,W);g.fillStyle='#d8c6a3';g.fillRect(0,0,W,W);
+ const cx=W/2,cy=W/2,cols=['#d22','#fff','#d22','#fff','#d22'],pts=[10,9,8,7,6];for(let i=4;i>=0;i--){g.fillStyle=cols[i];g.strokeStyle='#600';g.beginPath();g.arc(cx,cy,R[i]*s,0,7);g.fill();g.stroke();}
+ g.font='bold 11px sans-serif';for(let i=0;i<5;i++){g.fillStyle=cols[i]==='#fff'?'#d22':'#fff';g.fillText(pts[i],cx-6,cy-(i?(R[i-1]+R[i])/2:0)*s+4);}
+ g.fillStyle='#000';g.font='11px sans-serif';g.fillText(`bullseye r = ${S.bull} cm, rings +${S.ring} cm`,4,W-6);
+ if(lastShot){const px=cx+(lastShot.x-S.targetX)*s,py=cy-lastShot.y*s;g.strokeStyle='#000';g.lineWidth=2;g.beginPath();g.arc(px,py,6,0,7);g.stroke();g.fillStyle='#ffeb3b';g.beginPath();g.arc(px,py,4,0,7);g.fill();
+  g.fillStyle='#000';g.font='bold 12px sans-serif';g.fillText('landing',Math.min(px+8,W-50),py-8);}
+ else{g.fillStyle='#333';g.fillText('Zoomed target (after the shot)',4,14);}}
+// floor dragging
+const fpos=e=>{const b=$('floor').getBoundingClientRect();return FL.inv(e.clientX-b.left);};
+$('floor').onpointerdown=e=>{if(rev||run)return;const x=fpos(e);if(x<=0.02)return;dragT=true;S.targetX=+x.toFixed(3);S.targetPlaced=true;$('floor').setPointerCapture(e.pointerId);syncUI();draw();};
+$('floor').onpointermove=e=>{if(!dragT)return;const x=fpos(e);if(x>0.02){S.targetX=+x.toFixed(3);syncUI();draw();}};$('floor').onpointerup=()=>{dragT=false;};
+newTrial();syncUI();renderMeas();layout();setStatus('1) Measure H (and h) with the meter stick · 2) Practice rolls through the photogates · 3) Predict x · 4) Place the target · 5) Shoot for your grade!');requestAnimationFrame(tick);
+</script></body></html>

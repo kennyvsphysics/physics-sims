@@ -1,0 +1,197 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Free Fall – Motion Detector Sim</title>
+<style>
+body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6fa;color:#222}
+header{background:#234;color:#fff;padding:8px 14px}header h1{font-size:18px;margin:0}
+#wrap{display:flex;gap:10px;padding:10px}#left{flex:1.25;min-width:0}#right{width:460px}
+.panel{background:#fff;border-radius:8px;box-shadow:0 1px 3px #0002;padding:8px;margin-bottom:10px}
+canvas{display:block;width:100%}label{display:block;font-size:13px;margin:5px 0}
+input[type=range]{width:100%}.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px}
+button{padding:5px 9px;border:1px solid #889;border-radius:5px;background:#eef;cursor:pointer;font-size:13px}
+button.on{background:#ffd76a}.preset{background:#e6f4ea;text-align:left}
+#desc{font-size:13px;background:#fffbe6;padding:6px;border-radius:5px;min-height:34px}
+#readout{font-family:monospace;font-size:13px;white-space:pre}.g{font-size:12px;color:#555}
+#topscene{display:flex;gap:10px}#scene{width:330px;flex:none}#sceneSide{flex:1;min-width:0}
+#callout{background:#ffe3e3;border:2px solid #d33;border-radius:6px;padding:6px;font-size:14px;font-weight:bold;visibility:hidden;margin-top:6px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+</style></head><body>
+<header><h1>Free Fall — Vertical Motion with a Motion Detector</h1></header>
+<div id="wrap"><div id="left">
+ <div class="panel"><div id="topscene"><canvas id="scene" width="330" height="470"></canvas>
+  <div id="sceneSide">
+   <div class="row"><button id="play">▶ Play</button><button id="reset">⟲ Reset</button>
+    <label style="display:inline">Speed <select id="speed"><option value="1">1×</option><option value="0.5">0.5×</option><option value="0.25">0.25× (slow-mo)</option><option value="0.1">0.1×</option></select></label></div>
+   <div class="row" style="margin-top:6px"><button id="predict">✎ Predict mode: OFF</button><button id="clearPred">Clear sketches</button></div>
+   <div id="readout" style="margin-top:8px"></div>
+   <div id="callout">⬆ At the top: v = 0 but a = −g !<br><span style="font-weight:normal">The ball stops for an instant, but gravity never turns off — the velocity keeps changing at the same rate.</span></div>
+   <div id="desc" style="margin-top:8px"></div>
+   <div class="row" style="margin-top:8px"><label style="display:inline"><input type="checkbox" id="strobe" checked> Strobe / multiflash every</label>
+    <select id="strobeDt"><option>0.05</option><option selected>0.1</option><option>0.2</option></select> s
+    <label style="display:inline"><input type="checkbox" id="spread"> spread flashes sideways in time</label>
+    <label style="display:inline"><input type="checkbox" id="arrows" checked> v &amp; a arrows</label></div>
+  </div></div></div>
+ <div class="panel"><b>Scenarios</b><div class="row" id="presets"></div></div>
+ <div class="panel"><b>Controls</b>
+  <div class="row"><span>Coordinates:</span><button data-c="floorDet">Detector on floor ↑ (+ up)</button><button data-c="overDet">Detector overhead ↓ (+ down)</button><button data-c="up">Up is + (origin: floor)</button><button data-c="down">Down is + (origin: release point)</button></div>
+  <div class="cols">
+  <label>Initial height above floor/ground: <b id="h0V"></b> m<input type="range" id="h0" min="0" max="20" step="0.1"></label>
+  <label>Initial velocity (<span id="upHint"></span>): <b id="v0V"></b> m/s<input type="range" id="v0" min="-15" max="15" step="0.1"></label>
+  <label>g: <select id="g"><option value="9.8">Earth 9.8 m/s²</option><option value="10">Earth (rounded) 10 m/s²</option><option value="1.62">Moon 1.62 m/s²</option><option value="3.71">Mars 3.71 m/s²</option></select></label>
+  <label>At the floor: <select id="floor"><option value="stop">Land / stop</option><option value="bounce">Bounce</option></select>
+   &nbsp;<input type="checkbox" id="catch"> catch at release height</label>
+  <label>Coefficient of restitution e: <b id="eV"></b><input type="range" id="e" min="0" max="1" step="0.01"></label>
+  <label><input type="checkbox" id="drag"> Air drag (quadratic, F = kv²) — terminal speed v<sub>t</sub>: <b id="vtV"></b> m/s
+   <input type="range" id="vt" min="0.5" max="40" step="0.1"></label>
+  </div>
+  <div class="row">Object: <button id="objBall">Baseball (v<sub>t</sub>≈33 m/s)</button><button id="objFilt">Coffee filter (v<sub>t</sub>≈1.2 m/s)</button>
+   &nbsp; Second object B: <select id="cmp"><option value="none">none</option><option value="drop">B dropped from rest (same height, same instant)</option><option value="drag">A ideal (no air) vs B with drag</option><option value="moon">B on the Moon</option><option value="mars">B on Mars</option></select></div>
+  <p class="g">Drag: a = −g − (g/v<sub>t</sub>²)·v|v|, so speed approaches v<sub>t</sub>. Bounces assume a 0.01 s contact, so the a-t spike height is Δv/0.01 s (drawn clipped). Real sonic detectors can’t read closer than ~0.15 m.</p></div>
+</div>
+<div id="right"><div class="panel"><canvas id="graphs" width="460" height="690"></canvas>
+<p class="g">Graphs show what the detector / chosen coordinate system reports. <span style="color:#06c">Blue = A</span>, <span style="color:#e80">orange = B</span>, <span style="color:#d22">red = your prediction</span>. Time axis and scales auto-fit the whole run.</p></div></div></div>
+<script>
+// ---- FREE-FALL PHYSICS CORE (shared with headless test) ----
+// World frame: h = height above floor/ground (m), u = upward velocity (m/s).
+// p: {g, h0, u0, drag(bool), vt(terminal speed m/s), floor:'stop'|'bounce', e, catchAtRelease, tMax}
+function accelW(p,u){ let a=-p.g; if(p.drag) a-=(p.g/(p.vt*p.vt))*u*Math.abs(u); return a; }
+function rk4(p,h,u,dt){
+  const f=u=>accelW(p,u);
+  const k1h=u,k1u=f(u), k2h=u+0.5*dt*k1u,k2u=f(u+0.5*dt*k1u), k3h=u+0.5*dt*k2u,k3u=f(u+0.5*dt*k2u), k4h=u+dt*k3u,k4u=f(u+dt*k3u);
+  return [h+dt/6*(k1h+2*k2h+2*k3h+k4h), u+dt/6*(k1u+2*k2u+2*k3u+k4u)];
+}
+function adv(p,h,u,dt){ if(!p.drag) return [h+u*dt-0.5*p.g*dt*dt, u-p.g*dt]; return rk4(p,h,u,dt); }
+// time within [0,dt] at which height reaches target (moving downward), or -1
+function crossTime(p,h,u,dt,target){
+  if(!p.drag){ const A=-0.5*p.g,B=u,C=h-target; const D=B*B-4*A*C; if(D<0) return -1;
+    const r=(-B-Math.sqrt(D))/(2*A); return (r>=-1e-12&&r<=dt+1e-12)?Math.max(0,r):-1; }
+  let lo=0,hi=dt; for(let i=0;i<40;i++){const m=(lo+hi)/2; if(adv(p,h,u,m)[0]>target) lo=m; else hi=m;} return hi;
+}
+const TAU=0.01; // assumed contact time for bounce (s) -> a-t spike height = dv/TAU
+function simulate(p){
+  const dt=p.dt||0.0005, tMax=p.tMax||12, rec=0.004;
+  let t=0,h=p.h0,u=p.u0, out=[{t,h,u,a:accelW(p,u)}], peaks=[], events=[], lastRec=0, resting=false, end=null;
+  while(t<tMax){
+    if(resting){ t+=dt; if(t-lastRec>=rec){out.push({t,h:0,u:0,a:0});lastRec=t;} if(t>=end) break; continue; }
+    let [h2,u2]=adv(p,h,u,dt), step=dt;
+    // catch at release height on the way down
+    if(p.catchAtRelease && u2<0 && h>=p.h0-1e-12 && h2<p.h0 && t>0){ const tc=crossTime(p,h,u,dt,p.h0);
+      if(tc>=0){ const s=adv(p,h,u,tc); t+=tc; out.push({t,h:p.h0,u:s[1],a:accelW(p,s[1])}); out.push({t,h:p.h0,u:0,a:0,caught:true}); events.push({type:'caught',t,u:s[1]}); break; } }
+    if(h2<0){ const tc=crossTime(p,h,u,dt,0); const s=adv(p,h,u,tc); t+=tc; const uin=s[1];
+      out.push({t,h:0,u:uin,a:accelW(p,uin)});
+      if(p.floor==='bounce'){ const uout=-p.e*uin; out.push({t,h:0,u:uin,a:(uout-uin)/TAU,spike:true}); events.push({type:'bounce',t,uin,uout});
+        if(uout<0.05){ resting=true; out.push({t,h:0,u:0,a:0}); end=t+0.6; h=0;u=0; continue; }
+        out.push({t,h:0,u:uout,a:accelW(p,uout)}); const r=adv(p,0,uout,dt-tc); h=r[0];u=r[1]; t+=dt-tc;
+      } else { out.push({t,h:0,u:0,a:0,landed:true}); events.push({type:'landed',t,u:uin}); break; }
+    } else { if(u>0&&u2<=0){ const tp=u/(-accelW(p,u))*(p.drag?1:1); // refine peak exactly
+          let lo=0,hi=dt; for(let i=0;i<40;i++){const m=(lo+hi)/2; if(adv(p,h,u,m)[1]>0) lo=m; else hi=m;} const s=adv(p,h,u,hi); peaks.push({t:t+hi,h:s[0]}); }
+      h=h2;u=u2;t+=step; }
+    if(t-lastRec>=rec){ out.push({t,h,u,a:accelW(p,u)}); lastRec=t; }
+  }
+  return {out,peaks,events};
+}
+// Coordinate conversion. mode: 'floorDet' (+up, origin floor), 'overDet' (+down, origin at detector height D),
+// 'up' (+up, origin floor), 'down' (+down, origin at release point)
+function measure(mode,D,h0,s){ const sg=(mode==='overDet'||mode==='down')?-1:1;
+  const off= mode==='overDet'?D : mode==='down'?h0 : 0;
+  return {y:off+sg*s.h, v:sg*s.u, a:sg*s.a}; }
+if(typeof module!=='undefined') module.exports={accelW,simulate,measure,TAU};
+
+const P={coord:'floorDet',h0:2,v0:0,g:9.8,floor:'stop',catchAtRelease:false,e:0.8,drag:false,vt:33,cmp:'none'};
+const PRESETS=[
+ {n:'1. Dropped from rest',d:'Released from rest 2.0 m above the floor. With the floor detector (+ up): y decreases along a parabola, v is negative and growing linearly, a = −9.8 m/s² constant.',p:{h0:2,v0:0,floor:'stop',catchAtRelease:false,cmp:'none',drag:false}},
+ {n:'2. Thrown straight down',d:'Thrown downward at 3 m/s from 2.0 m. The v-t line starts at −3 m/s instead of 0 but has the SAME slope (−g) as the dropped ball.',p:{h0:2,v0:-3,floor:'stop',catchAtRelease:false,cmp:'drop',drag:false}},
+ {n:'3. Tossed up, caught at release height',d:'Tossed up at 5 m/s and caught at the release height (1.2 m). v goes from +5 to −5 m/s along one straight line; a = −g the whole time, including at the top. Time up = time down = v₀/g.',p:{h0:1.2,v0:5,floor:'stop',catchAtRelease:true,cmp:'none',drag:false}},
+ {n:'4. Tossed up from a cliff',d:'Tossed up at 8 m/s from a 15 m cliff, landing on the ground below. It passes the launch height moving at −8 m/s, then keeps speeding up until it hits the ground.',p:{h0:15,v0:8,floor:'stop',catchAtRelease:false,cmp:'none',drag:false}},
+ {n:'5. Bouncing ball',d:'Dropped from 1.5 m onto the floor with e = 0.8. v-t is a sawtooth: every segment has slope −g, and each bounce flips v almost instantly (spike in a-t). Each rebound height is e² = 0.64 of the previous one.',p:{h0:1.5,v0:0,floor:'bounce',e:0.8,catchAtRelease:false,cmp:'none',drag:false}},
+ {n:'6. Ball vs coffee filter (drag)',d:'A: ideal free fall (no air). B: coffee filter with air drag (v_t ≈ 1.2 m/s), both dropped from 2 m. B’s v-t curve flattens at −v_t and its a-t curve decays to 0.',p:{h0:2,v0:0,floor:'stop',catchAtRelease:false,cmp:'drag',vt:1.2,drag:false}},
+ {n:'7. Dropped vs tossed up together',d:'A is tossed up at 4 m/s while B is dropped from the same 3 m height at the same instant. Their v-t lines are parallel (same a = −g); A just starts 4 m/s higher.',p:{h0:3,v0:4,floor:'stop',catchAtRelease:false,cmp:'drop',drag:false}},
+ {n:'8. Same toss: Earth vs Moon',d:'Same 4 m/s toss from 1 m. On the Moon (g = 1.62) the v-t slope is about 1/6 as steep, so the ball goes about 6× higher and stays up 6× longer.',p:{h0:1,v0:4,floor:'stop',catchAtRelease:false,cmp:'moon',drag:false}},
+];
+const $=id=>document.getElementById(id);
+let preset=null,runs=[],tPlay=0,running=false,last=null,preds={y:[],v:[],a:[]},predictOn=false,drawing=null,D=3,AX=null;
+const sgn=()=>(P.coord==='overDet'||P.coord==='down')?-1:1;
+function params(){const u0=sgn()*P.v0;const A={g:P.g,h0:P.h0,u0,drag:P.drag&&P.cmp!=='drag',vt:P.vt,floor:P.floor,e:P.e,catchAtRelease:P.catchAtRelease,tMax:12};
+ const L=[A];if(P.cmp==='drop')L.push({...A,u0:0,catchAtRelease:false});if(P.cmp==='drag')L.push({...A,drag:true});
+ if(P.cmp==='moon')L.push({...A,g:1.62});if(P.cmp==='mars')L.push({...A,g:3.71});return L;}
+function rebuild(){runs=params().map(p=>({p,...simulate(p)}));
+ let hmax=0;runs.forEach(r=>r.out.forEach(s=>hmax=Math.max(hmax,s.h)));D=Math.ceil((hmax+0.4)*2)/2; // overhead detector mounted above highest point
+ const T=Math.max(...runs.map(r=>r.out[r.out.length-1].t));let R={y:[1e9,-1e9],v:[1e9,-1e9],a:[1e9,-1e9]};
+ runs.forEach(r=>r.out.forEach(s=>{const m=measure(P.coord,D,P.h0,s);R.y=[Math.min(R.y[0],m.y),Math.max(R.y[1],m.y)];R.v=[Math.min(R.v[0],m.v),Math.max(R.v[1],m.v)];if(!s.spike)R.a=[Math.min(R.a[0],m.a),Math.max(R.a[1],m.a)];}));
+ const pad=(r,mn)=>{let lo=Math.min(0,r[0]),hi=Math.max(0,r[1]);const sp=Math.max(hi-lo,mn);lo-=0.08*sp;hi+=0.08*sp;return[lo,hi];};
+ const am=Math.max(Math.abs(R.a[0]),Math.abs(R.a[1]),1)*1.25;
+ AX={T:Math.max(0.5,Math.ceil(T*1.05*2)/2),y:pad(R.y,0.5),v:pad(R.v,1),a:[-am,am]};reset();}
+function reset(){running=false;$('play').textContent='▶ Play';tPlay=0;draw();}
+function stateAt(r,t){const o=r.out;let lo=0,hi=o.length-1;if(t>=o[hi].t)return{...o[hi],done:true};
+ while(hi-lo>1){const m=(lo+hi)>>1;if(o[m].t<=t)lo=m;else hi=m;}const A=o[lo],B=o[hi];if(B.t===A.t)return A;
+ const f=(t-A.t)/(B.t-A.t);if(A.spike||B.spike)return f<0.5?{...A,spike:false,a:0}:{...B,spike:false};
+ return{t,h:A.h+(B.h-A.h)*f,u:A.u+(B.u-A.u)*f,a:A.a+(B.a-A.a)*f};}
+function syncUI(){['h0','v0','e','vt'].forEach(k=>$(k).value=P[k]);$('h0V').textContent=(+P.h0).toFixed(1);$('v0V').textContent=(+P.v0).toFixed(1);
+ $('eV').textContent=(+P.e).toFixed(2);$('vtV').textContent=(+P.vt).toFixed(1);$('g').value=String(P.g);$('floor').value=P.floor;$('catch').checked=P.catchAtRelease;
+ $('drag').checked=P.drag||P.cmp==='drag';$('drag').disabled=P.cmp==='drag';$('cmp').value=P.cmp;
+ document.querySelectorAll('[data-c]').forEach(b=>b.className=b.dataset.c===P.coord?'on':'');
+ $('upHint').textContent=sgn()>0?'toss UP = +':'toss UP = −';}
+function custom(){preset=null;$('desc').textContent='Custom setup.';}
+['h0','v0','e','vt'].forEach(k=>$(k).oninput=e=>{P[k]=+e.target.value;custom();syncUI();rebuild();});
+$('g').onchange=e=>{P.g=+e.target.value;custom();rebuild();};$('floor').onchange=e=>{P.floor=e.target.value;custom();rebuild();};
+$('catch').onchange=e=>{P.catchAtRelease=e.target.checked;custom();rebuild();};$('drag').onchange=e=>{P.drag=e.target.checked;custom();rebuild();};
+$('cmp').onchange=e=>{P.cmp=e.target.value;custom();syncUI();rebuild();};
+$('objBall').onclick=()=>{P.vt=33;if(P.cmp!=='drag')P.drag=true;syncUI();rebuild();};$('objFilt').onclick=()=>{P.vt=1.2;if(P.cmp!=='drag')P.drag=true;syncUI();rebuild();};
+document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{const s0=sgn();P.coord=b.dataset.c;if(sgn()!==s0)P.v0=-P.v0;syncUI();rebuild();});
+$('play').onclick=()=>{if(tPlay>=AX.T||runs.every(r=>stateAt(r,tPlay).done))tPlay=0;running=!running;$('play').textContent=running?'⏸ Pause':'▶ Play';last=null;};
+$('reset').onclick=reset;['strobe','strobeDt','spread','arrows'].forEach(k=>$(k).onchange=draw);
+$('predict').onclick=()=>{predictOn=!predictOn;$('predict').textContent='✎ Predict mode: '+(predictOn?'ON (draw on graphs)':'OFF');$('predict').className=predictOn?'on':'';};
+$('clearPred').onclick=()=>{preds={y:[],v:[],a:[]};draw();};
+PRESETS.forEach(pr=>{const b=document.createElement('button');b.className='preset';b.textContent=pr.n;b.onclick=()=>{Object.assign(P,{g:9.8,e:0.8,vt:33},pr.p);preset=pr;$('desc').innerHTML='<b>'+pr.n+':</b> '+pr.d;syncUI();rebuild();};$('presets').appendChild(b);});
+function tick(ts){if(running){if(last!=null){tPlay+=Math.min(0.05,(ts-last)/1000)*(+$('speed').value);
+  if(runs.every(r=>stateAt(r,tPlay).done)||tPlay>=AX.T){tPlay=Math.min(tPlay,AX.T);running=false;$('play').textContent='▶ Play';}}last=ts;draw();}requestAnimationFrame(tick);}
+const COL=['#06c','#e80'],NAME=['A','B'];
+function draw(){drawScene();drawGraphs();
+ let txt=`t = ${tPlay.toFixed(2)} s   (${P.coord==='floorDet'?'floor detector, + up':P.coord==='overDet'?'overhead detector at '+D.toFixed(1)+' m, + down':P.coord==='up'?'up is +, origin at floor':'down is +, origin at release point'})\n`;
+ let top=false;runs.forEach((r,i)=>{const s=stateAt(r,tPlay),m=measure(P.coord,D,P.h0,s);
+  txt+=`${runs.length>1?NAME[i]+': ':''}y = ${m.y.toFixed(3)} m  v = ${(m.v+0).toFixed(3)} m/s  a = ${(m.a+0).toFixed(2)} m/s²${s.done?(s.caught?'  [caught]':s.landed?'  [landed]':'  [at rest]'):''}\n`;
+  r.peaks.forEach(pk=>{if(tPlay>=pk.t-0.04&&tPlay<pk.t+1.2)top=true;});});
+ $('readout').textContent=txt;$('callout').style.visibility=top?'visible':'hidden';
+ $('callout').firstChild.textContent=`⬆ At the top: v = 0 but a = ${sgn()>0?'−':'+'}${P.g} m/s² !`;}
+function drawScene(){const c=$('scene'),g=c.getContext('2d'),W=c.width,H=c.height;g.clearRect(0,0,W,H);
+ const top=D+0.2,ground=H-40,sc=(ground-20)/top,Y=h=>ground-h*sc;
+ g.fillStyle='#eaf3ff';g.fillRect(0,0,W,ground);g.fillStyle='#8a6';g.fillRect(0,ground,W,H-ground);
+ // ledge / cliff at release height
+ if(P.h0>0.05){g.fillStyle=P.h0>4?'#a98':'#ccc';g.fillRect(0,Y(P.h0),70,P.h0>4?ground-Y(P.h0):6);g.fillStyle='#333';g.font='11px sans-serif';g.fillText((P.h0>4?'cliff ':'release ')+P.h0.toFixed(1)+' m',4,Y(P.h0)-4);}
+ // height scale
+ g.strokeStyle='#999';g.fillStyle='#555';g.font='10px sans-serif';const stp=top>12?2:top>6?1:top>3?0.5:0.25;
+ for(let h=0;h<=top;h+=stp){g.beginPath();g.moveTo(W-30,Y(h));g.lineTo(W-22,Y(h));g.stroke();g.fillText(h.toFixed(stp<1?2:0),W-20,Y(h)+3);}
+ g.fillText('height (m)',W-62,12);
+ // detector
+ const xs=runs.length>1?[130,215]:[170];g.fillStyle='#345';
+ if(P.coord==='floorDet'){xs.forEach(x=>{g.fillRect(x-14,ground-12,28,12);});g.fillStyle='#333';g.font='11px sans-serif';g.fillText('detector ↑ (+ up)',xs[0]-40,ground+28);}
+ if(P.coord==='overDet'){xs.forEach(x=>{g.fillStyle='#345';g.fillRect(x-14,Y(D),28,12);});g.fillStyle='#333';g.font='11px sans-serif';g.fillText('detector ↓ (+ down) at '+D.toFixed(1)+' m',xs[0]-40,Y(D)-4);}
+ if(P.coord==='up'||P.coord==='down'){g.fillStyle='#333';g.font='bold 12px sans-serif';g.fillText((P.coord==='up'?'↑ + (origin: floor)':'↓ + (origin: release)'),80,16);
+  if(P.coord==='down'){g.strokeStyle='#06c';g.setLineDash([4,3]);g.beginPath();g.moveTo(80,Y(P.h0));g.lineTo(W-35,Y(P.h0));g.stroke();g.setLineDash([]);g.fillStyle='#06c';g.fillText('y = 0',W-70,Y(P.h0)-3);}}
+ runs.forEach((r,i)=>{const x=xs[i],s=stateAt(r,tPlay),col=COL[i];
+  if($('strobe').checked){const dts=+$('strobeDt').value;g.fillStyle=col+'88';const tEnd=r.out[r.out.length-1].t;for(let t=0;t<=Math.min(tPlay,tEnd)+1e-9;t+=dts){const q=stateAt(r,t);const dx=$('spread').checked?(t/AX.T)*(W-60-x)*0.9:0;g.beginPath();g.arc(x+dx,Y(q.h)-7,4,0,7);g.fill();}}
+  const by=Y(s.h)-7;g.fillStyle=col;g.beginPath();g.arc(x,by,7,0,7);g.fill();g.fillStyle='#fff';g.font='bold 9px sans-serif';if(runs.length>1)g.fillText(NAME[i],x-3,by+3);
+  if($('arrows').checked){const ar=(val,col,dx,lab,scl)=>{if(Math.abs(val)<1e-3)return;const L=-val*scl;g.strokeStyle=g.fillStyle=col;g.lineWidth=3;g.beginPath();g.moveTo(x+dx,by);g.lineTo(x+dx,by+L);g.stroke();
+    g.beginPath();g.moveTo(x+dx,by+L);g.lineTo(x+dx-5,by+L-Math.sign(L)*8);g.lineTo(x+dx+5,by+L-Math.sign(L)*8);g.fill();g.font='12px sans-serif';g.fillText(lab,x+dx+6,by+L/2);};
+   ar(s.u,'#06c',-16,'v',Math.min(12,140/Math.max(1,Math.abs(AX.v[0]),Math.abs(AX.v[1]))));ar(s.spike?0:s.a,'#c0c',16,'a',6);}});
+ g.lineWidth=1;g.fillStyle='#333';g.font='11px sans-serif';g.fillText(P.drag||P.cmp==='drag'?'air drag ON'+(P.cmp==='drag'?' (B only)':''):'no air resistance',4,ground+14);}
+const GR=[{k:'y',lab:'position y (m)',f:m=>m.y},{k:'v',lab:'velocity v (m/s)',f:m=>m.v},{k:'a',lab:'acceleration a (m/s²)',f:m=>m.a}],GH=230,ML=50;
+function gmap(i){const r=AX[GR[i].k],top=i*GH+12,h=GH-42,w=460-ML-12;return{tx:t=>ML+t/AX.T*w,ty:y=>top+h-(y-r[0])/(r[1]-r[0])*h,ix:X=>(X-ML)/w*AX.T,iy:Yp=>r[0]+(top+h-Yp)/h*(r[1]-r[0]),top,h,w,r};}
+function nice(x){const p=Math.pow(10,Math.floor(Math.log10(x))),f=x/p;return(f<1.5?1:f<3?2:f<7?5:10)*p;}
+function drawGraphs(){const c=$('graphs'),g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);
+ GR.forEach((G,i)=>{const m=gmap(i),r=m.r;g.lineWidth=1;g.font='10px sans-serif';g.fillStyle='#666';g.strokeStyle='#ddd';
+  const ts=nice(AX.T/8);for(let t=0;t<=AX.T+1e-9;t+=ts){g.beginPath();g.moveTo(m.tx(t),m.top);g.lineTo(m.tx(t),m.top+m.h);g.stroke();g.fillText(+t.toFixed(2),m.tx(t)-4,m.top+m.h+12);}
+  const ys=nice((r[1]-r[0])/5);for(let y=Math.ceil(r[0]/ys)*ys;y<=r[1];y+=ys){g.beginPath();g.moveTo(ML,m.ty(y));g.lineTo(ML+m.w,m.ty(y));g.stroke();g.fillText(+y.toFixed(2),4,m.ty(y)+3);}
+  g.strokeStyle='#000';g.lineWidth=1.5;g.beginPath();g.moveTo(ML,m.ty(0));g.lineTo(ML+m.w,m.ty(0));g.moveTo(ML,m.top);g.lineTo(ML,m.top+m.h);g.stroke();
+  g.fillStyle='#000';g.font='bold 12px sans-serif';g.fillText(G.lab,ML+6,m.top+12);g.font='10px sans-serif';g.fillText('t (s)',ML+m.w-22,m.top+m.h+26);
+  g.strokeStyle='#d22';g.lineWidth=2;preds[G.k].forEach(str=>{g.beginPath();str.forEach((p,j)=>j?g.lineTo(m.tx(p[0]),m.ty(p[1])):g.moveTo(m.tx(p[0]),m.ty(p[1])));g.stroke();});
+  g.save();g.beginPath();g.rect(ML,m.top,m.w,m.h);g.clip();
+  runs.forEach((run,ri)=>{g.strokeStyle=COL[ri];g.lineWidth=2;g.beginPath();let j=0;
+   for(const s of run.out){if(s.t>tPlay)break;const v=G.f(measure(P.coord,D,P.h0,s)),X=m.tx(s.t),Yp=m.ty(v);j++?g.lineTo(X,Yp):g.moveTo(X,Yp);}
+   const cur=stateAt(run,tPlay);if(j){const v=G.f(measure(P.coord,D,P.h0,cur));g.lineTo(m.tx(Math.min(tPlay,cur.t)),m.ty(v));}g.stroke();
+   if(G.k==='a'){run.out.forEach(s=>{if(s.spike&&s.t<=tPlay){g.fillStyle=COL[ri];g.font='10px sans-serif';const up=G.f(measure(P.coord,D,P.h0,s))>0;g.fillText(up?'▲':'▼',m.tx(s.t)-4,up?m.top+10:m.top+m.h-2);}});}});
+  g.restore();if(G.k==='a'&&runs.some(r=>r.events.some(e=>e.type==='bounce'))){g.fillStyle='#555';g.font='10px sans-serif';g.fillText('spikes = bounce impulse (≈Δv/0.01 s, clipped)',ML+150,m.top+12);}});}
+const gc=$('graphs');function evp(e){const b=gc.getBoundingClientRect();return[(e.clientX-b.left)*gc.width/b.width,(e.clientY-b.top)*gc.height/b.height];}
+gc.onpointerdown=e=>{if(!predictOn)return;const[X,Yp]=evp(e);const i=Math.floor(Yp/GH);if(i<0||i>2)return;const m=gmap(i);drawing={m,str:[[Math.max(0,m.ix(X)),m.iy(Yp)]]};preds[GR[i].k].push(drawing.str);gc.setPointerCapture(e.pointerId);};
+gc.onpointermove=e=>{if(!drawing)return;const[X,Yp]=evp(e);drawing.str.push([Math.max(0,drawing.m.ix(X)),drawing.m.iy(Yp)]);draw();};
+gc.onpointerup=()=>drawing=null;
+syncUI();$('presets').children[2].click();requestAnimationFrame(tick);
+</script></body></html>

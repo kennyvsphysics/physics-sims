@@ -1,0 +1,294 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Golf Range – Projectile Motion Sim</title>
+<style>
+body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6fa;color:#222}
+header{background:#234;color:#fff;padding:6px 14px}header h1{font-size:17px;margin:0}
+#wrap{display:flex;gap:10px;padding:8px}#left{flex:1;min-width:0}#right{width:490px;flex:none}
+.panel{background:#fff;border-radius:8px;box-shadow:0 1px 3px #0002;padding:8px;margin-bottom:8px}
+canvas{display:block}label{font-size:13px}.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px;margin:4px 0}
+button{padding:5px 9px;border:1px solid #889;border-radius:5px;background:#eef;cursor:pointer;font-size:13px}
+button.on{background:#ffd76a}button.big{font-size:16px;padding:7px 14px;font-weight:bold}#launch{background:#d7f5dd}
+.preset{background:#e6f4ea}.g{font-size:12px;color:#555}
+input[type=range]{width:100%}.sl{display:grid;grid-template-columns:150px 1fr 74px;gap:6px;align-items:center;font-size:13px;margin:3px 0}
+.sl input[type=number]{width:66px}
+table{border-collapse:collapse;font-size:12px;width:100%}th,td{border:1px solid #ccd;padding:2px 4px;text-align:center}th{background:#eef2f8}
+#readout{font-family:monospace;font-size:13px;white-space:pre;line-height:1.45}
+.formula{font-family:Georgia,serif;font-size:14px;background:#f3f6ff;padding:6px 8px;border-radius:5px;line-height:1.6}
+#banner{white-space:nowrap;position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font:bold 40px system-ui;color:#fff;background:#2a8a3a;padding:10px 26px;border-radius:12px;box-shadow:0 4px 18px #0006;display:none;pointer-events:none}
+#sceneBox{position:relative}#callout{background:#ffe3e3;border:2px solid #d33;border-radius:6px;padding:4px 6px;font-size:13px;font-weight:bold;visibility:hidden;margin-top:4px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+</style></head><body>
+<header><h1>Golf Range — Projectile Motion (launch angle, speed, height, gravity, air)</h1></header>
+<div id="wrap"><div id="left">
+ <div class="panel"><div id="sceneBox"><canvas id="scene"></canvas><div id="banner">HOLE IN ONE!</div></div>
+  <div class="row"><button class="big" id="launch">🏌 Swing!</button><button id="pause">⏸ Pause</button><button id="reset">⟲ Reset ball</button>
+   <label>Speed <select id="speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="5">5×</option><option value="10">10×</option></select></label>
+   <button id="stepB">◀ 0.1 s</button><button id="stepF">0.1 s ▶</button>
+   <span style="flex:1;min-width:120px"><input type="range" id="scrub" min="0" max="1" step="0.001" value="0" title="scrub through the current shot"></span></div>
+  <div class="row">
+   <label><input type="checkbox" id="showGrid" checked> grid</label><label><input type="checkbox" id="showPaths" checked> show paths</label><button id="clearPaths">Clear paths</button>
+   <label><input type="checkbox" id="strobe" checked> strobe every</label><select id="strobeDt"><option>0.1</option><option>0.25</option><option selected>0.5</option><option>1</option><option>2</option></select> s
+   <label><input type="checkbox" id="vec" checked> velocity vector</label><label><input type="checkbox" id="comps" checked> components (v<sub>x</sub>, v<sub>y</sub>)</label>
+   <label><input type="checkbox" id="equal" checked> true shape (equal axes)</label><label><input type="checkbox" id="lockView"> lock view</label></div>
+  <div class="row"><b>Tools:</b><button id="tapeBtn">📏 Tape measure (drag on field)</button>
+   <span>⏱ Stopwatch (sim time): <b id="swV">0.00 s</b></span><button id="swStart">Start</button><button id="swStop">Stop</button><button id="swReset">Reset</button>
+   <label><input type="checkbox" id="sound" checked> sound</label></div>
+  <div class="row" id="presets"><b>Setups:</b></div>
+ </div>
+ <div class="panel"><div class="cols">
+  <div>
+   <div class="sl"><span>v<sub>initial</sub> (m/s)</span><input type="range" id="v" min="0" max="100" step="0.5"><input type="number" id="vN" min="0" max="100" step="0.1"></div>
+   <div class="sl"><span>Launch angle θ (°)</span><input type="range" id="th" min="0" max="90" step="0.1"><input type="number" id="thN" min="0" max="90" step="0.1"></div>
+   <div class="sl">Launch height h (m)<input type="range" id="h" min="0" max="200" step="0.5"><input type="number" id="hN" min="0" max="200" step="0.1"></div>
+   <div class="sl">Hole distance (m)<input type="range" id="hole" min="5" max="1000" step="1"><input type="number" id="holeN" min="5" max="1000" step="0.5"></div>
+   <div class="row">Hole-in-one zone: ± <select id="tol"><option>0.5</option><option selected>1</option><option>2</option><option>5</option></select> m
+    <button id="fireComp">Fire θ and 90° − θ</button></div>
+  </div>
+  <div>
+   <div class="row">Gravity: <select id="planet"><option value="earth">Earth 9.8 m/s²</option><option value="earth2">Earth 9.81 m/s²</option><option value="moon">Moon 1.62 m/s²</option><option value="mars">Mars 3.71 m/s²</option><option value="jupiter">Jupiter 24.79 m/s²</option><option value="custom">Custom…</option></select></div>
+   <div class="sl" id="gRow">g (m/s²)<input type="range" id="g" min="0.5" max="30" step="0.01"><input type="number" id="gN" min="0.1" max="30" step="0.01"></div>
+   <div class="row">Atmosphere: <button id="airNone">None (ideal)</button><button id="airOn">Air (drag)</button></div>
+   <div id="airBox">
+    <div class="row">Ball: <select id="ball"><option value="golf">Golf ball (45.9 g, 42.7 mm)</option><option value="pingpong">Ping-pong ball (2.7 g, 40 mm)</option><option value="baseball">Baseball (145 g, 74 mm)</option><option value="custom">Custom</option></select></div>
+    <div class="sl">Mass (g)<input type="range" id="m" min="1" max="200" step="0.1"><input type="number" id="mN" step="0.1"></div>
+    <div class="sl">Diameter (mm)<input type="range" id="d" min="20" max="100" step="0.1"><input type="number" id="dN" step="0.1"></div>
+    <div class="sl"><span>Drag coeff. C<sub>d</sub></span><input type="range" id="cd" min="0.1" max="0.6" step="0.01"><input type="number" id="cdN" step="0.01"></div>
+    <div class="sl">Air density ρ (kg/m³)<input type="range" id="rho" min="0" max="2" step="0.005"><input type="number" id="rhoN" step="0.005"></div>
+    <div class="g" id="kInfo"></div></div>
+  </div></div>
+  <div class="row" style="border-top:1px solid #ddd;padding-top:6px"><label><input type="checkbox" id="predict"> <b>Predict mode</b>: predict before you swing →</label>
+   range <input type="number" id="pR" style="width:70px" step="0.1"> m, max height <input type="number" id="pH" style="width:60px" step="0.1"> m, hang time <input type="number" id="pT" style="width:55px" step="0.01"> s
+   <span class="g">(or click the fairway to plant a prediction flag)</span></div>
+  <div class="row"><b>🎯 Hole-in-one challenge:</b><button id="chNew">New random hole</button><label><input type="checkbox" id="chH"> random launch height</label><label><input type="checkbox" id="chP"> random planet</label>
+   <span id="chInfo" class="g"></span></div>
+ </div>
+</div>
+<div id="right">
+ <div class="panel"><div id="readout"></div><div id="callout">At the top: v<sub>y</sub> = 0 but v<sub>x</sub> ≠ 0 — the ball is still moving sideways, and a<sub>y</sub> is still −g.</div><div id="predOut" class="g"></div></div>
+ <div class="panel"><canvas id="graphs" width="474" height="300"></canvas><div class="g">Current shot vs time (revealed as it flies). Dashed gray = same launch with no air.</div></div>
+ <div class="panel"><canvas id="rva" width="474" height="200"></canvas><div class="g" id="rvaInfo"></div></div>
+ <div class="panel"><b>AP Physics 1 connections</b><div id="ap" class="formula"></div></div>
+ <div class="panel"><div class="row"><b>Shots</b><button id="csv">⬇ CSV</button><button id="clearData">Clear table</button></div>
+  <div style="max-height:220px;overflow:auto" id="tblWrap"><table id="tbl"><thead><tr><th>#</th><th>g</th><th>Air</th><th>v₀ (m/s)</th><th>θ (°)</th><th>h (m)</th><th>Range (m)</th><th>Max ht (m)</th><th>Hang (s)</th><th>Hole (m)</th><th>Result</th><th>Pred. R (err)</th></tr></thead><tbody></tbody></table></div></div>
+</div></div>
+<script>
+// ---- PROJECTILE PHYSICS CORE (shared with headless test) ----
+// Frame: x horizontal (m, + downrange), y height above the fairway (m, + up). Launch from (0, h).
+// Ground: the launch platform/cliff top (y = h) for x <= 0, the fairway (y = 0) for x > 0.
+// Quadratic drag: a = -k|v|v - g ŷ,  k = ρ·Cd·A / (2m)  (no spin/lift modeled)
+const BALLS={golf:{name:'Golf ball',m:0.0459,d:0.0427,Cd:0.25},pingpong:{name:'Ping-pong ball',m:0.0027,d:0.040,Cd:0.50},baseball:{name:'Baseball',m:0.145,d:0.074,Cd:0.30}};
+function kDrag(rho,Cd,m,d){ return 0.5*rho*Cd*Math.PI*d*d/4/m; }
+function idealFlight(v,thDeg,g,h){ const th=thDeg*Math.PI/180, vx=v*Math.cos(th), vy=v*Math.sin(th);
+  let T; if(vx<1e-12&&h>0) T=Math.max(0,2*vy/g); else T=(vy+Math.sqrt(vy*vy+2*g*h))/g;
+  return {vx,vy,T,R:vx*T,H:h+(vy>0?vy*vy/(2*g):0),tApex:Math.max(0,vy/g)}; }
+function deriv(s,g,k){ const sp=Math.hypot(s[2],s[3]); return [s[2],s[3],-k*sp*s[2],-g-k*sp*s[3]]; }
+function rk4(s,dt,g,k){ const a=deriv(s,g,k), b=deriv(s.map((x,i)=>x+0.5*dt*a[i]),g,k), c=deriv(s.map((x,i)=>x+0.5*dt*b[i]),g,k), e=deriv(s.map((x,i)=>x+dt*c[i]),g,k);
+  return s.map((x,i)=>x+dt/6*(a[i]+2*b[i]+2*c[i]+e[i])); }
+function simulate(p){ // p:{v,theta,h,g,k,dt?,rec?,noPts?}
+  const th=p.theta*Math.PI/180, g=p.g, k=p.k||0, ground=x=>x<=1e-9?p.h:0;
+  const id=idealFlight(p.v,p.theta,g,p.h), dt=p.dt||Math.min(0.004,Math.max(2e-4,id.T/5000));
+  const every=Math.max(1,Math.round((p.rec||0.01)/dt));
+  let s=[0,p.h,p.v*Math.cos(th),p.v*Math.sin(th)], t=0, n=0, H=p.h, apex={t:0,x:0,y:p.h};
+  const pack=(t,s)=>{const sp=Math.hypot(s[2],s[3]);return {t,x:s[0],y:s[1],vx:s[2],vy:s[3],ax:-k*sp*s[2],ay:-g-k*sp*s[3]};};
+  const pts=p.noPts?null:[pack(0,s)];
+  while(t<5000){
+    let nx=rk4(s,dt,g,k);
+    if(s[3]>0&&nx[3]<=0){ let lo=0,hi=dt; for(let i=0;i<50;i++){const m=(lo+hi)/2; if(rk4(s,m,g,k)[3]>0) lo=m; else hi=m;} const a=rk4(s,hi,g,k); apex={t:t+hi,x:a[0],y:a[1]}; H=Math.max(H,a[1]); }
+    if(nx[3]<=0&&nx[1]<ground(nx[0])){ let lo=0,hi=dt; for(let i=0;i<60;i++){const m=(lo+hi)/2,q=rk4(s,m,g,k); if(q[1]>ground(q[0])) lo=m; else hi=m;}
+      s=rk4(s,hi,g,k); t+=hi; s[1]=ground(s[0]); if(pts) pts.push(pack(t,s)); break; }
+    s=nx; t+=dt; n++; H=Math.max(H,s[1]); if(pts&&n%every===0) pts.push(pack(t,s));
+  }
+  const sp=Math.hypot(s[2],s[3]);
+  return {pts,R:s[0],T:t,H,apex,land:{vx:s[2],vy:s[3],speed:sp,angle:Math.atan2(-s[3],s[2])*180/Math.PI}};
+}
+function rangeAt(p,theta){ return simulate({...p,theta,noPts:true}).R; }
+// optimum launch angle: 1° scan then golden-section refinement
+function optimumAngle(p){ let best=0,bR=-1; for(let a=0;a<=90;a+=1){const R=rangeAt(p,a); if(R>bR){bR=R;best=a;}}
+  let lo=Math.max(0,best-1),hi=Math.min(90,best+1); const gr=(Math.sqrt(5)-1)/2;
+  let c=hi-gr*(hi-lo),d=lo+gr*(hi-lo),fc=rangeAt(p,c),fd=rangeAt(p,d);
+  for(let i=0;i<40;i++){ if(fc>fd){hi=d;d=c;fd=fc;c=hi-gr*(hi-lo);fc=rangeAt(p,c);} else {lo=c;c=d;fc=fd;d=lo+gr*(hi-lo);fd=rangeAt(p,d);} }
+  const th=(lo+hi)/2; return {theta:th,R:rangeAt(p,th)}; }
+function holeResult(R,D,tol){ const e=R-D; return {err:e,hole:Math.abs(e)<=tol,text:Math.abs(e)<=tol?'HOLE IN ONE!':(e<0?'short by '+(-e).toFixed(1)+' m':'long by '+e.toFixed(1)+' m')}; }
+if(typeof module!=='undefined') module.exports={BALLS,kDrag,idealFlight,simulate,rangeAt,optimumAngle,holeResult};
+
+const $=id=>document.getElementById(id);
+const PLANETS={earth:{g:9.8,rho:1.225,name:'Earth'},earth2:{g:9.81,rho:1.225,name:'Earth'},moon:{g:1.62,rho:0,name:'Moon'},mars:{g:3.71,rho:0.020,name:'Mars'},jupiter:{g:24.79,rho:0.16,name:'Jupiter'},custom:{g:9.8,rho:1.225,name:'Custom'}};
+const S={v:45,th:30,h:0,hole:150,tol:1,planet:'earth',g:9.8,air:true,ball:'golf',m:45.9,d:42.7,cd:0.25,rho:1.225};
+const COLORS=['#d62728','#1f77b4','#2ca02c','#9467bd','#ff7f0e','#17becf','#8c564b','#e377c2','#555'];
+let shots=[],cur=-1,tPlay=0,running=false,last=null,view=null,tape=null,tapeOn=false,dragging=null,sw={on:false,t0:0,acc:0},predFlag=null,ch={on:false,strokes:0,holes:0},bannerUntil=0,rvaCache=null;
+function kNow(){return S.air?kDrag(S.rho,S.cd,S.m/1000,S.d/1000):0;}
+function params(over){return Object.assign({v:S.v,theta:S.th,h:S.h,g:S.g,k:kNow(),rec:0.01},over||{});}
+// ---------- UI sync ----------
+const SL=[['v','vN'],['th','thN'],['h','hN'],['hole','holeN'],['g','gN'],['m','mN'],['d','dN'],['cd','cdN'],['rho','rhoN']];
+const KEY={v:'v',th:'th',h:'h',hole:'hole',g:'g',m:'m',d:'d',cd:'cd',rho:'rho'};
+function syncUI(){SL.forEach(([a,b])=>{$(a).value=S[KEY[a]];$(b).value=+(+S[KEY[a]]).toFixed(a==='cd'||a==='g'?2:a==='rho'?3:1);});
+ $('planet').value=S.planet;$('gRow').style.opacity=S.planet==='custom'?1:0.55;$('g').disabled=$('gN').disabled=S.planet!=='custom';
+ $('airNone').className=S.air?'':'on';$('airOn').className=S.air?'on':'';$('airBox').style.opacity=S.air?1:0.45;$('ball').value=S.ball;
+ const k=kDrag(S.rho,S.cd,S.m/1000,S.d/1000);$('kInfo').innerHTML=`k = ρC<sub>d</sub>A/(2m) = ${k.toFixed(5)} m⁻¹ → terminal speed √(g/k) = ${k>0?Math.sqrt(S.g/k).toFixed(1)+' m/s':'∞ (no air)'}. Spin/lift (Magnus) not modeled.`;
+ $('tol').value=String(S.tol);}
+function changed(){if(!running)resetBall(true);rvaCache=null;scheduleRVA();syncUI();draw();}
+SL.forEach(([a,b])=>{const set=v=>{v=+v;if(isNaN(v))return;S[KEY[a]]=v;if(['m','d','cd'].includes(a))S.ball='custom';if(a==='rho'&&S.planet!=='custom'){} changed();};
+ $(a).oninput=e=>set(e.target.value);$(b).onchange=e=>set(e.target.value);});
+$('planet').onchange=e=>{S.planet=e.target.value;const p=PLANETS[S.planet];if(S.planet!=='custom'){S.g=p.g;S.rho=p.rho;}changed();};
+$('airNone').onclick=()=>{S.air=false;changed();};$('airOn').onclick=()=>{S.air=true;changed();};
+$('ball').onchange=e=>{S.ball=e.target.value;const b=BALLS[S.ball];if(b){S.m=b.m*1000;S.d=b.d*1000;S.cd=b.Cd;}changed();};
+$('tol').onchange=e=>{S.tol=+e.target.value;draw();};
+['showGrid','showPaths','strobe','strobeDt','vec','comps','equal','lockView'].forEach(id=>$(id).onchange=()=>{if(id==='equal')view=null;draw();});
+$('clearPaths').onclick=()=>{shots.forEach((s,i)=>{if(i!==cur)s.hidden=true;});view=null;draw();};
+// ---------- shots ----------
+function launch(over){if(running)return false;
+ const pr=$('predict').checked?{R:parseFloat($('pR').value),H:parseFloat($('pH').value),T:parseFloat($('pT').value)}:null;
+ if(pr&&isNaN(pr.R)&&predFlag!=null)pr.R=predFlag;
+ if(pr&&isNaN(pr.R)){flashMsg('Predict mode: enter a predicted range (or click the fairway) first.');return false;}
+ const p=params(over),res=simulate(p),ideal=p.k>0?simulate({...p,k:0}):null;
+ const shot={n:shots.length+1,color:COLORS[shots.length%COLORS.length],p,res,ideal,air:S.air,planet:S.planet,hole:S.hole,tol:S.tol,pred:pr,done:false,hidden:false,rho:S.rho,cd:S.cd,m:S.m,d:S.d};
+ shots.push(shot);cur=shots.length-1;tPlay=0;running=true;last=null;if(!$('lockView').checked)view=null;if(ch.on)ch.strokes++;
+ $('scrub').max=res.T;$('pause').textContent='⏸ Pause';$('predOut').innerHTML='';if($('sound').checked)thwack();refreshTable();return true;}
+function land(s){s.done=true;const hr=holeResult(s.res.R,s.hole,s.tol);s.result=hr;
+ if(hr.hole){bannerUntil=performance.now()+2500;$('banner').textContent=ch.on?`HOLE IN ONE! (${ch.strokes} stroke${ch.strokes>1?'s':''})`:'HOLE IN ONE!';if($('sound').checked)jingle();if(ch.on){ch.holes++;ch.on=false;}}
+ if(s.pred){const e=(a,b)=>isNaN(a)?'':`${a.toFixed(2)} vs ${b.toFixed(2)} (${((a-b)/b*100).toFixed(1)}% )`;
+  $('predOut').innerHTML=`<b>Prediction check</b> — range: predicted ${e(s.pred.R,s.res.R)}`+(isNaN(s.pred.H)?'':`; max height: ${e(s.pred.H,s.res.H)}`)+(isNaN(s.pred.T)?'':`; hang time: ${e(s.pred.T,s.res.T)}`);}
+ predFlag=null;updateChInfo();refreshTable();}
+function resetBall(keep){running=false;tPlay=0;if(!keep)cur=-1;else cur=-1;$('pause').textContent='⏸ Pause';draw();}
+$('launch').onclick=()=>launch();$('reset').onclick=()=>resetBall();
+$('pause').onclick=()=>{if(cur<0)return;const s=shots[cur];if(s.done&&!running)return;running=!running;last=null;$('pause').textContent=running?'⏸ Pause':'▶ Resume';};
+const step=dt=>{if(cur<0)return;running=false;$('pause').textContent='▶ Resume';tPlay=Math.min(Math.max(0,tPlay+dt),shots[cur].res.T);if(tPlay>=shots[cur].res.T&&!shots[cur].done)land(shots[cur]);draw();};
+$('stepB').onclick=()=>step(-0.1);$('stepF').onclick=()=>step(0.1);
+$('scrub').oninput=e=>{if(cur<0)return;running=false;$('pause').textContent='▶ Resume';tPlay=+e.target.value;if(tPlay>=shots[cur].res.T-1e-9&&!shots[cur].done)land(shots[cur]);draw();};
+$('fireComp').onclick=()=>{if(running)return;const th0=S.th;launch();const s1=cur;const wait=()=>{if(shots[s1].done){S.th=+(90-th0).toFixed(1);syncUI();launch();S.th=th0;syncUI();}else setTimeout(wait,100);};wait();};
+// stopwatch on sim time
+const swNow=()=>sw.acc+(sw.on?tPlay-sw.t0:0);
+$('swStart').onclick=()=>{if(!sw.on){sw.on=true;sw.t0=tPlay;}};$('swStop').onclick=()=>{if(sw.on){sw.acc+=tPlay-sw.t0;sw.on=false;}};$('swReset').onclick=()=>{sw={on:false,t0:0,acc:0};};
+// challenge
+function updateChInfo(){$('chInfo').innerHTML=ch.on?`Hole at ${S.hole.toFixed(1)} m${S.h?' from a '+S.h.toFixed(1)+' m platform':''} on ${PLANETS[S.planet].name} (g = ${S.g}) · strokes: ${ch.strokes}`:(ch.holes?`Holes-in-one so far: ${ch.holes}. Click “New random hole”.`:'');}
+$('chNew').onclick=()=>{if($('chP').checked){const ks=['earth','moon','mars','jupiter'];S.planet=ks[Math.floor(Math.random()*ks.length)];S.g=PLANETS[S.planet].g;S.rho=PLANETS[S.planet].rho;}
+ if($('chH').checked)S.h=Math.round(Math.random()*60);
+ const best=S.air?optimumAngle({...params({v:80,rec:1,dt:undefined})}).R:idealFlight(80,Math.atan(80/Math.sqrt(6400+2*S.g*S.h))*180/Math.PI,S.g,S.h).R;
+ S.hole=Math.round((0.2+0.6*Math.random())*Math.min(best,1000)*2)/2;ch={...ch,on:true,strokes:0};view=null;changed();updateChInfo();};
+// sound
+let actx=null;function ac(){if(!actx){try{actx=new AudioContext();}catch(e){}}if(actx&&actx.state==='suspended')actx.resume();return actx;}
+function tone(f,t0,dur,type){const a=ac();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(0.2,a.currentTime+t0);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+t0+dur);o.connect(g);g.connect(a.destination);o.start(a.currentTime+t0);o.stop(a.currentTime+t0+dur);}
+function thwack(){tone(180,0,0.08,'triangle');}
+function jingle(){[523,659,784,1047].forEach((f,i)=>tone(f,i*0.12,0.3));try{if(window.speechSynthesis)speechSynthesis.speak(new SpeechSynthesisUtterance('Hole in one!'));}catch(e){}}
+let msgT=0;function flashMsg(m){$('predOut').innerHTML='<b style="color:#c00">'+m+'</b>';}
+// ---------- animation ----------
+function stateAt(s,t){const p=s.res.pts;if(t>=s.res.T)return p[p.length-1];let lo=0,hi=p.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if(p[m].t<=t)lo=m;else hi=m;}
+ const A=p[lo],B=p[hi],f=(t-A.t)/(B.t-A.t||1);const o={t};['x','y','vx','vy','ax','ay'].forEach(k=>o[k]=A[k]+(B[k]-A[k])*f);return o;}
+function tick(ts){if(running&&cur>=0){if(last!=null){tPlay+=Math.min(0.05,(ts-last)/1000)*(+$('speed').value);const s=shots[cur];if(tPlay>=s.res.T){tPlay=s.res.T;running=false;land(s);}}last=ts;}
+ if(running||performance.now()<bannerUntil+100||sw.on)draw();$('banner').style.display=performance.now()<bannerUntil?'block':'none';requestAnimationFrame(tick);}
+// ---------- view ----------
+const SC={W:900,H:430,ml:64,mr:18,mt:16,mb:34};
+function fitView(){const vis=shots.filter((s,i)=>!s.hidden&&($('showPaths').checked||i===cur));
+ let xmax=S.hole*1.08+5,ymax=Math.max(S.h,5);
+ vis.forEach(s=>{xmax=Math.max(xmax,s.res.R*1.06);ymax=Math.max(ymax,s.res.H);});
+ if(cur<0){const pre=simulate(params({rec:1,noPts:true}));xmax=Math.max(xmax,Math.min(pre.R*1.06,xmax*3));ymax=Math.max(ymax,pre.H);}
+ ymax*=1.12;const pw=SC.W-SC.ml-SC.mr,ph=SC.H-SC.mt-SC.mb;let sx=pw/xmax,sy=ph/ymax;
+ if($('equal').checked){const s=Math.min(sx,sy);sx=sy=s;}
+ view={sx,sy,xmax:pw/sx,ymax:ph/sy};}
+const X=x=>SC.ml+x*view.sx,Y=y=>SC.H-SC.mb-y*view.sy,IX=px=>(px-SC.ml)/view.sx,IY=py=>(SC.H-SC.mb-py)/view.sy;
+function nice(x){const p=Math.pow(10,Math.floor(Math.log10(x))),f=x/p;return(f<1.5?1:f<3?2:f<7?5:10)*p;}
+function layout(){const c=$('scene'),dpr=window.devicePixelRatio||1,W=c.parentNode.clientWidth;SC.W=W;SC.H=430;c.style.width=W+'px';c.style.height=SC.H+'px';c.width=W*dpr;c.height=SC.H*dpr;view=null;draw();}
+window.addEventListener('resize',layout);
+function arrow(g,x0,y0,x1,y1,col,w,lab){if(Math.hypot(x1-x0,y1-y0)<2)return;g.strokeStyle=g.fillStyle=col;g.lineWidth=w||3;g.beginPath();g.moveTo(x0,y0);g.lineTo(x1,y1);g.stroke();
+ const a=Math.atan2(y1-y0,x1-x0);g.beginPath();g.moveTo(x1,y1);g.lineTo(x1-10*Math.cos(a-0.4),y1-10*Math.sin(a-0.4));g.lineTo(x1-10*Math.cos(a+0.4),y1-10*Math.sin(a+0.4));g.fill();
+ if(lab){g.font='bold 12px sans-serif';g.fillText(lab,x1+4,y1-4);}}
+function draw(){if(!view||!$('lockView').checked&&!running&&cur<0)fitView();if(!view)fitView();
+ const c=$('scene'),g=c.getContext('2d'),dpr=window.devicePixelRatio||1,{W,H}=SC;g.setTransform(dpr,0,0,dpr,0,0);
+ // sky & ground
+ const sky=g.createLinearGradient(0,0,0,H);sky.addColorStop(0,S.planet==='moon'?'#0d1020':S.planet==='mars'?'#e8b38a':S.planet==='jupiter'?'#e9d3b0':'#bfe3ff');sky.addColorStop(1,S.planet==='moon'?'#2a2d3a':'#f2f8ff');
+ g.fillStyle=sky;g.fillRect(0,0,W,H);const gy=Y(0);g.fillStyle=S.planet==='moon'?'#8a8a8a':S.planet==='mars'?'#b5532c':S.planet==='jupiter'?'#b98d5a':'#5fae4b';g.fillRect(0,gy,W,H-gy);
+ // grid
+ const sp=nice(view.xmax/10),spy=$('equal').checked?sp:nice(view.ymax/6);g.font='10px sans-serif';
+ for(let x=0;x<=view.xmax;x+=sp){const px=X(x);if($('showGrid').checked){g.strokeStyle='#0002';g.lineWidth=1;g.beginPath();g.moveTo(px,SC.mt);g.lineTo(px,gy);g.stroke();}g.fillStyle='#fff';g.fillText(x+' m',px-8,gy+14);}
+ for(let y=spy;y<=view.ymax;y+=spy){const py=Y(y);if($('showGrid').checked){g.strokeStyle='#0002';g.beginPath();g.moveTo(SC.ml,py);g.lineTo(W-SC.mr,py);g.stroke();}g.fillStyle=S.planet==='moon'?'#ccc':'#335';g.fillText(y+' m',4,py+3);}
+ // platform / cliff
+ if(S.h>0){g.fillStyle=S.planet==='moon'?'#777':'#8b6b4a';g.fillRect(0,Y(S.h),X(0),gy-Y(S.h));g.fillStyle=S.planet==='moon'?'#999':'#4f9a3e';g.fillRect(0,Y(S.h)-3,X(0),4);g.fillStyle='#fff';g.font='11px sans-serif';g.fillText('h = '+S.h.toFixed(1)+' m',4,Y(S.h)-8);}
+ // hole + zone
+ const hx=X(S.hole);g.fillStyle='#ffe36b';g.fillRect(X(S.hole-S.tol),gy-2,Math.max(3,X(S.hole+S.tol)-X(S.hole-S.tol)),5);g.fillStyle='#111';g.beginPath();g.ellipse(hx,gy+1,5,2.5,0,0,7);g.fill();
+ g.strokeStyle='#eee';g.lineWidth=2;g.beginPath();g.moveTo(hx,gy);g.lineTo(hx,gy-44);g.stroke();g.fillStyle='#e02';g.beginPath();g.moveTo(hx,gy-44);g.lineTo(hx+22,gy-37);g.lineTo(hx,gy-30);g.fill();
+ g.fillStyle='#fff';g.font='bold 11px sans-serif';g.fillText(S.hole.toFixed(1)+' m',hx-14,gy+26);
+ if(predFlag!=null){const px=X(predFlag);g.strokeStyle='#606';g.lineWidth=2;g.beginPath();g.moveTo(px,gy);g.lineTo(px,gy-30);g.stroke();g.fillStyle='#a0a';g.fillRect(px,gy-30,14,9);g.font='11px sans-serif';g.fillText('prediction',px-20,gy-34);}
+ // golfer (original simple figure, fixed pixel size) at the tee
+ const tx=X(0),ty=Y(S.h);g.strokeStyle=S.planet==='moon'?'#eee':'#223';g.lineWidth=3;g.lineCap='round';
+ g.beginPath();g.arc(tx-20,ty-44,6,0,7);g.stroke();g.beginPath();g.moveTo(tx-20,ty-38);g.lineTo(tx-18,ty-18);g.lineTo(tx-24,ty);g.moveTo(tx-18,ty-18);g.lineTo(tx-12,ty);g.moveTo(tx-19,ty-32);g.lineTo(tx-6,ty-22);g.stroke();
+ g.strokeStyle='#888';g.lineWidth=2;g.beginPath();g.moveTo(tx-6,ty-22);g.lineTo(tx-2,ty-2);g.stroke();g.lineCap='butt';
+ // paths
+ shots.forEach((s,i)=>{if(s.hidden||i===cur||!$('showPaths').checked)return;drawPath(g,s,s.res.T,0.75);});
+ let st=null;if(cur>=0){const s=shots[cur];drawPath(g,s,tPlay,1);st=stateAt(s,tPlay);
+  if(s.done){g.setLineDash([5,4]);g.strokeStyle='#333';g.lineWidth=1;g.beginPath();g.moveTo(X(s.res.apex.x),Y(s.res.H));g.lineTo(X(s.res.apex.x),gy);g.moveTo(SC.ml,Y(s.res.H));g.lineTo(X(s.res.apex.x)+40,Y(s.res.H));g.stroke();g.setLineDash([]);
+   g.fillStyle='#000';g.font='bold 12px sans-serif';g.fillText('max height '+s.res.H.toFixed(2)+' m',X(s.res.apex.x)+6,Y(s.res.H)-5);g.fillText('range '+s.res.R.toFixed(2)+' m',Math.min(X(s.res.R)+8,W-130),gy-52);}}
+ // ball
+ const bx=st?X(st.x):tx,by=st?Y(st.y):ty;g.fillStyle='#fff';g.strokeStyle='#333';g.lineWidth=1.5;g.beginPath();g.arc(bx,by-4,4.5,0,7);g.fill();g.stroke();
+ if(!st){const r=S.th*Math.PI/180,L=S.v*1.4;g.setLineDash([4,3]);arrow(g,tx,ty-4,tx+L*Math.cos(r),ty-4-L*Math.sin(r),'#333',2,`${S.v} m/s @ ${S.th}°`);g.setLineDash([]);}
+ if(st&&!(shots[cur].done&&st.t>=shots[cur].res.T)){const k=1.4;
+  if($('comps').checked){arrow(g,bx,by-4,bx+st.vx*k,by-4,'#d01c1c',3,'vx');arrow(g,bx,by-4,bx,by-4-st.vy*k,'#1450d8',3,'vy');}
+  if($('vec').checked)arrow(g,bx,by-4,bx+st.vx*k,by-4-st.vy*k,'#111',2.5,'v');}
+ // tape
+ if(tape){const a=[X(tape.x0),Y(tape.y0)],b=[X(tape.x1),Y(tape.y1)];g.strokeStyle='#ff0';g.lineWidth=4;g.beginPath();g.moveTo(...a);g.lineTo(...b);g.stroke();g.strokeStyle='#333';g.lineWidth=1.5;g.setLineDash([6,6]);g.beginPath();g.moveTo(...a);g.lineTo(...b);g.stroke();g.setLineDash([]);
+  const dx=tape.x1-tape.x0,dy=tape.y1-tape.y0;g.fillStyle='#000c';g.fillRect(b[0]+6,b[1]-30,170,26);g.fillStyle='#ff0';g.font='bold 11px monospace';g.fillText(`L=${Math.hypot(dx,dy).toFixed(2)} m`,b[0]+10,b[1]-19);g.fillText(`Δx=${dx.toFixed(2)} Δy=${dy.toFixed(2)}`,b[0]+10,b[1]-8);}
+ g.fillStyle=S.planet==='moon'?'#ddd':'#123';g.font='12px sans-serif';g.fillText(`${PLANETS[S.planet].name}: g = ${S.g} m/s² · atmosphere: ${S.air?(S.rho>0?'air (ρ = '+S.rho+' kg/m³)':'air selected, but ρ = 0'):'none'}`,SC.ml+4,14);
+ readout(st);drawGraphs(st);$('swV').textContent=swNow().toFixed(2)+' s';if(cur>=0)$('scrub').value=tPlay;}
+function drawPath(g,s,tEnd,alpha){g.globalAlpha=alpha;g.strokeStyle=s.color;g.lineWidth=2;g.beginPath();let first=true;for(const q of s.res.pts){if(q.t>tEnd)break;first?g.moveTo(X(q.x),Y(q.y)):g.lineTo(X(q.x),Y(q.y));first=false;}const e=stateAt(s,tEnd);g.lineTo(X(e.x),Y(e.y));g.stroke();
+ if($('strobe').checked){const dt=+$('strobeDt').value;g.fillStyle=s.color;for(let t=0;t<=tEnd+1e-9;t+=dt){const q=stateAt(s,t);g.beginPath();g.arc(X(q.x),Y(q.y),3.2,0,7);g.fill();}}g.globalAlpha=1;}
+function readout(st){if(!st){$('readout').textContent=`Ready: v₀ = ${S.v} m/s, θ = ${S.th}°, h = ${S.h} m\nvx₀ = v₀cosθ = ${(S.v*Math.cos(S.th*Math.PI/180)).toFixed(2)} m/s   vy₀ = v₀sinθ = ${(S.v*Math.sin(S.th*Math.PI/180)).toFixed(2)} m/s`;$('callout').style.visibility='hidden';return;}
+ const s=shots[cur],sp=Math.hypot(st.vx,st.vy);
+ $('readout').textContent=`Shot ${s.n}   t = ${st.t.toFixed(2)} s ${s.done&&st.t>=s.res.T?'(landed)':''}\nx  = ${st.x.toFixed(2).padStart(8)} m     y  = ${st.y.toFixed(2).padStart(8)} m\nvx = ${st.vx.toFixed(2).padStart(8)} m/s   vy = ${st.vy.toFixed(2).padStart(8)} m/s\n|v| = ${sp.toFixed(2).padStart(7)} m/s   direction ${(Math.atan2(st.vy,st.vx)*180/Math.PI).toFixed(1)}°\nax = ${st.ax.toFixed(2).padStart(8)} m/s²  ay = ${st.ay.toFixed(2).padStart(8)} m/s²`+(s.done&&st.t>=s.res.T?`\nRange ${s.res.R.toFixed(2)} m · max height ${s.res.H.toFixed(2)} m · hang time ${s.res.T.toFixed(2)} s\n${s.result.text}`:'');
+ $('callout').style.visibility=s.res.apex.t>0&&Math.abs(st.t-s.res.apex.t)<Math.max(0.15,0.03*s.res.T)?'visible':'hidden';}
+// ---------- graphs ----------
+function drawGraphs(st){const c=$('graphs'),g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);const GW=237,GH=150;
+ const s=cur>=0?shots[cur]:null;const defs=[['x (m)','x'],['y (m)','y'],['vx (m/s)','vx'],['vy (m/s)','vy']];
+ defs.forEach(([lab,k],i)=>{const ox=(i%2)*GW,oy=Math.floor(i/2)*GH,ml=40,mb=18,mt=18,w=GW-ml-8,h=GH-mb-mt;
+  g.strokeStyle='#ccc';g.strokeRect(ox+ml,oy+mt,w,h);g.fillStyle='#000';g.font='bold 11px sans-serif';g.fillText(lab+' vs t',ox+ml+4,oy+mt-5);
+  if(!s)return;const all=[s.res.pts,s.ideal?s.ideal.pts:[]];let lo=0,hi=0,T=Math.max(s.res.T,s.ideal?s.ideal.T:0);all.forEach(P=>P.forEach(q=>{lo=Math.min(lo,q[k]);hi=Math.max(hi,q[k]);}));if(hi-lo<1e-6){hi+=1;lo-=1;}const pad=(hi-lo)*0.08;lo-=pad;hi+=pad;
+  const tx=t=>ox+ml+t/T*w,ty=v=>oy+mt+h-(v-lo)/(hi-lo)*h;g.font='9px sans-serif';g.fillStyle='#666';
+  [lo,0,hi].forEach(v=>{if(v<lo||v>hi)return;g.fillText(v.toFixed(Math.abs(hi-lo)<10?1:0),ox+2,ty(v)+3);});g.fillText('0',tx(0)-2,oy+mt+h+10);g.fillText(T.toFixed(1)+' s',tx(T)-22,oy+mt+h+10);
+  if(lo<0&&hi>0){g.strokeStyle='#000';g.beginPath();g.moveTo(tx(0),ty(0));g.lineTo(tx(T),ty(0));g.stroke();}
+  if(s.ideal){g.strokeStyle='#999';g.setLineDash([4,3]);g.lineWidth=1.2;g.beginPath();s.ideal.pts.forEach((q,j)=>{if(q.t>tPlay)return;j?g.lineTo(tx(q.t),ty(q[k])):g.moveTo(tx(q.t),ty(q[k]));});g.stroke();g.setLineDash([]);}
+  g.strokeStyle=s.color;g.lineWidth=2;g.beginPath();let f=true;for(const q of s.res.pts){if(q.t>tPlay)break;f?g.moveTo(tx(q.t),ty(q[k])):g.lineTo(tx(q.t),ty(q[k]));f=false;}if(st)g.lineTo(tx(st.t),ty(st[k]));g.stroke();});}
+// ---------- range vs angle ----------
+let rvaTimer=null;function scheduleRVA(){clearTimeout(rvaTimer);rvaTimer=setTimeout(drawRVA,120);}
+function drawRVA(){const c=$('rva'),g=c.getContext('2d');g.clearRect(0,0,c.width,c.height);const ml=46,mb=26,mt=12,w=c.width-ml-10,h=c.height-mb-mt;
+ const id=[],dr=[];for(let a=0;a<=90;a++){id.push(idealFlight(S.v,a,S.g,S.h).R);}
+ const k=kNow(),idT=idealFlight(S.v,45,S.g,S.h).T,dt=Math.max(2e-4,idT/1500);
+ if(k>0)for(let a=0;a<=90;a++)dr.push(rangeAt({v:S.v,h:S.h,g:S.g,k,dt},a));
+ const thI=S.v>0?Math.atan(S.v/Math.sqrt(S.v*S.v+2*S.g*S.h))*180/Math.PI:45,oD=k>0&&S.v>0?optimumAngle({v:S.v,h:S.h,g:S.g,k,dt}):null;
+ const ymax=Math.max(...id,1)*1.08,X2=a=>ml+a/90*w,Y2=r=>mt+h-r/ymax*h;
+ g.strokeStyle='#ddd';g.fillStyle='#666';g.font='10px sans-serif';for(let a=0;a<=90;a+=15){g.beginPath();g.moveTo(X2(a),mt);g.lineTo(X2(a),mt+h);g.stroke();g.fillText(a+'°',X2(a)-6,mt+h+12);}
+ const ys=nice(ymax/4);for(let r=0;r<=ymax;r+=ys){g.beginPath();g.moveTo(ml,Y2(r));g.lineTo(ml+w,Y2(r));g.stroke();g.fillText(r,4,Y2(r)+3);}
+ g.fillStyle='#000';g.font='bold 11px sans-serif';g.fillText('Range vs launch angle (current v₀, h, g)',ml+4,mt+10);g.font='10px sans-serif';g.fillText('launch angle θ',ml+w/2-30,c.height-2);
+ const line=(arr,col,dash)=>{g.strokeStyle=col;g.lineWidth=2;g.setLineDash(dash||[]);g.beginPath();arr.forEach((r,a)=>a?g.lineTo(X2(a),Y2(r)):g.moveTo(X2(a),Y2(r)));g.stroke();g.setLineDash([]);};
+ line(id,'#1f77b4',k>0?[5,4]:[]);if(k>0)line(dr,'#d62728');
+ g.strokeStyle='#000';g.lineWidth=1;g.beginPath();g.moveTo(X2(S.th),mt);g.lineTo(X2(S.th),mt+h);g.stroke();g.strokeStyle='#888';g.setLineDash([2,3]);g.beginPath();g.moveTo(X2(90-S.th),mt);g.lineTo(X2(90-S.th),mt+h);g.stroke();g.setLineDash([]);
+ const dot=(a,r,col)=>{g.fillStyle=col;g.beginPath();g.arc(X2(a),Y2(r),4.5,0,7);g.fill();};dot(thI,idealFlight(S.v,thI,S.g,S.h).R,'#1f77b4');if(oD)dot(oD.theta,oD.R,'#d62728');
+ $('rvaInfo').innerHTML=`<span style="color:#1f77b4">Blue${k>0?' dashed':''} = no air</span>: best θ = <b>${thI.toFixed(1)}°</b> (R = ${idealFlight(S.v,thI,S.g,S.h).R.toFixed(1)} m)`+(oD?` · <span style="color:#d62728">red = with air</span>: best θ = <b>${oD.theta.toFixed(1)}°</b> (R = ${oD.R.toFixed(1)} m)`:'')+`. Black line = your θ, dotted = 90° − θ.`;
+ rvaCache={thI,oD};apPanel();}
+function apPanel(){const r=S.th*Math.PI/180,vx=S.v*Math.cos(r),vy=S.v*Math.sin(r),f=idealFlight(S.v,S.th,S.g,S.h),fc=idealFlight(S.v,90-S.th,S.g,S.h);
+ const ground=S.h===0;let html=`v<sub>x</sub> = v₀cosθ = ${S.v}·cos ${S.th}° = <b>${vx.toFixed(2)} m/s</b> &nbsp; v<sub>y0</sub> = v₀sinθ = <b>${vy.toFixed(2)} m/s</b><br>`+
+ `Time to top: t<sub>up</sub> = v<sub>y0</sub>/g = ${f.tApex.toFixed(3)} s &nbsp; Max height: H = h + v<sub>y0</sub>²/(2g) = <b>${f.H.toFixed(2)} m</b><br>`+
+ (ground?`Hang time: T = 2v<sub>y0</sub>/g = <b>${f.T.toFixed(3)} s</b> &nbsp; Range: R = v₀² sin2θ / g = <b>${f.R.toFixed(2)} m</b>`:
+ `Hang time (launch from h): 0 = h + v<sub>y0</sub>T − ½gT² ⇒ T = [v<sub>y0</sub> + √(v<sub>y0</sub>² + 2gh)]/g = <b>${f.T.toFixed(3)} s</b><br>Range: R = v<sub>x</sub>·T = <b>${f.R.toFixed(2)} m</b>`)+
+ `<br><span style="font-size:13px">These are <b>no-air</b> predictions${S.air&&kNow()>0?' — with air on, the real shot falls short (see the shots table)':''}. `+
+ `Complementary angle 90° − θ = ${(90-S.th).toFixed(1)}° → R = ${fc.R.toFixed(2)} m ${ground?'(<b>same range</b> from ground level, no air)':'(<b>not</b> equal: launching from a height favors the lower angle)'}. `+
+ (rvaCache?`Best angle: ${rvaCache.thI.toFixed(1)}° with no air${ground?' (45°)':' (below 45° because of the height)'}${rvaCache.oD?`, ${rvaCache.oD.theta.toFixed(1)}° with air (drag lowers the optimum)`:''}.`:'')+`</span>`;
+ $('ap').innerHTML=html;}
+// ---------- table / CSV ----------
+function refreshTable(){const tb=$('tbl').tBodies[0];tb.innerHTML='';shots.forEach(s=>{const d=s.done;tb.insertAdjacentHTML('beforeend',`<tr><td style="color:#fff;background:${s.color}">${s.n}</td><td>${s.p.g}</td><td>${s.air&&s.p.k>0?'yes':'no'}</td><td>${s.p.v}</td><td>${s.p.theta}</td><td>${s.p.h}</td><td>${d?s.res.R.toFixed(2):'…'}</td><td>${d?s.res.H.toFixed(2):'…'}</td><td>${d?s.res.T.toFixed(2):'…'}</td><td>${s.hole}</td><td>${d?(s.result.hole?'<b style="color:#2a8a3a">⛳ HOLE IN ONE</b>':s.result.text):''}</td><td>${s.pred&&!isNaN(s.pred.R)?s.pred.R.toFixed(1)+(d?` (${((s.pred.R-s.res.R)/s.res.R*100).toFixed(1)}%)`:''):''}</td></tr>`);});$('tblWrap').scrollTop=1e6;}
+$('clearData').onclick=()=>{if(running)return;shots=[];cur=-1;view=null;refreshTable();draw();};
+$('csv').onclick=()=>{let s='Shot,g (m/s^2),Air,rho (kg/m^3),Cd,mass (g),diameter (mm),v0 (m/s),angle (deg),launch height (m),range (m),max height (m),hang time (s),hole (m),result,predicted range (m)\n';
+ shots.forEach(x=>s+=`${x.n},${x.p.g},${x.air&&x.p.k>0?'yes':'no'},${x.rho},${x.cd},${x.m},${x.d},${x.p.v},${x.p.theta},${x.p.h},${x.res.R.toFixed(3)},${x.res.H.toFixed(3)},${x.res.T.toFixed(3)},${x.hole},${x.done?x.result.text:'in flight'},${x.pred&&!isNaN(x.pred.R)?x.pred.R:''}\n`);
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/csv'}));a.download='golf_range_shots.csv';a.click();};
+// ---------- canvas mouse: tape measure & prediction flag ----------
+const cpos=e=>{const b=$('scene').getBoundingClientRect();return[IX(e.clientX-b.left),IY(e.clientY-b.top)];};
+$('tapeBtn').onclick=()=>{tapeOn=!tapeOn;$('tapeBtn').className=tapeOn?'on':'';if(!tapeOn)tape=null;draw();};
+$('scene').onpointerdown=e=>{const [x,y]=cpos(e);if(tapeOn){tape={x0:x,y0:Math.max(0,y),x1:x,y1:Math.max(0,y)};dragging=true;$('scene').setPointerCapture(e.pointerId);draw();}
+ else if($('predict').checked&&!running&&y<view.ymax*0.15&&x>0){predFlag=+x.toFixed(1);$('pR').value=predFlag;draw();}};
+$('scene').onpointermove=e=>{if(!dragging)return;const [x,y]=cpos(e);tape.x1=x;tape.y1=Math.max(0,y);draw();};$('scene').onpointerup=()=>dragging=false;
+// ---------- presets (setups modeled on the classic exploration activities; original wording) ----------
+const PRE=[['Warm-up: hole in one',{v:45,th:30,h:0,air:true,planet:'earth',hole:150}],
+ ['Longest drive · air',{v:75,th:45,h:0,air:true,planet:'earth',hole:200}],['Longest drive · no air',{v:75,th:45,h:0,air:false,planet:'earth',hole:500}],
+ ['Velocity components',{v:50,th:45,h:0,air:false,planet:'earth',hole:250},{vec:true,comps:true}],['Hang time (75 m/s, 50°)',{v:75,th:50,h:0,air:false,planet:'earth2',hole:560}],
+ ['Cliff: 200 m, horizontal',{v:50,th:0,h:200,air:false,planet:'earth2',hole:320}],['Complementary angles',{v:50,th:30,h:0,air:false,planet:'earth',hole:221}],['Moon drive',{v:50,th:45,h:0,air:false,planet:'moon',hole:1000}]];
+PRE.forEach(([n,o,f])=>{const b=document.createElement('button');b.className='preset';b.textContent=n;b.onclick=()=>{if(running)return;Object.assign(S,o);const p=PLANETS[S.planet];S.g=p.g;S.rho=p.rho;if(S.ball==='custom'){}
+ if(f){$('vec').checked=f.vec;$('comps').checked=f.comps;}ch.on=false;updateChInfo();view=null;changed();};$('presets').appendChild(b);});
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'&&e.target.type!=='range'&&e.target.type!=='checkbox')return;if(e.key==='Enter'){e.preventDefault();launch();}});
+syncUI();layout();scheduleRVA();requestAnimationFrame(tick);
+</script></body></html>

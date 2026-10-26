@@ -1,0 +1,264 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Reaction Time LAB – Ruler Drop Sim</title>
+<style>
+body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6fa;color:#222}
+header{background:#234;color:#fff;padding:6px 14px}header h1{font-size:17px;margin:0}
+#wrap{display:flex;gap:10px;padding:8px}#rulerCol{flex:none;width:330px}#mid{width:400px;flex:none}#right{flex:1;min-width:0}
+.panel{background:#fff;border-radius:8px;box-shadow:0 1px 3px #0002;padding:8px;margin-bottom:8px}
+canvas{display:block}label{font-size:13px}.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px;margin:4px 0}
+button{padding:5px 9px;border:1px solid #889;border-radius:5px;background:#eef;cursor:pointer;font-size:13px}
+button.on{background:#ffd76a}button.big{font-size:18px;padding:10px 18px;font-weight:bold}
+#catchBtn{background:#ffd7d7}#startBtn{background:#d7f5dd}
+#status{font-size:15px;font-weight:bold;background:#fffbe6;border-radius:5px;padding:7px;min-height:22px}
+table{border-collapse:collapse;font-size:13px;width:100%}th,td{border:1px solid #ccd;padding:3px 5px;text-align:center}th{background:#eef2f8}
+tr.sel{background:#fff3c4}tr.bad td{color:#888;font-style:italic}.g{font-size:12px;color:#555}
+.formula{font-family:Georgia,serif;font-size:15px;background:#f3f6ff;padding:6px 8px;border-radius:5px;line-height:1.7}
+details summary{cursor:pointer;font-weight:bold;font-size:14px}.steps li{font-size:13px;margin:2px 0}
+#rulerBox{position:relative;background:#1b2430;border-radius:8px;overflow:hidden;touch-action:none;user-select:none}
+#calBox{width:90px;height:60px;border-radius:8px;background:#333;display:inline-block;vertical-align:middle}
+#printArea{display:none}
+@media print{@page{size:landscape;margin:10mm}body{background:#fff}header,#wrap{display:none!important}#printArea{display:block}}
+</style></head><body>
+<header><h1>Reaction Time LAB — Find your reaction time using the concepts of free fall</h1></header>
+<div id="wrap">
+<div id="rulerCol"><div id="rulerBox"><canvas id="ruler"></canvas></div></div>
+<div id="mid">
+ <div class="panel">
+  <div class="row"><button class="big" id="startBtn">Get ready</button><button class="big" id="catchBtn">CATCH!</button></div>
+  <div class="g">Keyboard: <b>Space</b> = get ready / catch (works even if a slider or text box has focus). You can also tap/click the ruler.</div>
+  <div id="status" style="margin-top:6px"></div>
+  <div class="row" id="readRow" style="display:none">Read the ruler at the top of the fingers: <input id="readIn" type="number" step="0.1" style="width:70px"> cm <button id="readOK">Record</button><span id="readFb" class="g"></span></div>
+  <div style="display:flex;gap:8px;align-items:flex-start;margin-top:6px"><canvas id="zoom" width="180" height="150"></canvas><div class="g" id="rawBox" style="flex:1"></div></div>
+ </div>
+ <div class="panel"><b>Setup</b>
+  <div class="row">Catcher (student): <input id="who" value="Student A" style="width:110px" list="names"><datalist id="names"></datalist>
+   <label><input type="checkbox" id="selfRead"> I'll read the ruler myself</label></div>
+  <div class="row">Mode: <button id="mReal" class="on">Real catch (you)</button><button id="mSim">Simulated partner (demo)</button></div>
+  <div class="row" id="simRow" style="display:none">Sim mean <input type="range" id="simMean" min="0.12" max="0.30" step="0.005" style="width:100px"> <b id="simMeanV"></b> s, SD <input type="range" id="simSD" min="0" max="0.06" step="0.005" style="width:70px"> <b id="simSDV"></b> s <button id="sim5">Run 5 trials</button></div>
+  <div class="row">g: <select id="g"><option value="9.8">9.8 m/s² (Earth)</option><option value="9.81">9.81 m/s²</option><option value="10">10 m/s²</option><option value="1.62">1.62 m/s² (Moon)</option><option value="3.71">3.71 m/s² (Mars)</option></select>
+   Ruler: <select id="len"><option value="0.30">30 cm</option><option value="0.50">50 cm</option></select></div>
+  <div class="row">Drop cue: <select id="cue"><option value="move">ruler movement only (like real life)</option><option value="flash">ruler flashes color at drop</option><option value="beep">beep at drop</option></select>
+   View: <select id="view"><option value="big">large (≈ life size)</option><option value="whole">whole ruler</option></select></div>
+  <div class="row"><label style="display:inline"><input type="checkbox" id="msScale"> Show ms scale on ruler</label></div>
+  <div class="row"><b>Device delay compensation:</b> <input type="range" id="delay" min="0" max="100" step="1" style="width:120px"> <b id="delayV"></b> ms</div>
+  <div class="g">A real ruler is seen instantly. On a computer the screen (frame wait + display processing) and the keyboard/mouse add roughly 30–80 ms, so the raw timer reads longer than your true reaction. This amount is subtracted from the raw time before the distance is calculated. Set it to 0 to see raw times. (Not applied to the simulated partner.)</div>
+  <details style="margin-top:4px"><summary style="font-size:13px">Auto-calibrate device delay (tap-along test)</summary>
+   <div class="g">Press <b>Space</b> exactly <i>in time with</i> the flashes (don’t react — anticipate the steady beat, like tapping to music). Because you are predicting the beat, your reaction time drops out and what is left is mostly the device delay. 2 lead-in + 8 scored beats.</div>
+   <div class="row"><span id="calBox"></span><label><input type="checkbox" id="calBeep"> beep too</label><button id="calBtn">Start calibration</button></div>
+   <div class="g" id="calOut"></div></details>
+  <div class="row"><button id="printBtn">🖨 Print a reaction-time ruler (ms)</button><button id="csvBtn">⬇ CSV</button><button id="clearBtn">Clear all data</button></div>
+ </div>
+ <div class="panel"><details><summary>Lab handout: Objective · Materials · Procedure</summary>
+  <p style="font-size:13px"><b>Objective:</b> Find the reaction time of yourself and your partner using the concepts of freefall.<br><b>Materials:</b> Metric ruler, pen, and calculator.</p>
+  <ol class="steps"><li>Drop ruler through your partner’s fingers. <span class="g">(sim: “Get ready”, the ruler drops after a random wait)</span></li>
+  <li>Partner will react and close fingers to catch the ruler. <span class="g">(press Space / CATCH)</span></li>
+  <li>Record the <b>distance</b> that ruler fell. (Convert to meters) <span class="g">(cm and m columns)</span></li>
+  <li>Use this information and what you know about the <b>acceleration due to gravity (g)</b> to calculate your partner’s reaction time.</li>
+  <li>Repeat for all group members. <span class="g">(change the Catcher name)</span></li></ol>
+  <p class="g">Lab write-up must include: 1. Objective 2. Materials 3. Procedure 4. Data 5. Analysis (calculations and formulas) 6. Conclusion (include a realistic error analysis).</p></details></div>
+ <div class="panel"><details><summary>Extension (not in handout): reaction distance while driving</summary>
+  <div class="row">Speed <input type="range" id="mph" min="10" max="80" step="1" style="width:160px"> <b id="mphV"></b></div>
+  <div id="stopOut" class="formula"></div></details></div>
+</div>
+<div id="right">
+ <div class="panel"><b>4. Data</b> <span class="g">(click a row to see its calculation; ✕ deletes it)</span>
+  <div style="max-height:250px;overflow:auto" id="tblWrap"><table id="tbl"><thead><tr><th>Trial</th><th>Student</th><th>Distance fell (cm)</th><th>Distance fell (m)</th><th>Reaction time t (s)</th><th class="g">Raw timer (s) / delay</th><th></th></tr></thead><tbody></tbody></table></div>
+  <table id="sum" style="margin-top:6px"><thead><tr><th>Student</th><th>Trials</th><th>Average distance (m)</th><th>Average reaction time (s)</th><th>Std. dev. (s)</th><th>Fastest (s)</th></tr></thead><tbody></tbody></table></div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap">
+  <div class="panel" style="flex:1;min-width:300px"><b>5. Analysis (calculations and formulas)</b><div id="calc" class="formula"></div></div>
+  <div class="panel" style="width:400px;flex:none"><canvas id="graph" width="400" height="270"></canvas><div class="g">Reaction time vs distance fell: t = √(2d/g). Points = trials.</div></div></div>
+ <div class="panel"><b>6. Conclusion: realistic error analysis</b><div id="err" style="font-size:13px"></div></div>
+</div></div>
+<div id="printArea"></div>
+<script>
+// ---- REACTION-TIME PHYSICS CORE (shared with headless test) ----
+// Ruler starts at rest with the 0 mark between the fingers: d = ½ g t²  ->  t = √(2d/g)
+function tFromD(d_m,g){ return Math.sqrt(2*d_m/g); }
+function dFromT(t_s,g){ return 0.5*g*t_s*t_s; }
+function maxCatchTime(L_m,g){ return tFromD(L_m,g); }       // slower than this: ruler falls through (miss)
+function mean(a){ return a.length? a.reduce((s,x)=>s+x,0)/a.length : NaN; }
+function stdev(a){ if(a.length<2) return NaN; const m=mean(a); return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/(a.length-1)); } // sample SD
+// uncertainty in t from a reading uncertainty Δd:  Δt = t·Δd/(2d)  (since t ∝ √d)
+function dtFromDd(d_m,dd_m,g){ return tFromD(d_m,g)*dd_m/(2*d_m); }
+// reaction-time ruler marks: position (cm from 0 mark) of each time label
+function rulerMarks(g,tMin_ms,tMax_ms,step_ms){ const m=[]; for(let ms=tMin_ms;ms<=tMax_ms+1e-9;ms+=step_ms) m.push({ms, cm:100*dFromT(ms/1000,g)}); return m; }
+function reactionDistance(v_ms,t_s){ return v_ms*t_s; }      // extension: distance travelled before braking starts
+// simulated partner: normal(mean, sd) via Box–Muller, floored at 0.08 s; rng injectable for testing
+function simReaction(meanS,sdS,rng){ rng=rng||Math.random; const u=1-rng(),v=rng(); const z=Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); return Math.max(0.08,meanS+sdS*z); }
+function roundTo(x,step){ return Math.round(x/step)*step; }
+if(typeof module!=='undefined') module.exports={tFromD,dFromT,maxCatchTime,mean,stdev,dtFromDd,rulerMarks,reactionDistance,simReaction,roundTo};
+// ---- v2 additions: latency compensation, display model, calibration ----
+function correctedTime(raw_s,delay_s){ return Math.max(0,raw_s-delay_s); }
+// outcome of a catch for a ruler of length L: distance uses the latency-corrected time
+function catchOutcome(raw_s,delay_s,L_m,g){ const tc=correctedTime(raw_s,delay_s), d=dFromT(tc,g); return {raw:raw_s,tc,d,miss:d>L_m}; }
+// ruler displacement drawn on a frame. t0 = timestamp of the first frame that shows movement, so that frame
+// already shows the ruler one frame-interval (h) into its fall (release happened at t0-h, invisible until t0).
+function displayD(elapsed_s,h_s,g){ return dFromT(Math.max(0,elapsed_s)+h_s,g); }
+function median(a){ if(!a.length) return NaN; const s=[...a].sort((x,y)=>x-y),m=s.length>>1; return s.length%2?s[m]:(s[m-1]+s[m])/2; }
+// tap-along calibration: match each beat (shown time) to the nearest press within ±win ms; skip lead-in beats
+function calibOffsets(beats_ms,presses_ms,leadIn,win){ const out=[]; beats_ms.forEach((b,i)=>{ if(i<leadIn||b==null) return;
+  let best=null; presses_ms.forEach(p=>{ if(Math.abs(p-b)<=win&&(best==null||Math.abs(p-b)<Math.abs(best-b))) best=p; }); if(best!=null) out.push(best-b); }); return out; }
+if(typeof module!=='undefined') Object.assign(module.exports,{correctedTime,catchOutcome,displayD,median,calibOffsets});
+
+const $=id=>document.getElementById(id);
+const S={mode:'real',g:9.8,L:0.30,simMean:0.21,simSD:0.03,mph:60,delay:50,cue:'move',view:'big'};
+const NOCATCH=1.5; // s after drop with no press -> miss
+let state='idle',d=0,t0=0,dropAt=0,trials=[],sel=null,simCatchT=0,pendingReading=null,simQueue=0,flashUntil=0,lastTs=null,frameDts=[],hFrame=1/60,lastRaw=null;
+window.__frames=[]; // test hook: per-frame log during a fall
+const COLORS=['#06c','#e80','#2a2','#c0c','#c33','#088','#860'];
+function students(){return [...new Set(trials.filter(x=>x.ok).map(x=>x.who))];}
+function color(w){const s=[...new Set(trials.map(x=>x.who))];return COLORS[Math.max(0,s.indexOf(w))%COLORS.length];}
+function setStatus(s){$('status').innerHTML=s;}
+let actx=null;function audio(){if(!actx){try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(actx&&actx.state==='suspended')actx.resume();return actx;}
+function beep(f){const a=audio();if(!a)return;const o=a.createOscillator(),gn=a.createGain();o.frequency.value=f||880;gn.gain.value=0.25;o.connect(gn);gn.connect(a.destination);o.start();o.stop(a.currentTime+0.08);}
+function getReady(){if(state==='armed'||state==='falling'||cal)return;$('readRow').style.display='none';pendingReading=null;
+ if(document.activeElement&&document.activeElement.blur)document.activeElement.blur(); // a focused button must not re-trigger on Space keyup
+ if(S.cue==='beep')audio();
+ state='armed';d=0;window.__frames=[];dropAt=performance.now()+1000+Math.random()*3000;
+ setStatus('Fingers ready at the 0 mark… watch the ruler. (Don’t guess — catching early is a false start!)');}
+function press(ts){ // ts = event.timeStamp (same clock as performance.now and rAF timestamps)
+ if(state==='idle'||state==='done'){getReady();return;}
+ if(state==='armed'){state='done';addTrial({ok:false,note:'false start (anticipated)'});setStatus('❌ False start: you closed your fingers before the ruler was dropped. Excluded. Press Space to try again.');return;}
+ if(state==='falling'&&S.mode==='real')finish((ts-t0)/1000,S.delay/1000);}
+function finish(raw,delay){const o=catchOutcome(raw,delay,S.L,S.g);state='done';lastRaw={raw,delay,tc:o.tc};
+ if(o.miss){d=S.L+0.2;addTrial({ok:false,note:'missed',raw,delay,wouldCm:o.d*100,tc:o.tc});
+  setStatus(`😮 Missed — the ruler fell through. You would have caught it at about <b>${(o.d*100).toFixed(1)} cm</b> (t ≈ ${o.tc.toFixed(3)} s); a ${S.L*100} cm ruler only allows ${maxCatchTime(S.L,S.g).toFixed(3)} s.`+(S.L<0.5?' Try the 50 cm ruler.':''));showRaw();return;}
+ d=o.d;const dcm=roundTo(o.d*100,0.1);
+ if($('selfRead').checked&&S.mode==='real'){pendingReading={true_cm:o.d*100,who:$('who').value||'Student',raw,delay};$('readRow').style.display='flex';$('readIn').value='';$('readFb').textContent='';$('readIn').focus();setStatus('Caught! Now read the distance at the top of the fingers (zoom box) and record it.');}
+ else{addTrial({ok:true,cm:dcm,raw,delay});setStatus(`✅ Caught at <b>${dcm.toFixed(1)} cm</b> = ${(dcm/100).toFixed(3)} m → t = ${tFromD(dcm/100,S.g).toFixed(3)} s`);}
+ showRaw();}
+function showRaw(){if(!lastRaw){$('rawBox').innerHTML='';return;}const r=lastRaw;
+ $('rawBox').innerHTML=S.mode==='sim'?`Simulated partner: t = ${(r.tc*1000).toFixed(0)} ms (no device delay).`:
+  `<b>Raw timer:</b> ${(r.raw*1000).toFixed(0)} ms<br><b>− device delay:</b> ${(r.delay*1000).toFixed(0)} ms<br><b>= reaction time:</b> ${(r.tc*1000).toFixed(0)} ms<br>Raw (uncorrected) distance would be ${(dFromT(r.raw,S.g)*100).toFixed(1)} cm.`;}
+function addTrial(o){o.who=o.who||$('who').value||'Student';o.g=S.g;o.L=S.L;if(o.ok)o.cm=+o.cm.toFixed(1);if(o.raw==null){o.raw=null;}trials.push(o);if(o.ok)sel=trials.length-1;refresh();
+ if(S.mode==='sim'&&simQueue>0){simQueue--;if(simQueue>0)setTimeout(()=>{if(state==='done')getReady();},700);}}
+$('readOK').onclick=()=>{const v=parseFloat($('readIn').value);if(!pendingReading||isNaN(v))return;const err=v-pendingReading.true_cm;
+ addTrial({ok:true,cm:v,who:pendingReading.who,raw:pendingReading.raw,delay:pendingReading.delay});$('readFb').textContent=Math.abs(err)<=0.15?' ✓ good reading':` (actual ≈ ${pendingReading.true_cm.toFixed(1)} cm — reading error ${err>0?'+':''}${err.toFixed(1)} cm)`;
+ setStatus(`Recorded ${v.toFixed(1)} cm = ${(v/100).toFixed(3)} m → t = ${tFromD(v/100,S.g).toFixed(3)} s`);pendingReading=null;$('readIn').blur();};
+$('readIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('readOK').click();});
+// ---- input: window-level, capture phase, keydown + pointerdown, using event.timeStamp ----
+function isTextEntry(el){return el&&((el.tagName==='INPUT'&&['text','number','search',''].includes(el.type))||el.tagName==='TEXTAREA');}
+window.addEventListener('keydown',e=>{if(e.code!=='Space')return;
+ const live=state==='armed'||state==='falling'||cal;
+ if(!live&&isTextEntry(e.target))return;            // let people type spaces in names when nothing is running
+ e.preventDefault();e.stopPropagation();if(e.repeat)return;
+ if(cal){calPress(e.timeStamp);return;}
+ if(S.mode==='sim'&&live)return;press(e.timeStamp);},{capture:true});
+window.addEventListener('keyup',e=>{if(e.code==='Space'&&!isTextEntry(e.target)){e.preventDefault();}},{capture:true}); // stop focused buttons "clicking" on Space keyup
+window.addEventListener('pointerdown',e=>{if(!(e.target.closest('#rulerBox')||e.target.id==='catchBtn'))return;e.preventDefault();
+ if(cal){calPress(e.timeStamp);return;}if(S.mode==='real')press(e.timeStamp);else if(state==='idle'||state==='done')getReady();},{capture:true});
+$('startBtn').onclick=()=>getReady();
+function setMode(m){S.mode=m;$('mReal').className=m==='real'?'on':'';$('mSim').className=m==='sim'?'on':'';$('simRow').style.display=m==='sim'?'flex':'none';if(m==='sim'&&$('who').value==='Student A')$('who').value='Sim Partner';}
+$('mReal').onclick=()=>setMode('real');$('mSim').onclick=()=>setMode('sim');
+$('simMean').oninput=e=>{S.simMean=+e.target.value;syncUI();};$('simSD').oninput=e=>{S.simSD=+e.target.value;syncUI();};
+$('sim5').onclick=()=>{setMode('sim');simQueue=5;if(state!=='armed'&&state!=='falling')getReady();};
+$('g').onchange=e=>{S.g=+e.target.value;trials.forEach(x=>x.g=S.g);refresh();};
+$('len').onchange=e=>{S.L=+e.target.value;layout();refresh();};$('cue').onchange=e=>{S.cue=e.target.value;};$('view').onchange=e=>{S.view=e.target.value;layout();};
+$('delay').oninput=e=>{S.delay=+e.target.value;syncUI();};
+$('msScale').onchange=drawRuler;$('mph').oninput=e=>{S.mph=+e.target.value;refresh();};
+$('clearBtn').onclick=()=>{if(confirm('Clear all trials?')){trials=[];sel=null;lastRaw=null;showRaw();refresh();}};
+$('csvBtn').onclick=()=>{let s='Trial,Student,Distance (cm),Distance (m),Reaction time (s),Raw timer (s),Device delay (s),Ruler (m),g (m/s^2),Note\n';
+ trials.forEach((x,i)=>s+=`${i+1},"${x.who}",${x.ok?x.cm.toFixed(1):''},${x.ok?(x.cm/100).toFixed(3):''},${x.ok?tFromD(x.cm/100,x.g).toFixed(3):''},${x.raw!=null?x.raw.toFixed(3):''},${x.delay!=null?x.delay.toFixed(3):''},${x.L},${x.g},${x.note||''}${x.wouldCm?' (would-be '+x.wouldCm.toFixed(1)+' cm / '+x.tc.toFixed(3)+' s)':''}\n`);
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/csv'}));a.download='reaction_time_data.csv';a.click();};
+function syncUI(){$('simMean').value=S.simMean;$('simSD').value=S.simSD;$('simMeanV').textContent=S.simMean.toFixed(3);$('simSDV').textContent=S.simSD.toFixed(3);$('mph').value=S.mph;$('mphV').textContent=S.mph+' mph ('+(S.mph*0.44704).toFixed(1)+' m/s)';
+ $('delay').value=S.delay;$('delayV').textContent=S.delay;$('len').value=S.L.toFixed(2);}
+// ---- ruler canvas: large, crisp (devicePixelRatio), time-based motion ----
+let RV={W:330,H:800,ppc:30,yf:600,dpr:1};
+function layout(){const c=$('ruler'),dpr=window.devicePixelRatio||1,H=Math.max(480,window.innerHeight-60),W=330;
+ c.style.width=W+'px';c.style.height=H+'px';c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);
+ let above,below;if(S.view==='big'){above=20;below=5;}else{above=S.L*100+2;below=4;}   // cm shown above / below the catch line
+ RV={W,H,dpr,ppc:H/(above+below),yf:H*above/(above+below)};drawRuler();}
+window.addEventListener('resize',layout);
+function tick(ts){
+ if(lastTs!=null){frameDts.push(ts-lastTs);if(frameDts.length>60)frameDts.shift();const m=median(frameDts);if(m>4&&m<60)hFrame=m/1000;}lastTs=ts;
+ if(state==='armed'&&ts>=dropAt&&!cal){ // FIRST frame on which the ruler is drawn displaced: its rAF timestamp is the drop (stimulus) time
+  t0=ts;state='falling';if(S.cue==='flash')flashUntil=ts+150;if(S.cue==='beep')beep(880);
+  setStatus(S.mode==='real'?'DROPPED! Catch it!':'Dropped… partner reacting');if(S.mode==='sim')simCatchT=simReaction(S.simMean,S.simSD);}
+ if(state==='falling'){const el=(ts-t0)/1000;d=displayD(el,hFrame,S.g);
+  if(window.__frames.length<400)window.__frames.push({ts,el,d,h:hFrame,ppc:RV.ppc,shiftPx:d*100*RV.ppc});
+  if(S.mode==='sim'&&el>=simCatchT)finish(simCatchT,0);else if(el>NOCATCH){state='done';d=S.L+0.2;addTrial({ok:false,note:'missed (no catch within '+NOCATCH+' s)'});setStatus('😮 No catch — the ruler hit the floor.');}}
+ if(cal)calTick(ts);
+ drawRuler(ts);requestAnimationFrame(tick);}
+function drawRuler(ts){const c=$('ruler'),g=c.getContext('2d'),{W,H,dpr,ppc,yf}=RV;g.setTransform(dpr,0,0,dpr,0,0);
+ g.fillStyle='#1b2430';g.fillRect(0,0,W,H);
+ const rx=118,rw=94,L=S.L*100,yOf=k=>yf+(d*100-k)*ppc; // y of the k-cm mark
+ const flashing=ts&&ts<flashUntil;
+ const yTop=yOf(L),yBot=yOf(0);
+ g.fillStyle=flashing?'#ffb000':'#fffbea';g.fillRect(rx,yTop,rw,yBot-yTop);g.strokeStyle='#000';g.lineWidth=2;g.strokeRect(rx,yTop,rw,yBot-yTop);
+ g.fillStyle='#000';g.strokeStyle='#000';const fs=Math.max(11,Math.min(20,ppc*0.55));g.font='bold '+fs+'px sans-serif';
+ const step=ppc>=14?1:5,labStep=ppc>=24?1:ppc>=12?2:5;
+ for(let mm=0;mm<=L*10;mm+=step){const y=Math.round(yOf(mm/10))+0.5;if(y<-5||y>H+5)continue;const len=mm%10===0?28:mm%5===0?18:10;g.lineWidth=mm%10===0?2:1;
+  g.beginPath();g.moveTo(rx,y);g.lineTo(rx+len,y);g.stroke();if(mm%10===0&&(mm/10)%labStep===0&&mm>0)g.fillText(mm/10,rx+32,y+fs*0.35);}
+ if(yBot>-20&&yBot<H)g.fillText('cm',rx+32,yBot-4);
+ if($('msScale').checked){g.fillStyle='#c00';g.strokeStyle='#c00';g.lineWidth=2;g.font='bold '+Math.max(10,fs*0.75)+'px sans-serif';g.textAlign='right';
+  rulerMarks(S.g,0,Math.floor(maxCatchTime(S.L,S.g)*100)*10,10).forEach(m=>{const y=yOf(m.cm);if(y<-5||y>H+5)return;g.beginPath();g.moveTo(rx+rw,y);g.lineTo(rx+rw-(m.ms%50===0?16:8),y);g.stroke();if(m.ms%50===0&&m.ms>0)g.fillText(m.ms,rx+rw-18,y+5);});
+  g.textAlign='left';}
+ // catcher's fingers at the catch line (thumb left, index right); closed after a catch
+ const closed=state==='done'&&trials.length&&trials[trials.length-1].ok&&d<=S.L,gap=closed?0:26,fh=Math.max(26,ppc*1.1);
+ g.fillStyle='#f0c09a';g.strokeStyle='#8a5a3a';g.lineWidth=2;
+ const finger=(x0,x1)=>{g.beginPath();g.roundRect?g.roundRect(Math.min(x0,x1),yf,Math.abs(x1-x0),fh,fh/2):g.rect(Math.min(x0,x1),yf,Math.abs(x1-x0),fh);g.fill();g.stroke();};
+ finger(0,rx-gap);finger(rx+rw+gap,W);
+ g.fillStyle='#f7d8c2';g.fillRect(rx-gap-16,yf+4,12,fh-8);g.fillRect(rx+rw+gap+4,yf+4,12,fh-8); // nails
+ g.strokeStyle='#ff3b3b';g.lineWidth=2;g.setLineDash([6,4]);g.beginPath();g.moveTo(0,yf);g.lineTo(W,yf);g.stroke();g.setLineDash([]);
+ g.fillStyle='#ff6b6b';g.font='bold 13px sans-serif';g.fillText('top of fingers',6,yf-6);
+ g.fillStyle='#fff';g.font='bold 15px sans-serif';g.fillText('d = '+Math.min(d*100,S.L*100).toFixed(1)+' cm'+(d>S.L?' (fell through)':''),8,22);
+ g.font='12px sans-serif';g.fillStyle='#9ab';g.fillText((S.view==='big'?'≈ life size':'whole ruler')+' · '+ppc.toFixed(0)+' px/cm · '+S.L*100+' cm ruler',8,40);
+ // zoom inset
+ const gm=$('zoom').getContext('2d'),zs=36,cy=75,zw=180,zh=150;gm.clearRect(0,0,zw,zh);gm.fillStyle='#1b2430';gm.fillRect(0,0,zw,zh);
+ const zcm=Math.min(d*100,S.L*100);gm.fillStyle='#fffbea';gm.fillRect(30,0,120,zh);gm.fillStyle='#000';gm.strokeStyle='#000';gm.font='bold 15px sans-serif';
+ for(let mm=Math.floor((zcm-2.5)*10);mm<=Math.ceil((zcm+2.5)*10);mm++){if(mm<0||mm>S.L*1000)continue;const y=cy-(mm/10-zcm)*zs;const len=mm%10===0?36:mm%5===0?24:12;gm.lineWidth=1;gm.beginPath();gm.moveTo(30,y);gm.lineTo(30+len,y);gm.stroke();if(mm%10===0)gm.fillText(mm/10+' cm',78,y+5);}
+ gm.strokeStyle='#f33';gm.lineWidth=2;gm.beginPath();gm.moveTo(0,cy);gm.lineTo(zw,cy);gm.stroke();gm.fillStyle='#f0c09a';gm.fillRect(0,cy,26,34);gm.fillRect(154,cy,26,34);}
+// ---- tap-along calibration ----
+let cal=null;
+$('calBtn').onclick=()=>{if(cal||state==='armed'||state==='falling')return;if($('calBeep').checked)audio();if(document.activeElement)document.activeElement.blur();
+ const start=performance.now()+1200;cal={sched:[...Array(10)].map((_,i)=>start+i*600),shown:Array(10).fill(null),presses:[],end:start+10*600+300};$('calOut').textContent='Get the rhythm… press Space on each flash.';};
+function calTick(ts){cal.sched.forEach((t,i)=>{if(cal.shown[i]==null&&ts>=t){cal.shown[i]=ts;if($('calBeep').checked)beep(660);}});
+ const lit=cal.shown.some(s=>s!=null&&ts-s<120);$('calBox').style.background=lit?'#3f3':'#333';
+ if(ts>cal.end){const off=calibOffsets(cal.shown,cal.presses,2,300),med=median(off),sd=stdev(off);
+  if(off.length<5){$('calOut').innerHTML=`Only ${off.length} presses matched beats — try again.`;}
+  else{const v=Math.round(Math.min(100,Math.max(0,med)));$('calOut').innerHTML=`Median offset <b>${med.toFixed(0)} ms</b> (spread ±${(isNaN(sd)?0:sd).toFixed(0)} ms, ${off.length}/8 beats). <button id="calUse">Use ${v} ms</button><br>Note: people tapping to a beat usually press 20–50 ms <i>early</i>, so the true device delay may be a bit larger than this.`;
+   $('calUse').onclick=()=>{S.delay=v;syncUI();};}
+  window.__cal={off,med};cal=null;$('calBox').style.background='#333';}}
+function calPress(ts){cal.presses.push(ts);}
+function refresh(){const tb=$('tbl').tBodies[0];tb.innerHTML='';
+ trials.forEach((x,i)=>{const tr=document.createElement('tr');if(!x.ok)tr.className='bad';if(i===sel)tr.classList.add('sel');
+  const rawc=x.raw!=null?`${x.raw.toFixed(3)} − ${(x.delay||0).toFixed(3)}`:'—';
+  tr.innerHTML=x.ok?`<td>${i+1}</td><td style="color:${color(x.who)}">${x.who}</td><td>${x.cm.toFixed(1)}</td><td>${(x.cm/100).toFixed(3)}</td><td>${tFromD(x.cm/100,x.g).toFixed(3)}</td><td class="g">${rawc}</td><td><button data-del="${i}">✕</button></td>`
+   :`<td>${i+1}</td><td>${x.who}</td><td colspan="4">${x.note}${x.wouldCm?` — would have been ≈${x.wouldCm.toFixed(1)} cm, t ≈ ${x.tc.toFixed(3)} s (raw ${x.raw.toFixed(3)} s)`:''} — not used in averages</td><td><button data-del="${i}">✕</button></td>`;
+  tr.onclick=e=>{if(e.target.dataset.del!==undefined){trials.splice(+e.target.dataset.del,1);sel=null;refresh();return;}if(x.ok){sel=i;refresh();}};tb.appendChild(tr);});
+ $('tblWrap').scrollTop=1e6;
+ const sb=$('sum').tBodies[0];sb.innerHTML='';const names=students();
+ names.forEach(n=>{const ok=trials.filter(x=>x.ok&&x.who===n),ds=ok.map(x=>x.cm/100),ts=ok.map(x=>tFromD(x.cm/100,x.g));const sd=stdev(ts);
+  sb.insertAdjacentHTML('beforeend',`<tr><td style="color:${color(n)}">${n}</td><td>${ok.length}</td><td>${mean(ds).toFixed(3)}</td><td><b>${mean(ts).toFixed(3)}</b></td><td>${isNaN(sd)?'—':sd.toFixed(3)}</td><td>${Math.min(...ts).toFixed(3)}</td></tr>`);});
+ $('names').innerHTML=[...new Set(trials.map(x=>x.who))].map(n=>`<option value="${n}">`).join('');
+ const x=sel!=null?trials[sel]:null;
+ $('calc').innerHTML=`Ruler starts at rest (v₀ = 0) and falls freely with acceleration g:<br>d = v₀t + ½gt² = ½gt² &nbsp;⇒&nbsp; <b>t = √(2d / g)</b><br>`+
+  (x?`<span class="g">Trial ${sel+1} (${x.who}):</span><br>d = ${x.cm.toFixed(1)} cm × (1 m / 100 cm) = <b>${(x.cm/100).toFixed(3)} m</b><br>t = √(2 × ${(x.cm/100).toFixed(3)} m / ${x.g} m/s²) = √(${(2*x.cm/100/x.g).toFixed(5)} s²) = <b>${tFromD(x.cm/100,x.g).toFixed(3)} s</b> (${(tFromD(x.cm/100,x.g)*1000).toFixed(0)} ms)`+
+   (x.raw!=null&&x.delay?`<br><span class="g">Computer: raw timer ${(x.raw*1000).toFixed(0)} ms − device delay ${(x.delay*1000).toFixed(0)} ms ≈ ${((x.raw-x.delay)*1000).toFixed(0)} ms; the ruler shows where a real ruler would have been.</span>`:'')
+   :'<span class="g">Catch the ruler to see a worked calculation.</span>')+
+  (names.length?`<br><span class="g">Average reaction time = (t₁ + t₂ + … + tₙ)/n; std. dev. s = √[Σ(tᵢ − t̄)²/(n − 1)]</span>`:'');
+ let e='';names.forEach(n=>{const ok=trials.filter(x=>x.ok&&x.who===n),ts=ok.map(x=>tFromD(x.cm/100,x.g)),m=mean(ts),sd=stdev(ts),md=mean(ok.map(x=>x.cm/100));
+  const dt=dtFromDd(md,0.001,S.g);e+=`<div><b style="color:${color(n)}">${n}:</b> reaction time = <b>${m.toFixed(3)} ${isNaN(sd)?'':'± '+sd.toFixed(3)} s</b> (${ok.length} trial${ok.length>1?'s':''}). A ±1 mm reading error at d ≈ ${(md*100).toFixed(1)} cm changes t by only ±${(dt*1000).toFixed(1)} ms, so ${isNaN(sd)?'more trials are needed to see the trial-to-trial spread.':(sd>dt*3?'the spread between trials (human variation) is much bigger than the ruler-reading error.':'the reading error and the trial spread are comparable.')}</div>`;});
+ const bad=trials.filter(x=>!x.ok).length;
+ $('err').innerHTML=(e||'<span class="g">Record some trials to get a summary.</span>')+(bad?`<div class="g">${bad} trial(s) excluded (false starts / misses).</div>`:'')+
+ `<ul class="g" style="margin:4px 0"><li><b>Anticipation:</b> guessing when the drop will happen gives times that are too short (or false starts).</li><li><b>Finger position:</b> fingers not exactly level with the 0 mark at the start, or reading from the top vs the middle of the fingers (a few mm).</li><li><b>Dropper’s push:</b> if the ruler is pushed or not dropped from rest, v₀ ≠ 0 and t = √(2d/g) no longer holds.</li><li><b>Closing time:</b> the fingers take time to close, so the measured time includes reaction and movement.</li><li><b>Air resistance</b> on a ruler over ~0.2 s is negligible; fatigue, practice, and distraction change results trial to trial.</li><li><b>On a computer:</b> the screen and keyboard add ~30–80 ms (corrected here by the device-delay setting of ${S.delay} ms), and pressing a key is a different motion from pinching a ruler.</li></ul>`;
+ const tr=names.length?mean(trials.filter(x=>x.ok).map(x=>tFromD(x.cm/100,x.g))):0.2,v=S.mph*0.44704;
+ $('stopOut').innerHTML=`Reaction distance = v × t<sub>react</sub> = ${v.toFixed(1)} m/s × ${tr.toFixed(3)} s = <b>${reactionDistance(v,tr).toFixed(2)} m</b> (${(reactionDistance(v,tr)*3.281).toFixed(1)} ft) travelled before your foot even touches the brake.<br><span class="g">Using ${names.length?'the class average':'a typical 0.200 s'}; real driving reaction times are closer to 1–1.5 s because you must notice the hazard and decide what to do.</span>`;
+ drawGraph();drawRuler();}
+function drawGraph(){const c=$('graph'),g=c.getContext('2d'),W=c.width,H=c.height,ML=50,MB=36,MT=14,MR=14;g.clearRect(0,0,W,H);
+ const Lg=Math.max(S.L,...trials.filter(x=>x.ok).map(x=>x.cm/100)),tMax=Math.ceil(maxCatchTime(Lg,S.g)*1.1*20)/20,X=dd=>ML+dd/Lg*(W-ML-MR),Y=t=>H-MB-t/tMax*(H-MB-MT);
+ g.strokeStyle='#ddd';g.fillStyle='#666';g.font='10px sans-serif';const cs=Lg>0.35?10:5;
+ for(let cm=0;cm<=Lg*100+1e-9;cm+=cs){g.beginPath();g.moveTo(X(cm/100),MT);g.lineTo(X(cm/100),H-MB);g.stroke();g.fillText((cm/100).toFixed(2),X(cm/100)-10,H-MB+12);}
+ const ts=tMax>0.5?0.1:0.05;for(let t=0;t<=tMax+1e-9;t+=ts){g.beginPath();g.moveTo(ML,Y(t));g.lineTo(W-MR,Y(t));g.stroke();g.fillText(t.toFixed(2),14,Y(t)+3);}
+ g.strokeStyle='#000';g.lineWidth=1.5;g.beginPath();g.moveTo(ML,MT);g.lineTo(ML,H-MB);g.lineTo(W-MR,H-MB);g.stroke();
+ g.fillStyle='#000';g.font='bold 11px sans-serif';g.fillText('distance fell d (m)',W/2-40,H-6);g.save();g.translate(11,H/2+40);g.rotate(-Math.PI/2);g.fillText('reaction time t (s)',0,0);g.restore();
+ g.strokeStyle='#888';g.lineWidth=2;g.beginPath();for(let i=0;i<=200;i++){const dd=Lg*i/200,y=Y(tFromD(dd,S.g));i?g.lineTo(X(dd),y):g.moveTo(X(dd),y);}g.stroke();
+ g.fillStyle='#555';g.font='11px sans-serif';g.fillText('t = √(2d/g), g = '+S.g+' m/s²',ML+10,MT+12);
+ trials.forEach((x,i)=>{if(!x.ok)return;g.fillStyle=color(x.who);g.beginPath();g.arc(X(x.cm/100),Y(tFromD(x.cm/100,x.g)),i===sel?6:4,0,7);g.fill();if(i===sel){g.strokeStyle='#000';g.lineWidth=1.5;g.stroke();}});}
+$('printBtn').onclick=()=>{const marks=rulerMarks(S.g,0,Math.floor(maxCatchTime(0.30,S.g)*1000/10)*10,10);
+ const strip=(from,to,yo)=>{let s=`<rect x="5" y="${yo}" width="${(to-from)*10}" height="30" fill="none" stroke="#000" stroke-width="0.3"/>`;
+  for(let mm=from*10;mm<=to*10;mm++){const x=5+mm-from*10,l=mm%10===0?6:mm%5===0?4:2;s+=`<line x1="${x}" y1="${yo+30}" x2="${x}" y2="${yo+30-l}" stroke="#000" stroke-width="0.2"/>`;if(mm%10===0)s+=`<text x="${x+0.5}" y="${yo+22}" font-size="3">${mm/10}</text>`;}
+  marks.filter(m=>m.cm>=from-1e-9&&m.cm<=to+1e-9).forEach(m=>{const x=5+(m.cm-from)*10,big=m.ms%50===0;s+=`<line x1="${x}" y1="${yo}" x2="${x}" y2="${yo+(big?10:6)}" stroke="#c00" stroke-width="${big?0.5:0.3}"/>`+(big||m.ms>=60?`<text x="${x+0.6}" y="${yo+(big?13.5:9.5)}" font-size="${big?3.6:2.6}" fill="#c00">${m.ms}</text>`:'');});return s;};
+ $('printArea').innerHTML=`<div style="font:14px sans-serif">Reaction-time ruler (g = ${S.g} m/s²). Cut out both strips and tape them end-to-end (15 cm to 15 cm). The catcher starts with the top of the fingers at 0; read the time in <b style="color:#c00">milliseconds</b> where they catch it. Print at 100% scale (check: 1 cm marks = 1 cm).</div>
+ <svg xmlns="http://www.w3.org/2000/svg" width="170mm" height="90mm" viewBox="0 0 170 90">${strip(0,15,5)}${strip(15,30,50)}<text x="5" y="44" font-size="3">0–15 cm (ms in red)</text><text x="5" y="89" font-size="3">15–30 cm</text></svg>`;window.print();};
+syncUI();setMode('real');layout();refresh();setStatus('Press <b>Space</b> (or “Get ready”). After a random wait the ruler drops — catch it as fast as you can!');requestAnimationFrame(tick);
+</script></body></html>
