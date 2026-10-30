@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Force Quest: the Free-Body Diagram Game</title>
+<!-- Self-contained offline game for NYS Regents Physics and AP Physics 1 (Mr. Tiu). No internet, install or login needed. Saves progress with localStorage keys starting "fbdgame:". -->
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;overflow-x:hidden}
+body{font-family:system-ui,"Segoe UI",Roboto,Arial,sans-serif;background:#f4f6fa;color:#222;font-size:14px;line-height:1.4}
+button{font:inherit;font-size:13.5px;padding:6px 11px;border:1px solid #889;border-radius:8px;background:#eef;cursor:pointer;color:#222;touch-action:manipulation}
+button:hover:not(:disabled){filter:brightness(.95)}button:disabled{opacity:.45;cursor:default}
+button.warn{background:#ffe0d6;border-color:#c55}
+.hide{display:none!important}.g{font-size:12px;color:#556}sub{font-size:75%}
+.kbd{font-family:monospace;background:#eef;border:1px solid #ccd;padding:0 4px;border-radius:3px}
+.lab{font-weight:bold;color:#234;margin:10px 0 4px}
+canvas{display:block;touch-action:none}
+.screen{min-height:100vh}
+/* ---- title ---- */
+#title{background:radial-gradient(circle at 20% 10%,#3a5f8a 0,#234 55%,#17222f 100%);padding:18px 12px}
+.tcard{max-width:1060px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 8px 30px #0006;padding:16px 22px}
+.tlogo{font-weight:900;font-size:46px;letter-spacing:2px;text-align:center;line-height:1}
+.lg1{color:#234}.lg2{color:#d9480f;text-shadow:3px 3px 0 #ffd76a}
+.tsub{text-align:center;color:#556;margin:4px 0 8px}
+.trow{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start}
+.tmascot{display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:6px}
+.nm{display:block;font-weight:bold;color:#234}.nm input{display:block;width:100%;max-width:360px;font:inherit;font-size:15px;padding:6px 9px;border:2px solid #b8c9e6;border-radius:8px;margin-top:3px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{text-align:left;padding:10px 12px;background:#f4f7fc;border:2px solid #b8c9e6;border-radius:12px;display:flex;flex-direction:column;gap:2px}
+.mode b{font-size:16px}.mode span{font-size:12.5px;color:#445}
+.mode.on{background:#fff6d6;border-color:#e0a800;box-shadow:0 0 0 3px #ffd76a88}
+.startlv{display:flex;flex-wrap:wrap;gap:5px}
+.startlv button{min-width:44px;padding:5px 8px;font-weight:bold;background:#eef2f8;border-color:#b8c9e6}
+.startlv button.on{background:#ffd76a;border-color:#c9a237}
+.startlv button .ic{display:block;font-size:16px;line-height:1.1}
+.play{display:block;margin:14px 0 6px;font-size:22px;font-weight:900;letter-spacing:1px;padding:10px 40px;color:#fff;background:linear-gradient(#ff7b39,#d9480f);border:none;border-radius:14px;box-shadow:0 5px 0 #8f2d07;transition:transform .08s}
+.play:active{transform:translateY(4px);box-shadow:0 1px 0 #8f2d07}.play.small{font-size:17px;padding:8px 22px;margin:0}
+.best{font-size:13px;color:#334}
+.trow2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:8px}
+details summary{cursor:pointer;font-weight:bold;color:#234}
+#howTo ul{margin:4px 0;padding-left:20px;font-size:13px}#howTo li{margin:2px 0}
+#badgeShelf{display:flex;flex-wrap:wrap;gap:5px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;background:#fff6d6;border:1px solid #e0c060;font-size:12.5px}
+.badge.locked{background:#f0f2f6;border-color:#d5d9e2;color:#99a;filter:grayscale(1)}
+#teacher{margin-top:10px;border-top:1px solid #e3e7ef;padding-top:6px}#teacher .row{display:flex;gap:6px;margin:6px 0;flex-wrap:wrap}
+.chk{display:inline-flex;gap:4px;align-items:center;font-size:13px;margin:6px 0}
+.tblwrap{max-height:260px;overflow:auto;border:1px solid #dde3ec;border-radius:6px;margin-top:4px}
+table.t{border-collapse:collapse;font-size:12px;width:100%}table.t th,table.t td{border:1px solid #e0e4ec;padding:3px 5px;text-align:left;vertical-align:top}
+table.t th{background:#eef2f8;position:sticky;top:0}table.t td.ok{color:#1d6b35;font-weight:bold}table.t td.no{color:#b02a1e;font-weight:bold}
+/* ---- HUD ---- */
+#hud{background:#234;color:#fff;display:flex;align-items:center;gap:12px;padding:5px 12px;min-height:56px;position:sticky;top:0;z-index:5}
+.hlogo{font-weight:900;letter-spacing:1px;font-size:15px;color:#ffd76a;white-space:nowrap}
+.sp{flex:1}
+.lvbar{display:flex;gap:3px;align-items:flex-end}
+.lvseg{width:42px;text-align:center;font-size:10.5px;color:#9fb3c8;line-height:1.05}
+.lvseg .bx{height:26px;border-radius:6px;background:#3a5068;border:1px solid #567;display:flex;align-items:center;justify-content:center;font-size:15px;filter:grayscale(.7);opacity:.75}
+.lvseg.done .bx{background:#2b8a3e;border-color:#56b36a;filter:none;opacity:1}
+.lvseg.cur .bx{background:#ffd76a;border-color:#fff;filter:none;opacity:1;transform:scale(1.15);box-shadow:0 0 10px #ffd76a}
+.lvseg.cur{color:#ffd76a;font-weight:bold}
+.pips{display:flex;gap:2px;justify-content:center;margin-top:2px}.pip{width:9px;height:4px;border-radius:2px;background:#567}.pip.on{background:#ffd76a}
+.hstat{text-align:center;min-width:60px}.hl{font-size:10.5px;color:#9fb3c8;text-transform:uppercase;letter-spacing:.5px}
+.hstat .big{font-size:20px;font-weight:900}
+.hearts{font-size:20px;letter-spacing:1px;white-space:nowrap}.hearts .lost{filter:grayscale(1);opacity:.35}
+.hearts .breaking{display:inline-block;animation:hbreak .8s ease-in forwards}
+@keyframes hbreak{0%{transform:scale(1)}30%{transform:scale(1.6) rotate(-15deg)}100%{transform:translateY(30px) rotate(40deg) scale(.6);opacity:0}}
+.hearts .gain{display:inline-block;animation:hgain .7s ease-out}@keyframes hgain{0%{transform:scale(0)}60%{transform:scale(1.7)}100%{transform:scale(1)}}
+#combo.hot{color:#ff9f43;text-shadow:0 0 8px #ff6b00}
+#hud button{background:#3a5068;color:#fff;border:1px solid #567}
+/* ---- arena ---- */
+#arena{display:grid;grid-template-columns:minmax(0,1fr) 470px;gap:10px;padding:8px 10px;max-width:1400px;margin:0 auto}
+#left,#right{min-width:0}
+#right{position:relative;background:#fff;border-radius:12px;box-shadow:0 1px 4px #0002;padding:10px 12px;min-height:520px}
+.lvname{font-weight:900;color:#234;font-size:16px;margin:0 0 4px}
+.lvname .g{font-weight:normal}
+.scenewrap{position:relative;background:#fff;border-radius:12px;box-shadow:0 1px 4px #0002;overflow:hidden}
+#scene{width:100%;height:auto;max-height:300px;object-fit:contain}
+.pop{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font-size:40px;font-weight:900;pointer-events:none;opacity:0;white-space:nowrap}
+.pop.show{animation:pop 1.3s ease-out}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-30%) scale(.5)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-120%) scale(1)}}
+.qrow{display:flex;gap:10px;margin-top:8px;align-items:flex-start}
+.qbox{flex:1;background:#fff;border-radius:12px;box-shadow:0 1px 4px #0002;padding:9px 12px;font-size:15.5px;line-height:1.45;min-height:96px}
+.qtype{display:inline-block;font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:.6px;color:#fff;background:#2b6cb0;border-radius:10px;padding:1px 8px;margin-bottom:3px}
+.bubble{background:#fffbe6;border:1px solid #f0e2a8;border-radius:12px;padding:6px 10px;font-size:13.5px;position:relative}
+.bubble.small{margin-top:6px;font-size:13px;background:#f4f7fc;border-color:#d5deec;color:#334}
+.bubble:empty{display:none}
+/* ---- mascot ---- */
+.mascot{width:88px;height:88px;flex:none}.mascot.big{width:150px;height:150px}
+.mascot svg{width:100%;height:100%;overflow:visible}
+.mascot .face{transition:transform .2s}
+.mascot.happy svg{animation:hop .6s ease-out 2}.mascot.cheer svg{animation:spin .9s ease-out}
+.mascot.sad svg{animation:droop .9s ease-out forwards}.mascot.idle svg{animation:breathe 3s ease-in-out infinite}
+@keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-18px) scale(1.05,.95)}}
+@keyframes spin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.2)}100%{transform:rotate(360deg) scale(1)}}
+@keyframes droop{0%{transform:none}40%{transform:translateX(-4px) rotate(-6deg)}70%{transform:translateX(4px) rotate(5deg)}100%{transform:translateY(4px) scale(1,.94)}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.03,0.97)}}
+/* ---- answer area ---- */
+.ahead{font-weight:bold;color:#234;margin:0 0 6px;font-size:14px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{position:relative;padding:4px;border:3px solid #d5deec;border-radius:12px;background:#fff}
+.opt.on{border-color:#e0a800;background:#fffbe6;box-shadow:0 0 0 3px #ffd76a77}
+.opt .ol{position:absolute;left:7px;top:4px;font-weight:900;font-size:16px;color:#234}
+.opt canvas{width:100%;height:auto}
+.choices{display:flex;flex-direction:column;gap:7px}
+.choice{text-align:left;padding:10px 12px;font-size:14.5px;border:2px solid #c5d2e6;border-radius:10px;background:#f7f9fd;display:flex;gap:10px;align-items:center}
+.choice .k{flex:none;width:24px;height:24px;border-radius:50%;background:#234;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold}
+.choice.on{border-color:#e0a800;background:#fff6d6}
+.mv4{display:grid;grid-template-columns:1fr 1fr;gap:7px}.mv4 .choice{flex-direction:column;align-items:flex-start;gap:2px;min-height:62px}.mv4 .ic{font-size:22px}
+.go{display:block;width:100%;margin-top:10px;font-size:18px;font-weight:900;padding:10px;color:#fff;background:#2b6cb0;border:none;border-radius:12px;box-shadow:0 4px 0 #1f4f82}
+.go:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #1f4f82}
+.go:disabled{background:#9db3cc;box-shadow:0 4px 0 #7d93ac}
+.numrow{display:flex;gap:8px;align-items:center;font-size:18px;margin:12px 0 4px}
+.numrow input{font:inherit;font-size:24px;width:200px;padding:6px 10px;border:3px solid #b8c9e6;border-radius:10px;text-align:right}
+.numrow input:focus{outline:none;border-color:#e0a800}
+.hint{font-size:12.5px;color:#556;margin:4px 0}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:6px 0 4px}
+.fchip{display:flex;gap:5px;align-items:center;text-align:left;font-size:12.5px;padding:5px 6px;background:#fff;border-radius:7px}
+.fchip i{flex:none;width:12px;height:12px;border-radius:3px}.fchip.on{background:#ffd76a;border-color:#c9a237;font-weight:bold}
+.fchip.placed:after{content:'✓';margin-left:auto;color:#2b8a3e;font-weight:bold}
+.brow{display:flex;gap:6px;flex-wrap:wrap}.brow button{font-size:12.5px;padding:4px 9px}
+#bcv{border:1px solid #d5deec;border-radius:10px;width:100%;height:auto;background:#fbfcfe}
+.spotbtns{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.spotbtns button{font-weight:bold;background:#fff}
+.spotbtns button.on{background:#ffd76a;border-color:#c9a237}
+.match{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;align-items:stretch}
+.mcard{padding:8px 9px;border:2px solid #c5d2e6;border-radius:10px;background:#f7f9fd;font-size:13px;text-align:left;min-height:52px;position:relative}
+.mcard.on{border-color:#e0a800;background:#fff6d6}
+.mcard .tag{position:absolute;right:5px;top:3px;font-weight:900;font-size:12px;padding:0 6px;border-radius:8px;color:#fff}
+.mright{display:flex;flex-direction:column;gap:6px}.mleft{display:flex;flex-direction:column;gap:6px}
+/* ---- feedback ---- */
+#feedback{position:absolute;inset:0;background:#fff;border-radius:12px;padding:10px 12px;overflow:auto;z-index:3;animation:slide .35s ease-out}
+@keyframes slide{0%{transform:translateY(16px);opacity:0}100%{transform:none;opacity:1}}
+.fhead{font-size:26px;font-weight:900;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+.fhead.win{color:#1d7a3a}.fhead.lose{color:#c0392b}
+.fhead .pts{font-size:17px;background:#2b8a3e;color:#fff;border-radius:16px;padding:2px 10px}
+.fmsg{font-size:13.5px;padding:5px 8px;border-radius:6px;margin:4px 0}
+.fmsg.bad{background:#fdecea;border-left:4px solid #c0392b}.fmsg.tip{background:#fff8e1;border-left:4px solid #e0a800}
+.fexp{font-size:14px;background:#eef5ff;border-left:4px solid #2b6cb0;padding:6px 9px;border-radius:6px;margin:6px 0}
+.fans{font-size:13.5px;margin:4px 0}.fans b{color:#234}
+#fcv{width:100%;height:auto;border:1px solid #e0e6f0;border-radius:8px;margin:4px 0}
+.nbadge{display:flex;align-items:center;gap:8px;background:#fff6d6;border:2px solid #e0c060;border-radius:10px;padding:5px 9px;margin:5px 0;font-size:13.5px;animation:glow 1.4s ease-in-out 2}
+.nbadge .bi{font-size:24px}@keyframes glow{50%{box-shadow:0 0 14px #ffd76a}}
+/* ---- banner ---- */
+#banner{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:20;pointer-events:none;text-align:center;padding:16px 34px;border-radius:20px;color:#fff;font-weight:900;box-shadow:0 10px 40px #0007;animation:bannerIn 2.2s ease-out forwards}
+#banner .b1{font-size:42px;letter-spacing:1px}#banner .b2{font-size:18px;font-weight:bold}
+#banner.up{background:linear-gradient(135deg,#ff9f1a,#e8590c)}#banner.down{background:linear-gradient(135deg,#4c6ef5,#364fc7)}#banner.over{background:linear-gradient(135deg,#5c5f66,#212529)}#banner.win{background:linear-gradient(135deg,#f59f00,#d6336c)}
+@keyframes bannerIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-60%) scale(1)}}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:19}#confetti{width:100%;height:100%}
+.shake{animation:shake .5s}@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-8px)}40%,60%{transform:translateX(8px)}}
+/* ---- summary ---- */
+#summary{background:radial-gradient(circle at 80% 0,#3a5f8a 0,#234 55%,#17222f 100%);padding:18px 12px}
+.scard{max-width:980px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 8px 30px #0006;padding:16px 22px}
+.shead{font-size:38px;font-weight:900;text-align:center;color:#234}
+.shead .sm{display:block;font-size:15px;font-weight:bold;color:#556}
+.srow{display:grid;grid-template-columns:170px 1fr;gap:20px;align-items:center;margin:8px 0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.stat{background:#f4f7fc;border:1px solid #d5deec;border-radius:12px;padding:8px;text-align:center}
+.stat .v{font-size:24px;font-weight:900;color:#234}.stat .l{font-size:11.5px;color:#556;text-transform:uppercase}
+.sbadges{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0}
+.sbtns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+@media (max-width:1100px){#arena{grid-template-columns:1fr}.trow,.trow2{grid-template-columns:1fr}.lvseg{width:30px}.lvseg .t{display:none}}
+#nextBtn{position:sticky;bottom:0;width:100%;margin-top:8px;box-shadow:0 -6px 12px #fff}
+
+</style></head><body>
+<noscript><p style="padding:20px;font:16px sans-serif">This game needs JavaScript. Open the file in Google Chrome.</p></noscript>
+<div id="fx"><canvas id="confetti"></canvas></div>
+<div id="banner" class="hide"></div>
+
+<!-- ============ TITLE ============ -->
+<section id="title" class="screen">
+  <div class="tcard">
+    <div class="tlogo"><span class="lg1">FORCE</span> <span class="lg2">QUEST</span></div>
+    <div class="tsub">The free-body diagram game · NYS Regents &amp; AP Physics 1</div>
+    <div class="trow">
+      <div class="tmascot"><div class="mascot big" id="mascotT"></div><div class="bubble" id="bubbleT">Hi, I’m <b>Newt the Box</b>! Help me figure out every force on me.</div></div>
+      <div class="tform">
+        <label class="nm">Your name <input id="nameIn" maxlength="40" placeholder="First name + last initial" autocomplete="off"></label>
+        <div class="lab">1. Choose your course</div>
+        <div class="modes">
+          <button class="mode" data-mode="regents" id="mReg"><b>📘 Regents Physics</b><span>8 levels · horizontal &amp; vertical forces · g = 9.8 m/s²</span></button>
+          <button class="mode" data-mode="ap" id="mAP"><b>📗 AP Physics 1</b><span>10 levels · adds angles, inclines &amp; pulleys</span></button>
+        </div>
+        <div class="lab">2. Start at level <span class="g" id="unlockNote"></span></div>
+        <div id="startLv" class="startlv"></div>
+        <button class="play" id="playBtn">▶ PLAY</button>
+        <div class="best" id="bestBox"></div>
+      </div>
+    </div>
+    <div class="trow2">
+      <details id="howTo" open><summary>How to play</summary>
+        <ul>
+          <li>You have <b>3 hearts</b> ❤️. A wrong answer costs a heart. Lose them all and the run is over.</li>
+          <li><b>3 right in a row</b> → <b>LEVEL UP!</b> (harder scenarios + 1 bonus heart, up to 5).</li>
+          <li><b>2 wrong in a row</b> → <b>warm-up</b>: you drop one level to practise easier ones.</li>
+          <li>Streaks multiply your points: ×2 from the 4th in a row, ×3 from the 7th, ×4 from the 10th.</li>
+          <li>Question types: <b>build</b> an FBD, <b>pick</b> the right FBD, <b>spot</b> the fake force, <b>predict</b> the motion, <b>calculate</b>, concept questions and 3rd-law <b>matching</b>.</li>
+          <li>Keys: <span class="kbd">1</span>–<span class="kbd">4</span> pick an answer, <span class="kbd">Enter</span> checks / goes on.</li>
+        </ul>
+      </details>
+      <div class="allbadges"><div class="lab">Badges earned on this device</div><div id="badgeShelf"></div></div>
+    </div>
+    <details id="teacher"><summary>For teachers</summary>
+      <div class="g">Every run is saved on this device only (localStorage keys start with <code>fbdgame:</code>). No internet, accounts or logins. Students can screenshot the summary screen or download a CSV.</div>
+      <label class="chk"><input type="checkbox" id="unlockAll"> Unlock every start level on this device</label>
+      <div class="row"><button id="runsCsv">⬇ Download all saved runs (CSV)</button><button id="clearData" class="warn">Clear saved data on this device</button></div>
+      <div id="runsTbl" class="tblwrap"></div>
+    </details>
+  </div>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="game" class="screen hide">
+  <header id="hud">
+    <div class="hlogo">FORCE QUEST</div>
+    <div id="lvBar" class="lvbar"></div>
+    <div class="sp"></div>
+    <div class="hstat"><div class="hl">Hearts</div><div id="hearts" class="hearts"></div></div>
+    <div class="hstat"><div class="hl">Score</div><div id="score" class="big">0</div></div>
+    <div class="hstat"><div class="hl">Streak</div><div id="combo" class="big">0</div></div>
+    <button id="muteBtn" title="Sound on/off">🔊</button>
+    <button id="endBtn" title="End this run and see your summary">End run</button>
+  </header>
+  <div id="arena">
+    <div id="left">
+      <div class="lvname" id="lvName"></div>
+      <div class="scenewrap"><canvas id="scene" width="640" height="250"></canvas><div id="pop" class="pop"></div></div>
+      <div class="qrow">
+        <div class="mascot" id="mascot"></div>
+        <div class="qbox"><div class="qtype" id="qType"></div><div id="prompt"></div><div class="bubble small" id="bubble"></div></div>
+      </div>
+    </div>
+    <div id="right">
+      <div id="answer"></div>
+      <div id="feedback" class="hide"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SUMMARY ============ -->
+<section id="summary" class="screen hide">
+  <div class="scard" id="scard">
+    <div class="shead" id="sHead"></div>
+    <div class="srow">
+      <div class="mascot big" id="mascotS"></div>
+      <div class="sstats">
+        <label class="nm">Name <input id="nameS" maxlength="40" placeholder="Type your name for the screenshot"></label>
+        <div id="sStats" class="stats"></div>
+        <div id="sBadges" class="sbadges"></div>
+        <div class="g" id="sDate"></div>
+      </div>
+    </div>
+    <div class="row sbtns"><button class="play small" id="againBtn">↻ Try again</button><button id="csvBtn">⬇ Download results (CSV)</button><button id="homeBtn">⌂ Title screen</button></div>
+    <details id="histD"><summary>Question-by-question results</summary><div id="histTbl" class="tblwrap"></div></details>
+  </div>
+</section>
+
+<script>
+// ===== Free-Body Diagram Simulator: physics core + FBD grading (pure functions; also run by the node tests) =====
+// Conventions: g default 9.8 m/s^2 (NYS Reference Tables). Angles are degrees counter-clockwise from +x (screen right); +y is up.
+// Each scenario's ev(p, st) returns every force on the chosen object as {k, mag (N), ang (deg)} plus its acceleration a
+// along that object's motion axis (axisAng). Newton's 2nd law check: the vector sum of the forces = m * a * (axis unit vector).
+const FBDPHYS = (() => {
+  const D2R = Math.PI / 180, EPS = 1e-9;
+  const sgn = x => (x > EPS ? 1 : x < -EPS ? -1 : 0);
+  const normAng = a => (((a % 360) + 360) % 360);
+  const angDiff = (a, b) => Math.abs((((a - b) % 360) + 540) % 360 - 180);
+  const r6 = x => (Math.abs(x) < 1e-9 ? 0 : x);
+
+  // ---------- adjustable parameters (every value in every scenario is adjustable) ----------
+  // ap:true  = shown only in AP level (Regents level uses the default value, which is the simple case)
+  const gP = { k: 'g', label: 'Gravitational field strength g', unit: 'm/s²', min: 1, max: 25, step: 0.1, def: 9.8 };
+  const tP = (d) => ({ k: 'tMax', label: 'Run time', unit: 's', min: 1, max: 30, step: 0.5, def: d || 5 });
+  const SCEN = {
+    rest: { name: 'Box resting on the floor', short: 'Box on floor', axis: 'y', obj: 'box',
+      params: [{ k: 'm', label: 'Mass m', unit: 'kg', min: 0.5, max: 100, step: 0.5, def: 10 },
+        { k: 'Fy', label: 'Hand force (+ pull up, − push down)', unit: 'N', min: -300, max: 300, step: 1, def: 0 }, gP, tP(4)] },
+    push: { name: 'Box pushed or pulled across the floor (friction)', short: 'Push / pull a box', axis: 'x', obj: 'box',
+      params: [{ k: 'm', label: 'Mass m', unit: 'kg', min: 0.5, max: 100, step: 0.5, def: 10 },
+        { k: 'F', label: 'Applied force F', unit: 'N', min: 0, max: 500, step: 1, def: 40 },
+        { k: 'th', label: 'Angle of F above horizontal (− = pushing down)', unit: '°', min: -60, max: 60, step: 1, def: 0, ap: true },
+        { k: 'mus', label: 'Static friction coefficient μs', unit: '', min: 0, max: 1.5, step: 0.01, def: 0.5 },
+        { k: 'muk', label: 'Kinetic friction coefficient μk', unit: '', min: 0, max: 1.5, step: 0.01, def: 0.3 },
+        { k: 'v0', label: 'Starting velocity v₀ (+ = right)', unit: 'm/s', min: -10, max: 10, step: 0.1, def: 0 },
+        { k: 'tOff', label: 'Hand lets go at t = (30 = never)', unit: 's', min: 0, max: 30, step: 0.5, def: 30 }, gP, tP(5)] },
+    incline: { name: 'Box on a ramp (incline)', short: 'Ramp / incline', axis: 's', obj: 'box',
+      params: [{ k: 'm', label: 'Mass m', unit: 'kg', min: 0.5, max: 100, step: 0.5, def: 10 },
+        { k: 'th', label: 'Ramp angle θ', unit: '°', min: 0, max: 70, step: 0.1, def: 30 },
+        { k: 'mus', label: 'Static friction coefficient μs', unit: '', min: 0, max: 1.5, step: 0.01, def: 0.7 },
+        { k: 'muk', label: 'Kinetic friction coefficient μk', unit: '', min: 0, max: 1.5, step: 0.01, def: 0.4 },
+        { k: 'Fa', label: 'Push along the ramp (+ up the ramp)', unit: 'N', min: -300, max: 300, step: 1, def: 0 },
+        { k: 'v0', label: 'Starting velocity v₀ (+ = up the ramp)', unit: 'm/s', min: -10, max: 10, step: 0.1, def: 0 }, gP, tP(4)] },
+    hang: { name: 'Hanging mass: one rope (crane) or two ropes at angles', short: 'Hanging mass / ropes', axis: 'y', obj: 'mass',
+      params: [{ k: 'ropes', label: 'Number of ropes', type: 'choice', opts: [[1, 'One rope (crane cable)'], [2, 'Two ropes at angles']], def: 1, ap: true },
+        { k: 'm', label: 'Mass m', unit: 'kg', min: 0.5, max: 100, step: 0.5, def: 10 },
+        { k: 'T', label: 'Cable tension F_T', unit: 'N', min: 0, max: 2000, step: 1, def: 98, show: p => p.ropes == 1 },
+        { k: 'v0', label: 'Starting velocity v₀ (+ = up)', unit: 'm/s', min: -5, max: 5, step: 0.1, def: 0, show: p => p.ropes == 1 },
+        { k: 'th1', label: 'Left rope angle above horizontal θ₁', unit: '°', min: 5, max: 89, step: 1, def: 40, show: p => p.ropes == 2 },
+        { k: 'th2', label: 'Right rope angle above horizontal θ₂', unit: '°', min: 5, max: 89, step: 1, def: 40, show: p => p.ropes == 2 }, gP, tP(4)] },
+    elevator: { name: 'Person on a scale in an elevator (apparent weight)', short: 'Elevator', axis: 'y', obj: 'person',
+      params: [{ k: 'm', label: 'Person’s mass m', unit: 'kg', min: 10, max: 150, step: 1, def: 60 },
+        { k: 'a', label: 'Elevator acceleration a (+ = up)', unit: 'm/s²', min: -12, max: 12, step: 0.1, def: 2 },
+        { k: 'v0', label: 'Starting velocity v₀ (+ = up)', unit: 'm/s', min: -8, max: 8, step: 0.1, def: 0 }, gP, tP(4)] },
+    wall: { name: 'Book pushed against a wall', short: 'Pushed against a wall', axis: 'y', obj: 'book',
+      params: [{ k: 'm', label: 'Mass m', unit: 'kg', min: 0.1, max: 20, step: 0.1, def: 2 },
+        { k: 'F', label: 'Push F', unit: 'N', min: 0, max: 300, step: 1, def: 50 },
+        { k: 'ph', label: 'Push angle above horizontal', unit: '°', min: -60, max: 60, step: 1, def: 0, ap: true },
+        { k: 'mus', label: 'Static friction coefficient μs', unit: '', min: 0, max: 1.5, step: 0.01, def: 0.6 },
+        { k: 'muk', label: 'Kinetic friction coefficient μk', unit: '', min: 0, max: 1.5, step: 0.01, def: 0.4 },
+        { k: 'v0', label: 'Starting velocity v₀ (+ = up)', unit: 'm/s', min: -5, max: 5, step: 0.1, def: 0 },
+        { k: 'h0', label: 'Starting height above floor', unit: 'm', min: 0.5, max: 20, step: 0.5, def: 3 }, gP, tP(4)] },
+    fall: { name: 'Falling object (with or without air resistance)', short: 'Falling object', axis: 'y', obj: 'ball',
+      params: [{ k: 'm', label: 'Mass m', unit: 'kg', min: 0.1, max: 100, step: 0.1, def: 5 },
+        { k: 'h0', label: 'Starting height h₀', unit: 'm', min: 1, max: 1000, step: 1, def: 50 },
+        { k: 'v0', label: 'Starting velocity v₀ (+ = up)', unit: 'm/s', min: -60, max: 40, step: 0.5, def: 0 },
+        { k: 'drag', label: 'Air resistance', type: 'choice', opts: [[0, 'Off (neglected)'], [1, 'On: F_air = k·v²']], def: 0 },
+        { k: 'k', label: 'Drag constant k', unit: 'kg/m', min: 0.001, max: 2, step: 0.001, def: 0.05, show: p => p.drag == 1 }, gP, tP(10)] },
+    pulley: { name: 'Pulley systems: Atwood machine or block on a table', short: 'Pulleys (AP)', axis: 's', obj: 'block', apOnly: true,
+      params: [{ k: 'type', label: 'Setup', type: 'choice', opts: [['atwood', 'Atwood: two hanging masses'], ['table', 'Block on table + hanging mass']], def: 'atwood' },
+        { k: 'obj', label: 'Free-body diagram of', type: 'choice', opts: [[1, 'Mass m₁'], [2, 'Mass m₂']], def: 2 },
+        { k: 'm1', label: 'Mass m₁', unit: 'kg', min: 0.5, max: 50, step: 0.5, def: 2 },
+        { k: 'm2', label: 'Mass m₂ (hanging)', unit: 'kg', min: 0.5, max: 50, step: 0.5, def: 3 },
+        { k: 'mus', label: 'Table μs', unit: '', min: 0, max: 1.5, step: 0.01, def: 0.5, show: p => p.type === 'table' },
+        { k: 'muk', label: 'Table μk', unit: '', min: 0, max: 1.5, step: 0.01, def: 0.3, show: p => p.type === 'table' },
+        { k: 'v0', label: 'Starting velocity v₀ (+ = m₂ moving down)', unit: 'm/s', min: -3, max: 3, step: 0.1, def: 0 }, gP, tP(3)] },
+  };
+  const ORDER = ['rest', 'push', 'incline', 'hang', 'elevator', 'wall', 'fall', 'pulley'];
+  function defaults(id) { const p = {}; for (const q of SCEN[id].params) p[q.k] = q.def; if (id === 'hang') p.T = +(p.m * p.g).toFixed(2); return p; }
+
+  // ---------- friction helper (1-D along an axis) ----------
+  // D = sum of all other force components along the axis; v = velocity along axis; N = normal force.
+  function friction(D, v, N, mus, muk) {
+    if (Math.abs(v) < 1e-9) {
+      const fsMax = mus * N;
+      if (Math.abs(D) <= fsMax + 1e-9) return { f: -D, mode: Math.abs(D) > 1e-9 ? 'static' : 'none', fsMax, need: Math.abs(D) };
+      return { f: -sgn(D) * muk * N, mode: 'kinetic', fsMax, need: Math.abs(D), slipped: true };
+    }
+    return { f: -sgn(v) * muk * N, mode: 'kinetic', fsMax: mus * N, need: Math.abs(D) };
+  }
+  const F = (k, mag, ang, extra) => Object.assign({ k, mag: Math.abs(mag), ang: normAng(ang) }, extra || {});
+  const fricF = (f, axisAng, mode) => F('Ff', f, f >= 0 ? axisAng : axisAng + 180, { mode });
+
+  // ---------- each scenario: forces + acceleration ----------
+  const EV = {
+    rest(p, st) {
+      const mg = p.m * p.g, Fy = p.Fy, onFloor = st.s <= 1e-9 && st.v <= 1e-9;
+      const N = onFloor ? Math.max(0, mg - Fy) : 0, a = (Fy - mg + N) / p.m;
+      const fs = [F('Fg', mg, 270)]; if (N > 1e-9) fs.push(F('FN', N, 90));
+      if (Math.abs(Fy) > 1e-9) fs.push(F('Fapp', Fy, Fy > 0 ? 90 : 270));
+      return { forces: fs, a: r6(a), axisAng: 90, m: p.m, info: { N, onFloor } };
+    },
+    push(p, st) {
+      const mg = p.m * p.g, on = st.t < p.tOff - 1e-9 || p.tOff >= 30, Fa = on ? p.F : 0, th = p.th * D2R;
+      const Fx = Fa * Math.cos(th), Fy = Fa * Math.sin(th); let N = mg - Fy; const lift = N < -1e-9; N = Math.max(0, N);
+      const fr = friction(Fx, st.v, N, p.mus, p.muk); const a = (Fx + fr.f) / p.m;
+      const fs = [F('Fg', mg, 270)]; if (N > 1e-9) fs.push(F('FN', N, 90)); if (Fa > 1e-9) fs.push(F('Fapp', Fa, p.th));
+      if (Math.abs(fr.f) > 1e-9) fs.push(fricF(fr.f, 0, fr.mode));
+      return { forces: fs, a: r6(a), axisAng: 0, m: p.m, kinetic: fr.mode === 'kinetic', info: { N, Fx, Fy, fr, lift, handOn: on && p.F > 0 } };
+    },
+    incline(p, st) {
+      const mg = p.m * p.g, th = p.th * D2R, N = mg * Math.cos(th), par = mg * Math.sin(th);
+      const D = p.Fa - par, fr = friction(D, st.v, N, p.mus, p.muk), a = (D + fr.f) / p.m;
+      const fs = [F('Fg', mg, 270), F('FN', N, 90 + p.th)];
+      if (Math.abs(p.Fa) > 1e-9) fs.push(F('Fapp', p.Fa, p.Fa > 0 ? p.th : p.th + 180));
+      if (Math.abs(fr.f) > 1e-9) fs.push(fricF(fr.f, p.th, fr.mode));
+      return { forces: fs, a: r6(a), axisAng: p.th, m: p.m, kinetic: fr.mode === 'kinetic', info: { N, par, perp: N, fr, D } };
+    },
+    hang(p, st) {
+      const mg = p.m * p.g;
+      if (p.ropes == 2) {
+        const t1 = p.th1 * D2R, t2 = p.th2 * D2R, s = Math.sin(t1 + t2);
+        const T1 = mg * Math.cos(t2) / s, T2 = mg * Math.cos(t1) / s;
+        return { forces: [F('Fg', mg, 270), F('FT1', T1, 180 - p.th1), F('FT2', T2, p.th2)], a: 0, axisAng: 90, m: p.m, static2: true, info: { T1, T2 } };
+      }
+      const a = (p.T - mg) / p.m, fs = [F('Fg', mg, 270)]; if (p.T > 1e-9) fs.push(F('FT', p.T, 90));
+      return { forces: fs, a: r6(a), axisAng: 90, m: p.m, info: {} };
+    },
+    elevator(p, st) {
+      const mg = p.m * p.g; let a = st.stopped ? 0 : p.a; const sep = a < -p.g; if (sep) a = -p.g;
+      const N = p.m * (p.g + a), fs = [F('Fg', mg, 270)]; if (N > 1e-9) fs.push(F('FN', N, 90));
+      return { forces: fs, a: r6(a), axisAng: 90, m: p.m, stopsAtZero: true, info: { N, sep, kgReading: N / p.g } };
+    },
+    wall(p, st) {
+      const mg = p.m * p.g, ph = p.ph * D2R, N = p.F * Math.cos(ph), Fup = p.F * Math.sin(ph);
+      const D = Fup - mg, fr = friction(D, st.v, N, p.mus, p.muk), a = (D + fr.f) / p.m;
+      const fs = [F('Fg', mg, 270)]; if (p.F > 1e-9) fs.push(F('Fapp', p.F, 180 - p.ph)); if (N > 1e-9) fs.push(F('FN', N, 0));
+      if (Math.abs(fr.f) > 1e-9) fs.push(fricF(fr.f, 90, fr.mode));
+      return { forces: fs, a: r6(a), axisAng: 90, m: p.m, kinetic: fr.mode === 'kinetic', info: { N, fr, D } };
+    },
+    fall(p, st) {
+      const mg = p.m * p.g;
+      if (st.ground) return { forces: [F('Fg', mg, 270), F('FN', mg, 90)], a: 0, axisAng: 90, m: p.m, info: { ground: true, vt: p.drag == 1 ? Math.sqrt(mg / p.k) : Infinity } };
+      const Fair = p.drag == 1 ? p.k * st.v * st.v : 0, a = (-mg - sgn(st.v) * Fair) / p.m;
+      const fs = [F('Fg', mg, 270)]; if (Fair > 1e-9) fs.push(F('Fair', Fair, st.v > 0 ? 270 : 90));
+      return { forces: fs, a: r6(a), axisAng: 90, m: p.m, info: { Fair, vt: p.drag == 1 ? Math.sqrt(mg / p.k) : Infinity } };
+    },
+    pulley(p, st) {
+      const g = p.g, m1 = p.m1, m2 = p.m2, M = m1 + m2, v = st.v; let a, T, fr = null;
+      if (p.type === 'atwood') { a = (m2 - m1) * g / M; T = m1 * (g + a); }
+      else {
+        const N = m1 * g;
+        if (Math.abs(v) < 1e-9) {
+          const fsMax = p.mus * N, D = m2 * g;
+          if (D <= fsMax + 1e-9) { a = 0; T = m2 * g; fr = { f: -D, mode: 'static', fsMax, need: D }; }
+          else { const f = p.muk * N; a = (m2 * g - f) / M; T = m2 * (g - a); fr = { f: -f, mode: 'kinetic', fsMax, need: D, slipped: true }; }
+        } else { const f = p.muk * N; a = (m2 * g - sgn(v) * f) / M; T = m2 * (g - a); fr = { f: -sgn(v) * f, mode: 'kinetic', fsMax: p.mus * N, need: m2 * g }; }
+      }
+      const kinetic = !!(fr && fr.mode === 'kinetic');
+      let fs, axisAng, m;
+      if (p.obj == 1) {
+        m = m1;
+        if (p.type === 'atwood') { fs = [F('Fg', m1 * g, 270), F('FT', T, 90)]; axisAng = 90; }
+        else { fs = [F('Fg', m1 * g, 270), F('FN', m1 * g, 90), F('FT', T, 0)]; if (Math.abs(fr.f) > 1e-9) fs.push(fricF(fr.f, 0, fr.mode)); axisAng = 0; }
+      } else { m = m2; fs = [F('Fg', m2 * g, 270), F('FT', T, 90)]; axisAng = 270; }
+      return { forces: fs, a: r6(a), axisAng, m, kinetic, info: { T, fr, aSys: a } };
+    },
+  };
+  function ev(id, p, st) {
+    const e = EV[id](p, st);
+    let nx = 0, ny = 0; for (const f of e.forces) { nx += f.mag * Math.cos(f.ang * D2R); ny += f.mag * Math.sin(f.ang * D2R); }
+    e.net = { x: r6(nx), y: r6(ny), mag: Math.hypot(nx, ny), ang: normAng(Math.atan2(ny, nx) / D2R) };
+    e.Fnet = r6(e.m * e.a); // along the object's motion axis
+    e.motion = motionCat(st.v, e.a);
+    return e;
+  }
+  function motionCat(v, a) { if (Math.abs(a) < 0.002) return Math.abs(v) < 1e-6 ? 'rest' : 'const'; if (Math.abs(v) < 1e-6) return 'speed'; return v * a > 0 ? 'speed' : 'slow'; }
+
+  // ---------- time stepping ----------
+  function init(id, p) {
+    const st = { t: 0, s: 0, v: 0, done: false, msg: '' };
+    if (id === 'push' || id === 'incline' || id === 'elevator' || id === 'wall' || id === 'fall' || id === 'pulley' || (id === 'hang' && p.ropes == 1)) st.v = +p.v0 || 0;
+    if (id === 'fall') st.s = p.h0; if (id === 'wall') st.s = 0;
+    if (id === 'pulley' && p.type === 'table' && st.v < 0) st.v = 0; // a block moving away from the pulley would make the string go slack: not modelled
+    return st;
+  }
+  function step(id, p, st, dt) {
+    if (st.done) return st;
+    const e = ev(id, p, st); let a = e.a, v0 = st.v, v1, ds;
+    if (id === 'fall' && p.drag == 1) { // midpoint (RK2) for velocity-dependent drag
+      const vm = v0 + a * dt / 2, am = ev(id, p, { ...st, v: vm }).a; v1 = v0 + am * dt; ds = vm * dt;
+      if (Math.abs(v0) > 1e-9 && v0 * v1 < 0) { /* passes through the top */ }
+    } else { v1 = v0 + a * dt; ds = (v0 + v1) / 2 * dt; }
+    const n = { ...st, t: st.t + dt };
+    if ((e.kinetic || e.stopsAtZero) && Math.abs(v0) > 1e-9 && (v0 * v1 <= 0 || Math.abs(v1) < 1e-9) && a * v0 < 0) { // friction (or the elevator) brings it to rest
+      const ts = -v0 / a; ds = v0 * ts / 2; v1 = 0; if (e.stopsAtZero) { n.stopped = true; n.msg = 'Elevator stopped (v = 0).'; n.tStop = st.t + ts; }
+    }
+    if (Math.abs(v1) < 1e-10) v1 = 0;
+    n.s = st.s + ds; n.v = v1;
+    post(id, p, n);
+    return n;
+  }
+  function post(id, p, n) {
+    if (id === 'rest' && n.s < 0) { n.s = 0; n.v = 0; }
+    if (id === 'fall' && n.s <= 0) { n.s = 0; n.vImpact = n.v; n.v = 0; n.ground = true; n.done = true; n.msg = 'Landed on the ground. Now the ground pushes up (F_N) and the forces balance.'; }
+    if (id === 'wall' && n.s <= -p.h0) { n.s = -p.h0; n.done = true; n.msg = 'Slid down to the floor.'; }
+    if (id === 'hang' && p.ropes == 1 && n.s <= -1.4) { n.s = -1.4; n.v = 0; n.done = true; n.msg = 'The mass reached the floor.'; }
+    if (id === 'pulley') { const lo = p.type === 'table' ? -0.6 : -1.2, hi = 1.2;
+      if (n.s >= hi || n.s <= lo) { n.s = Math.max(lo, Math.min(hi, n.s)); n.done = true; n.msg = 'A mass reached the end of the string / the floor.'; } }
+    if (id === 'elevator' && n.stopped && n.t > n.tStop + 0.6) { n.done = true; }
+    if (n.t >= p.tMax - 1e-9) { n.done = true; if (!n.msg) n.msg = 'Run time reached.'; }
+  }
+  function simulate(id, p, opt) {
+    opt = opt || {}; const dt = opt.dt || 0.001; let st = init(id, p); const out = [st];
+    while (!st.done && out.length < 200000) { st = step(id, p, st, dt); out.push(st); }
+    return out;
+  }
+
+  // ---------- FBD grading (predict mode) ----------
+  const FORCE_NAMES = { Fg: 'weight F_g', FN: 'normal force F_N', Ff: 'friction F_f', FT: 'tension F_T', FT1: 'tension F_T1 (left rope)', FT2: 'tension F_T2 (right rope)', Fapp: 'applied force F_app', Fair: 'air resistance F_air',
+    Fmotion: '“force of motion”', Fnet: 'net force F_net', Finertia: '“force of inertia”' };
+  const SURF = { rest: 'floor', push: 'floor', incline: 'ramp', elevator: 'scale (the elevator floor)', wall: 'wall', pulley: 'table', fall: 'ground', hang: '' };
+  function dirWord(a) {
+    a = normAng(a); const W = [[0, 'to the right (→)'], [45, 'up-right (↗)'], [90, 'straight up (↑)'], [135, 'up-left (↖)'], [180, 'to the left (←)'], [225, 'down-left (↙)'], [270, 'straight down (↓)'], [315, 'down-right (↘)'], [360, 'to the right (→)']];
+    for (const [d, w] of W) if (angDiff(a, d) < 4) return w;
+    const b = W.reduce((x, y) => angDiff(a, y[0]) < angDiff(a, x[0]) ? y : x); return b[1].replace(/ \(.\)/, '') + ' (' + Math.round(a) + '°)';
+  }
+  const fmt = x => (Math.abs(x) >= 100 ? x.toFixed(0) : Math.abs(x) >= 10 ? x.toFixed(1) : x.toFixed(2));
+  const N_ = k => FORCE_NAMES[k] || k;
+  function msgExtra(id, p, st, e, k) {
+    if (k === 'Fmotion') return 'There is no “force of motion.” A force is always a push or pull BY another object. Moving objects keep moving because of inertia; they don’t need a force in the direction they move.';
+    if (k === 'Finertia') return 'Inertia is not a force. It is the tendency of an object to keep doing what it’s doing, and it is measured by mass. Nothing “exerts” inertia.';
+    if (k === 'Fnet') return 'The net force is the SUM of the forces on the diagram, not another force. Never draw F_net as one of the forces on a free-body diagram (the sim shows it separately as a dashed arrow).';
+    if (k === 'Fapp') {
+      if (id === 'push' && p.F > 0 && !e.info.handOn) return 'The hand let go, so nothing is pushing now. The box keeps sliding because of inertia, not because a push is still acting.';
+      if (id === 'push' && st.v !== 0) return 'Nobody is pushing it (F = 0). It keeps sliding because of inertia; the only horizontal force is friction slowing it down.';
+      if (id === 'fall') return st.v > 0 ? 'The ball has left the hand, so the hand can no longer push it (no “force of the throw”). It keeps rising only because of the velocity it already has.' : 'Nothing is touching the object (except air), so there is no applied force.';
+      return 'No person or hand is pushing or pulling this object here, so there is no applied force.';
+    }
+    if (k === 'FN') {
+      if (id === 'fall') return 'A normal force only comes from a surface the object is touching. A falling object isn’t touching any surface.';
+      if (id === 'rest' && !e.info.onFloor) return 'The box has been lifted off the floor, so the floor no longer pushes on it (F_N = 0).';
+      if (id === 'rest' && e.info.onFloor) return 'The pull is at least as big as the weight, so the floor doesn’t have to push at all: F_N = 0 (the box is about to lift off).';
+      if (id === 'elevator') return 'The person is no longer pressing on the scale (the elevator accelerates downward at g or more), so F_N = 0, which feels “weightless.”';
+      if (id === 'push') return 'The upward part of the pull is at least as big as the weight, so the floor no longer pushes up (F_N = 0).';
+      return 'No surface is touching the object here, so there is no normal force. Ropes pull with tension, not normal force.';
+    }
+    if (k === 'Ff') {
+      const fr = e.info.fr;
+      if (id === 'fall' || id === 'hang' || id === 'elevator' || id === 'rest' || (id === 'pulley' && (p.type === 'atwood' || p.obj == 2))) return 'Friction needs two surfaces touching and sliding (or trying to slide) along each other. Nothing here rubs along this object' + (id === 'fall' ? ' (air resistance is a separate force).' : '.');
+      if (fr && fr.fsMax === 0 && p.muk === 0) return 'This surface is frictionless (μ = 0), so there is no friction force.';
+      return 'Nothing is trying to make the object slide along the surface, so static friction is zero here. Static friction only appears when something tries to make it slide.';
+    }
+    if (k === 'Fair') return p.drag == 1 && id === 'fall' ? 'At this instant the object isn’t moving, so there is no air resistance yet (F_air = k·v² = 0).' : 'Air resistance is turned off (neglected) in this situation, so don’t draw it.';
+    if (k === 'FT' || k === 'FT1' || k === 'FT2') return (id === 'hang' && p.ropes == 2 && k === 'FT') ? 'There are two ropes here, so use F_T1 (left rope) and F_T2 (right rope) instead of a single F_T.' : (id === 'hang' && p.ropes == 1 && k !== 'FT') ? 'There is only one rope here, so use a single tension F_T.' : (id === 'hang' && p.T === 0) ? 'The cable is slack (F_T = 0), so it isn’t pulling.' : 'No rope, string, or cable is attached to this object, so there is no tension.';
+    if (k === 'Fg') return 'Weight acts on every object with mass.';
+    return 'This force does not act on the object here.';
+  }
+  function msgMissing(id, p, st, e, k) {
+    const f = e.forces.find(x => x.k === k);
+    if (k === 'Fg') return 'Missing the weight F_g = mg = ' + fmt(f.mag) + ' N. Earth pulls on every object with mass, whether it is at rest, moving up, or moving down.';
+    if (k === 'FN') return 'Missing the normal force. The ' + (SURF[id] || 'surface') + ' is touching the object and pushes on it, perpendicular to the surface (F_N = ' + fmt(f.mag) + ' N).';
+    if (k === 'Ff') return f.mode === 'static' ? 'Missing static friction. Something is trying to make the object slide, but it doesn’t slide: static friction (' + fmt(f.mag) + ' N) holds it.' : 'Missing kinetic friction. The object is sliding on a rough surface, so kinetic friction acts against the sliding (F_f = μk·F_N = ' + fmt(f.mag) + ' N).';
+    if (k === 'FT' || k === 'FT1' || k === 'FT2') return 'Missing ' + N_(k) + '. A rope or string is attached and pulling on the object along the rope (' + fmt(f.mag) + ' N).';
+    if (k === 'Fapp') return 'Missing the applied force: someone is pushing or pulling on it (' + fmt(f.mag) + ' N).';
+    if (k === 'Fair') return 'Missing air resistance. The object is moving through the air with drag on, so the air pushes against its motion (' + fmt(f.mag) + ' N).';
+    return 'Missing ' + N_(k) + '.';
+  }
+  function msgDir(id, p, st, e, k, drawnAng) {
+    const f = e.forces.find(x => x.k === k), want = dirWord(f.ang), got = dirWord(drawnAng);
+    let why = '';
+    if (k === 'Fg') why = 'Gravity always points straight down, toward the center of Earth' + (id === 'incline' ? ', even on a ramp. (On a ramp, only its components tilt.)' : '.');
+    else if (k === 'FN') why = id === 'incline' && angDiff(drawnAng, 90) < 20 ? 'On a ramp the normal force is perpendicular to the ramp surface, NOT straight up.' : 'A surface pushes perpendicular to itself and away from the surface (it can push but never pull).';
+    else if (k === 'Ff') {
+      if (st.v !== 0 && angDiff(drawnAng, e.axisAng + (st.v > 0 ? 0 : 180)) < 30) why = 'Friction does NOT point in the direction of motion. Kinetic friction opposes the sliding, so it points opposite the velocity.';
+      else if (f.mode === 'static') why = 'Static friction points opposite to the way the object WOULD slide if the surface were slippery.';
+      else why = 'Kinetic friction always points opposite the direction the object slides.';
+    } else if (k === 'Fair') why = 'Air resistance points opposite the velocity.';
+    else if (k.startsWith('FT')) why = 'Tension pulls along the rope, away from the object. Ropes can only pull, never push.';
+    else if (k === 'Fapp') why = 'Look at which way the hand pushes or pulls.';
+    return N_(k)[0].toUpperCase() + N_(k).slice(1) + ' points the wrong way: you drew it ' + got + ', but it points ' + want + '. ' + why;
+  }
+  function pairMsg(id, p, e, A, B, rel, Ma, Mb) {
+    const a = N_(A), b = N_(B); let why = '';
+    const pairIs = (x, y) => (A === x && B === y) || (A === y && B === x);
+    if (pairIs('FN', 'Fg')) {
+      if (rel === 'eq') why = ' Here nothing else pushes up or down, so the ' + (SURF[id] || 'surface') + ' pushes up exactly as hard as gravity pulls down.';
+      else if (id === 'incline') why = ' On a ramp the surface only has to hold the part of the weight that presses into it: F_N = mg·cosθ, which is less than mg.';
+      else if (id === 'elevator') why = e.a > 0 ? ' The elevator accelerates UP, so the scale must push harder than gravity: F_N = m(g + a). You feel heavier.' : ' The elevator accelerates DOWN, so the scale pushes less than gravity: F_N = m(g + a) with a < 0. You feel lighter.';
+      else if (id === 'rest' || id === 'push') why = ' The normal force is NOT automatically equal to the weight. ' + (e.info.N > p.m * p.g ? 'The push down makes the floor push back harder.' : 'The upward pull holds up part of the weight, so the floor pushes less.');
+      else why = ' The normal force is not automatically equal to the weight; it is whatever the surface needs to push.';
+    } else if (pairIs('FT', 'Fg')) {
+      why = rel === 'eq' ? ' Balanced: the rope holds the weight exactly (no acceleration).' : (e.a !== 0 ? ' The object accelerates ' + ((e.axisAng === 90) === (e.a > 0) ? 'UP' : 'DOWN') + ', so the forces can’t be equal; the bigger force must point in the direction of the acceleration.' : '');
+    } else if (pairIs('Fair', 'Fg')) why = rel === 'eq' ? ' At terminal velocity the air resistance has grown to equal the weight, so the forces balance and the speed stays constant.' : '';
+    else if (pairIs('Ff', 'Fapp')) why = rel === 'eq' ? (e.motion === 'const' ? ' Constant velocity means balanced forces: friction equals the push.' : ' Static friction matches the push exactly, so the box doesn’t move.') : ' The push beats the maximum friction, so the box accelerates.';
+    const word = rel === 'eq' ? 'about the same size as' : 'bigger than';
+    return 'Check relative sizes: ' + a + ' (' + fmt(Ma) + ' N) should be ' + word + ' ' + b + ' (' + fmt(Mb) + ' N).' + why;
+  }
+  // placed: {key: {ang (deg), len (any units)}}, guess: 'rest'|'const'|'speed'|'slow'|''
+  function grade(id, p, st, placed, guess) {
+    placed = placed || {}; const e = ev(id, p, st), exp = {};
+    const maxM = Math.max(...e.forces.map(f => f.mag), 1e-9);
+    for (const f of e.forces) if (f.mag > 1e-6 * Math.max(1, maxM)) exp[f.k] = f;
+    const items = []; const add = (type, ok, msg, k) => items.push({ type, ok, msg, k });
+    for (const k in exp) if (!placed[k]) add('missing', false, msgMissing(id, p, st, e, k), k);
+    for (const k in placed) if (!exp[k]) add('extra', false, 'Extra force ' + N_(k) + ': ' + msgExtra(id, p, st, e, k), k);
+    const good = [];
+    for (const k in placed) if (exp[k]) { if (angDiff(placed[k].ang, exp[k].ang) > 20) add('dir', false, msgDir(id, p, st, e, k, placed[k].ang), k); else { good.push(k); add('good', true, N_(k)[0].toUpperCase() + N_(k).slice(1) + ': correct force, correct direction.', k); } }
+    // relative sizes (pairs of correctly drawn forces)
+    let sizeBad = 0;
+    for (let i = 0; i < good.length; i++) for (let j = i + 1; j < good.length; j++) {
+      let A = good[i], B = good[j], Ma = exp[A].mag, Mb = exp[B].mag, La = placed[A].len, Lb = placed[B].len;
+      if (Ma < Mb) { [A, B, Ma, Mb, La, Lb] = [B, A, Mb, Ma, Lb, La]; }
+      const r = Ma / Mb, q = La / Math.max(Lb, 1e-9);
+      if (r >= 1.12 && q < 1.03) { sizeBad++; add('size', false, pairMsg(id, p, e, A, B, 'gt', Ma, Mb), A + '/' + B); }
+      else if (r <= 1.05 && (q < 0.77 || q > 1.3)) { sizeBad++; add('size', false, pairMsg(id, p, e, A, B, 'eq', Ma, Mb), A + '/' + B); }
+    }
+    const errs = items.filter(x => !x.ok).length;
+    // balanced or not? (only when the right forces are drawn in the right directions)
+    if (!errs && good.length) {
+      let nx = 0, ny = 0, Lmax = 0; for (const k of good) { const a = placed[k].ang * D2R; nx += placed[k].len * Math.cos(a); ny += placed[k].len * Math.sin(a); Lmax = Math.max(Lmax, placed[k].len); }
+      const Ns = Math.hypot(nx, ny), rel = e.net.mag / maxM;
+      if (rel < 0.03 && Ns > 0.22 * Lmax) add('net', false, 'Your arrows don’t cancel out, but the forces here are BALANCED (F_net = 0): the object is ' + (e.motion === 'rest' ? 'staying at rest' : 'moving at constant velocity') + '. Adjust the arrow lengths so opposite forces match' + (e.forces.length > 2 ? ' (on angled arrows, it’s the components that cancel).' : '.'));
+      else if (rel >= 0.1 && Ns < 0.08 * Lmax) add('net', false, 'Your arrows cancel out (balanced), but this object is accelerating, so the forces must be UNBALANCED. The net force points ' + dirWord(e.net.ang) + '.');
+      else if (rel >= 0.1 && angDiff(Math.atan2(ny, nx) / D2R, e.net.ang) > 40) add('net', false, 'Your arrows add up to a net force pointing ' + dirWord(Math.atan2(ny, nx) / D2R) + ', but the acceleration (and net force) points ' + dirWord(e.net.ang) + '.');
+      else add('net', true, rel < 0.03 ? 'Balanced forces: your arrows cancel out, F_net = 0.' : 'Unbalanced forces: your net force points the right way (' + dirWord(e.net.ang) + ').');
+    }
+    // motion prediction
+    const MW = { rest: 'stay at rest', const: 'keep moving at constant velocity', speed: 'speed up', slow: 'slow down' };
+    if (guess) {
+      if (guess === e.motion) add('motion', true, 'Motion prediction correct: it will ' + MW[e.motion] + '.');
+      else add('motion', false, 'Motion prediction: you said it will ' + MW[guess] + ', but it will ' + MW[e.motion] + '. ' + (e.motion === 'const' ? 'Balanced forces do NOT mean “not moving”: with F_net = 0 a moving object keeps moving at constant velocity (Newton’s 1st law).' : e.motion === 'rest' ? 'The forces are balanced and it starts at rest, so it stays at rest.' : e.motion === 'slow' ? 'The net force points opposite the velocity, so it slows down. A moving object does not need a forward force to keep moving.' : 'The net force points the same way as the velocity (or it starts from rest), so it speeds up.'));
+    }
+    const nErr = items.filter(x => !x.ok).length;
+    return { ok: nErr === 0 && Object.keys(placed).length > 0, items, expect: exp, e, nErr, nGood: items.filter(x => x.ok).length };
+  }
+  return { SCEN, ORDER, defaults, ev, init, step, simulate, grade, motionCat, friction, normAng, angDiff, dirWord, FORCE_NAMES, D2R };
+})();
+if (typeof module !== 'undefined') module.exports = FBDPHYS;
+
+</script>
+<script>
+// ===== Force Quest: game logic (scenarios, question generators, grading, adaptive ladder, badges) =====
+// Pure functions + a small game-state object; no DOM. Runs in the browser and in node (tests).
+// Physics comes from the published FBD simulator engine (FBDPHYS): every force, acceleration and motion
+// answer below is computed by that engine, not typed in by hand. g = 9.8 m/s² (NYS Reference Tables).
+const FBDGAME = (() => {
+  const PHYS = typeof FBDPHYS !== 'undefined' ? FBDPHYS : require('./physics.js');
+  const G = 9.8, D2R = Math.PI / 180;
+  function makeRng(seed) {
+    let a = (seed === undefined ? Math.floor(Math.random() * 2 ** 31) : seed) >>> 0;
+    const f = () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    return { f, int: (lo, hi) => lo + Math.floor(f() * (hi - lo + 1)), pick: arr => arr[Math.floor(f() * arr.length)],
+      shuffle: arr => { const b = arr.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(f() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }, chance: p => f() < p };
+  }
+  const sig3 = x => { if (!isFinite(x)) return '∞'; if (Math.abs(x) < 1e-9) return '0'; const d = Math.max(0, 2 - Math.floor(Math.log10(Math.abs(x)))); return String(+x.toFixed(d)); };
+  const n1 = x => String(+(+x).toFixed(2));
+  const sub = s => String(s).replace(/F_([A-Za-z0-9]+)/g, 'F<sub>$1</sub>');
+  const plain = s => String(s).replace(/<sub>(.*?)<\/sub>/g, '$1').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+  const SYM = { Fg: 'F_g', FN: 'F_N', Ff: 'F_f', FT: 'F_T', FT1: 'F_T1', FT2: 'F_T2', Fapp: 'F_app', Fair: 'F_air', Fmotion: 'F_motion', Finertia: 'F_inertia', Fnet: 'F_net' };
+  const NAME = { Fg: 'weight', FN: 'normal force', Ff: 'friction', FT: 'tension', FT1: 'tension (left rope)', FT2: 'tension (right rope)', Fapp: 'applied force', Fair: 'air resistance', Fmotion: '“force of motion”', Finertia: '“force of inertia”', Fnet: 'net force' };
+  const arrowWord = a => PHYS.dirWord(a).replace(/ \(.\)$/, '');
+  const fakeKeys = ['Fmotion', 'Finertia', 'Fnet'];
+  // Regents wording: the NYS Reference Tables don't use coefficients of friction, so strip μ formulas from engine messages.
+  function wording(msg, mode) {
+    let m = String(msg).replace(' (the sim shows it separately as a dashed arrow)', '');
+    if (mode === 'regents') m = m.replace(/ \(F_f = μk·F_N = ([0-9.]+) N\)/g, ' ($1 N)').replace(/, up to μs·F_N = ([0-9.]+) N/g, ', up to $1 N').replace(/μs·F_N/g, 'the maximum static friction').replace(/μk·F_N/g, 'the kinetic friction');
+    return m;
+  }
+
+  // ---------- scenarios: each is a configuration of the simulator engine ----------
+  const VW = { push: v => (v > 0 ? 'to the right' : 'to the left'), rest: v => (v > 0 ? 'up' : 'down'), hang: v => (v > 0 ? 'up' : 'down'), elevator: v => (v > 0 ? 'up' : 'down'), wall: v => (v > 0 ? 'up' : 'down'), fall: v => (v > 0 ? 'up' : 'down'), incline: v => (v > 0 ? 'up the ramp' : 'down the ramp'), pulley: v => (v > 0 ? 'with m₂ going down' : 'with m₂ going up') };
+  const muTxt = (mode, mu, f) => (mode === 'ap' ? `μk = ${mu.toFixed(2)}` : `friction force ${sig3(f)} N`);
+  const K = {
+    bookTable(r) { const m = r.pick([0.5, 1, 1.5, 2, 2.5, 3, 4]); return { id: 'rest', p: { m, Fy: 0 }, text: `A ${n1(m)} kg book rests on a level table.`, obj: 'the book', draw: { k: 'floor', thing: 'book', table: true }, why: 'At rest, the forces balance: the table pushes up (F_N) exactly as hard as gravity pulls down (F_g).', mis: 'FN vs Fg at rest' }; },
+    lampCord(r) { const m = r.pick([0.5, 1, 1.5, 2, 3, 4, 5]); return { id: 'hang', p: { m, T: m * G, v0: 0, ropes: 1 }, text: `A ${n1(m)} kg lamp hangs at rest from a single vertical cord.`, obj: 'the lamp', draw: { k: 'hang', thing: 'lamp' }, why: 'Only two things act on the lamp: the cord (tension, up) and Earth (weight, down). At rest they balance. Ropes pull with tension; there is no normal force.', mis: 'ropes pull (tension), no normal force' }; },
+    boxPushedDown(r) { const m = r.pick([2, 3, 4, 5, 6, 8, 10]), F = r.pick([10, 15, 20, 25, 30, 40]); return { id: 'rest', p: { m, Fy: -F }, text: `A ${n1(m)} kg box sits on the floor. You press straight down on its top with a ${F} N push.`, obj: 'the box', draw: { k: 'floor', thing: 'box', hand: 'down' }, why: `The floor must hold up the weight AND your push: F_N = F_g + F_app = ${sig3(m * G)} N + ${F} N = ${sig3(m * G + F)} N. The normal force is NOT always equal to the weight.`, mis: 'normal force is not always mg' }; },
+    boxPulledUp(r) { const m = r.pick([5, 6, 8, 10]); const F = r.pick([10, 15, 20, 25].filter(x => x < 0.6 * m * G)); return { id: 'rest', p: { m, Fy: F }, text: `You pull straight up on a ${n1(m)} kg box with ${F} N, but it stays on the floor.`, obj: 'the box', draw: { k: 'floor', thing: 'box', hand: 'up' }, why: `Your pull holds up part of the weight, so the floor pushes less: F_N = F_g − F_app = ${sig3(m * G)} N − ${F} N = ${sig3(m * G - F)} N.`, mis: 'normal force is not always mg' }; },
+    puckIce(r) { const m = r.pick([0.2, 0.3, 0.5, 1]), v = r.pick([2, 3, 4, 5]); return { id: 'push', p: { m, F: 0, mus: 0, muk: 0, v0: v }, text: `A ${n1(m)} kg hockey puck glides to the right at ${v} m/s across frictionless ice. Nothing is pushing it anymore.`, obj: 'the puck', draw: { k: 'floor', thing: 'puck', ice: true }, why: 'Newton’s 1st law: with no friction, nothing slows the puck. It keeps moving at constant velocity with NO forward force (there is no “force of motion”).', mis: 'force of motion' }; },
+    cartIcePush(r) { const m = r.pick([1, 2, 3, 4, 5]), F = r.pick([4, 6, 8, 10, 12, 15, 20]); return { id: 'push', p: { m, F, mus: 0, muk: 0, v0: 0 }, text: `A student pushes a ${n1(m)} kg cart to the right with a ${F} N horizontal force. The track is frictionless and the cart starts at rest.`, obj: 'the cart', draw: { k: 'floor', thing: 'cart', ice: true, hand: 'push' }, why: `The only horizontal force is the push, so F_net = ${F} N to the right and the cart speeds up: a = F_net/m = ${sig3(F / m)} m/s².`, mis: 'unbalanced force gives acceleration' }; },
+    pushConst(r, mode) { const m = r.pick([5, 8, 10, 12, 15, 20]), v = r.pick([1, 1.5, 2, 3]); let f = r.pick([10, 15, 20, 25, 30, 40]); if (mode === 'ap') f = r.pick([0.2, 0.25, 0.3, 0.4]) * m * G;
+      const muk = f / (m * G); return { id: 'push', p: { m, F: f, muk, mus: muk + 0.15, v0: v }, text: `A student pushes a ${n1(m)} kg box to the right with a ${sig3(f)} N horizontal force. It slides across a rough floor (${muTxt(mode, muk, f)}) at a constant velocity of ${n1(v)} m/s.`, obj: 'the box', draw: { k: 'floor', thing: 'box', hand: 'push' }, why: `Constant velocity means F_net = 0: the push (${sig3(f)} N) exactly balances friction (${sig3(f)} N), and F_N balances F_g. You do NOT need a bigger push to keep it moving.`, mis: 'constant velocity needs a net force' }; },
+    pushStuck(r, mode) { const m = r.pick([10, 15, 20, 25, 30]), mus = r.pick([0.4, 0.5, 0.6]), fs = mus * m * G, F = r.pick([10, 15, 20, 25, 30, 40].filter(x => x < 0.8 * fs)); return { id: 'push', p: { m, F, mus, muk: mus - 0.15, v0: 0 }, text: `A student pushes a heavy ${n1(m)} kg crate to the right with ${F} N, but it does not move. (${mode === 'ap' ? 'μs = ' + mus.toFixed(2) : 'The floor can supply up to ' + sig3(fs) + ' N of static friction.'})`, obj: 'the crate', draw: { k: 'floor', thing: 'crate', hand: 'push' }, why: `Static friction is only as big as it needs to be: it matches the ${F} N push (not its ${sig3(fs)} N maximum), so the forces balance and the crate stays put.`, mis: 'static friction always maximum' }; },
+    slideSlow(r, mode) { const m = r.pick([2, 4, 5, 8, 10]), v = r.pick([2, 3, 4, 5]); let f = r.pick([4, 5, 8, 10, 12, 20].filter(x => x < m * G)); if (mode === 'ap') f = r.pick([0.1, 0.2, 0.25, 0.3]) * m * G;
+      const muk = f / (m * G); return { id: 'push', p: { m, F: 0, muk, mus: muk + 0.1, v0: v }, text: `A ${n1(m)} kg box slides to the right across a rough floor (${muTxt(mode, muk, f)}) and is slowing down. Nobody is touching it.`, obj: 'the box', draw: { k: 'floor', thing: 'box' }, why: 'Nothing pushes the box forward anymore. Friction points opposite the motion (to the left), so the net force is backward and the box slows down.', mis: 'force of motion; friction direction' }; },
+    pushSlide(r, mode) { const m = r.pick([4, 5, 8, 10, 12, 20]), v = r.pick([1, 2, 3]); let f = r.pick([5, 8, 10, 15, 20].filter(x => x < m * G)); if (mode === 'ap') f = r.pick([0.1, 0.2, 0.25, 0.3]) * m * G; const F = Math.ceil(f + r.pick([5, 10, 15, 20, 30]));
+      const muk = f / (m * G); return { id: 'push', p: { m, F, muk, mus: muk + 0.1, v0: v }, text: `A student pushes a ${n1(m)} kg box to the right with a ${F} N horizontal force while it slides to the right across a rough floor (${muTxt(mode, muk, f)}).`, obj: 'the box', draw: { k: 'floor', thing: 'box', hand: 'push' }, why: `The push (${F} N) is bigger than friction (${sig3(f)} N), so F_net = ${sig3(F - f)} N forward and the box speeds up: a = F_net/m = ${sig3((F - f) / m)} m/s².`, mis: 'forgetting friction in F_net' }; },
+    ballUp(r) { const m = r.pick([0.2, 0.5, 1, 1.5]), v = r.pick([4, 6, 8, 10]); return { id: 'fall', p: { m, drag: 0, v0: v, h0: 20 }, text: `A ${n1(m)} kg ball has been thrown straight up and is still rising. Ignore air resistance.`, obj: 'the ball', draw: { k: 'ball' }, why: 'Once the ball leaves your hand, the only force is gravity (down). There is no “force of the throw”: the ball keeps rising only because it is already moving up, and it is slowing down.', mis: 'force of the throw' }; },
+    ballDown(r) { const m = r.pick([0.2, 0.5, 1, 2]), v = r.pick([3, 5, 8]); return { id: 'fall', p: { m, drag: 0, v0: -v, h0: 20 }, text: `A ${n1(m)} kg ball is falling straight down. Ignore air resistance.`, obj: 'the ball', draw: { k: 'ball' }, why: 'In free fall the only force is gravity, so the ball speeds up downward at g = 9.8 m/s².', mis: 'extra forces in free fall' }; },
+    craneUp(r) { const m = r.pick([100, 200, 250, 400, 500]), a = r.pick([1.5, 2, 2.5, 3]); return { id: 'hang', p: { m, T: m * (G + a), v0: 1, ropes: 1 }, text: `A crane cable lifts a ${m} kg crate. The crate is moving up and speeding up.`, obj: 'the crate', draw: { k: 'hang', thing: 'crate' }, why: `Speeding up while moving up means the acceleration (and F_net) points up, so the tension must be BIGGER than the weight: F_T = m(g + a) = ${sig3(m * (G + a))} N > F_g = ${sig3(m * G)} N.`, mis: 'tension always equals weight' }; },
+    craneConst(r) { const m = r.pick([100, 200, 300, 500]), up = r.chance(0.5), v = r.pick([1, 1.5, 2]); return { id: 'hang', p: { m, T: m * G, v0: up ? v : -v, ropes: 1 }, text: `A crane ${up ? 'lifts' : 'lowers'} a ${m} kg crate at a constant speed of ${n1(v)} m/s.`, obj: 'the crate', draw: { k: 'hang', thing: 'crate' }, why: `Constant velocity means balanced forces: F_T = F_g = ${sig3(m * G)} N, whether the crate goes up or down.`, mis: 'moving up needs a bigger force' }; },
+    craneSlowUp(r) { const m = r.pick([100, 200, 400, 500]), a = r.pick([1.5, 2, 2.5, 3]); return { id: 'hang', p: { m, T: m * (G - a), v0: 2, ropes: 1 }, text: `A crane cable lifts a ${m} kg crate. The crate is moving up but slowing down as it nears the top.`, obj: 'the crate', draw: { k: 'hang', thing: 'crate' }, why: `Slowing down while moving up means the acceleration points DOWN, so the tension is LESS than the weight: F_T = m(g − a) = ${sig3(m * (G - a))} N < F_g = ${sig3(m * G)} N.`, mis: 'moving up needs a bigger force' }; },
+    elevator(r) { const m = r.pick([40, 45, 50, 55, 60, 65, 70, 80]), a0 = r.pick([1.5, 2, 2.5, 3]);
+      const c = r.pick([['moving up and speeding up', a0, 1], ['moving up and slowing down', -a0, 2], ['moving down and speeding up', -a0, -1], ['moving down and slowing down', a0, -2], ['moving up at a constant speed', 0, 2], ['moving down at a constant speed', 0, -2]]);
+      const N = m * (G + c[1]); return { id: 'elevator', p: { m, a: c[1], v0: c[2] }, text: `A ${m} kg student stands on a bathroom scale in an elevator that is <b>${c[0]}</b>${c[1] ? ' (acceleration ' + n1(Math.abs(c[1])) + ' m/s²)' : ''}.`, obj: 'the student', draw: { k: 'elevator' }, elev: c, why: c[1] === 0 ? `Constant velocity: the forces balance, so the scale reads exactly the weight, ${sig3(m * G)} N.` : `The acceleration points ${c[1] > 0 ? 'UP' : 'DOWN'}, so the scale (F_N) must be ${c[1] > 0 ? 'bigger' : 'smaller'} than the weight: F_N = m(g + a) = ${m} × (9.8 ${c[1] > 0 ? '+' : '−'} ${n1(Math.abs(c[1]))}) = ${sig3(N)} N. Your weight F_g = ${sig3(m * G)} N never changes. (Look at the acceleration, not the velocity.)`, mis: 'apparent weight follows velocity' }; },
+    skydiver(r) { const m = r.pick([60, 70, 80, 90]), k = 0.25, vt = Math.sqrt(m * G / k), term = r.chance(0.6); return { id: 'fall', p: { m, drag: 1, k, v0: term ? -vt : -0.5 * vt, h0: 3000 }, text: term ? `A ${m} kg skydiver falls at a constant terminal velocity of ${sig3(vt)} m/s.` : `A ${m} kg skydiver has just jumped. She is falling at ${sig3(0.5 * vt)} m/s, well below her terminal velocity of ${sig3(vt)} m/s.`, obj: 'the skydiver', draw: { k: 'sky' }, why: term ? `At terminal velocity the velocity is constant, so F_net = 0: air resistance equals her weight, F_air = F_g = ${sig3(m * G)} N.` : `Air resistance grows with speed. At half her terminal speed it is only ${sig3(0.25 * m * G)} N, less than her ${sig3(m * G)} N weight, so she is still speeding up.`, mis: 'falling means unbalanced / terminal velocity' }; },
+    wallBook(r) { const m = r.pick([0.5, 1, 1.5, 2]), F = r.pick([30, 40, 50, 60].filter(x => 0.6 * x >= 1.2 * m * G)); return { id: 'wall', p: { m, F, ph: 0, mus: 0.6, muk: 0.4, v0: 0, h0: 3 }, text: `You hold a ${n1(m)} kg book at rest against a vertical wall by pushing horizontally on it with ${F} N.`, obj: 'the book', draw: { k: 'wall' }, why: `Your push is sideways, so the wall’s normal force is sideways too (${F} N, balancing your push). What holds the book UP is static friction from the wall, equal to the weight: ${sig3(m * G)} N.`, mis: 'normal force always points up' }; },
+    // ---- AP only: angles, inclines, pulleys ----
+    sledAngle(r) { const m = r.pick([10, 15, 20, 25]), th = r.pick([20, 25, 30, 35, 40]), F = r.pick([40, 50, 60, 80, 100]), muk = r.pick([0.1, 0.15, 0.2]); return { id: 'push', p: { m, F, th, muk, mus: muk + 0.1, v0: 2 }, text: `A child pulls a ${m} kg sled to the right with a rope at ${th}° above the horizontal (tension ${F} N). The sled slides to the right across snow with μk = ${muk.toFixed(2)}.`, obj: 'the sled', draw: { k: 'floor', thing: 'sled', rope: th }, why: `The rope’s upward part (F sinθ = ${sig3(F * Math.sin(th * D2R))} N) lifts on the sled, so the snow pushes up LESS: F_N = mg − F sinθ = ${sig3(m * G - F * Math.sin(th * D2R))} N. Friction is μk·F_N, opposite the motion.`, mis: 'FN = mg with an angled pull', geom: [th] }; },
+    pushDownAngle(r) { const m = r.pick([10, 15, 20]), th = r.pick([25, 30, 35]), F = r.pick([40, 50, 60, 80]), muk = r.pick([0.1, 0.2, 0.25]); return { id: 'push', p: { m, F, th: -th, muk, mus: muk + 0.1, v0: 1.5 }, text: `A student pushes a ${m} kg cart by its handle, pushing at ${th}° BELOW the horizontal with ${F} N. The cart rolls to the right with rolling friction μk = ${muk.toFixed(2)}.`, obj: 'the cart', draw: { k: 'floor', thing: 'cart', hand: 'angleDown', ang: th }, why: `Pushing down adds to the weight, so the floor pushes up MORE: F_N = mg + F sinθ = ${sig3(m * G + F * Math.sin(th * D2R))} N.`, mis: 'FN = mg with an angled push', geom: [-th] }; },
+    twoRopes(r) { const m = r.pick([2, 3, 5, 8, 10]), t1 = r.pick([30, 40, 45, 50, 60]), t2 = r.pick([30, 40, 45, 50, 60]); return { id: 'hang', p: { m, ropes: 2, th1: t1, th2: t2, v0: 0 }, text: `A ${m} kg sign hangs at rest from two ropes. The left rope makes ${t1}° and the right rope ${t2}° with the horizontal.`, obj: 'the sign', draw: { k: 'ropes', t1, t2 }, why: 'Each rope pulls along itself, away from the sign. Their horizontal parts cancel and their vertical parts add up to the weight.', mis: 'tension straight up', geom: [180 - t1, t2] }; },
+    rampRest(r) { const m = r.pick([2, 4, 5, 8, 10]), th = r.pick([25, 30]); return { id: 'incline', p: { m, th, mus: 0.7, muk: 0.5, Fa: 0, v0: 0 }, text: `A ${m} kg block sits at rest on a rough ramp tilted ${th}° above the horizontal (rising to the right).`, obj: 'the block', draw: { k: 'ramp', th }, why: `On a ramp F_N is perpendicular to the surface (F_N = mg cosθ = ${sig3(m * G * Math.cos(th * D2R))} N) and static friction points UP the ramp, holding the block (F_f = mg sinθ = ${sig3(m * G * Math.sin(th * D2R))} N). Gravity still points straight down.`, mis: 'FN straight up / equal to mg on a ramp', geom: [th, th + 90, th + 180] }; },
+    rampSlide(r) { const m = r.pick([2, 4, 5, 8]), th = r.pick([25, 30, 35, 40]); return { id: 'incline', p: { m, th, mus: 0, muk: 0, Fa: 0, v0: -1 }, text: `A ${m} kg block slides DOWN a frictionless ramp tilted ${th}° (rising to the right).`, obj: 'the block', draw: { k: 'ramp', th, ice: true }, why: `No friction: only F_g and F_N act. Their sum points down the ramp, so the block speeds up with a = g sinθ = ${sig3(G * Math.sin(th * D2R))} m/s². There is no separate “down-the-ramp force.”`, mis: 'extra down-the-ramp force', geom: [th, th + 90, th + 180] }; },
+    rampShoved(r) { const m = r.pick([2, 4, 5]), th = r.pick([25, 30, 35]), muk = r.pick([0.2, 0.3, 0.4]); return { id: 'incline', p: { m, th, mus: muk + 0.1, muk, Fa: 0, v0: 3 }, text: `A ${m} kg block was shoved UP a rough ${th}° ramp (μk = ${muk.toFixed(2)}). It has left your hand and is still sliding up.`, obj: 'the block', draw: { k: 'ramp', th }, why: 'Sliding UP the ramp, kinetic friction points DOWN the ramp (opposite the motion). Friction and the downhill part of gravity both slow the block. Nothing pushes it up anymore.', mis: 'force of the shove; friction direction', geom: [th, th + 90, th + 180] }; },
+    atwood(r) { let [m1, m2] = r.pick([[1, 2], [1, 3], [2, 3], [2, 4], [2, 5], [3, 5], [1, 4], [3, 6], [4, 6]]); if (r.chance(0.3)) [m1, m2] = [m2, m1]; const obj = r.pick([1, 2]); return { id: 'pulley', p: { type: 'atwood', m1, m2, obj, v0: 0 }, text: `An Atwood machine: m₁ = ${m1} kg and m₂ = ${m2} kg hang from a light string over a frictionless pulley and are released from rest. Draw the forces on <b>m${obj === 1 ? '₁' : '₂'}</b>.`, obj: 'mass m' + (obj === 1 ? '₁' : '₂'), draw: { k: 'atwood', m1, m2, obj }, why: `a = |m₂ − m₁|g/(m₁ + m₂) = ${sig3(Math.abs(m2 - m1) * G / (m1 + m2))} m/s². The tension (${sig3(2 * m1 * m2 * G / (m1 + m2))} N) is between the two weights: less than the heavier weight and more than the lighter one.`, mis: 'tension equals the hanging weight' }; },
+    tablePulley(r) { const m1 = r.pick([2, 3, 4, 5]), m2 = r.pick([1, 2, 3]), obj = r.pick([1, 2]); return { id: 'pulley', p: { type: 'table', m1, m2, obj, mus: 0, muk: 0, v0: 0 }, text: `A ${m1} kg block (m₁) on a frictionless table is tied to a ${m2} kg mass (m₂) hanging over a pulley at the table’s edge. They are released from rest. Draw the forces on <b>${obj === 1 ? 'the block on the table (m₁)' : 'the hanging mass (m₂)'}</b>.`, obj: obj === 1 ? 'the block m₁' : 'the hanging mass m₂', draw: { k: 'table2', m1, m2, obj }, why: `The system accelerates at a = m₂g/(m₁ + m₂) = ${sig3(m2 * G / (m1 + m2))} m/s². The string tension (${sig3(m1 * m2 * G / (m1 + m2))} N) is LESS than m₂g, because m₂ accelerates downward.`, mis: 'tension equals the hanging weight' }; },
+  };
+  const AP_KINDS = ['sledAngle', 'pushDownAngle', 'twoRopes', 'rampRest', 'rampSlide', 'rampShoved', 'atwood', 'tablePulley'];
+  function scenario(kind, r, mode) {
+    const sc = K[kind](r, mode); sc.kind = kind; sc.mode = mode; sc.p = Object.assign(PHYS.defaults(sc.id), sc.p);
+    sc.st = PHYS.init(sc.id, sc.p); sc.e = PHYS.ev(sc.id, sc.p, sc.st); sc.forces = sc.e.forces.map(f => ({ k: f.k, mag: f.mag, ang: f.ang })); sc.motion = sc.e.motion; sc.v = sc.st.v;
+    sc.vText = sc.v === 0 ? 'at rest right now' : `moving ${VW[sc.id](sc.v)} at ${sig3(Math.abs(sc.v))} m/s right now`;
+    return sc;
+  }
+
+  // ---------- FBD helpers ----------
+  const gradeFBD = (sc, placed) => PHYS.grade(sc.id, sc.p, sc.st, placed || {});
+  const asPlaced = list => { const o = {}; for (const f of list) o[f.k] = { ang: f.ang, len: f.mag }; return o; };
+  const sigOf = list => list.map(f => f.k + '@' + Math.round(PHYS.normAng(f.ang)) + ':' + (+f.mag).toFixed(2)).sort().join('|');
+  const fbdText = list => (list.length ? list.map(f => `${SYM[f.k]} ${arrowWord(f.ang)}`).join(', ') : '(no forces)');
+  const correctFBDText = sc => sc.forces.map(f => `${SYM[f.k]} = ${sig3(f.mag)} N ${arrowWord(f.ang)}`).join('; ');
+  function chipKeys(sc) { const two = sc.id === 'hang' && sc.p.ropes == 2; return (two ? ['Fg', 'FN', 'Ff', 'FT1', 'FT2', 'Fapp', 'Fair'] : ['Fg', 'FN', 'Ff', 'FT', 'Fapp', 'Fair']).concat(fakeKeys); }
+
+  // ---------- wrong diagrams (each mutation is a classic misconception) ----------
+  function mutations(sc) {
+    const F = sc.forces, max = Math.max(...F.map(f => f.mag)), g = F.find(f => f.k === 'Fg'), out = [], has = k => F.some(f => f.k === k), cp = () => F.map(f => ({ ...f }));
+    const vAng = sc.v === 0 ? null : PHYS.normAng(sc.e.axisAng + (sc.v > 0 ? 0 : 180));
+    const push = (list, why, tag) => out.push({ list, why, tag });
+    if (vAng !== null) { const a = cp(); a.push({ k: 'Fmotion', mag: 0.5 * max, ang: vAng }); push(a, 'adds a “force of motion” in the direction it moves', 'force of motion'); }
+    if (sc.id === 'fall' && sc.v > 0) { const a = cp(); a.push({ k: 'Fapp', mag: 0.6 * max, ang: 90 }); push(a, 'adds an upward “force of the throw,” but the hand isn’t touching the ball anymore', 'force of the throw'); }
+    if (sc.id === 'fall' && !sc.p.drag) { const a = cp(); a.push({ k: 'Fair', mag: 0.4 * max, ang: sc.v > 0 ? 270 : 90 }); push(a, 'adds air resistance, but the problem says to ignore it', 'extra air resistance'); }
+    if (sc.id === 'fall' || (sc.id === 'hang' && sc.p.ropes == 1)) { const a = cp(); a.push({ k: 'FN', mag: g.mag, ang: 90 }); push(a, 'adds a normal force, but no surface is touching it', 'normal force with no surface'); }
+    if (sc.id === 'rest' && !has('Ff')) { const a = cp(); a.push({ k: 'Ff', mag: 0.35 * max, ang: 180 }); push(a, 'adds friction, but nothing is trying to make the object slide', 'friction with no sliding'); }
+    for (const k of ['FN', 'Ff', 'FT', 'Fair', 'FT1', 'Fapp']) if (has(k)) { const a = cp().filter(f => f.k !== k); push(a, `is missing the ${NAME[k]}`, 'missing ' + NAME[k]); }
+    if (has('Ff')) { const a = cp(); const f = a.find(x => x.k === 'Ff'); f.ang = PHYS.normAng(f.ang + 180); push(a, 'has friction pointing the wrong way', 'friction direction'); }
+    const N = F.find(f => f.k === 'FN');
+    if (N && N.ang === 90 && Math.abs(N.mag - g.mag) > 0.12 * g.mag) { const a = cp(); a.find(x => x.k === 'FN').mag = g.mag; push(a, 'makes F_N equal to F_g, but the normal force is not always equal to the weight', 'FN always equals weight'); }
+    if (sc.id === 'incline') { const a = cp(); a.find(x => x.k === 'FN').ang = 90; push(a, 'draws F_N straight up instead of perpendicular to the ramp', 'FN straight up on a ramp'); const b = cp(); b.find(x => x.k === 'Fg').ang = PHYS.normAng(270 + sc.p.th); push(b, 'tilts gravity into the ramp, but gravity always points straight down', 'gravity perpendicular to ramp'); }
+    if (sc.id === 'wall') { const a = cp(); a.find(x => x.k === 'FN').ang = 90; push(a, 'draws the wall’s normal force pointing up, but a wall pushes perpendicular to itself (sideways)', 'normal force always up'); }
+    if (sc.id === 'hang' && sc.p.ropes == 2) { const a = cp().filter(f => !/FT/.test(f.k)); a.push({ k: 'FT', mag: g.mag, ang: 90 }); push(a, 'replaces the two angled ropes with one tension straight up', 'tension straight up'); }
+    const net = sc.e.net, axis = sc.e.axisAng;
+    if (net.mag > 0.08 * max) { const a = cp(); const opp = a.filter(f => PHYS.angDiff(f.ang, net.ang + 180) < 1).sort((x, y) => y.mag - x.mag)[0]; if (opp) { opp.mag += net.mag; push(a, 'is balanced, but the object is accelerating, so the forces must be unbalanced', 'balanced when accelerating'); } }
+    if (net.mag < 1e-6 * max && sc.v !== 0) { const a = cp(); const along = a.find(f => PHYS.angDiff(f.ang, axis + (sc.v > 0 ? 0 : 180)) < 1); if (along) { along.mag *= 1.7; push(a, 'makes the forward force bigger, as if moving needed a net force; at constant velocity the forces balance', 'constant velocity needs a net force'); } }
+    { const a = cp().filter(f => f.k !== 'Fg'); if (a.length) push(a, 'is missing the weight (gravity always acts)', 'missing weight'); }
+    return out;
+  }
+  function distractors(sc, n, r) {
+    const seen = new Set([sigOf(sc.forces)]), res = [];
+    for (const m of r.shuffle(mutations(sc))) { const s = sigOf(m.list); if (seen.has(s) || !m.list.length) continue; if (gradeFBD(sc, asPlaced(m.list)).ok) continue; seen.add(s); res.push(m); if (res.length >= n) break; }
+    return res;
+  }
+
+  // ---------- FBD question builders ----------
+  const LETTER = ['A', 'B', 'C', 'D'];
+  const MOTION = { rest: 'Stay at rest', const: 'Keep moving at constant velocity', speed: 'Speed up', slow: 'Slow down' };
+  function qBuild(sc) { return { type: 'build', sc, prompt: sub(`${sc.text} <b>Build the free-body diagram for ${sc.obj}.</b> Make bigger forces longer arrows.`), chips: chipKeys(sc), correctText: correctFBDText(sc), topic: sc.kind, mis: sc.mis }; }
+  function qPick(sc, r, level) {
+    const ds = distractors(sc, level <= 2 ? 2 : 3, r); if (ds.length < 2) return null;
+    const opts = r.shuffle([{ list: sc.forces, ok: true }].concat(ds.map(d => ({ list: d.list, why: d.why, tag: d.tag }))));
+    return { type: 'pick', sc, prompt: sub(`${sc.text} <b>Which free-body diagram is correct for ${sc.obj}?</b> (Arrow lengths are to scale.)`), options: opts, answer: opts.findIndex(o => o.ok), correctText: 'Diagram ' + LETTER[opts.findIndex(o => o.ok)] + ': ' + correctFBDText(sc), topic: sc.kind, mis: sc.mis };
+  }
+  function qSpot(sc, r) {
+    const F = sc.forces, max = Math.max(...F.map(f => f.mag)), cands = [], has = k => F.some(f => f.k === k);
+    const vAng = sc.v === 0 ? null : PHYS.normAng(sc.e.axisAng + (sc.v > 0 ? 0 : 180));
+    if (vAng !== null) { cands.push({ k: 'Fmotion', f: { k: 'Fmotion', mag: 0.5 * max, ang: vAng } }); cands.push({ k: 'Finertia', f: { k: 'Finertia', mag: 0.45 * max, ang: vAng } }); }
+    if (sc.id === 'fall' && sc.v > 0) cands.push({ k: 'Fapp', f: { k: 'Fapp', mag: 0.6 * max, ang: 90 } });
+    if (sc.id === 'fall' || (sc.id === 'hang' && sc.p.ropes == 1)) cands.push({ k: 'FN', f: { k: 'FN', mag: 0.8 * max, ang: 90 } });
+    if (sc.id === 'rest' && !has('Ff')) cands.push({ k: 'Ff', f: { k: 'Ff', mag: 0.4 * max, ang: 0 } });
+    if (sc.id === 'rest' && !has('Fapp')) cands.push({ k: 'Fapp', f: { k: 'Fapp', mag: 0.5 * max, ang: 90 } });
+    if (sc.id === 'rest' || sc.id === 'hang') cands.push({ k: 'Finertia', f: { k: 'Finertia', mag: 0.4 * max, ang: 0 } });
+    if (has('Ff') && sc.v !== 0) cands.push({ k: 'Ff', flip: true });
+    if (sc.id === 'incline') cands.push({ k: 'FN', vertical: true });
+    if (sc.id === 'push' && !has('Fapp') && sc.v !== 0) cands.push({ k: 'Fapp', f: { k: 'Fapp', mag: 0.5 * max, ang: vAng } });
+    if (sc.e.net.mag > 0.05 * max) cands.push({ k: 'Fnet', f: { k: 'Fnet', mag: sc.e.net.mag, ang: sc.e.net.ang } });
+    if (!cands.length) return null;
+    const c = r.pick(cands), list = F.map(f => ({ ...f }));
+    if (c.f) list.push(c.f); else if (c.flip) { const f = list.find(x => x.k === 'Ff'); f.ang = PHYS.normAng(f.ang + 180); } else if (c.vertical) list.find(x => x.k === 'FN').ang = 90;
+    const item = gradeFBD(sc, asPlaced(list)).items.find(i => !i.ok && i.k === c.k);
+    if (!item) return null;
+    return { type: 'spot', sc, list: r.shuffle(list), prompt: sub(`${sc.text} <b>One arrow on this free-body diagram of ${sc.obj} is WRONG. Tap the wrong arrow.</b>`), answer: c.k, explainWrong: wording(item.msg, sc.mode), correctText: `${SYM[c.k]} is wrong. Correct FBD: ${correctFBDText(sc)}`, topic: sc.kind, mis: c.f ? 'fake/extra force ' + SYM[c.k] : 'wrong direction of ' + SYM[c.k] };
+  }
+  function qPredict(sc) { const Obj = sc.obj[0].toUpperCase() + sc.obj.slice(1);
+    return { type: 'predict', sc, prompt: sub(`${Obj} is <b>${sc.vText}</b>. The free-body diagram shows every force on it, with values. <b>What will it do next?</b>`), choices: ['rest', 'const', 'speed', 'slow'], answer: sc.motion, correctText: MOTION[sc.motion], topic: sc.kind, mis: sc.motion === 'const' ? 'balanced forces means at rest' : sc.motion === 'slow' ? 'moving needs a forward force' : sc.motion === 'rest' ? 'forces present means moving' : 'net force gives acceleration' }; }
+  function predictWhy(q) { const e = q.sc.e;
+    if (q.answer === 'rest') return 'The forces are balanced (F_net = 0) and it starts at rest, so it stays at rest.';
+    if (q.answer === 'const') return 'The forces are balanced (F_net = 0) and it is already moving, so it keeps moving at constant velocity. Balanced does NOT mean stopped (Newton’s 1st law).';
+    if (q.answer === 'speed') return `The forces are unbalanced: F_net = ${sig3(e.net.mag)} N points ${arrowWord(e.net.ang)}, the same way it ${q.sc.v === 0 ? 'will start to move' : 'is moving'}, so it speeds up.`;
+    return `The forces are unbalanced: F_net = ${sig3(e.net.mag)} N points ${arrowWord(e.net.ang)}, opposite its motion, so it slows down. Moving objects don’t need a forward force to keep going.`; }
+
+  // ---------- numeric questions (answers taken from the engine; traps = common wrong answers) ----------
+  const fk = (sc, k) => { const f = sc.forces.find(x => x.k === k); return f ? f.mag : 0; };
+  const NUMS = {
+    weight(r, mode) { const sc = scenario(r.pick(['bookTable', 'lampCord']), r, mode), m = sc.p.m; return num(sc, `${sc.text} What is the weight (F_g) of ${sc.obj}?`, 'N', fk(sc, 'Fg'), [[m, 'That is the mass in kg. Weight is a force: F_g = mg.'], [m * 10, 'Use g = 9.8 m/s² (Reference Tables), not 10.']], `F_g = mg = ${n1(m)} kg × 9.8 m/s² = ${sig3(m * G)} N. Mass (kg) never changes; weight (N) depends on g.`, 'mass vs weight'); },
+    normalPush(r, mode) { const sc = scenario(r.pick(['boxPushedDown', 'boxPulledUp']), r, mode), m = sc.p.m, F = Math.abs(sc.p.Fy); return num(sc, `${sc.text} What is the size of the normal force from the floor on the box?`, 'N', fk(sc, 'FN'), [[m * G, 'That is the weight. With a hand pushing or pulling vertically, F_N is not equal to F_g.'], [sc.p.Fy < 0 ? m * G - F : m * G + F, 'Check the direction of the hand’s force.']], sc.why, 'normal force is not always mg'); },
+    netTwo(r, mode) { const m = r.pick([4, 5, 8, 10, 20]), F1 = r.pick([20, 25, 30, 35, 40, 50, 60]), opp = r.chance(0.7), F2 = r.pick([5, 10, 12, 15, 20, 25].filter(x => x < F1)), ans = opp ? F1 - F2 : F1 + F2;
+      const sc = { kind: 'twoPush', id: null, mode, text: `Two students push a ${m} kg box on a frictionless floor: one with ${F1} N to the right and the other with ${F2} N to the ${opp ? 'left' : 'right'}.`, obj: 'the box', draw: { k: 'floor', thing: 'box', ice: true, two: opp ? 'opp' : 'same', F1, F2 } };
+      return num(sc, `${sc.text} What is the magnitude of the net force on the box?`, 'N', ans, [[opp ? F1 + F2 : F1 - F2, opp ? 'The forces point in opposite directions, so subtract them.' : 'Both forces point the same way, so they add.'], [ans / m, 'That is the acceleration. The question asks for the net force.']], `${opp ? 'Opposite directions subtract' : 'Same direction adds'}: F_net = ${F1} N ${opp ? '−' : '+'} ${F2} N = ${ans} N to the right. (Vertically, F_N balances F_g.)`, 'adding forces as vectors'); },
+    frictionConst(r, mode) { const sc = scenario('pushConst', r, mode), f = fk(sc, 'Ff'); return num(sc, mode === 'ap' ? `A student pushes a ${n1(sc.p.m)} kg box to the right with a horizontal force. The box slides at a constant ${n1(sc.v)} m/s on a floor with μk = ${sc.p.muk.toFixed(2)}. How big is the student’s push?` : `${sc.text.replace(/ \(friction force [^)]*\)/, '')} What is the size of the friction force on the box?`, 'N', f, [[0, 'Constant velocity does not mean no forces; it means the forces BALANCE.'], [sc.p.m * G, 'That is the weight.'], [sc.p.muk * sc.p.m * 10, 'Use g = 9.8 m/s².']], sc.why, 'constant velocity needs a net force'); },
+    staticFriction(r, mode) { const sc = scenario('pushStuck', r, mode), f = fk(sc, 'Ff'); return num(sc, `${sc.text} What is the size of the friction force on the crate right now?`, 'N', f, [[sc.p.mus * sc.p.m * G, 'That is the MAXIMUM static friction. Static friction only matches what is needed to stop sliding.'], [0, 'The floor must push back, or the crate would accelerate.']], sc.why, 'static friction always maximum'); },
+    kineticFriction(r) { const sc = scenario('slideSlow', r, 'ap'), f = fk(sc, 'Ff'); return num(sc, `${sc.text} What is the size of the kinetic friction force?`, 'N', f, [[sc.p.muk * sc.p.m * 10, 'Use g = 9.8 m/s².'], [sc.p.muk * sc.p.m, 'F_f = μk·F_N, and F_N = mg here (not m).']], `F_f = μk·F_N = ${sc.p.muk.toFixed(2)} × (${n1(sc.p.m)} kg × 9.8 m/s²) = ${sig3(f)} N, opposite the motion.`, 'friction = μ·F_N'); },
+    accelIce(r, mode) { const sc = scenario('cartIcePush', r, mode); return num(sc, `${sc.text} What is the magnitude of the cart’s acceleration?`, 'm/s²', Math.abs(sc.e.a), [[sc.p.F * sc.p.m, 'a = F_net / m: divide, don’t multiply.'], [sc.p.F / (sc.p.m * G), 'Divide by the mass in kg, not the weight.']], `a = F_net / m = ${sc.p.F} N ÷ ${n1(sc.p.m)} kg = ${sig3(sc.p.F / sc.p.m)} m/s².`, 'F_net = ma'); },
+    accelPush(r, mode) { const sc = scenario('pushSlide', r, mode), f = fk(sc, 'Ff'); return num(sc, `${sc.text} What is the magnitude of the box’s acceleration?`, 'm/s²', Math.abs(sc.e.a), [[sc.p.F / sc.p.m, 'You used only the push. F_net = push − friction.'], [(sc.p.F + f) / sc.p.m, 'Friction points backward, so subtract it.']], `F_net = ${sc.p.F} N − ${sig3(f)} N = ${sig3(sc.p.F - f)} N, so a = F_net/m = ${sig3((sc.p.F - f) / sc.p.m)} m/s².`, 'forgetting friction in F_net'); },
+    decel(r, mode) { const sc = scenario('slideSlow', r, mode), f = fk(sc, 'Ff'); return num(sc, `${sc.text} What is the magnitude of its acceleration while it slows down?`, 'm/s²', Math.abs(sc.e.a), [[f, 'That is the friction force (in N). Now use a = F_net/m.'], [0, 'It is slowing down, so it IS accelerating (backward).']], `The only horizontal force is friction: a = F_f/m = ${sig3(f)} N ÷ ${n1(sc.p.m)} kg = ${sig3(f / sc.p.m)} m/s², pointing backward.`, 'slowing down is acceleration'); },
+    forceNeeded(r, mode) { const m = r.pick([1.5, 2, 3, 4, 5, 8]), a = r.pick([0.5, 1.5, 2, 2.5, 3, 4]); const sc = { kind: 'cartIce', id: null, mode, text: `What net force is needed to give a ${n1(m)} kg cart an acceleration of ${n1(a)} m/s²?`, obj: 'the cart', draw: { k: 'floor', thing: 'cart', ice: true, hand: 'push' } };
+      return num(sc, sc.text, 'N', m * a, [[m / a, 'F_net = m × a: multiply.'], [m * G, 'That is the weight.']], `F_net = ma = ${n1(m)} kg × ${n1(a)} m/s² = ${sig3(m * a)} N.`, 'F_net = ma'); },
+    elevatorScale(r, mode) { let sc = scenario('elevator', r, mode); if (sc.elev[1] === 0 && r.chance(0.7)) sc = scenario('elevator', r, mode); const m = sc.p.m, a = Math.abs(sc.p.a);
+      return num(sc, `${sc.text} What does the scale read (the normal force on the student)?`, 'N', fk(sc, 'FN'), [[m * G, 'That is the true weight. When the elevator accelerates, the scale reads differently.'], [m * (G + (sc.p.a > 0 ? -a : a)), 'Check the direction of the ACCELERATION, not the velocity.'], [m * a, 'That is only F_net. Use F_N − F_g = ma.'], [m, 'That is the mass in kg. The scale force is in newtons.']], sc.why, 'apparent weight'); },
+    craneTension(r, mode) { const sc = scenario(r.pick(['craneUp', 'craneSlowUp', 'craneConst']), r, mode), m = sc.p.m, a = Math.abs(sc.e.a);
+      return num(sc, `${sc.text}${a ? ` Its acceleration has magnitude ${n1(a)} m/s².` : ''} What is the tension in the cable?`, 'N', fk(sc, 'FT'), [[m * G, 'That is the weight. The crate accelerates, so F_T ≠ F_g.'], [m * (G + (sc.e.a > 0 ? -a : a)), 'Check which way the acceleration points.'], [m * a, 'That is only F_net. Use F_T − F_g = ma.']], sc.why, 'tension always equals weight'); },
+    wallFriction(r, mode) { const sc = scenario('wallBook', r, mode); return num(sc, `${sc.text} What is the size of the friction force from the wall on the book?`, 'N', fk(sc, 'Ff'), [[sc.p.F, 'That is your push (and the normal force). Friction is what holds the book UP against gravity.'], [sc.p.m, 'That is the mass. Friction balances the weight, mg.']], sc.why, 'friction equals the push'); },
+    skydiverAir(r, mode) { let sc = scenario('skydiver', r, mode); while (sc.motion !== 'const') sc = scenario('skydiver', r, mode); return num(sc, `${sc.text} What is the size of the air resistance on her?`, 'N', fk(sc, 'Fair'), [[sc.p.m, 'That is the mass. Use F_g = mg.'], [0, 'She is moving through air, so the air pushes back.']], sc.why, 'terminal velocity'); },
+    angledN(r) { const sc = scenario('sledAngle', r, 'ap'), th = sc.p.th * D2R; return num(sc, `${sc.text} What is the normal force from the snow on the sled?`, 'N', fk(sc, 'FN'), [[sc.p.m * G, 'The rope pulls partly UP, so F_N is less than mg.'], [sc.p.m * G + sc.p.F * Math.sin(th), 'The rope’s vertical part is upward: subtract it.'], [sc.p.m * G - sc.p.F * Math.cos(th), 'The vertical part of the pull is F sinθ (θ is measured from the horizontal).']], sc.why, 'FN = mg with an angled pull'); },
+    angledA(r) { const sc = scenario('sledAngle', r, 'ap'), th = sc.p.th * D2R, f = fk(sc, 'Ff'); return num(sc, `${sc.text} What is the magnitude of the sled’s acceleration?`, 'm/s²', Math.abs(sc.e.a), [[Math.abs(sc.p.F * Math.cos(th) - sc.p.muk * sc.p.m * G) / sc.p.m, 'Friction uses F_N = mg − F sinθ, not mg.'], [Math.abs(sc.p.F - f) / sc.p.m, 'Only the horizontal part, F cosθ, pulls forward.']], `${sc.why} a = (F cosθ − F_f)/m = (${sig3(sc.p.F * Math.cos(th))} N − ${sig3(f)} N) ÷ ${sc.p.m} kg = ${sig3(sc.e.a)} m/s²${sc.e.a < 0 ? ' (negative: the sled is slowing down)' : ''}.`, 'components'); },
+    inclineA(r) { const sc = scenario('rampSlide', r, 'ap'), th = sc.p.th * D2R; return num(sc, `${sc.text} What is the magnitude of its acceleration?`, 'm/s²', Math.abs(sc.e.a), [[G * Math.cos(th), 'The part of gravity ALONG the ramp is mg sinθ, so a = g sinθ.'], [G, 'Only part of gravity points along the ramp.']], sc.why, 'incline components'); },
+    inclineFN(r) { const sc = scenario('rampRest', r, 'ap'), th = sc.p.th * D2R; return num(sc, `${sc.text} What is the normal force from the ramp on the block?`, 'N', fk(sc, 'FN'), [[sc.p.m * G, 'On a ramp F_N is less than mg: F_N = mg cosθ.'], [sc.p.m * G * Math.sin(th), 'Perpendicular to the ramp uses cosθ.']], sc.why, 'FN = mg on a ramp'); },
+    inclineStaticF(r) { const sc = scenario('rampRest', r, 'ap'), th = sc.p.th * D2R; return num(sc, `${sc.text} (μs = 0.70) What is the size of the static friction force on the block?`, 'N', fk(sc, 'Ff'), [[0.7 * sc.p.m * G * Math.cos(th), 'That is the MAXIMUM static friction. Friction only needs to balance mg sinθ.'], [sc.p.m * G * Math.cos(th), 'Along the ramp uses sinθ.']], sc.why, 'static friction always maximum'); },
+    atwoodA(r) { const sc = scenario('atwood', r, 'ap'), { m1, m2 } = sc.p; return num(sc, `${sc.text.replace(/ Draw the forces.*$/, '')} What is the magnitude of the acceleration of the masses?`, 'm/s²', Math.abs(sc.e.info.aSys), [[Math.abs(m2 - m1) * G / Math.max(m1, m2), 'Divide by the TOTAL mass m₁ + m₂ (both masses accelerate).'], [G, 'They don’t fall freely: the string pulls up on both.']], sc.why, 'Atwood system'); },
+    atwoodT(r) { const sc = scenario('atwood', r, 'ap'), { m1, m2 } = sc.p; return num(sc, `${sc.text.replace(/ Draw the forces.*$/, '')} What is the tension in the string?`, 'N', fk(sc, 'FT'), [[Math.max(m1, m2) * G, 'Tension is less than the heavier weight (that mass accelerates down).'], [Math.min(m1, m2) * G, 'Tension is more than the lighter weight (that mass accelerates up).']], sc.why, 'tension equals the hanging weight'); },
+    tableA(r) { const sc = scenario('tablePulley', r, 'ap'), { m1, m2 } = sc.p; return num(sc, `${sc.text.replace(/ Draw the forces.*$/, '')} What is the magnitude of their acceleration?`, 'm/s²', Math.abs(sc.e.info.aSys), [[G, 'The block on the table also has to be accelerated: a = m₂g/(m₁ + m₂).'], [m2 * G / m1, 'Divide by the TOTAL mass m₁ + m₂.']], sc.why, 'pulley system'); },
+  };
+  const closeTo = (a, b) => Math.abs(a - b) <= Math.max(0.015 * Math.abs(b), 0.02); // ±1.5%: 3 significant figures pass, g = 10 m/s² does not
+  function num(sc, prompt, unit, answer, traps, explain, mis) { return { type: 'num', sc, prompt: sub(prompt), unit, answer: +answer, traps: traps.filter((t, i) => isFinite(t[0]) && !closeTo(Math.abs(t[0]), answer) && !traps.slice(0, i).some(u => closeTo(Math.abs(t[0]), Math.abs(u[0])))), explain: sub(explain), correctText: sig3(answer) + ' ' + unit, topic: mis, mis }; }
+  function gradeNum(q, raw) {
+    const s = String(raw === undefined || raw === null ? '' : raw).trim().replace(/,/g, '.').replace(/−/g, '-'), x = parseFloat(s);
+    if (!/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?/i.test(s) || !isFinite(x)) return { ok: false, msg: 'Type a number.', invalid: true };
+    if (closeTo(Math.abs(x), q.answer)) return { ok: true, x, note: x < 0 ? 'The size (magnitude) is positive, but your number is right.' : '' };
+    const t = q.traps.find(t => closeTo(Math.abs(x), Math.abs(t[0])));
+    return { ok: false, x, msg: t ? t[1] : Math.abs(Math.abs(x) - q.answer) <= 0.06 * q.answer ? 'Close, but not close enough. Keep 3 significant figures and use g = 9.8 m/s².' : 'Not quite.' };
+  }
+
+  // ---------- concept multiple choice (choice 0 is correct before shuffling) ----------
+  const MCS = {
+    massWeight(r) { const m = r.pick([50, 60, 70, 80]); return mc({ k: 'emoji', e: '🧑‍🚀🌙' }, `An astronaut has a mass of ${m} kg on Earth. She travels to the Moon, where gravity is weaker. On the Moon, her <b>mass</b> is…`, [`still ${m} kg, but her weight is less`, 'less, because gravity is weaker', 'zero, because there is no air', 'more, because she is farther from Earth'], `Mass is the amount of matter (and inertia), in kg. It doesn’t change from place to place. Weight F_g = mg depends on g, so her weight is smaller on the Moon.`, 'mass vs weight'); },
+    constVelNet(r) { const th = r.pick(['A car cruises down a straight, level highway', 'A box slides across a floor', 'An elevator rises', 'A hockey puck glides']), v = r.pick([2, 5, 20]); return mc({ k: 'emoji', e: '➡️' }, `${th} at a constant velocity of ${v} m/s. What is the net force on it?`, ['Zero', 'In the direction it is moving', 'Opposite to its motion', 'Equal to its weight'], 'Constant velocity means no acceleration, so F_net = ma = 0. Moving does not need a net force (Newton’s 1st law).', 'constant velocity needs a net force'); },
+    noPushStops() { return mc({ k: 'floor', thing: 'puck', ice: true }, 'A hockey puck slides across perfectly frictionless ice after leaving the stick. What happens to it?', ['It keeps moving at the same speed in a straight line', 'It slows down as the force from the stick wears off', 'It stops quickly because nothing pushes it', 'It speeds up'], 'Newton’s 1st law: with zero net force, a moving object keeps a constant velocity. Objects don’t “run out” of force, and there is no force of motion.', 'force wears off'); },
+    frictionDir(r) { const d = r.pick(['right', 'left']); return mc({ k: 'floor', thing: 'box' }, `A box slides to the ${d} across a rough floor and slows down. Nobody is touching it. Which way does the friction force on the box point?`, [`To the ${d === 'right' ? 'left' : 'right'}`, `To the ${d}`, 'Straight up', 'There is no friction on a moving object'], 'Kinetic friction always opposes the sliding, so it points opposite the velocity. That backward net force is what slows the box.', 'friction direction'); },
+    ballTop() { return mc({ k: 'ball' }, 'A ball is thrown straight up. At the very top of its path (v = 0 for an instant), what is its acceleration? Ignore air resistance.', ['9.8 m/s² downward', 'Zero', '9.8 m/s² upward', 'It depends on the ball’s mass'], 'Gravity still acts at the top, so F_net = F_g and a = g = 9.8 m/s² downward. The velocity is zero for an instant, but it is still changing.', 'a = 0 at the top'); },
+    thirdLawSize(r) { const c = r.pick([['a small car', 'a large truck', 'collide head-on', '🚗💥🚚'], ['a mosquito', 'the windshield of a moving car', 'collide', '🦟💥🚙'], ['a child', 'an adult', 'push off each other on ice', '🧒🤝🧑'], ['a bat', 'a baseball', 'collide during a hit', '🏏⚾']]);
+      return mc({ k: 'emoji', e: c[3] }, `${c[0][0].toUpperCase() + c[0].slice(1)} and ${c[1]} ${c[2]}. Compared with the force ${c[0]} exerts on ${c[1]}, the force ${c[1]} exerts on ${c[0]} is…`, ['exactly the same size, in the opposite direction', 'bigger, because it is bigger or faster', 'smaller', 'zero'], 'Newton’s 3rd law: the two forces in an interaction are ALWAYS equal in size and opposite in direction. The lighter object has the bigger acceleration (a = F/m), which is why it looks like it got “hit harder.”', 'bigger object pushes harder'); },
+    thirdLawCancel() { return mc({ k: 'emoji', e: '🐴🛒' }, 'A horse pulls a cart forward. By Newton’s 3rd law, the cart pulls back on the horse just as hard. So how can the horse and cart speed up?', ['The two forces act on different objects, so they don’t cancel', 'The horse pulls a little harder than the cart pulls back', 'They can’t: the forces cancel', 'The cart’s pull arrives a moment later'], 'Third-law pairs act on DIFFERENT objects, so they never cancel each other. The cart speeds up because the horse’s pull on it is bigger than the friction on the cart. The horse speeds up because the ground pushes its hooves forward harder than the cart pulls back.', '3rd-law pairs cancel'); },
+    elevatorCompare(r, mode) { const sc = scenario('elevator', r, mode), N = fk(sc, 'FN'), W = sc.p.m * G, ans = Math.abs(N - W) < 1e-6 ? 2 : N > W ? 0 : 1;
+      const ch = ['more than her weight', 'less than her weight', 'exactly her weight', 'zero']; const order = [ans].concat([0, 1, 2, 3].filter(i => i !== ans));
+      return mc(sc.draw, `A student stands on a scale in an elevator that is <b>${sc.elev[0]}</b>. Compared with her true weight, the scale reads…`, order.map(i => ch[i]), sc.why.replace(/: F_N = m\(g \+ a\) = .*? N\./, '.'), 'apparent weight follows velocity', sc); },
+    craneCompare(r, mode) { const sc = scenario(r.pick(['craneUp', 'craneSlowUp', 'craneConst']), r, mode), T = fk(sc, 'FT'), W = sc.p.m * G, ans = Math.abs(T - W) < 1e-6 ? 2 : T > W ? 0 : 1;
+      const ch = ['The tension is greater than the weight', 'The tension is less than the weight', 'The tension equals the weight', 'The tension is zero']; const order = [ans].concat([0, 1, 2, 3].filter(i => i !== ans));
+      return mc(sc.draw, `${sc.text} How does the cable tension compare with the crate’s weight?`, order.map(i => ch[i]), sc.why, 'tension always equals weight', sc); },
+    terminal(r) { const m = r.pick([60, 70, 80]); return mc({ k: 'sky' }, `A ${m} kg skydiver falls at a constant terminal velocity. Which is true?`, ['Air resistance equals her weight', 'Air resistance is less than her weight, since she is still falling', 'Air resistance is greater than her weight', 'There is no air resistance at terminal velocity'], `Constant velocity means F_net = 0, so F_air = F_g = ${sig3(m * G)} N. Falling does not mean the forces are unbalanced.`, 'falling means unbalanced'); },
+    steeper() { return mc({ k: 'ramp', th: 30 }, 'A box rests on a ramp. The ramp is slowly made steeper, but the box still doesn’t slide. What happens to the normal force on the box?', ['It decreases', 'It increases', 'It stays equal to mg', 'It drops to zero right away'], 'F_N = mg cosθ. As θ grows, cosθ gets smaller, so the ramp pushes less. (The friction needed, mg sinθ, grows.)', 'FN = mg on a ramp'); },
+    atwoodTension() { return mc({ k: 'atwood', m1: 2, m2: 3, obj: 0 }, 'An Atwood machine holds masses m₁ and m₂ (m₂ > m₁) over an ideal pulley, released from rest. The string tension is…', ['between m₁g and m₂g', 'equal to m₂g', 'equal to m₁g + m₂g', 'equal to m₁g'], 'm₂ accelerates down, so the tension is less than m₂g. m₁ accelerates up, so the tension is more than m₁g. It is in between.', 'tension equals the hanging weight'); },
+  };
+  function mc(draw, prompt, choices, explain, mis, sc) { return { type: 'mc', sc: sc || { kind: 'concept', id: null, draw, text: '' }, prompt: sub(prompt), choices: choices.map(sub), answer: 0, explain: sub(explain), topic: 'concept', mis }; }
+  function shuffleMC(q, r) { const idx = r.shuffle(q.choices.map((_, i) => i)); q.choices = idx.map(i => q.choices[i]); q.answer = idx.indexOf(0); q.correctText = plain(q.choices[q.answer]); return q; }
+
+  // ---------- Newton's 3rd-law matching: [group, force, its partner, a same-object trap] ----------
+  const PAIRS = [
+    ['book', 'Earth pulls the book down (gravity)', 'The book pulls Earth up (gravity)', 'The table pushes the book up (normal force)'],
+    ['book', 'The table pushes up on the book (normal force)', 'The book pushes down on the table (normal force)', 'Earth pulls the book down (gravity)'],
+    ['cart', 'A student pushes a cart forward', 'The cart pushes the student backward', 'Friction from the floor pushes the cart backward'],
+    ['car', 'The road pushes a car’s tires forward (friction)', 'The tires push the road backward (friction)', 'The air pushes the car backward (air resistance)'],
+    ['swim', 'A swimmer’s hands push the water backward', 'The water pushes the swimmer’s hands forward', 'Earth pulls the swimmer down (gravity)'],
+    ['rocket', 'A rocket pushes its exhaust gas down', 'The exhaust gas pushes the rocket up', 'Earth pulls the rocket down (gravity)'],
+    ['bucket', 'A rope pulls a bucket up (tension)', 'The bucket pulls the rope down (tension)', 'Earth pulls the bucket down (gravity)'],
+    ['hammer', 'A hammer pushes a nail into the wood', 'The nail pushes back on the hammer', 'The wood pushes back on the nail (friction)'],
+    ['bat', 'A bat pushes a baseball forward', 'The baseball pushes the bat backward', 'The air pushes the baseball backward (air resistance)'],
+    ['moon', 'Earth pulls the Moon (gravity)', 'The Moon pulls Earth (gravity)', 'The Sun pulls the Moon (gravity)'],
+    ['walk', 'Your shoe pushes the floor backward as you walk (friction)', 'The floor pushes your shoe forward (friction)', 'The floor pushes up on you (normal force)'],
+    ['skate', 'Ana pushes Ben to the right on the ice', 'Ben pushes Ana to the left', 'The ice pushes Ben up (normal force)'],
+  ];
+  function qMatch(r) {
+    const chosen = [];
+    for (const p of r.shuffle(PAIRS)) { if (chosen.length >= 3) break; if (chosen.some(c => c[0] === p[0])) continue; chosen.push(p); }
+    const trapFrom = r.pick(chosen), right = r.shuffle(chosen.map(p => p[2]).concat([trapFrom[3]]));
+    return { type: 'match', sc: { kind: 'match', id: null, draw: { k: 'emoji', e: '🤝' }, text: '' }, prompt: '<b>Newton’s 3rd law:</b> match each force on the left with its 3rd-law partner on the right. One card on the right is a trap!', left: chosen.map(p => p[1]), right, answer: chosen.map(p => right.indexOf(p[2])), trap: right.indexOf(trapFrom[3]),
+      explain: 'A 3rd-law pair is ONE interaction seen from both sides: “A pushes B” ↔ “B pushes A.” The two forces are the same type, the same size, opposite in direction, and act on DIFFERENT objects. Two forces on the same object (like gravity and the normal force on a book) are never a 3rd-law pair.',
+      correctText: chosen.map(p => `${p[1]} ↔ ${p[2]}`).join(' | '), topic: 'third law', mis: '3rd-law partner on the same object' };
+  }
+
+  // ---------- grading (one entry point for every question type) ----------
+  function grade(q, ans) {
+    if (q.type === 'build') { const placed = ans || {}; if (!Object.keys(placed).length) return { ok: false, invalid: true, msgs: ['Draw at least one force first.'] };
+      const g = gradeFBD(q.sc, placed), bad = g.items.filter(i => !i.ok && i.type !== 'net'), tip = g.items.filter(i => !i.ok && i.type === 'net');
+      if (!bad.length) { // along the motion axis the drawn arrows must not cancel when the object accelerates (balanced-when-accelerating misconception)
+        const e = g.e, ax = e.axisAng * D2R, mx = Math.max(...e.forces.map(f => f.mag)), trueRel = (e.net.x * Math.cos(ax) + e.net.y * Math.sin(ax)) / mx;
+        let along = 0, L = 0; for (const k in placed) { const a = placed[k].ang * D2R; along += placed[k].len * (Math.cos(a) * Math.cos(ax) + Math.sin(a) * Math.sin(ax)); L = Math.max(L, placed[k].len); }
+        if (Math.abs(trueRel) >= 0.1 && !(along * trueRel > 0 && Math.abs(along / L) >= 0.25 * Math.abs(trueRel))) bad.push({ msg: 'Your arrows (nearly) cancel along the direction of motion, but this object is ' + (e.motion === 'slow' ? 'slowing down' : 'speeding up') + ', so the forces must be UNBALANCED. The net force points ' + PHYS.dirWord(e.net.ang) + '.' });
+      }
+      // the right forces, directions and pairwise sizes = correct; the engine's extra "do the arrows add up exactly" check becomes a tip (hand-drawn lengths are never exact)
+      return { ok: bad.length === 0, msgs: (bad.length ? bad : tip.map(i => ({ msg: 'Tip: ' + i.msg }))).map(i => sub(wording(i.msg, q.sc.mode))), yourText: Object.entries(placed).map(([k, v]) => `${SYM[k]} ${arrowWord(v.ang)}`).join(', ') }; }
+    if (q.type === 'pick') { if (!q.options[ans]) return { ok: false, invalid: true, msgs: ['Choose a diagram.'] }; const ok = ans === q.answer; return { ok, msgs: ok ? [] : [sub(`Diagram ${LETTER[ans]} ${q.options[ans].why}.`)], yourText: `Diagram ${LETTER[ans]}: ${fbdText(q.options[ans].list)}` }; }
+    if (q.type === 'spot') { if (!q.list.some(f => f.k === ans)) return { ok: false, invalid: true, msgs: ['Tap one of the arrows.'] }; const ok = ans === q.answer; return { ok, msgs: ok ? [] : [sub(`The ${NAME[ans]} (${SYM[ans]}) arrow is correct. The wrong one is ${SYM[q.answer]}.`)], yourText: SYM[ans] }; }
+    if (q.type === 'predict') { if (!MOTION[ans]) return { ok: false, invalid: true, msgs: ['Choose an answer.'] }; const ok = ans === q.answer; return { ok, msgs: [], yourText: MOTION[ans] }; }
+    if (q.type === 'num') { const g = gradeNum(q, ans); return { ok: g.ok, invalid: g.invalid, msgs: g.ok ? (g.note ? [g.note] : []) : [sub(g.msg)], yourText: String(ans).trim() + ' ' + q.unit }; }
+    if (q.type === 'mc') { if (q.choices[ans] === undefined) return { ok: false, invalid: true, msgs: ['Choose an answer.'] }; return { ok: ans === q.answer, msgs: [], yourText: plain(q.choices[ans]) }; }
+    if (q.type === 'match') { const a = ans || []; if (a.length !== q.left.length || a.some(x => x === undefined || x === null)) return { ok: false, invalid: true, msgs: ['Match every force on the left first.'] };
+      const ok = q.answer.every((v, i) => a[i] === v), trap = a.includes(q.trap);
+      return { ok, msgs: ok ? [] : [trap ? `“${q.right[q.trap]}” was the trap: it acts on the SAME object as one of the forces on the left, so it can’t be a 3rd-law partner.` : 'Some pairs are mixed up. A partner swaps the two objects: “A on B” ↔ “B on A.”'], yourText: q.left.map((l, i) => `${l} ↔ ${q.right[a[i]]}`).join(' | ') }; }
+    return { ok: false, invalid: true, msgs: ['Unknown question type.'] };
+  }
+  function explain(q) {
+    if (q.type === 'num' || q.type === 'mc' || q.type === 'match') return q.explain;
+    if (q.type === 'predict') return sub(predictWhy(q));
+    if (q.type === 'spot') return sub(q.explainWrong) + ' ' + sub(q.sc.why);
+    return sub(q.sc.why);
+  }
+
+  // ---------- levels (mix = relative weight of each question type) ----------
+  const LEVELS = {
+    1: { name: 'Things at Rest', icon: '📦', blurb: 'Books, lamps and boxes that sit still. Find every force.', kinds: ['bookTable', 'lampCord', 'boxPushedDown', 'boxPulledUp'], mix: { pick: 3, build: 2, spot: 2, num: 2, mc: 1 }, num: ['weight', 'normalPush'], mc: ['massWeight'] },
+    2: { name: 'Adding Up Forces', icon: '➕', blurb: 'Net force: same direction adds, opposite directions subtract.', kinds: ['cartIcePush', 'boxPushedDown', 'puckIce', 'bookTable'], mix: { num: 3, pick: 2, predict: 2, build: 1, spot: 1 }, num: ['netTwo', 'netTwo', 'normalPush'], mc: ['constVelNet'] },
+    3: { name: 'Newton’s 1st Law', icon: '🏒', blurb: 'Inertia: nothing is needed to keep moving. No “force of motion”!', kinds: ['puckIce', 'pushConst', 'craneConst', 'ballUp'], mix: { spot: 3, predict: 3, build: 2, mc: 2, num: 1 }, num: ['frictionConst'], mc: ['constVelNet', 'noPushStops'] },
+    4: { name: 'Friction', icon: '🧱', blurb: 'Static vs. kinetic friction, and which way it points.', kinds: ['pushStuck', 'pushConst', 'slideSlow', 'pushSlide'], mix: { build: 2, pick: 2, spot: 2, predict: 1, num: 2, mc: 1 }, num: ['staticFriction', 'frictionConst'], numAP: ['kineticFriction'], mc: ['frictionDir'] },
+    5: { name: 'Newton’s 2nd Law', icon: '🚀', blurb: 'F_net = ma: unbalanced forces speed things up or slow them down.', kinds: ['pushSlide', 'slideSlow', 'ballUp', 'ballDown', 'cartIcePush'], mix: { num: 4, spot: 2, predict: 2, pick: 1, mc: 1 }, num: ['accelIce', 'accelPush', 'forceNeeded', 'decel'], mc: ['ballTop'] },
+    6: { name: 'Newton’s 3rd Law', icon: '🤝', blurb: 'Every force has an equal and opposite partner on the OTHER object.', kinds: [], mix: { match: 4, mc: 3 }, num: [], mc: ['thirdLawSize', 'thirdLawCancel'] },
+    7: { name: 'Going Up & Down', icon: '🛗', blurb: 'Cranes, elevators and apparent weight.', kinds: ['craneUp', 'craneSlowUp', 'elevator', 'elevator', 'craneConst'], mix: { num: 3, mc: 2, build: 2, pick: 2, predict: 1 }, num: ['elevatorScale', 'craneTension'], mc: ['elevatorCompare', 'craneCompare'] },
+    R8: { name: 'Champion Mix', icon: '🏆', blurb: 'Everything at once: walls, skydivers, elevators, friction, 3rd law.', kinds: ['skydiver', 'wallBook', 'elevator', 'pushSlide', 'slideSlow', 'ballUp', 'pushStuck', 'boxPushedDown'], mix: { build: 2, pick: 2, spot: 2, predict: 2, num: 3, mc: 2, match: 1 }, num: ['elevatorScale', 'accelPush', 'wallFriction', 'skydiverAir', 'decel', 'craneTension'], mc: ['terminal', 'elevatorCompare', 'thirdLawCancel'] },
+    A8: { name: 'Forces at an Angle', icon: '📐', blurb: 'Angled pulls and pushes, and two ropes: use components.', kinds: ['sledAngle', 'pushDownAngle', 'twoRopes'], mix: { build: 3, pick: 2, num: 3, predict: 1, spot: 1 }, num: ['angledN', 'angledA'], mc: [] },
+    A9: { name: 'Inclines', icon: '⛰️', blurb: 'Ramps: tilted axes, mg sinθ and mg cosθ.', kinds: ['rampRest', 'rampSlide', 'rampShoved'], mix: { build: 2, pick: 2, spot: 2, num: 3, mc: 1, predict: 1 }, num: ['inclineA', 'inclineFN', 'inclineStaticF'], mc: ['steeper'] },
+    A10: { name: 'Pulleys & Champion Mix', icon: '🏆', blurb: 'Atwood machines, table pulleys, and a bit of everything.', kinds: ['atwood', 'tablePulley', 'skydiver', 'wallBook', 'rampShoved', 'sledAngle', 'elevator'], mix: { build: 2, pick: 2, num: 3, mc: 1, predict: 1, spot: 1 }, num: ['atwoodA', 'atwoodT', 'tableA', 'skydiverAir', 'wallFriction', 'elevatorScale'], mc: ['atwoodTension', 'terminal'] },
+  };
+  const LADDER = { regents: ['1', '2', '3', '4', '5', '6', '7', 'R8'], ap: ['1', '2', '3', '4', '5', '6', '7', 'A8', 'A9', 'A10'] };
+  const levelDef = (mode, n) => LEVELS[LADDER[mode][n - 1]];
+  function makeQuestion(mode, n, r, avoid, forceType) {
+    const L = levelDef(mode, n);
+    for (let tries = 0; tries < 60; tries++) {
+      const bag = []; for (const [t, w] of Object.entries(L.mix)) for (let i = 0; i < w; i++) bag.push(t);
+      const type = forceType || r.pick(bag); let q = null;
+      if (['build', 'pick', 'spot', 'predict'].includes(type)) { if (!L.kinds.length) continue; const kind = r.pick(L.kinds); if (mode === 'regents' && AP_KINDS.includes(kind)) continue; const sc = scenario(kind, r, mode);
+        q = type === 'build' ? qBuild(sc) : type === 'pick' ? qPick(sc, r, n) : type === 'spot' ? qSpot(sc, r) : qPredict(sc); }
+      else if (type === 'num') { const list = L.num.concat(mode === 'ap' ? (L.numAP || []) : []); if (!list.length) continue; const k = r.pick(list); q = NUMS[k](r, mode); q.topic = k; }
+      else if (type === 'mc') { if (!L.mc.length) continue; const k = r.pick(L.mc); q = shuffleMC(MCS[k](r, mode), r); q.topic = k; }
+      else if (type === 'match') q = qMatch(r);
+      if (!q) continue;
+      q.key = q.type + ':' + q.topic;
+      if (avoid && tries < 40 && (avoid[0] === q.key || avoid.slice(0, 3).filter(k => k === q.key).length >= 1 || (avoid[0] && avoid[0].split(':')[0] === q.type && avoid[1] && avoid[1].split(':')[0] === q.type))) continue;
+      q.level = n; q.levelName = L.name; q.mode = mode; q.plainPrompt = plain(q.prompt);
+      return q;
+    }
+    throw new Error('could not make a question for ' + mode + ' level ' + n);
+  }
+
+  // ---------- adaptive ladder, score, hearts, badges ----------
+  const RULES = { upStreak: 3, downMisses: 2, startHearts: 3, maxHearts: 5 };
+  const comboMult = c => Math.min(4, 1 + Math.floor(c / 3)); // c = correct answers in a row BEFORE this one: ×1, ×1, ×1, ×2 (4th in a row)… ×4
+  const basePoints = n => 100 + 25 * (n - 1);
+  const BADGES = [
+    ['first', '⭐', 'First Force', 'Get your first answer right'],
+    ['streak5', '🔥', 'On Fire', '5 correct in a row'],
+    ['streak10', '⚡', 'Unstoppable', '10 correct in a row'],
+    ['artist', '🎨', 'FBD Artist', 'Build 3 free-body diagrams correctly'],
+    ['detective', '🕵️', 'Fake-Force Detective', 'Spot 3 wrong arrows'],
+    ['cruncher', '🧮', 'Number Cruncher', 'Get 5 calculations right'],
+    ['newton3', '🤝', 'Third-Law Pro', '2 perfect 3rd-law matches'],
+    ['elevator', '🛗', 'Elevator Operator', '3 elevator or crane questions right'],
+    ['comeback', '💪', 'Comeback Kid', 'Level up again after a warm-up'],
+    ['closecall', '😅', 'Close Call', 'Answer right with only 1 heart left'],
+    ['halfway', '🚀', 'Halfway Hero', 'Reach level 5'],
+    ['sharp', '🎯', 'Sharpshooter', '90% accuracy over 12+ questions'],
+    ['champion', '🏆', 'Force Champion', 'Beat the final level'],
+  ];
+  function createGame(opts) {
+    opts = opts || {}; const mode = opts.mode === 'ap' ? 'ap' : 'regents', top = LADDER[mode].length, r = opts.rng || makeRng(opts.seed);
+    const g = { mode, top, level: Math.max(1, Math.min(top, opts.startLevel || 1)), startLevel: 0, hearts: RULES.startHearts, score: 0, combo: 0, bestCombo: 0, upStreak: 0, missRow: 0, asked: 0, correct: 0, history: [], badges: [], counts: {}, wentDown: false, over: false, victory: false, ended: false, startedAt: opts.now || Date.now(), name: opts.name || '', q: null, recent: [] };
+    g.startLevel = g.level; g.highest = g.level;
+    g.next = forceType => { const q = makeQuestion(mode, g.level, r, g.recent, forceType); g.recent = [q.key].concat(g.recent).slice(0, 4); g.q = q; q.n = g.asked + 1; return q; };
+    g.submit = (ans, at) => {
+      const q = g.q; if (!q || q.done) throw new Error('no open question'); if (g.over || g.victory) throw new Error('run is over');
+      const res = grade(q, ans); if (res.invalid) return res; q.done = true;
+      g.asked++; const lv = g.level; res.levelBefore = lv; res.points = 0; res.levelChange = null; res.mult = 1;
+      if (res.ok) {
+        res.mult = comboMult(g.combo); res.points = basePoints(lv) * res.mult; g.score += res.points; g.correct++; g.combo++; g.bestCombo = Math.max(g.bestCombo, g.combo); g.upStreak++; g.missRow = 0;
+        g.counts[q.type] = (g.counts[q.type] || 0) + 1; if (q.sc && /elevator|crane/i.test(q.sc.kind + ' ' + q.topic)) g.counts.elev = (g.counts.elev || 0) + 1;
+        if (g.upStreak >= RULES.upStreak) { g.upStreak = 0; if (g.level < top) { g.level++; g.hearts = Math.min(RULES.maxHearts, g.hearts + 1); res.levelChange = 'up'; res.heartGained = true; } else { g.victory = true; res.victory = true; } }
+      } else {
+        g.combo = 0; g.upStreak = 0; g.missRow++; g.hearts--; res.heartLost = true;
+        if (g.hearts <= 0) { g.hearts = 0; g.over = true; res.gameOver = true; }
+        else if (g.missRow >= RULES.downMisses && g.level > 1) { g.level--; g.missRow = 0; g.wentDown = true; res.levelChange = 'down'; }
+      }
+      g.highest = Math.max(g.highest, g.level); res.hearts = g.hearts; res.level = g.level; res.score = g.score; res.combo = g.combo;
+      res.explain = explain(q); res.correctText = q.correctText;
+      g.history.push({ n: g.asked, time: at || Date.now(), level: lv, levelName: levelDef(mode, lv).name, type: q.type, topic: q.topic, question: q.plainPrompt, your: plain(res.yourText || ''), correct: plain(q.correctText || ''), ok: res.ok, points: res.points, score: g.score, hearts: g.hearts, change: res.levelChange ? (res.levelChange === 'up' ? 'level up to ' + g.level : 'warm-up: down to ' + g.level) : res.victory ? 'VICTORY' : res.gameOver ? 'game over' : '', mis: q.mis || '' });
+      res.newBadges = checkBadges(g, res);
+      return res;
+    };
+    g.end = () => { g.ended = true; };
+    g.restartLevel = () => Math.max(1, g.level - 1); // after a game over, try again one level easier
+    g.accuracy = () => (g.asked ? g.correct / g.asked : 0);
+    return g;
+  }
+  function checkBadges(g, res) {
+    const c = g.counts, out = [];
+    const want = { first: g.correct >= 1, streak5: g.combo >= 5, streak10: g.combo >= 10, artist: (c.build || 0) >= 3, detective: (c.spot || 0) >= 3, cruncher: (c.num || 0) >= 5, newton3: (c.match || 0) >= 2, elevator: (c.elev || 0) >= 3,
+      comeback: res.levelChange === 'up' && g.wentDown, closecall: res.ok && g.hearts === 1, halfway: g.highest >= 5, sharp: g.asked >= 12 && g.correct / g.asked >= 0.9, champion: !!res.victory };
+    for (const [id] of BADGES) if (want[id] && !g.badges.includes(id)) { g.badges.push(id); out.push(id); }
+    return out;
+  }
+  function historyCSV(g, meta) {
+    meta = meta || {}; const esc = v => { const s = String(v === undefined || v === null ? '' : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const lines = [['Student', meta.name || '(no name)'], ['Mode', g.mode === 'ap' ? 'AP Physics 1' : 'Regents Physics'], ['Result', g.victory ? 'Victory' : g.over ? 'Game over' : 'Ended early'], ['Score', g.score], ['Highest level', g.highest + ' of ' + g.top + ' (' + levelDef(g.mode, g.highest).name + ')'], ['Accuracy', Math.round(g.accuracy() * 100) + '% (' + g.correct + '/' + g.asked + ')'], ['Best streak', g.bestCombo], ['Badges', g.badges.map(b => BADGES.find(x => x[0] === b)[2]).join('; ')], ['Exported', meta.date || new Date().toString()], []].map(r => r.map(esc).join(','));
+    lines.push(['#', 'time', 'level', 'level name', 'question type', 'topic', 'question', 'student answer', 'correct answer', 'result', 'points', 'score', 'hearts left', 'level change', 'misconception checked'].join(','));
+    for (const h of g.history) lines.push([h.n, meta.fmtTime ? meta.fmtTime(h.time) : new Date(h.time).toISOString(), h.level, h.levelName, h.type, h.topic, h.question, h.your, h.correct, h.ok ? 'correct' : 'incorrect', h.points, h.score, h.hearts, h.change, h.mis].map(esc).join(','));
+    return lines.join('\r\n') + '\r\n';
+  }
+  // ---------- answer keys (used by the tests and the teacher-preview hook) ----------
+  function solution(q) { return q.type === 'build' ? asPlaced(q.sc.forces) : q.type === 'num' ? sig3(q.answer) : q.type === 'match' ? q.answer.slice() : q.answer; }
+  function wrongAnswer(q) {
+    if (q.type === 'build') { const o = asPlaced(q.sc.forces); o.Fmotion = { ang: 0, len: 1 }; return o; }
+    if (q.type === 'pick') return (q.answer + 1) % q.options.length;
+    if (q.type === 'spot') return q.list.find(f => f.k !== q.answer).k;
+    if (q.type === 'predict') return q.answer === 'rest' ? 'speed' : 'rest';
+    if (q.type === 'num') return String(+(q.answer * 2 + 5).toFixed(2));
+    if (q.type === 'mc') return (q.answer + 1) % q.choices.length;
+    if (q.type === 'match') { const a = q.answer.slice(); [a[0], a[1]] = [a[1], a[0]]; return a; }
+  }
+  return { solution, wrongAnswer, PHYS, G, makeRng, scenario, K, AP_KINDS, NUMS, MCS, PAIRS, LEVELS, LADDER, levelDef, makeQuestion, grade, gradeNum, gradeFBD, asPlaced, mutations, distractors, explain, predictWhy, createGame, RULES, BADGES, comboMult, basePoints, historyCSV, SYM, NAME, MOTION, LETTER, sig3, sub, plain, wording, arrowWord, fbdText, chipKeys, qMatch };
+})();
+if (typeof module !== 'undefined') module.exports = FBDGAME;
+
+</script>
+<script>
+// ===== Force Quest: user interface, scenes, effects, sound, storage =====
+(() => {
+  'use strict';
+  const GM = FBDGAME, P = GM.PHYS, D2R = Math.PI / 180, SYM = GM.SYM, NAME = GM.NAME, sig3 = GM.sig3;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const subH = s => esc(s).replace(/_([A-Za-z0-9]+)/g, '<sub>$1</sub>');
+  const COL = { Fg: '#7b3fd0', FN: '#2563eb', Ff: '#d9480f', FT: '#0b7285', FT1: '#0b7285', FT2: '#1098ad', Fapp: '#2b8a3e', Fair: '#6b7280', Fmotion: '#a61e4d', Finertia: '#a61e4d', Fnet: '#495057' };
+  const TYPE_LABEL = { build: '✏️ Build the FBD', pick: '🔍 Pick the FBD', spot: '🕵️ Spot the fake', predict: '🔮 Predict the motion', num: '🧮 Calculate', mc: '💡 Concept check', match: '🤝 3rd-law match' };
+  const LETTER = GM.LETTER;
+  // ---------- storage (all keys start with "fbdgame:") ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('fbdgame:' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem('fbdgame:' + k, JSON.stringify(v)); } catch (e) { /* storage full or blocked: the game still works */ } },
+    clear() { try { Object.keys(localStorage).filter(k => k.startsWith('fbdgame:')).forEach(k => localStorage.removeItem(k)); } catch (e) { } },
+  };
+  // ---------- sound (WebAudio, generated, no files) ----------
+  const SND = { ctx: null, muted: !!store.get('mute', false) };
+  function actx() { if (!SND.ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; try { SND.ctx = new AC(); } catch (e) { return null; } } if (SND.ctx.state === 'suspended') SND.ctx.resume(); return SND.ctx; }
+  function tone(f, t0, dur, o) {
+    o = o || {}; const c = actx(); if (!c || SND.muted) return; const t = c.currentTime + t0, osc = c.createOscillator(), gn = c.createGain();
+    osc.type = o.type || 'sine'; osc.frequency.setValueAtTime(f, t); if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t + dur);
+    if (o.vib) { const l = c.createOscillator(), lg = c.createGain(); l.frequency.value = o.vib; lg.gain.value = f * 0.03; l.connect(lg); lg.connect(osc.frequency); l.start(t); l.stop(t + dur); }
+    const v = (o.vol || 0.18); gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(v, t + 0.015); gn.gain.setValueAtTime(v, t + Math.max(0.02, dur - 0.08)); gn.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(gn); gn.connect(c.destination); osc.start(t); osc.stop(t + dur + 0.02);
+  }
+  const sfx = {
+    click() { tone(880, 0, 0.05, { type: 'square', vol: 0.05 }); },
+    ding(combo) { const k = Math.pow(2, Math.min(combo, 12) / 12); tone(784 * k, 0, 0.12, { type: 'triangle' }); tone(1175 * k, 0.09, 0.28, { type: 'triangle' }); },
+    trombone() { const n = [392, 370, 349, 330]; n.forEach((f, i) => tone(f, i * 0.32, i === 3 ? 0.9 : 0.3, { type: 'sawtooth', vol: 0.09, vib: i === 3 ? 6 : 0, to: i === 3 ? 300 : 0 })); },
+    levelUp() { [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.1, i === 3 ? 0.45 : 0.14, { type: 'square', vol: 0.07 })); tone(1568, 0.42, 0.4, { type: 'triangle', vol: 0.1 }); },
+    levelDown() { tone(523, 0, 0.18, { type: 'triangle' }); tone(392, 0.17, 0.35, { type: 'triangle' }); },
+    gameOver() { [392, 330, 262, 196].forEach((f, i) => tone(f, i * 0.28, i === 3 ? 0.9 : 0.26, { type: 'square', vol: 0.06 })); },
+    victory() { [523, 523, 523, 659, 784, 659, 784, 1047].forEach((f, i) => tone(f, [0, .12, .24, .36, .6, .84, .96, 1.1][i], i === 7 ? 0.7 : 0.13, { type: 'square', vol: 0.07 })); },
+    crash() { const c = actx(); if (!c || SND.muted) return; const len = 0.35, b = c.createBuffer(1, c.sampleRate * len, c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2.5);
+      const s = c.createBufferSource(), gn = c.createGain(); gn.gain.value = 0.25; s.buffer = b; s.connect(gn); gn.connect(c.destination); s.start(); },
+    heart() { tone(300, 0, 0.12, { type: 'square', vol: 0.05, to: 150 }); },
+    badge() { tone(1319, 0, 0.1, { type: 'triangle', vol: 0.12 }); tone(1760, 0.1, 0.3, { type: 'triangle', vol: 0.12 }); },
+  };
+  function setMute(m) { SND.muted = m; store.set('mute', m); $('muteBtn').textContent = m ? '🔇' : '🔊'; $('muteBtn').title = m ? 'Sound is off (click to turn on)' : 'Sound is on (click to mute)'; }
+
+  // ---------- Newt the Box (SVG mascot) ----------
+  function mascotSVG(state) {
+    const eyes = {
+      idle: '<circle cx="38" cy="46" r="5"/><circle cx="62" cy="46" r="5"/><circle cx="39.5" cy="44.5" r="1.6" fill="#fff"/><circle cx="63.5" cy="44.5" r="1.6" fill="#fff"/>',
+      happy: '<path d="M32 48q6-9 12 0M56 48q6-9 12 0" stroke="#222" stroke-width="3.5" fill="none" stroke-linecap="round"/>',
+      cheer: '<path d="M38 38l2.4 5 5.4.6-4 3.7 1.1 5.3-4.9-2.7-4.9 2.7 1.1-5.3-4-3.7 5.4-.6z M62 38l2.4 5 5.4.6-4 3.7 1.1 5.3-4.9-2.7-4.9 2.7 1.1-5.3-4-3.7 5.4-.6z" fill="#f59f00" stroke="#a86b00" stroke-width="1"/>',
+      sad: '<path d="M31 42l12 4M69 42l-12 4" stroke="#222" stroke-width="3" stroke-linecap="round"/><circle cx="38" cy="50" r="4"/><circle cx="62" cy="50" r="4"/><path d="M66 56q3 6 0 9q-3-3 0-9z" fill="#4dabf7"/>',
+      facepalm: '<path d="M55 48q7 4 13 0" stroke="#222" stroke-width="3" fill="none" stroke-linecap="round"/>',
+    }[state] || '';
+    const mouth = { idle: '<path d="M40 62q10 8 20 0" stroke="#222" stroke-width="3.5" fill="none" stroke-linecap="round"/>', happy: '<path d="M36 59q14 18 28 0z" fill="#c2255c" stroke="#222" stroke-width="3" stroke-linejoin="round"/>', cheer: '<ellipse cx="50" cy="65" rx="11" ry="9" fill="#c2255c" stroke="#222" stroke-width="3"/>', sad: '<path d="M39 69q11-10 22 0" stroke="#222" stroke-width="3.5" fill="none" stroke-linecap="round"/>', facepalm: '<path d="M42 68q8-5 16 0" stroke="#222" stroke-width="3.5" fill="none" stroke-linecap="round"/>' }[state] || '';
+    const arms = state === 'cheer' ? '<path d="M14 50L2 22M86 50L98 22" stroke="#8b5a2b" stroke-width="7" stroke-linecap="round"/><circle cx="2" cy="20" r="6" fill="#f0c08a"/><circle cx="98" cy="20" r="6" fill="#f0c08a"/>'
+      : state === 'facepalm' ? '<path d="M86 62Q70 70 46 50" stroke="#8b5a2b" stroke-width="8" stroke-linecap="round" fill="none"/><ellipse cx="40" cy="46" rx="12" ry="10" fill="#f0c08a" stroke="#b07a4a" stroke-width="1.5"/><path d="M14 60L4 80" stroke="#8b5a2b" stroke-width="7" stroke-linecap="round"/>'
+      : state === 'happy' ? '<path d="M14 56L0 40M86 56L100 40" stroke="#8b5a2b" stroke-width="7" stroke-linecap="round"/>'
+      : '<path d="M14 60L4 78M86 60L96 78" stroke="#8b5a2b" stroke-width="7" stroke-linecap="round"/>';
+    const blush = state === 'happy' || state === 'cheer' ? '<ellipse cx="27" cy="60" rx="6" ry="3.5" fill="#ff8787" opacity=".6"/><ellipse cx="73" cy="60" rx="6" ry="3.5" fill="#ff8787" opacity=".6"/>' : '';
+    return `<svg viewBox="-6 -6 112 112" aria-label="Newt the Box (${state})" role="img"><ellipse cx="50" cy="101" rx="36" ry="4" fill="#0002"/>${arms}
+      <rect x="12" y="14" width="76" height="76" rx="9" fill="#d9a066" stroke="#8b5a2b" stroke-width="4"/><path d="M14 33H86M14 71H86" stroke="#b9824c" stroke-width="3"/><rect x="12" y="14" width="76" height="76" rx="9" fill="none" stroke="#8b5a2b" stroke-width="4"/>
+      <g class="face">${blush}<g fill="#222">${eyes}</g>${mouth}</g>${state === 'facepalm' ? arms.replace(/<path d="M14 60L4 80"[^>]*\/>/, '') : ''}</svg>`;
+  }
+  function setMascot(el, state, say) { el = typeof el === 'string' ? $(el) : el; el.className = el.className.replace(/\b(idle|happy|cheer|sad|facepalm)\b/g, '').trim() + ' ' + (state === 'facepalm' ? 'sad' : state); el.innerHTML = mascotSVG(state); if (say !== undefined && el.id === 'mascot') $('bubble').innerHTML = say; }
+
+  // ---------- confetti / particles ----------
+  const FX = { parts: [], run: false };
+  function confetti(n, opts) {
+    opts = opts || {}; const cv = $('confetti'), W = innerWidth, H = innerHeight; if (cv.width !== W) { cv.width = W; cv.height = H; }
+    const x0 = opts.x !== undefined ? opts.x : W / 2, y0 = opts.y !== undefined ? opts.y : H * 0.35, cols = ['#ffd76a', '#ff6b6b', '#4dabf7', '#69db7c', '#da77f2', '#ff922b'];
+    for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, s = 4 + Math.random() * (opts.power || 9); FX.parts.push({ x: x0, y: y0, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 5, r: Math.random() * 6.28, vr: (Math.random() - .5) * .4, w: 6 + Math.random() * 6, h: 4 + Math.random() * 5, c: cols[i % cols.length], life: 90 + Math.random() * 60, emoji: opts.emoji ? opts.emoji[i % opts.emoji.length] : null }); }
+    if (!FX.run) { FX.run = true; requestAnimationFrame(fxLoop); }
+  }
+  function fxLoop() {
+    const cv = $('confetti'), g = cv.getContext('2d'); g.clearRect(0, 0, cv.width, cv.height);
+    FX.parts = FX.parts.filter(p => p.life > 0 && p.y < cv.height + 40);
+    for (const p of FX.parts) { p.vy += 0.25; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life--; g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.globalAlpha = Math.min(1, p.life / 30);
+      if (p.emoji) { g.font = '22px system-ui'; g.fillText(p.emoji, -11, 8); } else { g.fillStyle = p.c; g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); } g.restore(); }
+    if (FX.parts.length) requestAnimationFrame(fxLoop); else { FX.run = false; g.clearRect(0, 0, cv.width, cv.height); }
+  }
+  function shake(el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); setTimeout(() => el.classList.remove('shake'), 600); }
+  let bannerT = 0;
+  function banner(cls, big, small, ms) { const b = $('banner'); b.className = cls; b.innerHTML = `<div class="b1">${big}</div><div class="b2">${small || ''}</div>`; clearTimeout(bannerT); b.style.animation = 'none'; void b.offsetWidth; b.style.animation = ''; bannerT = setTimeout(() => b.classList.add('hide'), ms || 2300); }
+  let fxT = []; function later(fn, ms) { fxT.push(setTimeout(fn, ms)); }
+  function clearFX() { fxT.forEach(clearTimeout); fxT = []; clearTimeout(bannerT); $('banner').classList.add('hide'); }
+  function popText(txt, col) { const p = $('pop'); p.textContent = txt; p.style.color = col; p.classList.remove('show'); void p.offsetWidth; p.classList.add('show'); }
+
+  // ---------- canvas helpers (same drawing style as the FBD simulator) ----------
+  function setupCanvas(cv) { const w = +cv.getAttribute('width'), h = +cv.getAttribute('height'); if (!cv._w) { cv._w = w; cv._h = h; const r = Math.min(2, window.devicePixelRatio || 1); cv.width = w * r; cv.height = h * r; cv._r = r; }
+    const g = cv.getContext('2d'); g.setTransform(cv._r, 0, 0, cv._r, 0, 0); return { g, W: cv._w, H: cv._h }; }
+  function lbl(g, txt, x, y, col, align, size) {
+    size = size || 14; const m = txt.match(/^(.*?)_([A-Za-z0-9,'′∥⊥]+)(.*)$/); const parts = m ? [[m[1], size], [m[2], size * 0.72, 4], [m[3], size]] : [[txt, size]];
+    g.save(); let w = 0; for (const pt of parts) { g.font = `bold ${pt[1]}px system-ui,sans-serif`; w += g.measureText(pt[0]).width; }
+    let cx = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x; g.lineJoin = 'round';
+    const CW = g.canvas._w || 1e4, CH = g.canvas._h || 1e4; cx = Math.max(3, Math.min(CW - w - 3, cx)); y = Math.max(size, Math.min(CH - 4, y));
+    for (const pt of parts) { g.font = `bold ${pt[1]}px system-ui,sans-serif`; g.lineWidth = 3.5; g.strokeStyle = 'rgba(255,255,255,.92)'; g.strokeText(pt[0], cx, y + (pt[2] || 0)); g.fillStyle = col; g.fillText(pt[0], cx, y + (pt[2] || 0)); cx += g.measureText(pt[0]).width; }
+    g.restore(); return w;
+  }
+  function arrow(g, x, y, dx, dy, col, o) {
+    o = o || {}; const L = Math.hypot(dx, dy); if (L < 1.5) return; g.save(); g.strokeStyle = g.fillStyle = col; g.globalAlpha = o.alpha || 1; g.lineWidth = o.w || 3.5; g.lineCap = 'round'; if (o.dash) g.setLineDash(o.dash);
+    const ux = dx / L, uy = dy / L, hl = Math.min(o.head || 13, L * 0.5); g.beginPath(); g.moveTo(x, y); g.lineTo(x + dx - ux * hl * 0.7, y + dy - uy * hl * 0.7); g.stroke(); g.setLineDash([]);
+    g.beginPath(); g.moveTo(x + dx, y + dy); g.lineTo(x + dx - ux * hl - uy * hl * 0.45, y + dy - uy * hl + ux * hl * 0.45); g.lineTo(x + dx - ux * hl + uy * hl * 0.45, y + dy - uy * hl - ux * hl * 0.45); g.closePath(); g.fill(); g.restore();
+    if (o.label) { const lx = x + dx + ux * 9, ly = y + dy + uy * 12 + 5; lbl(g, o.label, lx, ly, o.lcol || col, ux < -0.35 ? 'right' : ux > 0.35 ? 'left' : 'center', o.lsize || 13.5); }
+  }
+  const unitV = a => [Math.cos(a * D2R), -Math.sin(a * D2R)];
+  function groupOffsets(list) { const o = {}, used = []; for (const f of list) { const grp = used.find(u => P.angDiff(u.ang, f.ang) < 4); if (grp) grp.ks.push(f.k); else used.push({ ang: f.ang, ks: [f.k] }); } for (const u of used) u.ks.forEach((k, i) => o[k] = (i - (u.ks.length - 1) / 2) * 11); return o; }
+  function rrect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+  // small Newt face drawn on boxes in the scene
+  function face(g, x, y, s, mood) { g.save(); g.translate(x, y); g.scale(s, s); g.fillStyle = '#222'; g.strokeStyle = '#222'; g.lineWidth = 2.2; g.lineCap = 'round';
+    if (mood === 'happy') { g.beginPath(); g.moveTo(-9, -2); g.quadraticCurveTo(-6, -8, -3, -2); g.moveTo(3, -2); g.quadraticCurveTo(6, -8, 9, -2); g.stroke(); g.fillStyle = '#c2255c'; g.beginPath(); g.moveTo(-6, 3); g.quadraticCurveTo(0, 12, 6, 3); g.closePath(); g.fill(); g.stroke(); }
+    else if (mood === 'sad') { g.beginPath(); g.moveTo(-9, -6); g.lineTo(-3, -4); g.moveTo(9, -6); g.lineTo(3, -4); g.stroke(); g.beginPath(); g.arc(-6, -1, 1.8, 0, 7); g.arc(6, -1, 1.8, 0, 7); g.fill(); g.beginPath(); g.moveTo(-6, 9); g.quadraticCurveTo(0, 3, 6, 9); g.stroke(); }
+    else if (mood === 'dizzy') { g.font = 'bold 9px system-ui'; g.textAlign = 'center'; g.fillText('x', -6, 0); g.fillText('x', 6, 0); g.beginPath(); g.ellipse(0, 7, 3, 2.4, 0, 0, 7); g.stroke(); }
+    else { g.beginPath(); g.arc(-6, -2, 2.2, 0, 7); g.arc(6, -2, 2.2, 0, 7); g.fill(); g.beginPath(); g.moveTo(-5, 5); g.quadraticCurveTo(0, 9, 5, 5); g.stroke(); }
+    g.restore(); }
+  function crateRect(g, x, y, w, h, opts) { opts = opts || {}; g.save(); g.fillStyle = opts.fill || '#d9a066'; g.strokeStyle = opts.sel ? '#e0a800' : '#8b5a2b'; g.lineWidth = opts.sel ? 4 : 2.5; rrect(g, x, y, w, h, 5); g.fill(); g.stroke();
+    if (!opts.plain) { g.strokeStyle = '#b9824c'; g.lineWidth = 2; g.beginPath(); g.moveTo(x + 3, y + h * 0.22); g.lineTo(x + w - 3, y + h * 0.22); g.moveTo(x + 3, y + h * 0.78); g.lineTo(x + w - 3, y + h * 0.78); g.stroke(); }
+    if (opts.mood) face(g, x + w / 2, y + h / 2, Math.min(w, h) / 34, opts.mood); if (opts.label) { g.fillStyle = '#3b2a17'; g.font = 'bold 11px system-ui'; g.textAlign = 'center'; g.fillText(opts.label, x + w / 2, y + h - 3 - (opts.plain ? 0 : 0)); } g.restore(); }
+  function floor(g, y, x0, x1, ice) { g.fillStyle = ice ? '#d9f1ff' : '#e9dcc8'; g.fillRect(x0, y, x1 - x0, 400); g.strokeStyle = ice ? '#8cc7e8' : '#7a6650'; g.lineWidth = 2; g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
+    if (!ice) { g.lineWidth = 1; g.strokeStyle = '#0002'; for (let x = x0 - 400; x < x1; x += 14) { g.beginPath(); g.moveTo(x, y + 400); g.lineTo(x + 30, y); g.stroke(); } } else { g.fillStyle = '#3d8fc2'; g.font = '11px system-ui'; g.fillText('frictionless', x0 + 8, y + 16); g.strokeStyle = '#fff9'; g.lineWidth = 2; for (let x = x0 + 40; x < x1; x += 90) { g.beginPath(); g.moveTo(x, y + 8); g.lineTo(x + 24, y + 8); g.stroke(); } } }
+  function ceiling(g, x0, x1, y) { g.fillStyle = '#cfd5df'; g.fillRect(x0, y - 14, x1 - x0, 14); g.strokeStyle = '#7d8696'; g.lineWidth = 2; g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke(); g.lineWidth = 1; for (let x = x0; x < x1; x += 12) { g.beginPath(); g.moveTo(x, y - 14); g.lineTo(x + 12, y); g.stroke(); } }
+  function arm(g, x, y, ang, len) { const [ux, uy] = unitV(ang); g.save(); g.strokeStyle = '#e0a87e'; g.lineCap = 'round'; g.lineWidth = 13; g.beginPath(); g.moveTo(x + ux * 7, y + uy * 7); g.lineTo(x + ux * len, y + uy * len); g.stroke();
+    g.strokeStyle = '#4c6ef5'; g.lineWidth = 16; g.beginPath(); g.moveTo(x + ux * len * 0.62, y + uy * len * 0.62); g.lineTo(x + ux * len, y + uy * len); g.stroke(); g.fillStyle = '#f0c08a'; g.strokeStyle = '#b07a4a'; g.lineWidth = 1.5; g.beginPath(); g.arc(x + ux * 8, y + uy * 8, 8, 0, 7); g.fill(); g.stroke(); g.restore(); }
+  function vTag(g, x, y, ang, txt) { const [ux, uy] = unitV(ang); g.save(); g.globalAlpha = 0.75; arrow(g, x - ux * 22, y - uy * 22, ux * 44, uy * 44, '#868e96', { w: 2.5, dash: [5, 4], head: 9 }); g.restore(); lbl(g, txt, x + ux * 30 + (Math.abs(ux) < 0.5 ? 8 : 0), y + uy * 30 + (Math.abs(uy) < 0.5 ? -8 : 5), '#5c636a', Math.abs(ux) < 0.5 ? 'left' : ux > 0 ? 'left' : 'right', 11.5); }
+  function sky(g, W, H) { const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#a5d8ff'); gr.addColorStop(1, '#e7f5ff'); g.fillStyle = gr; g.fillRect(0, 0, W, H); g.fillStyle = '#fff'; for (const [x, y, s] of [[90, 60, 1], [520, 40, 1.2], [430, 190, 0.8]]) { g.beginPath(); g.arc(x, y, 18 * s, 0, 7); g.arc(x + 22 * s, y - 8 * s, 22 * s, 0, 7); g.arc(x + 46 * s, y, 18 * s, 0, 7); g.fill(); } }
+  function person(g, x, y, s, col) { g.save(); g.translate(x, y); g.scale(s, s); g.strokeStyle = col || '#343a40'; g.lineWidth = 4; g.lineCap = 'round'; g.fillStyle = '#f0c08a'; g.beginPath(); g.arc(0, -62, 10, 0, 7); g.fill(); g.stroke(); g.beginPath(); g.moveTo(0, -52); g.lineTo(0, -22); g.moveTo(0, -46); g.lineTo(-14, -30); g.moveTo(0, -46); g.lineTo(14, -30); g.moveTo(0, -22); g.lineTo(-10, 0); g.moveTo(0, -22); g.lineTo(10, 0); g.stroke(); g.restore(); }
+
+  // ---------- scene (the picture of the situation) ----------
+  const SCALE_PX = { floor: 150, hang: 45, ropes: 0, elevator: 38, ball: 70, sky: 50, wall: 0, ramp: 80, atwood: 45, table2: 55, emoji: 0 };
+  function motionPx(q, t) { // displacement (px, + along the motion axis) after t seconds of the "it worked!" replay
+    const sc = q.sc; if (!sc || !sc.e || !SCALE_PX[sc.draw.k]) return 0; const v = sc.v || 0, a = sc.e.a || 0, T = 1.8;
+    const tStop = (sc.motion === 'slow' && sc.id !== 'fall' && a) ? Math.abs(v / a) : Infinity, dm = tt => { tt = Math.min(tt, tStop); return v * tt + 0.5 * a * tt * tt; };
+    let mx = 0; for (let i = 1; i <= 30; i++) mx = Math.max(mx, Math.abs(dm(T * i / 30))); if (mx < 1e-6) return 0;
+    return dm(Math.min(t, T)) / mx * SCALE_PX[sc.draw.k];
+  }
+  function withCrash(g, cx, cy, w, h, crash, drawFn) { // draws the main object, or its broken pieces while it crashes
+    if (!crash) { drawFn(); return; }
+    const p = Math.min(1, crash), pcs = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
+    pcs.forEach(([sx, sy], i) => { g.save(); const fly = p * 60, drop = p * p * 90; g.translate(sx * fly * (0.6 + i * 0.15), sy * fly * 0.4 + drop * (sy > 0 ? 0.6 : 1)); g.translate(cx, cy); g.rotate(sx * p * (1 + i * 0.4)); g.translate(-cx, -cy); g.globalAlpha = 1 - Math.max(0, p - 0.75) * 3;
+      g.beginPath(); g.rect(sx < 0 ? cx - w / 2 - 4 : cx, sy < 0 ? cy - h / 2 - 30 : cy, w / 2 + 4, h / 2 + 30); g.clip(); drawFn(); g.restore(); });
+    if (p < 0.85) { g.save(); g.font = `${40 + 50 * Math.sin(p * Math.PI)}px system-ui`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.globalAlpha = 1 - p; g.fillText('💥', cx, cy); g.restore(); }
+  }
+  function stars(g, x, y, t) { g.save(); g.font = '16px system-ui'; g.textAlign = 'center'; for (let i = 0; i < 3; i++) { const a = t * 4 + i * 2.1; g.fillText('⭐', x + Math.cos(a) * 30, y + Math.sin(a) * 8); } g.restore(); }
+  function sparkles(g, x, y, t) { g.save(); g.font = '18px system-ui'; g.textAlign = 'center'; for (let i = 0; i < 5; i++) { const a = i * 1.26 + t * 2, r = 40 + 14 * Math.sin(t * 6 + i); g.globalAlpha = 0.5 + 0.5 * Math.sin(t * 8 + i); g.fillText('✨', x + Math.cos(a) * r * 1.4, y + Math.sin(a) * r * 0.7); } g.restore(); }
+  function drawScene(q, anim) {
+    const cv = $('scene'), { g, W, H } = setupCanvas(cv); anim = anim || {}; g.clearRect(0, 0, W, H);
+    const sc = q.sc, d = sc.draw || { k: 'emoji', e: '❓' }, mood = anim.mood || 'idle', crash = anim.crash || 0, t = anim.t || 0;
+    let jx = anim.jitter ? Math.sin(t * 70) * 5 : 0, hop = anim.hop || 0; const s = anim.d || 0;
+    g.fillStyle = '#f8fbff'; g.fillRect(0, 0, W, H);
+    const vt = sc.e && sc.v ? (sig3(Math.abs(sc.v)) + ' m/s') : '';
+    const box = (cx, cy, w, h, o) => withCrash(g, cx, cy, w, h, crash, () => crateRect(g, cx - w / 2, cy - h / 2, w, h, Object.assign({ mood: crash ? null : mood }, o)));
+    const after = (x, y) => { if (anim.dizzy) stars(g, x, y, t); if (anim.sparkle) sparkles(g, x, y, t); };
+    if (d.k === 'floor') {
+      const fy = 205; let cx = Math.max(80, Math.min(W - 80, 320 + s)) + jx; const ice = !!d.ice;
+      if (d.table) { g.fillStyle = '#e9dcc8'; g.fillRect(0, 225, W, 30); g.fillStyle = '#a47148'; g.fillRect(190, 150, 260, 12); g.fillRect(205, 162, 12, 63); g.fillRect(423, 162, 12, 63); }
+      else floor(g, fy, 0, W, ice);
+      const base = d.table ? 150 : fy, th = d.thing; let w = 80, h = 62; if (th === 'crate') { w = 100; h = 78; } if (th === 'book') { w = 96; h = 24; } if (th === 'puck') { w = 56; h = 16; } if (th === 'cart') { w = 98; h = 44; } if (th === 'sled') { w = 112; h = 26; }
+      const lift = th === 'cart' ? 14 : th === 'sled' ? 8 : 0, cy = base - lift - h / 2 - hop, mlab = sc.p ? sig3(sc.p.m) + ' kg' : (sc.text.match(/(\d+(?:\.\d+)?) kg/) || [])[0] || '';
+      withCrash(g, cx, cy, w, h, crash, () => {
+        if (th === 'book') { g.fillStyle = '#c92a2a'; rrect(g, cx - w / 2, cy - h / 2, w, h, 3); g.fill(); g.fillStyle = '#fff3'; g.fillRect(cx - w / 2 + 6, cy - h / 2 + 4, w - 12, 4); g.fillStyle = '#fff'; g.font = 'bold 11px system-ui'; g.textAlign = 'center'; g.fillText('PHYSICS ' + mlab, cx, cy + 6); face(g, cx + w / 2 + 0, cy, 0, mood); }
+        else if (th === 'puck') { g.fillStyle = '#212529'; g.beginPath(); g.ellipse(cx, cy, w / 2, h / 2, 0, 0, 7); g.fill(); g.fillStyle = '#495057'; g.beginPath(); g.ellipse(cx, cy - 3, w / 2, h / 2 - 3, 0, 0, 7); g.fill(); g.fillStyle = '#fff'; g.font = 'bold 10px system-ui'; g.textAlign = 'center'; g.fillText(mlab, cx, cy - 12 - h / 2); }
+        else if (th === 'cart') { crateRect(g, cx - w / 2, cy - h / 2, w, h, { fill: '#74c0fc', plain: true, mood: crash ? null : mood, label: mlab }); g.fillStyle = '#343a40'; for (const ox of [-28, 28]) { g.beginPath(); g.arc(cx + ox, base - 8, 8, 0, 7); g.fill(); } }
+        else if (th === 'sled') { g.fillStyle = '#c0803f'; rrect(g, cx - w / 2, cy - h / 2, w, h, 5); g.fill(); g.strokeStyle = '#6b4423'; g.lineWidth = 3; g.beginPath(); g.moveTo(cx - w / 2, base - 1); g.lineTo(cx + w / 2 - 6, base - 1); g.quadraticCurveTo(cx + w / 2 + 12, base - 2, cx + w / 2 + 6, cy); g.stroke(); face(g, cx, cy, 0.8, crash ? null : mood); g.fillStyle = '#3b2a17'; g.font = 'bold 10px system-ui'; g.textAlign = 'center'; g.fillText(mlab, cx + 36, cy + 4); }
+        else crateRect(g, cx - w / 2, cy - h / 2, w, h, { mood: crash ? null : mood, label: mlab });
+      });
+      if (!crash || crash > 1.2) {
+        if (d.hand === 'push') arm(g, cx - w / 2, cy, 180, 92); if (d.hand === 'down') arm(g, cx, cy - h / 2, 90, 78);
+        if (d.hand === 'up') { g.strokeStyle = '#555'; g.lineWidth = 3; g.beginPath(); g.arc(cx, cy - h / 2, 10, Math.PI, 0); g.stroke(); arm(g, cx, cy - h / 2 - 10, 90, 70); }
+        if (d.hand === 'angleDown') { const a = 180 - (d.ang || 30), [ux, uy] = unitV(a); g.strokeStyle = '#495057'; g.lineWidth = 4; g.beginPath(); g.moveTo(cx - w / 2 + 6, cy - h / 2 + 2); g.lineTo(cx - w / 2 + 6 + ux * 60, cy - h / 2 + 2 + uy * 60); g.stroke(); arm(g, cx - w / 2 + 6 + ux * 60, cy - h / 2 + 2 + uy * 60, a, 70); }
+        if (d.rope !== undefined) { const [ux, uy] = unitV(d.rope), x0 = cx + w / 2 + 4, y0 = cy - 2; g.strokeStyle = '#8d6e63'; g.lineWidth = 3; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x0 + ux * 120, y0 + uy * 120); g.stroke(); g.fillStyle = '#f0c08a'; g.strokeStyle = '#b07a4a'; g.beginPath(); g.arc(x0 + ux * 124, y0 + uy * 124, 8, 0, 7); g.fill(); g.stroke(); lbl(g, d.rope + '°', x0 + 34, y0 - 4, '#555', 'left', 11.5); }
+        if (d.two) { arm(g, cx - w / 2, cy - (d.two === 'same' ? 14 : 0), 180, 92); lbl(g, d.F1 + ' N', cx - w / 2 - 70, cy - 30, '#2b8a3e', 'center', 13);
+          if (d.two === 'opp') { arm(g, cx + w / 2, cy, 0, 92); lbl(g, d.F2 + ' N', cx + w / 2 + 70, cy - 30, '#2b8a3e', 'center', 13); } else { arm(g, cx - w / 2, cy + 14, 180, 80); lbl(g, d.F2 + ' N', cx - w / 2 - 70, cy + 42, '#2b8a3e', 'center', 13); } }
+      }
+      if (vt && !crash) vTag(g, cx, cy - h / 2 - 34, sc.v > 0 ? 0 : 180, 'v = ' + vt);
+      after(cx, cy);
+    } else if (d.k === 'hang') {
+      const cy0 = (d.thing === 'lamp' ? 135 : 150) - s - hop, cx = 320 + jx;
+      if (d.thing === 'lamp') { ceiling(g, 220, 420, 24); g.strokeStyle = '#333'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(320, 24); g.lineTo(cx, cy0 - 26); g.stroke();
+        withCrash(g, cx, cy0, 80, 60, crash, () => { g.fillStyle = '#ffe066'; g.beginPath(); g.arc(cx, cy0 + 16, 14, 0, 7); g.fill(); g.fillStyle = '#4c6ef5'; g.beginPath(); g.moveTo(cx - 16, cy0 - 26); g.lineTo(cx + 16, cy0 - 26); g.lineTo(cx + 40, cy0 + 14); g.lineTo(cx - 40, cy0 + 14); g.closePath(); g.fill(); face(g, cx, cy0 - 4, 0.75, crash ? null : mood); });
+        if (sc.p) lbl(g, sig3(sc.p.m) + ' kg', cx + 48, cy0, '#333', 'left', 12.5); }
+      else { g.fillStyle = '#fab005'; g.fillRect(120, 10, W - 120, 16); g.strokeStyle = '#a07000'; g.lineWidth = 2; for (let x = 120; x < W; x += 20) { g.beginPath(); g.moveTo(x, 10); g.lineTo(x + 20, 26); g.stroke(); } g.fillStyle = '#495057'; g.fillRect(300, 24, 40, 12);
+        g.strokeStyle = '#333'; g.lineWidth = 3; g.beginPath(); g.moveTo(320, 36); g.lineTo(cx, cy0 - 39); g.stroke(); g.beginPath(); g.moveTo(cx, cy0 - 39); g.lineTo(cx - 30, cy0 - 39 + 0.1); g.stroke(); box(cx, cy0, 96, 74, { label: sc.p ? sig3(sc.p.m) + ' kg' : '' });
+        if (vt && !crash) vTag(g, cx + 92, cy0, sc.v > 0 ? 90 : 270, 'v = ' + vt); }
+      after(cx, cy0);
+    } else if (d.k === 'ropes') {
+      ceiling(g, 30, 610, 24); const cx = 320 + jx, cy = 160 - hop, t1 = d.t1, t2 = d.t2, L = [cx - 55, cy - 26], R = [cx + 55, cy - 26];
+      g.strokeStyle = '#8d6e63'; g.lineWidth = 3; g.beginPath(); g.moveTo(...L); g.lineTo(L[0] - (L[1] - 24) / Math.tan(t1 * D2R), 24); g.moveTo(...R); g.lineTo(R[0] + (R[1] - 24) / Math.tan(t2 * D2R), 24); g.stroke();
+      lbl(g, t1 + '°', L[0] - (L[1] - 24) / Math.tan(t1 * D2R) + 14, 44, '#555', 'left', 12); lbl(g, t2 + '°', R[0] + (R[1] - 24) / Math.tan(t2 * D2R) - 14, 44, '#555', 'right', 12);
+      withCrash(g, cx, cy, 120, 52, crash, () => { g.fillStyle = '#ffe066'; g.strokeStyle = '#b08900'; g.lineWidth = 3; rrect(g, cx - 60, cy - 26, 120, 52, 6); g.fill(); g.stroke(); g.fillStyle = '#5c3d00'; g.font = 'bold 13px system-ui'; g.textAlign = 'center'; g.fillText('PHYSICS ' + (sc.p ? sc.p.m + ' kg' : ''), cx, cy + 20); face(g, cx, cy - 6, 0.6, crash ? null : mood); });
+      after(cx, cy);
+    } else if (d.k === 'elevator') {
+      g.fillStyle = '#e9ecef'; g.fillRect(200, 0, 240, H); g.strokeStyle = '#adb5bd'; g.lineWidth = 3; g.strokeRect(200, -5, 240, H + 10); const cy = 125 - s - hop, cx = 320 + jx;
+      g.strokeStyle = '#495057'; g.lineWidth = 2; g.beginPath(); g.moveTo(cx, 0); g.lineTo(cx, cy - 92); g.stroke();
+      withCrash(g, cx, cy, 160, 180, crash, () => { g.fillStyle = '#fff9db'; g.strokeStyle = '#868e96'; g.lineWidth = 4; g.fillRect(cx - 80, cy - 92, 160, 184); g.strokeRect(cx - 80, cy - 92, 160, 184); g.fillStyle = '#ced4da'; g.fillRect(cx - 30, cy + 78, 60, 10); g.fillStyle = '#212529'; g.font = 'bold 9px system-ui'; g.textAlign = 'center'; g.fillText('SCALE', cx, cy + 86); person(g, cx, cy + 78, 1.05, '#343a40'); });
+      if (sc.p) lbl(g, sig3(sc.p.m) + ' kg student', 450, 40, '#333', 'left', 12.5);
+      if (sc.elev) { lbl(g, sc.elev[0], 450, 62, '#7a4300', 'left', 12); } if (vt && !crash) vTag(g, 170, 125, sc.v > 0 ? 90 : 270, 'v = ' + vt); after(cx, cy);
+    } else if (d.k === 'ball') {
+      g.fillStyle = '#d3f9d8'; g.fillRect(0, 232, W, 30); g.strokeStyle = '#2f9e44'; g.lineWidth = 2; g.beginPath(); g.moveTo(0, 232); g.lineTo(W, 232); g.stroke(); const cx = 320 + jx, cy = 130 - s - hop;
+      withCrash(g, cx, cy, 34, 34, crash, () => { g.fillStyle = '#ff922b'; g.beginPath(); g.arc(cx, cy, 17, 0, 7); g.fill(); g.strokeStyle = '#c05f00'; g.lineWidth = 2; g.stroke(); face(g, cx, cy, 0.62, crash ? null : mood); });
+      if (vt && !crash) vTag(g, cx + 60, cy, sc.v > 0 ? 90 : 270, 'v = ' + vt); if (sc.p) lbl(g, sig3(sc.p.m) + ' kg', cx - 26, cy + 5, '#333', 'right', 12.5); after(cx, cy);
+    } else if (d.k === 'sky') {
+      sky(g, W, H); const cx = 320 + jx, cy = 110 - s - hop;
+      withCrash(g, cx, cy, 90, 50, crash, () => { g.save(); g.translate(cx, cy); g.strokeStyle = '#e8590c'; g.lineWidth = 6; g.lineCap = 'round'; g.beginPath(); g.moveTo(-40, -18); g.lineTo(0, 0); g.lineTo(40, -18); g.moveTo(-30, 22); g.lineTo(0, 4); g.lineTo(30, 22); g.stroke(); g.fillStyle = '#f0c08a'; g.beginPath(); g.arc(0, -14, 10, 0, 7); g.fill(); g.restore(); face(g, cx, cy - 14, 0.45, crash ? null : mood); });
+      if (vt && !crash) vTag(g, cx + 90, cy, 270, 'v = ' + vt); if (sc.p) lbl(g, sig3(sc.p.m) + ' kg', cx - 60, cy + 40, '#333', 'right', 12.5); after(cx, cy);
+    } else if (d.k === 'wall') {
+      g.fillStyle = '#ced4da'; g.fillRect(200, 0, 40, H); g.strokeStyle = '#868e96'; g.lineWidth = 1; for (let y = -40; y < H; y += 14) { g.beginPath(); g.moveTo(200, y + 40); g.lineTo(240, y); g.stroke(); } g.lineWidth = 3; g.beginPath(); g.moveTo(240, 0); g.lineTo(240, H); g.stroke();
+      const cx = 253 + jx, cy = 120 - hop; withCrash(g, cx, cy, 26, 92, crash, () => { g.fillStyle = '#1971c2'; rrect(g, cx - 13, cy - 46, 26, 92, 3); g.fill(); face(g, cx, cy - 14, 0.5, crash ? null : mood); });
+      if (!crash) arm(g, cx + 13, cy + 8, 0, 110); if (sc.p) { lbl(g, sig3(sc.p.m) + ' kg book', cx + 22, cy - 50, '#333', 'left', 12.5); lbl(g, 'push ' + sc.p.F + ' N', cx + 40, cy + 40, '#2b8a3e', 'left', 12.5); } after(cx, cy);
+    } else if (d.k === 'ramp') {
+      const th = d.th || 30, x1 = 570, y0 = 228, Lb = Math.min(430, 190 / Math.tan(th * D2R)), x0 = x1 - Lb, hgt = Lb * Math.tan(th * D2R);
+      g.fillStyle = d.ice ? '#d9f1ff' : '#e9dcc8'; g.strokeStyle = d.ice ? '#5aa9d6' : '#7a6650'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y0); g.lineTo(x1, y0 - hgt); g.closePath(); g.fill(); g.stroke(); g.fillStyle = '#ced4da'; g.fillRect(0, y0, W, 30);
+      g.strokeStyle = '#555'; g.lineWidth = 1.5; g.beginPath(); g.arc(x0, y0, 34, -th * D2R, 0); g.stroke(); lbl(g, th + '°', x0 + 40, y0 - 6, '#333', 'left', 12);
+      const [ux, uy] = unitV(th), [nx, ny] = unitV(th + 90), sl = Math.hypot(Lb, hgt), along = sl * 0.5 + s, bx = x0 + ux * along + nx * 21 - nx * hop, by = y0 + uy * along + ny * 21 - ny * hop;
+      g.save(); g.translate(bx + jx, by); g.rotate(-th * D2R); g.translate(-(bx + jx), -by); box(bx + jx, by, 62, 42, { label: sc.p ? sig3(sc.p.m) + ' kg' : '' }); g.restore();
+      if (d.ice) lbl(g, 'frictionless', x1 - 80, y0 - 8, '#3d8fc2', 'left', 11); if (vt && !crash) vTag(g, bx - 70, by - 50, sc.v > 0 ? th : th + 180, 'v = ' + vt); after(bx, by);
+    } else if (d.k === 'atwood') {
+      ceiling(g, 250, 390, 18); g.strokeStyle = '#495057'; g.lineWidth = 4; g.beginPath(); g.moveTo(320, 18); g.lineTo(320, 46); g.stroke(); g.fillStyle = '#adb5bd'; g.beginPath(); g.arc(320, 46, 24, 0, 7); g.fill(); g.strokeStyle = '#495057'; g.lineWidth = 2; g.stroke(); g.fillStyle = '#495057'; g.beginPath(); g.arc(320, 46, 4, 0, 7); g.fill();
+      const blk = (m, x, top, nm, sel) => { const w = 34 + 5 * m, h = 24 + 6 * m; g.strokeStyle = '#333'; g.lineWidth = 2; g.beginPath(); g.moveTo(x, 46); g.lineTo(x, top); g.stroke(); const cyb = top + h / 2;
+        const dr = () => crateRect(g, x - w / 2, top, w, h, { sel, plain: true, fill: sel ? '#ffe8a3' : '#d9a066', mood: crash || !sel ? null : mood }); if (sel) withCrash(g, x + jx, cyb, w, h, crash, dr); else dr(); lbl(g, nm + ' = ' + m + ' kg', x + (x < 320 ? -w / 2 - 6 : w / 2 + 6), cyb + 5, '#333', x < 320 ? 'right' : 'left', 12.5); return cyb; };
+      const y1 = blk(d.m1, 296, 120 - s - (d.obj === 1 ? hop : 0), 'm₁', d.obj === 1), y2 = blk(d.m2, 344, 120 + s - (d.obj === 2 ? hop : 0), 'm₂', d.obj === 2); after(d.obj === 1 ? 296 : 344, d.obj === 1 ? y1 : y2);
+    } else if (d.k === 'table2') {
+      g.fillStyle = '#a47148'; g.fillRect(40, 110, 440, 12); g.fillRect(60, 122, 12, 120); g.fillRect(448, 122, 12, 120); g.fillStyle = '#e9dcc8'; g.fillRect(0, 238, W, 20);
+      g.fillStyle = '#adb5bd'; g.beginPath(); g.arc(490, 104, 13, 0, 7); g.fill(); g.strokeStyle = '#495057'; g.lineWidth = 2; g.stroke(); g.strokeStyle = '#495057'; g.lineWidth = 4; g.beginPath(); g.moveTo(478, 112); g.lineTo(490, 104); g.stroke();
+      const bx = 250 + s + (d.obj === 1 ? jx : 0), by = 110 - 26 - (d.obj === 1 ? hop : 0), hy = 170 + s - (d.obj === 2 ? hop : 0), hx = 503 + (d.obj === 2 ? jx : 0);
+      g.strokeStyle = '#333'; g.lineWidth = 2; g.beginPath(); g.moveTo(bx + 40, by); g.lineTo(490, 91); g.moveTo(503, 104); g.lineTo(hx, hy - 20); g.stroke();
+      const b1 = () => crateRect(g, bx - 40, by - 26, 80, 52, { sel: d.obj === 1, plain: true, fill: d.obj === 1 ? '#ffe8a3' : '#d9a066', mood: crash || d.obj !== 1 ? null : mood, label: 'm₁ = ' + d.m1 + ' kg' });
+      const b2 = () => crateRect(g, hx - 24, hy - 20, 48, 40, { sel: d.obj === 2, plain: true, fill: d.obj === 2 ? '#ffe8a3' : '#d9a066', mood: crash || d.obj !== 2 ? null : mood });
+      if (d.obj === 1) withCrash(g, bx, by, 80, 52, crash, b1); else b1(); if (d.obj === 2) withCrash(g, hx, hy, 48, 40, crash, b2); else b2(); lbl(g, 'm₂ = ' + d.m2 + ' kg', hx - 30, hy + 5, '#333', 'right', 12.5);
+      after(d.obj === 1 ? bx : hx, d.obj === 1 ? by : hy);
+    } else { // emoji / concept card
+      const gr = g.createLinearGradient(0, 0, W, H); gr.addColorStop(0, '#fff4e6'); gr.addColorStop(1, '#e7f5ff'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+      const cx = 320 + jx, cy = 125 - hop; withCrash(g, cx, cy, 160, 110, crash, () => { g.save(); g.font = '92px system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(d.e || '❓', cx, cy); g.restore(); }); after(cx, cy);
+    }
+    if (anim.banner) { lbl(g, anim.banner, W / 2, 30, anim.bcol || '#1d7a3a', 'center', 22); }
+  }
+
+  // ---------- free-body diagrams ----------
+  // list = [{k, mag, ang}] ; draws arrows from a dot, to scale (longest = R px). Returns the arrow geometry for hit tests.
+  function drawFBD(cv, list, o) {
+    o = o || {}; const { g, W, H } = setupCanvas(cv); g.clearRect(0, 0, W, H); g.fillStyle = o.bg || '#fbfcfe'; g.fillRect(0, 0, W, H);
+    const cx = o.cx || W / 2, cy = o.cy || H / 2, R = o.R || Math.min(W, H) * 0.36, max = o.max || Math.max(1e-9, ...list.map(f => f.mag)), geo = [];
+    g.strokeStyle = '#e3e7ef'; g.lineWidth = 1; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(8, cy); g.lineTo(W - 8, cy); g.moveTo(cx, 6); g.lineTo(cx, H - 6); g.stroke(); g.setLineDash([]);
+    if (o.tilt) { const [dx, dy] = unitV(o.tilt), [nx, ny] = unitV(o.tilt + 90); g.strokeStyle = '#cdd5e6'; g.setLineDash([2, 3]); g.beginPath(); g.moveTo(cx - dx * R * 1.3, cy - dy * R * 1.3); g.lineTo(cx + dx * R * 1.3, cy + dy * R * 1.3); g.moveTo(cx - nx * R * 1.2, cy - ny * R * 1.2); g.lineTo(cx + nx * R * 1.2, cy + ny * R * 1.2); g.stroke(); g.setLineDash([]); }
+    const off = groupOffsets(list);
+    for (const f of list) { const [ux, uy] = unitV(f.ang), L = Math.max(16, f.mag / max * R), of = off[f.k] || 0, sx = cx - uy * of, sy = cy + ux * of, col = COL[f.k] || '#333', sel = o.sel === f.k;
+      if (sel) { g.save(); g.strokeStyle = '#ffd76a'; g.lineWidth = 12; g.lineCap = 'round'; g.globalAlpha = 0.8; g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx + ux * L, sy + uy * L); g.stroke(); g.restore(); }
+      arrow(g, sx, sy, ux * L, uy * L, col, { label: (o.noLabels ? '' : SYM[f.k] + (o.vals ? ' = ' + sig3(f.mag) + ' N' : '')), w: o.w || 3.5, lsize: o.lsize, dash: o.dash, alpha: o.alpha }); geo.push({ k: f.k, x0: sx, y0: sy, x1: sx + ux * L, y1: sy + uy * L }); }
+    if (o.overlay) { const om = Math.max(1e-9, ...o.overlay.map(f => f.mag)), lo = groupOffsets(o.overlay); for (const f of o.overlay) { const [ux, uy] = unitV(f.ang), L = Math.max(16, f.mag / om * R * 0.92), of = (lo[f.k] || 0) + 4; arrow(g, cx - uy * of, cy + ux * of, ux * L, uy * L, COL[f.k] || '#333', { w: 2.2, dash: [6, 5], alpha: 0.6, head: 10 }); } }
+    g.fillStyle = '#111'; g.beginPath(); g.arc(cx, cy, 5.5, 0, 7); g.fill();
+    if (o.foot) { g.font = '11px system-ui'; g.fillStyle = '#667'; g.fillText(o.foot, 6, H - 6); }
+    return geo;
+  }
+  const tiltOf = sc => (sc && sc.id === 'incline' && sc.mode === 'ap' ? sc.p.th : 0);
+  const segDist = (x, y, s) => { const dx = s.x1 - s.x0, dy = s.y1 - s.y0, L2 = dx * dx + dy * dy || 1; let t = ((x - s.x0) * dx + (y - s.y0) * dy) / L2; t = Math.max(0.15, Math.min(1, t)); return Math.hypot(s.x0 + t * dx - x, s.y0 + t * dy - y); };
+  function cvPt(cv, ev) { const r = cv.getBoundingClientRect(); return [(ev.clientX - r.left) * cv._w / r.width, (ev.clientY - r.top) * cv._h / r.height]; }
+
+  // ---------- game state ----------
+  const S = { mode: store.get('mode', 'regents'), start: 1, game: null, q: null, ans: null, B: { placed: {}, sel: null }, fbOpen: false, anim: null, endArm: false };
+  const MV = { rest: ['🛑', 'Stay at rest'], const: ['➡️', 'Keep moving at constant velocity'], speed: ['⏩', 'Speed up'], slow: ['🐢', 'Slow down'] };
+  const SAY = {
+    build: 'Tap a force below, then drag from the black dot to aim it. Longer arrow = bigger force.', pick: 'Look at every arrow: is each force real, and does it point the right way?', spot: 'One of these arrows is a fake or points the wrong way. Tap it!', predict: 'Add up the forces. Balanced or unbalanced?',
+    num: 'Use g = 9.8 m/s². Draw a quick FBD in your head first!', mc: 'Think it through before you tap.', match: 'Tap a card on the left, then its partner on the right.',
+    win: ['Nailed it!', 'Physics power! 💪', 'Newton would be proud.', 'Yes! That’s exactly right.', 'Smooth! Keep it rolling.', 'You make it look easy.'],
+    lose: ['Oof! That one squashed me. Read why →', 'Ouch! Let’s see what went wrong.', 'Facepalm… but you’ll get the next one.', 'Crunch! Check the explanation.'],
+  };
+  const pickOne = a => a[Math.floor(Math.random() * a.length)];
+
+  // ---------- answer area ----------
+  const goBtn = (txt) => `<button class="go" id="goBtn" disabled>${txt || 'Check my answer ✓'}</button><div class="hint" id="ansHint"></div>`;
+  function setGo(on) { const b = $('goBtn'); if (b) b.disabled = !on; }
+  function renderAnswer() {
+    const q = S.q, a = $('answer'); S.ans = null; S.B = { placed: {}, sel: null };
+    if (q.type === 'build') {
+      a.innerHTML = `<div class="ahead">Build the free-body diagram for ${esc(q.sc.obj)}</div><canvas id="bcv" width="440" height="290"></canvas>
+        <div class="chips" id="chips">${q.chips.map(k => `<button class="fchip" data-k="${k}"><i style="background:${COL[k]}"></i><span>${subH(SYM[k])} <span class="g">${esc(NAME[k])}</span></span></button>`).join('')}</div>
+        <div class="brow"><button id="bDel">✖ Remove selected</button><button id="bClr">⟲ Clear all</button><span class="g" style="align-self:center">${S.mode === 'regents' ? 'Arrows snap to up / down / left / right.' : 'Arrows snap to 45° and to the angles in the problem.'}</span></div>${goBtn()}`;
+      a.querySelectorAll('.fchip').forEach(b => b.onclick = () => { sfx.click(); S.B.sel = b.dataset.k; markChips(); drawBuilder(); });
+      $('bDel').onclick = () => { if (S.B.sel) delete S.B.placed[S.B.sel]; markChips(); drawBuilder(); }; $('bClr').onclick = () => { S.B.placed = {}; markChips(); drawBuilder(); };
+      wireBuilder($('bcv')); drawBuilder();
+    } else if (q.type === 'pick') {
+      a.innerHTML = `<div class="ahead">Which diagram is correct? <span class="g">(tap one, or press 1–${q.options.length})</span></div><div class="opts">${q.options.map((o, i) => `<div class="opt" data-i="${i}" role="button" tabindex="0"><span class="ol">${LETTER[i]}</span><canvas width="212" height="168"></canvas></div>`).join('')}</div>${goBtn()}`;
+      a.querySelectorAll('.opt').forEach((el, i) => { drawFBD(el.querySelector('canvas'), q.options[i].list, { R: 62, lsize: 12, w: 3, tilt: tiltOf(q.sc) }); el.onclick = () => choose(i); });
+    } else if (q.type === 'spot') {
+      a.innerHTML = `<div class="ahead">Tap the WRONG arrow</div><canvas id="scv" width="440" height="290"></canvas><div class="spotbtns">${q.list.map(f => `<button data-k="${f.k}">${subH(SYM[f.k])}</button>`).join('')}</div>${goBtn()}`;
+      const cv = $('scv'); const redraw = () => { S.geo = drawFBD(cv, q.list, { R: 112, sel: S.ans, tilt: tiltOf(q.sc), foot: 'Arrow lengths are to scale.' }); };
+      redraw(); S.redrawSpot = redraw;
+      cv.addEventListener('pointerdown', ev => { if (S.fbOpen) return; const [x, y] = cvPt(cv, ev); let best = null, bd = 22; for (const s of S.geo) { const dd = segDist(x, y, s); if (dd < bd) { bd = dd; best = s.k; } } if (best) choose(best); });
+      a.querySelectorAll('.spotbtns button').forEach(b => b.onclick = () => choose(b.dataset.k));
+    } else if (q.type === 'predict') {
+      a.innerHTML = `<div class="ahead">Free-body diagram of ${esc(q.sc.obj)}</div><canvas id="pcv" width="440" height="235"></canvas><div class="mv4 choices" style="margin-top:8px">${q.choices.map((c, i) => `<button class="choice" data-c="${c}"><span class="ic">${MV[c][0]}</span><span><b>${i + 1}.</b> ${MV[c][1]}</span></button>`).join('')}</div>${goBtn()}`;
+      drawFBD($('pcv'), q.sc.forces, { vals: true, R: 92, tilt: tiltOf(q.sc) }); a.querySelectorAll('.choice').forEach(b => b.onclick = () => choose(b.dataset.c));
+    } else if (q.type === 'num') {
+      a.innerHTML = `<div class="ahead">Your answer</div><div class="numrow"><input id="numIn" inputmode="decimal" autocomplete="off" placeholder="?" aria-label="answer"><span>${esc(q.unit)}</span></div>
+        <div class="hint">Use g = 9.8 m/s². Give the size (magnitude) with 3 significant figures, like ${q.unit === 'N' ? '49.0' : '2.45'}.</div>
+        <details class="hint"><summary>Need a hint?</summary>Draw the FBD first. Which forces act? Are they balanced (F<sub>net</sub> = 0) or does it accelerate (F<sub>net</sub> = ma)?</details>${goBtn()}`;
+      const inp = $('numIn'); inp.oninput = () => { S.ans = inp.value; setGo(inp.value.trim() !== ''); }; setTimeout(() => { try { inp.focus({ preventScroll: true }); } catch (e) { } }, 50);
+    } else if (q.type === 'mc') {
+      a.innerHTML = `<div class="ahead">Choose one <span class="g">(or press 1–${q.choices.length})</span></div><div class="choices">${q.choices.map((c, i) => `<button class="choice" data-i="${i}"><span class="k">${i + 1}</span><span>${c}</span></button>`).join('')}</div>${goBtn()}`;
+      a.querySelectorAll('.choice').forEach(b => b.onclick = () => choose(+b.dataset.i));
+    } else if (q.type === 'match') {
+      S.ans = q.left.map(() => null); S.mSel = 0;
+      a.innerHTML = `<div class="ahead">Match each force with its 3rd-law partner</div><div class="match"><div class="mleft">${q.left.map((l, i) => `<button class="mcard" data-l="${i}">${esc(l)}<span class="tag"></span></button>`).join('')}</div><div class="mright">${q.right.map((r, j) => `<button class="mcard" data-r="${j}">${esc(r)}<span class="tag"></span></button>`).join('')}</div></div><div class="hint">Tap a card on the left, then its partner on the right. Tap again to change.</div>${goBtn()}`;
+      a.querySelectorAll('[data-l]').forEach(b => b.onclick = () => { sfx.click(); S.mSel = +b.dataset.l; markMatch(); });
+      a.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { if (S.mSel === null) return; sfx.click(); const j = +b.dataset.r; S.ans = S.ans.map(v => (v === j ? null : v)); S.ans[S.mSel] = j; const nx = S.ans.findIndex(v => v === null); S.mSel = nx >= 0 ? nx : null; markMatch(); });
+      markMatch();
+    }
+    $('goBtn').onclick = submit;
+  }
+  const MCOL = ['#e8590c', '#1971c2', '#2f9e44'];
+  function markMatch() { const q = S.q; document.querySelectorAll('[data-l]').forEach(b => { const i = +b.dataset.l, t = b.querySelector('.tag'); b.classList.toggle('on', S.mSel === i); t.textContent = LETTER[i]; t.style.background = MCOL[i]; b.style.borderColor = S.mSel === i ? '' : (S.ans[i] !== null ? MCOL[i] : ''); });
+    document.querySelectorAll('[data-r]').forEach(b => { const j = +b.dataset.r, i = S.ans.indexOf(j), t = b.querySelector('.tag'); t.textContent = i >= 0 ? LETTER[i] : ''; t.style.background = i >= 0 ? MCOL[i] : 'transparent'; b.style.borderColor = i >= 0 ? MCOL[i] : ''; });
+    setGo(S.ans.every(v => v !== null)); }
+  function choose(v) { if (S.fbOpen) return; sfx.click(); S.ans = v; const q = S.q;
+    if (q.type === 'pick') document.querySelectorAll('.opt').forEach((el, i) => el.classList.toggle('on', i === v));
+    if (q.type === 'predict') document.querySelectorAll('.choice').forEach(b => b.classList.toggle('on', b.dataset.c === v));
+    if (q.type === 'mc') document.querySelectorAll('.choice').forEach(b => b.classList.toggle('on', +b.dataset.i === v));
+    if (q.type === 'spot') { document.querySelectorAll('.spotbtns button').forEach(b => b.classList.toggle('on', b.dataset.k === v)); S.redrawSpot(); }
+    setGo(true); }
+  // builder (drag from the dot)
+  const FB = { cx: 220, cy: 142, U: 24 };
+  function snapList() { const sc = S.q.sc; if (S.mode === 'regents') return null; const s = [0, 45, 90, 135, 180, 225, 270, 315]; for (const a of sc.geom || []) for (const d of [0, 90, 180, 270]) s.push(P.normAng(a + d)); return s; }
+  function markChips() { document.querySelectorAll('#chips .fchip').forEach(b => { b.classList.toggle('on', b.dataset.k === S.B.sel); b.classList.toggle('placed', !!S.B.placed[b.dataset.k]); }); setGo(Object.keys(S.B.placed).length > 0); }
+  function drawBuilder(flash) {
+    const cv = $('bcv'); if (!cv) return; const { g, W, H } = setupCanvas(cv), { cx, cy, U } = FB; g.clearRect(0, 0, W, H); g.fillStyle = '#fbfcfe'; g.fillRect(0, 0, W, H);
+    g.strokeStyle = '#eceff5'; g.lineWidth = 1; for (let r = 1; r <= 5; r++) { g.beginPath(); g.arc(cx, cy, r * U, 0, 7); g.stroke(); }
+    g.setLineDash([2, 5]); g.strokeStyle = '#d4d9e4'; for (const a of (S.mode === 'regents' ? [0, 90, 180, 270] : [0, 45, 90, 135, 180, 225, 270, 315])) { const [ux, uy] = unitV(a); g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + ux * 5.6 * U, cy + uy * 5.6 * U); g.stroke(); } g.setLineDash([]);
+    const tl = tiltOf(S.q.sc); if (tl) { const [dx, dy] = unitV(tl), [nx, ny] = unitV(tl + 90); g.strokeStyle = '#c3cbe0'; g.setLineDash([2, 3]); g.beginPath(); g.moveTo(cx - dx * 150, cy - dy * 150); g.lineTo(cx + dx * 150, cy + dy * 150); g.moveTo(cx - nx * 135, cy - ny * 135); g.lineTo(cx + nx * 135, cy + ny * 135); g.stroke(); g.setLineDash([]); lbl(g, 'ramp', cx + dx * 150 - 30, cy + dy * 150 - 4, '#8a96b5', 'left', 11); }
+    const list = Object.entries(S.B.placed).map(([k, v]) => ({ k, ang: v.ang, mag: v.len })), off = groupOffsets(list);
+    for (const f of list) { const [ux, uy] = unitV(f.ang), L = f.mag * U, o = off[f.k] || 0; arrow(g, cx - uy * o, cy + ux * o, ux * L, uy * L, COL[f.k] || '#333', { label: SYM[f.k], w: f.k === S.B.sel ? 5.5 : 3.5 }); }
+    g.fillStyle = '#111'; g.beginPath(); g.arc(cx, cy, 6, 0, 7); g.fill();
+    g.font = '11.5px system-ui'; g.fillStyle = '#667'; g.fillText('Rings = equal steps of force. The dot is ' + S.q.sc.obj + '.', 8, H - 8);
+    if (!list.length && !flash) lbl(g, S.B.sel ? 'Now drag from the dot to aim ' + SYM[S.B.sel] : '① tap a force below   ② drag from the dot', W / 2, 22, '#2b6cb0', 'center', 13);
+    if (flash) lbl(g, flash, W / 2, 22, '#b02a1e', 'center', 13);
+  }
+  let dragK = null;
+  function setFromPt(x, y) { const dx = x - FB.cx, dy = FB.cy - y, d = Math.hypot(dx, dy); if (d < 8) return; let ang = P.normAng(Math.atan2(dy, dx) / D2R); const sl = snapList();
+    if (!sl) ang = P.normAng(Math.round(ang / 90) * 90); else { let best = null; for (const s of sl) if (P.angDiff(ang, s) < 8 && (best === null || P.angDiff(ang, s) < P.angDiff(ang, best))) best = s; ang = best !== null ? best : Math.round(ang); }
+    S.B.placed[dragK] = { ang: P.normAng(ang), len: Math.max(0.4, Math.min(5.8, Math.round(d / FB.U * 10) / 10)) }; drawBuilder(); }
+  function wireBuilder(cv) {
+    cv.addEventListener('pointerdown', ev => { if (S.fbOpen) return; ev.preventDefault(); const [x, y] = cvPt(cv, ev);
+      if (!(S.B.sel && !S.B.placed[S.B.sel])) for (const k in S.B.placed) { const v = S.B.placed[k], [ux, uy] = unitV(v.ang); if (Math.hypot(FB.cx + ux * v.len * FB.U - x, FB.cy + uy * v.len * FB.U - y) < 16) { S.B.sel = k; dragK = k; markChips(); try { cv.setPointerCapture(ev.pointerId); } catch (e) { } drawBuilder(); return; } }
+      if (!S.B.sel) { drawBuilder('First tap a force in the list below ↓'); return; } dragK = S.B.sel; try { cv.setPointerCapture(ev.pointerId); } catch (e) { } setFromPt(x, y); });
+    cv.addEventListener('pointermove', ev => { if (dragK) { const [x, y] = cvPt(cv, ev); setFromPt(x, y); } });
+    const up = () => { if (dragK) { dragK = null; markChips(); drawBuilder(); } }; cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  }
+
+  // ---------- HUD ----------
+  function renderHUD(gain, lost) {
+    const G0 = S.game, lad = GM.LADDER[G0.mode];
+    $('lvBar').innerHTML = lad.map((id, i) => { const n = i + 1, L = GM.LEVELS[id], cls = n === G0.level ? 'cur' : n < G0.level ? 'done' : '';
+      return `<div class="lvseg ${cls}" title="Level ${n}: ${esc(L.name)}"><div class="bx">${L.icon}</div><div class="t">${n}</div>${n === G0.level ? `<div class="pips">${[0, 1, 2].map(j => `<span class="pip ${j < G0.upStreak ? 'on' : ''}"></span>`).join('')}</div>` : ''}</div>`; }).join('');
+    const slots = Math.max(GM.RULES.startHearts, G0.hearts + (lost ? 1 : 0)); let h = '';
+    for (let i = 0; i < slots; i++) h += i < G0.hearts ? `<span class="${gain && i === G0.hearts - 1 ? 'gain' : ''}">❤️</span>` : (lost && i === G0.hearts ? '<span class="breaking">💔</span>' : '<span class="lost">🖤</span>');
+    $('hearts').innerHTML = h; $('hearts').title = G0.hearts + ' heart' + (G0.hearts === 1 ? '' : 's') + ' left';
+    $('score').textContent = G0.score.toLocaleString('en-US'); const m = GM.comboMult(G0.combo);
+    $('combo').innerHTML = G0.combo + (G0.combo >= 3 ? ' 🔥' : '') + (m > 1 ? ` <span style="font-size:13px">×${m}</span>` : ''); $('combo').className = 'big' + (G0.combo >= 3 ? ' hot' : '');
+    const L = GM.levelDef(G0.mode, G0.level); $('lvName').innerHTML = `${L.icon} Level ${G0.level}: ${esc(L.name)} <span class="g">· ${GM.sub(esc(L.blurb))} · Get 3 in a row to level up</span>`;
+  }
+
+  // ---------- flow ----------
+  function startGame(level) {
+    actx(); const name = $('nameIn').value.trim(); store.set('name', name); store.set('mode', S.mode);
+    S.game = GM.createGame({ mode: S.mode, startLevel: level, name }); S.saved = false;
+    show('game'); S.endArm = false; $('endBtn').textContent = 'End run';
+    banner('up', `Level ${S.game.level}`, GM.levelDef(S.mode, S.game.level).name, 1600); nextQ();
+  }
+  function nextQ() {
+    if (S.game.over || S.game.victory) { toSummary(); return; }
+    S.q = S.game.next(); S.fbOpen = false; $('pop').classList.remove('show'); $('feedback').classList.add('hide'); $('feedback').innerHTML = '';
+    $('qType').textContent = TYPE_LABEL[S.q.type]; $('qType').style.background = { build: '#2b8a3e', pick: '#2b6cb0', spot: '#a61e4d', predict: '#7048e8', num: '#e8590c', mc: '#0b7285', match: '#d6336c' }[S.q.type];
+    $('prompt').innerHTML = S.q.prompt; setMascot('mascot', 'idle', SAY[S.q.type]); stopAnim(); drawScene(S.q, {}); renderAnswer(); renderHUD(); window.scrollTo(0, 0);
+  }
+  function submit() {
+    if (S.fbOpen || !S.q) return; let ans = S.ans; if (S.q.type === 'build') ans = JSON.parse(JSON.stringify(S.B.placed));
+    const res = S.game.submit(ans, Date.now()); if (res.invalid) { $('ansHint').innerHTML = `<b style="color:#b02a1e">${res.msgs[0]}</b>`; shake($('goBtn')); return; }
+    S.fbOpen = true; S.last = { res, ans }; renderHUD(res.heartGained, res.heartLost); showFeedback(res, ans);
+    if (res.ok) winFX(res); else loseFX(res);
+    if (res.levelChange === 'up' || res.victory) saveProgress();
+  }
+  function showFeedback(res, ans) {
+    const q = S.q, f = $('feedback'), fbd = ['build', 'pick', 'spot', 'predict'].includes(q.type);
+    let h = res.ok ? `<div class="fhead win">✅ Correct! <span class="pts">+${res.points}${res.mult > 1 ? ' (×' + res.mult + ' streak)' : ''}</span></div>` : `<div class="fhead lose">❌ Not quite! <span class="g" style="font-weight:normal">−1 ❤️</span></div>`;
+    if (res.levelChange === 'up') h += `<div class="fmsg tip">⬆️ <b>Level up!</b> Welcome to level ${res.level}: ${esc(GM.levelDef(S.game.mode, res.level).name)}. +1 ❤️</div>`;
+    if (res.levelChange === 'down') h += `<div class="fmsg tip">↘️ <b>Let’s warm up again.</b> Two misses in a row, so you’re back on level ${res.level} to build your skills. Get 3 right in a row to climb back up!</div>`;
+    if (res.gameOver) h += `<div class="fmsg bad">💀 <b>Out of hearts!</b> Your run is over. Next time you’ll start one level easier.</div>`;
+    if (res.victory) h += `<div class="fmsg tip">🏆 <b>You beat the final level!</b></div>`;
+    for (const m of res.msgs || []) h += `<div class="fmsg ${res.ok ? 'tip' : 'bad'}">${m}</div>`;
+    if (!res.ok && res.yourText) h += `<div class="fans">You answered: ${GM.sub(esc(GM.plain(res.yourText)))}</div>`;
+    if (!res.ok || q.type === 'num') h += `<div class="fans"><b>Correct answer:</b> ${GM.sub(esc(GM.plain(res.correctText || '')))}</div>`;
+    if (fbd) h += `<canvas id="fcv" width="440" height="${q.sc.id === 'incline' ? 230 : 210}"></canvas><div class="g">${q.type === 'build' ? 'Solid = correct diagram (to scale). Dashed = your diagram.' : 'The correct free-body diagram, to scale.'}</div>`;
+    h += `<div class="fexp"><b>Why:</b> ${res.explain}</div>`;
+    for (const b of res.newBadges || []) { const B = GM.BADGES.find(x => x[0] === b); h += `<div class="nbadge"><span class="bi">${B[1]}</span><span><b>New badge: ${B[2]}</b><br><span class="g">${B[3]}</span></span></div>`; }
+    h += `<button class="go" id="nextBtn">${res.gameOver || res.victory ? 'See my results ▶' : 'Next question ▶'}</button>`;
+    f.innerHTML = h; f.classList.remove('hide'); f.scrollTop = 0;
+    if (fbd) drawFBD($('fcv'), q.sc.forces, { vals: true, R: 80, tilt: tiltOf(q.sc), overlay: q.type === 'build' ? Object.entries(ans).map(([k, v]) => ({ k, ang: v.ang, mag: v.len })) : null });
+    $('nextBtn').onclick = () => { sfx.click(); clearFX(); nextQ(); };
+    setTimeout(() => { const nb = $('nextBtn'); if (nb) try { nb.focus({ preventScroll: true }); } catch (e) { } }, 30);
+  }
+  // ---------- win / lose effects ----------
+  function stopAnim() { if (S.anim) cancelAnimationFrame(S.anim.raf); S.anim = null; }
+  function playScene(kind) {
+    stopAnim(); const q = S.q, t0 = performance.now(), dur = kind === 'win' ? 2.2 : 2.4, moving = q.sc.e && (Math.abs(q.sc.v) > 1e-9 || Math.abs(q.sc.e.a) > 1e-9);
+    const A = { raf: 0 }; S.anim = A;
+    const frame = now => { const t = (now - t0) / 1000; if (S.q !== q) return;
+      if (kind === 'win') drawScene(q, { t, mood: 'happy', d: moving ? motionPx(q, t) : 0, hop: moving ? 0 : Math.abs(Math.sin(Math.min(t, 1.2) * Math.PI / 0.4)) * 16, sparkle: t < 2, banner: t < 1.6 ? (q._bn || (q._bn = pickOne(['NICE!', 'YES!', 'PERFECT!', 'GREAT!']))) : '' });
+      else drawScene(q, { t, mood: t > 1.5 ? 'dizzy' : 'sad', jitter: t < 0.35, crash: t > 0.35 && t < 1.5 ? (t - 0.35) / 1.0 : 0, dizzy: t > 1.5, banner: t > 0.35 ? (q._bl || (q._bl = pickOne(['CRASH!', 'OOPS!', 'SPLAT!', 'BONK!']))) : '', bcol: '#c0392b' });
+      if (t < dur) A.raf = requestAnimationFrame(frame); else if (kind === 'lose') drawScene(q, { t, mood: 'dizzy', dizzy: true }); else drawScene(q, { mood: 'happy', d: moving ? motionPx(q, 9) : 0 }); };
+    A.raf = requestAnimationFrame(frame);
+  }
+  function winFX(res) {
+    sfx.ding(res.combo); const r = $('scene').getBoundingClientRect(); confetti(30 + 12 * res.mult, { x: r.left + r.width / 2, y: r.top + r.height * 0.4 });
+    popText('+' + res.points, '#2b8a3e'); playScene('win');
+    setMascot('mascot', res.mult > 1 || res.levelChange ? 'cheer' : 'happy', pickOne(SAY.win) + (res.mult > 1 ? ` Streak ×${res.mult}!` : ''));
+    if (res.newBadges.length) setTimeout(sfx.badge, 350);
+    if (res.levelChange === 'up') later(() => { sfx.levelUp(); banner('up', 'LEVEL UP! ⬆️', `Level ${res.level}: ${GM.levelDef(S.game.mode, res.level).name} · +1 ❤️`); confetti(140, { power: 14 }); }, 450);
+    if (res.victory) later(() => { sfx.victory(); banner('win', '🏆 CHAMPION! 🏆', 'You beat every level!', 3200); confetti(220, { power: 16 }); setTimeout(() => confetti(60, { emoji: ['⭐', '🏆', '🎉', '💪'] }), 600); }, 450);
+  }
+  function loseFX(res) {
+    sfx.crash(); setTimeout(sfx.trombone, 250); setTimeout(sfx.heart, 120); shake($('arena')); popText('−1 ❤️', '#c0392b'); playScene('lose');
+    setMascot('mascot', 'facepalm', pickOne(SAY.lose));
+    if (res.levelChange === 'down') later(() => { sfx.levelDown(); banner('down', 'Let’s warm up again', `Back to level ${res.level}: ${GM.levelDef(S.game.mode, res.level).name}`); }, 1500);
+    if (res.gameOver) later(() => { sfx.gameOver(); banner('over', 'GAME OVER', 'Out of hearts · score ' + res.score.toLocaleString('en-US'), 2600); }, 1400);
+  }
+
+  // ---------- saving, summary, CSV ----------
+  const fmtDate = t => new Date(t).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+  const fmtTime = t => new Date(t).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', timeZoneName: 'short' });
+  const stamp = t => { const d = new Date(t), z = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}_${z(d.getHours())}${z(d.getMinutes())}`; };
+  function saveProgress() { const G0 = S.game, k = 'progress:' + G0.mode; store.set(k, Math.max(store.get(k, 1), G0.highest)); const all = store.get('badges', []); for (const b of G0.badges) if (!all.includes(b)) all.push(b); store.set('badges', all); }
+  function saveRun() {
+    if (S.saved || !S.game || !S.game.asked) return; S.saved = true; const G0 = S.game; saveProgress();
+    const name = ($('nameS').value || $('nameIn').value || '').trim(), best = store.get('best:' + G0.mode, null);
+    if (!best || G0.score > best.score) store.set('best:' + G0.mode, { score: G0.score, name, level: G0.highest, date: Date.now() });
+    const runs = store.get('runs', []); runs.unshift({ name, mode: G0.mode, start: G0.startedAt, end: Date.now(), result: G0.victory ? 'Victory' : G0.over ? 'Game over' : 'Ended early', score: G0.score, highest: G0.highest, top: G0.top, startLevel: G0.startLevel, correct: G0.correct, asked: G0.asked, bestCombo: G0.bestCombo, badges: G0.badges.slice() }); store.set('runs', runs.slice(0, 300));
+  }
+  function badgeChip(id, locked) { const B = GM.BADGES.find(x => x[0] === id); return `<span class="badge ${locked ? 'locked' : ''}" title="${esc(B[3])}">${B[1]} ${esc(B[2])}</span>`; }
+  function historyTable(G0) { return `<table class="t"><tr><th>#</th><th>Time</th><th>Lvl</th><th>Type</th><th>Question</th><th>Your answer</th><th>Correct answer</th><th>Result</th><th>Pts</th></tr>${G0.history.map(h => `<tr><td>${h.n}</td><td>${esc(new Date(h.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }))}</td><td>${h.level}</td><td>${esc(h.type)}</td><td>${esc(h.question.length > 150 ? h.question.slice(0, 147) + '…' : h.question)}</td><td>${esc(h.your)}</td><td>${esc(h.correct)}</td><td class="${h.ok ? 'ok' : 'no'}">${h.ok ? '✔' : '✘'}${h.change ? '<br><span class="g">' + esc(h.change) + '</span>' : ''}</td><td>${h.points}</td></tr>`).join('')}</table>`; }
+  function toSummary() {
+    const G0 = S.game; if (!G0.over && !G0.victory) G0.end(); stopAnim(); show('summary');
+    $('nameS').value = $('nameIn').value; saveRun();
+    const L = GM.levelDef(G0.mode, G0.highest);
+    $('sHead').innerHTML = (G0.victory ? '🏆 FORCE CHAMPION! 🏆' : G0.over ? 'GAME OVER' : 'Run complete') + `<span class="sm">Force Quest · ${G0.mode === 'ap' ? 'AP Physics 1' : 'Regents Physics'} · started on level ${G0.startLevel}</span>`;
+    setMascot('mascotS', G0.victory ? 'cheer' : G0.accuracy() >= 0.6 ? 'happy' : 'sad');
+    $('sStats').innerHTML = [[G0.score.toLocaleString('en-US'), 'Score'], [`${G0.highest} / ${G0.top}`, 'Highest level · ' + esc(L.name)], [Math.round(G0.accuracy() * 100) + '%', `Accuracy (${G0.correct}/${G0.asked})`], [G0.bestCombo, 'Best streak']].map(([v, l]) => `<div class="stat"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+    $('sBadges').innerHTML = G0.badges.length ? '<b style="margin-right:4px">Badges:</b> ' + G0.badges.map(b => badgeChip(b)).join('') : '<span class="g">No badges this run. Get your first answer right to earn ⭐ First Force!</span>';
+    $('sDate').textContent = `Played ${fmtDate(G0.startedAt)} → ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })} · ${G0.asked} questions`;
+    $('histTbl').innerHTML = historyTable(G0); $('againBtn').textContent = `↻ Try again (start at level ${G0.restartLevel()})`;
+    if (G0.victory) setTimeout(() => confetti(160, { power: 15 }), 200);
+  }
+  function downloadCSV(fname, text) { const blob = new Blob(['\ufeff' + text], { type: 'text/csv;charset=utf-8' }), a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fname; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
+  const safe = s => (String(s || '').trim().replace(/[^A-Za-z0-9_-]+/g, '_').slice(0, 30) || 'student');
+  function runCSV() { const G0 = S.game, name = $('nameS').value.trim(); return GM.historyCSV(G0, { name, date: fmtDate(Date.now()), fmtTime }); }
+  function runsCSV() { const esc2 = v => { const s = String(v === undefined || v === null ? '' : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const rows = [['started', 'ended', 'student', 'mode', 'result', 'score', 'start level', 'highest level', 'of', 'correct', 'questions', 'accuracy %', 'best streak', 'badges']];
+    for (const r of store.get('runs', [])) rows.push([fmtDate(r.start), fmtDate(r.end), r.name, r.mode === 'ap' ? 'AP' : 'Regents', r.result, r.score, r.startLevel, r.highest, r.top, r.correct, r.asked, r.asked ? Math.round(100 * r.correct / r.asked) : 0, r.bestCombo, (r.badges || []).map(b => (GM.BADGES.find(x => x[0] === b) || [])[2]).join('; ')]);
+    return rows.map(r => r.map(esc2).join(',')).join('\r\n') + '\r\n'; }
+
+  // ---------- title screen ----------
+  function show(id) { clearFX(); for (const s of ['title', 'game', 'summary']) $(s).classList.toggle('hide', s !== id); S.screen = id; window.scrollTo(0, 0); if (id === 'title') renderTitle(); }
+  function unlocked(mode) { return $('unlockAll').checked ? GM.LADDER[mode].length : Math.max(1, Math.min(GM.LADDER[mode].length, store.get('progress:' + mode, 1))); }
+  function renderTitle() {
+    $('mReg').classList.toggle('on', S.mode === 'regents'); $('mAP').classList.toggle('on', S.mode === 'ap');
+    const lad = GM.LADDER[S.mode], un = unlocked(S.mode); if (S.start > un) S.start = 1;
+    $('startLv').innerHTML = lad.map((id, i) => { const n = i + 1, L = GM.LEVELS[id], ok = n <= un; return `<button data-n="${n}" class="${n === S.start ? 'on' : ''}" ${ok ? '' : 'disabled'} title="Level ${n}: ${esc(L.name)}${ok ? '' : ' (reach it in a run to unlock)'}"><span class="ic">${ok ? L.icon : '🔒'}</span>${n}</button>`; }).join('');
+    $('startLv').querySelectorAll('button').forEach(b => b.onclick = () => { sfx.click(); S.start = +b.dataset.n; renderTitle(); });
+    const L = GM.levelDef(S.mode, S.start); $('unlockNote').innerHTML = `· <b>${L.icon} ${esc(L.name)}</b>: ${GM.sub(esc(L.blurb))}${un < lad.length ? ' · reach higher levels to unlock them as start points' : ''}`;
+    const bR = store.get('best:regents', null), bA = store.get('best:ap', null), bs = b => (b ? `<b>${b.score.toLocaleString('en-US')}</b> (level ${b.level}${b.name ? ', ' + esc(b.name) : ''})` : '—');
+    $('bestBox').innerHTML = `🏅 Best on this device: Regents ${bs(bR)} · AP ${bs(bA)}`;
+    const have = store.get('badges', []); $('badgeShelf').innerHTML = GM.BADGES.map(B => badgeChip(B[0], !have.includes(B[0]))).join('');
+    const runs = store.get('runs', []);
+    $('runsTbl').innerHTML = runs.length ? `<table class="t"><tr><th>Started</th><th>Student</th><th>Mode</th><th>Result</th><th>Score</th><th>Levels</th><th>Accuracy</th></tr>${runs.slice(0, 60).map(r => `<tr><td>${esc(fmtDate(r.start))}</td><td>${esc(r.name || '(no name)')}</td><td>${r.mode === 'ap' ? 'AP' : 'Regents'}</td><td>${esc(r.result)}</td><td>${r.score}</td><td>${r.startLevel} → ${r.highest} of ${r.top}</td><td>${r.asked ? Math.round(100 * r.correct / r.asked) : 0}% (${r.correct}/${r.asked})</td></tr>`).join('')}</table>` : '<div class="g" style="padding:6px">No runs saved on this device yet.</div>';
+    setMascot('mascotT', 'idle');
+  }
+
+  // ---------- wiring ----------
+  function init() {
+    $('nameIn').value = store.get('name', ''); setMute(SND.muted); show('title');
+    $('mReg').onclick = () => { sfx.click(); S.mode = 'regents'; store.set('mode', S.mode); S.start = 1; renderTitle(); };
+    $('mAP').onclick = () => { sfx.click(); S.mode = 'ap'; store.set('mode', S.mode); S.start = 1; renderTitle(); };
+    $('unlockAll').onchange = renderTitle; $('playBtn').onclick = () => startGame(S.start);
+    $('muteBtn').onclick = () => { setMute(!SND.muted); if (!SND.muted) sfx.click(); };
+    $('endBtn').onclick = () => { if (!S.endArm) { S.endArm = true; $('endBtn').textContent = 'Sure? Tap again'; setTimeout(() => { S.endArm = false; if ($('endBtn')) $('endBtn').textContent = 'End run'; }, 3000); return; } toSummary(); };
+    $('againBtn').onclick = () => { const lv = S.game.restartLevel(); $('nameIn').value = $('nameS').value; startGame(lv); };
+    $('homeBtn').onclick = () => { $('nameIn').value = $('nameS').value || $('nameIn').value; store.set('name', $('nameIn').value.trim()); show('title'); };
+    $('nameS').oninput = () => { store.set('name', $('nameS').value.trim()); const runs = store.get('runs', []); if (S.saved && runs[0] && runs[0].start === S.game.startedAt) { runs[0].name = $('nameS').value.trim(); store.set('runs', runs); } };
+    $('csvBtn').onclick = () => downloadCSV(`ForceQuest_${safe($('nameS').value)}_${S.game.mode}_${stamp(Date.now())}.csv`, runCSV());
+    $('runsCsv').onclick = () => downloadCSV(`ForceQuest_all_runs_${stamp(Date.now())}.csv`, runsCSV());
+    $('clearData').onclick = () => { if ($('clearData').dataset.arm) { store.clear(); delete $('clearData').dataset.arm; $('clearData').textContent = 'Cleared ✓'; renderTitle(); return; } $('clearData').dataset.arm = '1'; $('clearData').textContent = 'Really clear everything? Tap again'; };
+    document.addEventListener('keydown', ev => {
+      if (S.screen !== 'game' || ev.ctrlKey || ev.metaKey || ev.altKey) return; const inInput = ev.target && ev.target.tagName === 'INPUT';
+      if (ev.key === 'Enter') { ev.preventDefault(); if (S.fbOpen) { const nb = $('nextBtn'); if (nb) nb.click(); } else { const b = $('goBtn'); if (b && !b.disabled) submit(); } return; }
+      if (inInput || S.fbOpen) return; const n = +ev.key; if (!(n >= 1 && n <= 4)) return; const q = S.q;
+      if (q.type === 'pick' && n <= q.options.length) choose(n - 1); else if (q.type === 'mc' && n <= q.choices.length) choose(n - 1); else if (q.type === 'predict') choose(q.choices[n - 1]); else if (q.type === 'spot' && n <= q.list.length) choose(q.list[n - 1].k);
+    });
+    window.addEventListener('resize', () => { const cv = $('confetti'); cv.width = innerWidth; cv.height = innerHeight; });
+  }
+  // ---------- hook for automated tests / teacher preview (answers are only computed when asked) ----------
+  window.FBDGAMEAPP = {
+    get game() { return S.game; }, get q() { return S.q; }, get screen() { return S.screen; }, get feedbackOpen() { return S.fbOpen; }, GM,
+    solution: () => GM.solution(S.q), wrong: () => GM.wrongAnswer(S.q),
+    fill(ans) { const q = S.q; if (q.type === 'build') { S.B.placed = JSON.parse(JSON.stringify(ans)); markChips(); drawBuilder(); } else if (q.type === 'num') { $('numIn').value = ans; S.ans = String(ans); setGo(true); } else if (q.type === 'match') { S.ans = ans.slice(); S.mSel = null; markMatch(); } else choose(ans); },
+    nextOf(type) { S.q = null; S.game.q = null; S.q = S.game.next(type); S.fbOpen = false; $('feedback').classList.add('hide'); $('qType').textContent = TYPE_LABEL[S.q.type]; $('prompt').innerHTML = S.q.prompt; setMascot('mascot', 'idle', SAY[S.q.type]); stopAnim(); drawScene(S.q, {}); renderAnswer(); renderHUD(); return S.q.type; },
+  };
+  init();
+})();
+
+</script>
+</body></html>
