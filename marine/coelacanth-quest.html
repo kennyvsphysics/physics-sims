@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Coelacanth Quest</title>
+<style>
+:root{
+  --body:#1F3A6B; --back:#152A4F; --spot:#F4F7FB;
+  --surface:#2E86C1; --twilight:#0B2545; --deep:#050B1A;
+  --gold:#F2B134; --aqua:#5CE1E6; --coral:#E4572E;
+  --panel:rgba(11,37,69,.94);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--deep);overflow:hidden;
+  font-family:"Trebuchet MS","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:#eaf2fb;
+  -webkit-user-select:none;user-select:none;touch-action:none}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{position:absolute;left:0;top:0;width:960px;height:540px;transform-origin:0 0;overflow:hidden;background:var(--deep)}
+canvas{position:absolute;left:0;top:0;width:960px;height:540px;display:block}
+#ui{position:absolute;inset:0;pointer-events:none}
+#ui .screen{position:absolute;inset:0;pointer-events:auto;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#hud{position:absolute;inset:0;pointer-events:none}
+.card{background:var(--panel);border-top:4px solid var(--gold);border-radius:12px;padding:18px 22px;
+  box-shadow:0 10px 30px rgba(0,0,0,.45);max-width:640px}
+.card h2{margin:0 0 8px;font-size:24px;color:var(--gold);letter-spacing:.3px}
+.card h3{margin:0 0 6px;font-size:15px;color:var(--aqua);text-transform:uppercase;letter-spacing:1.5px}
+.card p{margin:6px 0;font-size:17px;line-height:1.38}
+.card ul{margin:6px 0 6px 20px;padding:0;font-size:16px;line-height:1.4}
+.btn{pointer-events:auto;display:inline-block;background:var(--gold);color:#10203d;border:none;border-radius:999px;
+  padding:10px 20px;margin:6px;font-weight:bold;font-size:17px;font-family:inherit;cursor:pointer;box-shadow:0 3px 0 #a87412}
+.btn:hover,.btn:focus-visible{filter:brightness(1.08);outline:3px solid var(--aqua);outline-offset:2px}
+.btn.secondary{background:#244a7d;color:#eaf2fb;box-shadow:0 3px 0 #0f2442}
+.btn.small{padding:6px 14px;font-size:14px}
+.btn:disabled{opacity:.45;cursor:default}
+.title{font-size:58px;font-weight:900;margin:0;color:#fff;text-shadow:0 4px 0 var(--back),0 0 24px rgba(92,225,230,.35);letter-spacing:1px}
+.subtitle{font-size:19px;color:var(--aqua);margin:4px 0 18px}
+.lvl{display:flex;gap:14px;margin:8px 0 14px}
+.lvlcard{width:250px;background:var(--panel);border-radius:12px;border-top:4px solid var(--gold);padding:12px 14px;cursor:pointer;text-align:left}
+.lvlcard:hover,.lvlcard:focus-visible{outline:3px solid var(--aqua)}
+.lvlcard b{color:var(--gold);font-size:18px}
+.lvlcard small{display:block;color:#b8cbe3;font-size:14px;margin-top:4px;line-height:1.3}
+.lvlcard .done{color:var(--aqua);font-weight:bold;font-size:14px}
+.opt{display:block;width:100%;text-align:left;background:#163259;color:#eaf2fb;border:2px solid #2b5288;border-radius:10px;
+  padding:9px 12px;margin:6px 0;font-size:16px;font-family:inherit;cursor:pointer}
+.opt:hover,.opt:focus-visible{border-color:var(--aqua)}
+.opt.sel{border-color:var(--gold);background:#24406b}
+.opt.right{border-color:#4cd17a;background:#1d4f39}
+.opt.wrong{border-color:var(--coral);background:#5a2a24}
+.fb{min-height:24px;font-size:16px;margin-top:6px}
+.fb.ok{color:#7ff0a4}.fb.no{color:#ffab91}
+.toast{position:absolute;left:50%;top:8px;transform:translateX(-50%);background:var(--panel);border-left:5px solid var(--aqua);
+  padding:9px 16px;border-radius:8px;font-size:15px;max-width:480px;width:max-content;box-shadow:0 6px 18px rgba(0,0,0,.4);pointer-events:none;transition:opacity .4s}
+.footer{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:13px;color:#9fb6d4}
+.footer a{color:var(--aqua);cursor:pointer;text-decoration:underline;pointer-events:auto}
+.touch{position:absolute;bottom:10px;pointer-events:auto;display:flex;gap:6px;opacity:.85}
+.touch button{width:58px;height:58px;border-radius:14px;border:2px solid #3d6aa6;background:rgba(21,42,79,.75);color:#fff;font-size:22px;font-weight:bold;font-family:inherit;touch-action:none}
+.touch button.wide{width:auto;padding:0 12px;font-size:15px}
+.touch button:active,.touch button.on{background:rgba(92,225,230,.4)}
+.dpad{left:10px;display:grid;grid-template-columns:58px 58px 58px;grid-template-rows:58px 58px}
+.acts{right:10px}
+.scroll{max-height:420px;overflow-y:auto;pointer-events:auto}
+.scroll::-webkit-scrollbar{width:8px}.scroll::-webkit-scrollbar-thumb{background:#2b5288;border-radius:4px}
+input.name{font-weight:bold;font-size:22px;font-family:inherit;padding:8px 12px;border-radius:8px;border:2px solid var(--gold);background:#0b1c36;color:#fff;width:320px;text-align:center;user-select:text;-webkit-user-select:text}
+.cert{background:var(--panel);border:3px solid var(--gold);border-radius:16px;padding:18px 30px;text-align:center;width:640px}
+.cert .big{font-size:54px;font-weight:900;color:var(--gold);margin:4px 0}
+.row{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
+.pill{display:inline-block;background:#163259;border:1px solid #2b5288;border-radius:999px;padding:3px 10px;margin:2px;font-size:14px}
+.kbd{display:inline-block;border:1px solid #6d8fbf;border-bottom-width:3px;border-radius:5px;padding:0 6px;font-size:13px;background:#10264a;margin:0 1px}
+.order-slot{display:inline-block;min-width:26px;text-align:center;font-weight:bold;color:var(--gold);margin-right:6px}
+@media print{body{background:#fff}#stage{transform:none!important}}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+  <canvas id="cv" width="960" height="540"></canvas>
+  <div id="hud"></div>
+  <div id="ui"></div>
+</div></div>
+<script>
+"use strict";
+/* ============ Coelacanth Quest — core ============ */
+const W = 960, H = 540;
+const C = {body:"#1F3A6B", back:"#152A4F", belly:"#2C5490", spot:"#F4F7FB", surface:"#2E86C1", twilight:"#0B2545",
+  deep:"#050B1A", gold:"#F2B134", aqua:"#5CE1E6", coral:"#E4572E"};
+const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+const stage = document.getElementById("stage"), ui = document.getElementById("ui"), hud = document.getElementById("hud");
+let scale = 1;
+function fit(){
+  scale = Math.min(window.innerWidth / W, window.innerHeight / H);
+  const ox = (window.innerWidth - W*scale)/2, oy = (window.innerHeight - H*scale)/2;
+  stage.style.transform = `translate(${ox}px,${oy}px) scale(${scale})`;
+}
+window.addEventListener("resize", fit); fit();
+
+/* ---------- storage (safe on file://) ---------- */
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem("cq_"+k); return v===null? d : JSON.parse(v);}catch(e){return d;} },
+  set(k, v){ try{ localStorage.setItem("cq_"+k, JSON.stringify(v)); }catch(e){} }
+};
+const progress = store.get("progress", {l1:false,l2:false,l3:false,quiz:null});
+function saveProgress(){ store.set("progress", progress); }
+
+/* ---------- utils ---------- */
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+function hex2rgb(h){h=h.replace("#","");return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
+function mixColor(a,b,t){const A=hex2rgb(a),B=hex2rgb(b);return `rgb(${Math.round(lerp(A[0],B[0],t))},${Math.round(lerp(A[1],B[1],t))},${Math.round(lerp(A[2],B[2],t))})`;}
+function rng(seed){ let s = seed>>>0 || 1; return ()=>{ s = (s*1664525 + 1013904223)>>>0; return s/4294967296; }; }
+function el(html){ const d=document.createElement("div"); d.innerHTML=html.trim(); return d.firstChild; }
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+/* ---------- input ---------- */
+const keys = new Set();
+const keyMap = {ArrowLeft:"left",KeyA:"left",ArrowRight:"right",KeyD:"right",ArrowUp:"up",KeyW:"up",ArrowDown:"down",KeyS:"down",
+  Space:"action",KeyP:"action",KeyH:"action",ShiftLeft:"burst",ShiftRight:"burst",KeyB:"burst",Enter:"enter",Escape:"esc"};
+window.addEventListener("keydown", e=>{
+  if (e.target && e.target.tagName==="INPUT") return;
+  const k = keyMap[e.code];
+  if (e.target && e.target.tagName==="BUTTON" && (k==="action"||k==="enter")) return; // focused buttons handle Space/Enter
+  if(!k) { if(scene && scene.onKeyRaw) scene.onKeyRaw(e); return; }
+  if (["left","right","up","down","action"].includes(k)) e.preventDefault();
+  if(!keys.has(k)){ keys.add(k); if(scene && scene.onKey) scene.onKey(k); }
+});
+window.addEventListener("keyup", e=>{ const k=keyMap[e.code]; if(k) keys.delete(k); });
+window.addEventListener("blur", ()=>keys.clear());
+function canvasPoint(e){ const r=cv.getBoundingClientRect(); return {x:(e.clientX-r.left)/scale, y:(e.clientY-r.top)/scale}; }
+cv.addEventListener("pointerdown", e=>{ if(scene && scene.onPointer) scene.onPointer(canvasPoint(e)); });
+
+function touchControls(actions){
+  // actions: [{key,label,cls}]
+  const t = el(`<div><div class="touch dpad">
+    <span></span><button data-k="up" aria-label="Up">&#9650;</button><span></span>
+    <button data-k="left" aria-label="Left">&#9664;</button><button data-k="down" aria-label="Down">&#9660;</button><button data-k="right" aria-label="Right">&#9654;</button>
+  </div><div class="touch acts">${actions.map(a=>`<button class="wide" data-k="${a.key}">${a.label}</button>`).join("")}</div></div>`);
+  t.querySelectorAll("button").forEach(b=>{
+    const k=b.dataset.k;
+    const down=e=>{e.preventDefault(); if(!keys.has(k)){keys.add(k); if(scene&&scene.onKey)scene.onKey(k);} b.classList.add("on");};
+    const up=e=>{e.preventDefault(); keys.delete(k); b.classList.remove("on");};
+    b.addEventListener("pointerdown",down); b.addEventListener("pointerup",up); b.addEventListener("pointerleave",up); b.addEventListener("pointercancel",up);
+  });
+  return t;
+}
+
+/* ---------- toast ---------- */
+let toastTimer=null;
+function toast(msg, ms=4200){
+  let t=document.getElementById("toast");
+  if(!t){ t=el(`<div id="toast" class="toast"></div>`); hud.appendChild(t); }
+  t.innerHTML=msg; t.style.opacity=1;
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>{ t.style.opacity=0; }, ms);
+}
+function clearHUD(){ hud.innerHTML=""; }
+
+/* ---------- drawing: the coelacanth ---------- */
+const spotCache = {};
+function spotsFor(seed){
+  if(spotCache[seed]) return spotCache[seed];
+  const r=rng(seed*7919+13), s=[];
+  let tries=0;
+  while(s.length<22 && tries<400){ tries++;
+    const x = -60 + r()*150, y = -34 + r()*68;
+    // inside body ellipse-ish
+    const ex = (x-15)/88, ey = y/ (34*(1-Math.abs(x-15)/140));
+    if (ex*ex+ey*ey>0.85) continue;
+    const rad = 2.2 + r()*5.5;
+    if (s.some(p=>Math.hypot(p.x-x,p.y-y)<p.r+rad+3)) continue;
+    s.push({x,y,r:rad, a:r()*Math.PI, e:0.6+r()*0.5});
+  }
+  return spotCache[seed]=s;
+}
+function lobeFin(g, x, y, ang, len, fill, fringe){
+  g.save(); g.translate(x,y); g.rotate(ang);
+  // fleshy lobe (stalk)
+  g.fillStyle=fill; g.beginPath(); g.ellipse(len*0.32,0,len*0.36,len*0.13,0,0,Math.PI*2); g.fill();
+  // fin rays fringe
+  g.fillStyle=fringe; g.beginPath();
+  g.moveTo(len*0.55,-len*0.12); g.quadraticCurveTo(len*1.05,-len*0.2,len*1.08,0); g.quadraticCurveTo(len*1.05,len*0.2,len*0.55,len*0.12); g.closePath(); g.fill();
+  g.strokeStyle="rgba(255,255,255,.18)"; g.lineWidth=1;
+  for(let i=-2;i<=2;i++){ g.beginPath(); g.moveTo(len*0.6,i*len*0.04); g.lineTo(len*1.02,i*len*0.07); g.stroke(); }
+  g.restore();
+}
+/** draw coelacanth facing right; opts: phase (fin cycle), seed (spot pattern), species ('afr'|'indo'), alpha, headstand(0..1), mouth(0..1), flip */
+function drawCoelacanth(g, x, y, sc, o={}){
+  const ph=o.phase||0, seed=o.seed||1, hs=o.headstand||0;
+  const indo = o.species==="indo";
+  const bodyCol = indo? "#5a4632":C.body, backCol=indo?"#3e2f22":C.back, bellyCol=indo?"#7a6046":C.belly;
+  const finCol = indo? "#4a3a2a":"#1a335f", farFin = indo? "#2e241a":"#10213f", fringe= indo?"rgba(120,95,70,.85)":"rgba(44,84,144,.85)";
+  g.save(); g.translate(x,y); g.scale(o.flip?-sc:sc, sc);
+  g.rotate(hs*1.35 + (o.tilt||0));
+  if(o.alpha!==undefined) g.globalAlpha=o.alpha;
+  const sw = Math.sin(ph), sw2=Math.sin(ph+Math.PI);
+  // far-side paired fins (diagonal partner phases): far pectoral moves with near pelvic
+  lobeFin(g, 48, 18, 2.1 + 0.45*sw2, 34, farFin, "rgba(16,33,63,.8)");
+  lobeFin(g, -6, 30, 2.3 + 0.45*sw, 30, farFin, "rgba(16,33,63,.8)");
+  // tail: upper & lower lobes + small middle (epicaudal) lobe
+  const tw = Math.sin(ph*0.5)*0.08;
+  g.save(); g.translate(-74,0); g.rotate(tw);
+  g.fillStyle=finCol;
+  g.beginPath(); g.moveTo(0,-9); g.quadraticCurveTo(-22,-30,-44,-40); g.quadraticCurveTo(-36,-14,-22,-3); g.closePath(); g.fill();
+  g.beginPath(); g.moveTo(0,9); g.quadraticCurveTo(-22,30,-44,40); g.quadraticCurveTo(-36,14,-22,3); g.closePath(); g.fill();
+  g.fillStyle=bodyCol; g.beginPath(); g.moveTo(-6,-4); g.lineTo(-40,-3); g.lineTo(-40,3); g.lineTo(-6,4); g.fill();
+  g.fillStyle=finCol; g.beginPath(); g.moveTo(-38,0); g.quadraticCurveTo(-48,-11,-60,0); g.quadraticCurveTo(-48,11,-38,0); g.fill();
+  g.restore();
+  // dorsal & anal lobed fins
+  lobeFin(g, -36, -30, -2.55 + 0.12*sw, 30, finCol, fringe);
+  lobeFin(g, -36, 30, 2.55 - 0.12*sw, 28, finCol, fringe);
+  // first dorsal (fan, no lobe)
+  g.fillStyle=finCol; g.beginPath(); g.moveTo(5,-38); g.lineTo(-2,-64); g.quadraticCurveTo(14,-66,30,-40); g.closePath(); g.fill();
+  g.strokeStyle="rgba(255,255,255,.15)"; for(let i=0;i<4;i++){g.beginPath();g.moveTo(10+i*5,-39);g.lineTo(2+i*7,-62);g.stroke();}
+  // body
+  const grd=g.createLinearGradient(0,-42,0,40); grd.addColorStop(0,backCol); grd.addColorStop(.55,bodyCol); grd.addColorStop(1,bellyCol);
+  g.fillStyle=grd; g.beginPath();
+  g.moveTo(102,2); g.bezierCurveTo(98,-30,52,-44,2,-41); g.bezierCurveTo(-40,-38,-66,-22,-76,-9);
+  g.lineTo(-76,9); g.bezierCurveTo(-66,22,-40,37,2,39); g.bezierCurveTo(52,41,96,28,102,2); g.fill();
+  // scales hint
+  g.save(); g.clip(); g.strokeStyle="rgba(255,255,255,.05)"; g.lineWidth=1;
+  for(let sx=-70;sx<100;sx+=9){ for(let sy=-40;sy<40;sy+=9){ g.beginPath(); g.arc(sx+(sy%18?4:0),sy,5,-1,1); g.stroke(); } }
+  // spots
+  g.fillStyle=C.spot;
+  for(const s of spotsFor(seed)){ g.globalAlpha=(o.alpha??1)*0.9; g.beginPath(); g.ellipse(s.x,s.y,s.r,s.r*s.e,s.a,0,Math.PI*2); g.fill(); }
+  g.globalAlpha=o.alpha??1;
+  g.restore();
+  // gill cover
+  g.strokeStyle="rgba(0,0,0,.35)"; g.lineWidth=2; g.beginPath(); g.moveTo(58,-26); g.quadraticCurveTo(46,0,58,26); g.stroke();
+  // mouth (intracranial joint: opens wide when eating)
+  const m=o.mouth||0;
+  g.fillStyle="#0a1428"; g.beginPath(); g.moveTo(102,2); g.lineTo(80,6+m*4); g.lineTo(102,6+m*14); g.closePath(); g.fill();
+  g.strokeStyle="rgba(0,0,0,.5)"; g.beginPath(); g.moveTo(102,4); g.lineTo(80,8); g.stroke();
+  // eye
+  g.fillStyle="#0b0f1a"; g.beginPath(); g.arc(74,-9,8,0,Math.PI*2); g.fill();
+  g.fillStyle=C.gold; g.globalAlpha=(o.alpha??1)*0.85; g.beginPath(); g.arc(76,-11,2.6,0,Math.PI*2); g.fill(); g.globalAlpha=o.alpha??1;
+  // rostral organ hint (small pores on snout)
+  g.fillStyle="rgba(92,225,230,.6)"; [[92,-8],[95,-3],[90,-12]].forEach(p=>{g.beginPath();g.arc(p[0],p[1],1.4,0,Math.PI*2);g.fill();});
+  // near-side paired fins on top
+  lobeFin(g, 48, 20, 2.0 + 0.45*sw, 36, finCol, fringe);      // near pectoral (with far pelvic)
+  lobeFin(g, -4, 33, 2.25 + 0.45*sw2, 32, finCol, fringe);    // near pelvic (with far pectoral)
+  g.restore();
+}
+function drawShark(g,x,y,sc,flip,t){
+  g.save(); g.translate(x,y); g.scale(flip?-sc:sc,sc);
+  const w=Math.sin(t*4)*0.12;
+  g.fillStyle="#56657a";
+  g.beginPath(); g.moveTo(110,4); g.quadraticCurveTo(70,-26,0,-20); g.quadraticCurveTo(-60,-14,-90,-2); g.lineTo(-90,4); g.quadraticCurveTo(-40,18,20,18); g.quadraticCurveTo(80,18,110,4); g.fill();
+  g.save(); g.translate(-88,1); g.rotate(w); g.beginPath(); g.moveTo(0,0); g.lineTo(-30,-38); g.lineTo(-20,0); g.lineTo(-26,24); g.closePath(); g.fill(); g.restore();
+  g.beginPath(); g.moveTo(10,-19); g.lineTo(-12,-50); g.lineTo(-24,-16); g.fill();
+  g.beginPath(); g.moveTo(40,14); g.lineTo(14,42); g.lineTo(8,14); g.fill();
+  g.fillStyle="#8a97a8"; g.beginPath(); g.moveTo(108,6); g.quadraticCurveTo(60,18,0,16); g.quadraticCurveTo(60,8,108,6); g.fill();
+  g.fillStyle="#111"; g.beginPath(); g.arc(80,-4,3,0,Math.PI*2); g.fill();
+  g.strokeStyle="rgba(0,0,0,.35)"; for(let i=0;i<4;i++){g.beginPath();g.moveTo(58-i*5,-6);g.lineTo(55-i*5,8);g.stroke();}
+  g.restore();
+}
+function oceanGradient(g, topCol, botCol){
+  const gr=g.createLinearGradient(0,0,0,H); gr.addColorStop(0,topCol); gr.addColorStop(1,botCol); g.fillStyle=gr; g.fillRect(0,0,W,H);
+}
+const bubbles = Array.from({length:40},(_,i)=>({x:Math.random()*W,y:Math.random()*H,r:1+Math.random()*2.5,v:10+Math.random()*25}));
+function drawParticles(g,dt,alpha=0.35){
+  g.fillStyle=`rgba(200,230,255,${alpha})`;
+  for(const b of bubbles){ b.y-=b.v*dt; if(b.y<-5){b.y=H+5;b.x=Math.random()*W;} g.beginPath(); g.arc(b.x,b.y,b.r,0,Math.PI*2); g.fill(); }
+}
+function roundRect(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
+
+/* ---------- scene manager ---------- */
+let scene=null, last=performance.now(), T=0;
+function setScene(s){ if(scene&&scene.exit) scene.exit(); keys.clear(); ui.innerHTML=""; clearHUD(); scene=s; if(s.enter) s.enter(); }
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now; T+=dt;
+  try{ if(scene){ if(scene.update) scene.update(dt); if(scene.draw) scene.draw(ctx,dt); } }
+  catch(err){ console.error(err); }
+  requestAnimationFrame(frame);
+}
+/* ============ Title / Menu / Teacher notes ============ */
+function ambientBackground(g,dt,fishX){
+  oceanGradient(g, "#123a66", C.deep);
+  // light rays
+  g.save(); g.globalAlpha=0.07; g.fillStyle="#bfe6ff";
+  for(let i=0;i<5;i++){ const x=120+i*190+Math.sin(T*0.3+i)*30; g.beginPath(); g.moveTo(x,0); g.lineTo(x+60,0); g.lineTo(x-80,H); g.lineTo(x-170,H); g.fill(); }
+  g.restore();
+  drawParticles(g,dt,0.25);
+  // rocky slope
+  g.fillStyle="#08162b"; g.beginPath(); g.moveTo(0,H); for(let x=0;x<=W;x+=40){ g.lineTo(x, 470+Math.sin(x*0.02)*18+Math.sin(x*0.07)*6);} g.lineTo(W,H); g.fill();
+}
+const TitleScene = {
+  fx:260,
+  enter(){
+    ui.appendChild(el(`<div class="screen" id="title">
+      <h1 class="title">COELACANTH QUEST</h1>
+      <div class="subtitle">400 million years. Three missions. One very old fish.</div>
+      <button class="btn" id="startBtn">Start</button>
+      <div class="row" style="margin-top:6px"><button class="btn secondary small" id="notesBtn">Teacher notes</button></div>
+      <div class="footer">Mouse, touch or keyboard &middot; Best in full screen (F11) &middot; Companion to NOVA's <i>Ancient Creature of the Deep</i></div>
+    </div>`));
+    document.getElementById("startBtn").onclick=()=>setScene(MenuScene);
+    document.getElementById("notesBtn").onclick=()=>setScene(NotesScene(TitleScene));
+    document.getElementById("startBtn").focus();
+  },
+  onKey(k){ if(k==="enter"||k==="action") setScene(MenuScene); },
+  draw(g,dt){
+    ambientBackground(g,dt);
+    this.fx += 40*dt; if(this.fx>W+220) this.fx=-220;
+    drawCoelacanth(g, this.fx, 395+Math.sin(T*0.8)*10, 1.15, {phase:T*2.2, seed:1});
+  }
+};
+const MenuScene = {
+  enter(){
+    const d=(b)=>b?'<span class="done">&#10003; Completed</span>':'';
+    const q=progress.quiz? `<span class="done">Best: ${progress.quiz.score}/10</span>`:'';
+    ui.appendChild(el(`<div class="screen">
+      <h2 style="margin:0 0 4px;font-size:32px;color:#fff">Choose a mission</h2>
+      <div style="color:#b8cbe3;margin-bottom:8px">Play in order, or jump to any level. About 3–6 minutes each.</div>
+      <div class="lvl">
+        <div class="lvlcard" tabindex="0" id="m1"><b>1 &middot; Time Travel</b><small>Ride the timeline from the Devonian to today. Catch the clues to a fish that was "extinct."</small>${d(progress.l1)}</div>
+        <div class="lvlcard" tabindex="0" id="m2"><b>2 &middot; Dive Sim</b><small>Pilot a submersible to 250 m. Find coelacanths in caves and ID them by their spots.</small>${d(progress.l2)}</div>
+        <div class="lvlcard" tabindex="0" id="m3"><b>3 &middot; Live as a Coelacanth</b><small>One night as the fish: drift, headstand, sense prey, dodge sharks and nets.</small>${d(progress.l3)}</div>
+      </div>
+      <div class="row"><button class="btn" id="mq">Final Review Quiz (10 Qs)</button> ${q}</div>
+      <div class="row" style="margin-top:4px"><button class="btn secondary small" id="mt">Teacher notes</button><button class="btn secondary small" id="mb">Title</button></div>
+      <div class="footer">Keys: <span class="kbd">1</span> <span class="kbd">2</span> <span class="kbd">3</span> pick a level &middot; <span class="kbd">Q</span> quiz</div>
+    </div>`));
+    const bind=(id,fn)=>{const e=document.getElementById(id); e.onclick=fn; e.onkeydown=ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();fn();}};};
+    bind("m1",()=>setScene(Level1())); bind("m2",()=>setScene(Level2())); bind("m3",()=>setScene(Level3()));
+    bind("mq",()=>setScene(QuizScene())); bind("mt",()=>setScene(NotesScene(MenuScene))); bind("mb",()=>setScene(TitleScene));
+    document.getElementById("m1").focus();
+  },
+  onKeyRaw(e){ if(e.key==="1") setScene(Level1()); if(e.key==="2") setScene(Level2()); if(e.key==="3") setScene(Level3()); if(e.key==="q"||e.key==="Q") setScene(QuizScene()); },
+  draw(g,dt){ ambientBackground(g,dt); drawCoelacanth(g, 820, 470, 0.6, {phase:T*2, seed:1, alpha:.6}); }
+};
+const SOURCES = [
+ ["Mahé et al. 2021, Current Biology (≈100-yr lifespan, ≈5-yr gestation)","https://doi.org/10.1016/j.cub.2021.05.054"],
+ ["NOAA Fisheries — African Coelacanth","https://www.fisheries.noaa.gov/species/african-coelacanth"],
+ ["PBS NOVA — Anatomy of the Coelacanth","https://www.pbs.org/wgbh/nova/fish/anatomy.html"],
+ ["Amemiya et al. 2013, Nature — coelacanth genome","https://www.nature.com/articles/nature12027"],
+ ["SAIAB / ACEP coelacanth timeline","https://www.acep.co.za/content/view/20/262/"],
+ ["SAIAB / ACEP — 2nd discovery (1952)","https://www.acep.co.za/content/view/22/262/"],
+ ["Johanson et al. 2006, Biology Letters — oldest coelacanth","https://doi.org/10.1098/rsbl.2006.0470"],
+ ["Erdmann et al. 1998, Nature — Indonesian coelacanth","https://doi.org/10.1038/26376"],
+ ["Fricke et al. 1987, Nature — locomotion","https://doi.org/10.1038/329331a0"],
+ ["Fricke et al. 1991 — habitat & population, Grand Comoro","https://link.springer.com/article/10.1007/BF00007462"],
+ ["Hissmann et al. 2000, Marine Biology — telemetry","https://www.researchgate.net/publication/225171307"],
+ ["NOAA ESA Status Review Report for the Coelacanth","https://repository.library.noaa.gov/view/noaa/17113/noaa_17113_DS1.pdf"],
+ ["IUCN Red List — L. chalumnae (CR), L. menadoensis (VU)","https://www.iucnredlist.org/details/88288870/0"],
+ ["CITES CoP11 Prop. 51 — L. menadoensis","https://cites.org/sites/default/files/eng/cop/11/prop/51.pdf"],
+ ["Smithsonian NMNH — Extinction Over Time","https://naturalhistory.si.edu/education/teaching-resources/paleontology/extinction-over-time"],
+ ["ICS International Chronostratigraphic Chart","https://stratigraphy.org/chart"]
+];
+function NotesScene(back){ return {
+  enter(){
+    ui.appendChild(el(`<div class="screen"><div class="card scroll" style="max-width:820px;width:820px;max-height:470px">
+      <h2>Teacher notes</h2>
+      <h3>Learning goals</h3>
+      <ul>
+        <li>Place coelacanth history on the geologic time scale. Explain why it was thought extinct and what a <b>Lazarus taxon</b> is.</li>
+        <li>Recount the 1938 rediscovery, the 1952 Comoros specimen and the 1997–98 discovery of a second species in Indonesia.</li>
+        <li>Describe habitat (≈150–250 m by day, caves, ≈15–22 °C) and day/night behavior (rest in caves, drift-hunt at night).</li>
+        <li>Explain key adaptations: lobe fins in a diagonal "walking" pattern, headstand + rostral organ (electroreception), intracranial joint, oil-filled notochord, fat-filled swim bladder.</li>
+        <li>Connect slow life history (≈100-yr lifespan, late maturity, ≈5-yr gestation) to extinction risk. Identify bycatch in deep-set shark gill nets as the main threat (IUCN CR / VU; CITES Appendix I).</li>
+        <li>Recognize that lungfish, not coelacanths, are the closest living relatives of tetrapods (2013 genome).</li>
+      </ul>
+      <h3>How it runs</h3>
+      <p style="font-size:15px">One offline HTML file with no internet needed. Level 1 ≈ 4 min, Level 2 ≈ 4 min, Level 3 ≈ 4–5 min, Quiz ≈ 3 min. Controls: arrow keys/WASD to move, Space for the action (photo / headstand), Shift or B for a burst. On-screen buttons work for touch. Students can show or screenshot the final score screen, which has their name, score and date. Progress is saved in the browser on that device.</p>
+      <h3>Simplifications to mention</h3>
+      <p style="font-size:15px">The timeline is not to scale. The map is schematic. The temperature readout in the Dive Sim is an approximate profile matched to the published 150–250 m range (16.5–22.8 °C at Grande Comore). Game speeds and time are compressed. Sources differ on the date of the last fossil (≈66–75 Ma) and on population sizes.</p>
+      <h3>Sources</h3>
+      <ul style="font-size:14px">${SOURCES.map(s=>`<li>${esc(s[0])}<br><span style="color:#9fd8ea">${esc(s[1])}</span></li>`).join("")}</ul>
+      <div class="row"><button class="btn" id="nb">Back</button></div>
+    </div></div>`));
+    document.getElementById("nb").onclick=()=>setScene(back); document.getElementById("nb").focus();
+  },
+  onKey(k){ if(k==="esc") setScene(back); },
+  draw(g,dt){ ambientBackground(g,dt); }
+};}
+
+/* ---------- shared: fact card + quick check overlay ---------- */
+function showCard({kicker,title,lines,btn="Continue",onDone}){
+  const s=el(`<div class="screen" style="background:rgba(5,11,26,.35)"><div class="card">
+    ${kicker?`<h3>${kicker}</h3>`:""}<h2>${title}</h2>${lines.map(l=>`<p>${l}</p>`).join("")}
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-cont>${btn}</button></div></div></div>`);
+  ui.appendChild(s);
+  const b=s.querySelector("[data-cont]"); b.focus();
+  b.onclick=()=>{ s.remove(); onDone&&onDone(); };
+  return s;
+}
+/* multiple choice: {q, opts:[{t,ok}], multi:false, explain, onPass} */
+function showCheck({kicker="Quick check",q,opts,multi=false,need=1,explain,onPass}){
+  const s=el(`<div class="screen" style="background:rgba(5,11,26,.45)"><div class="card" style="width:600px">
+    <h3>${kicker}</h3><h2 style="font-size:21px">${q}</h2>
+    <div data-opts>${opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="order-slot">${i+1}</span>${o.t}</button>`).join("")}</div>
+    <div class="fb" data-fb>${multi?`Select ${need}, then press Check.`:""}</div>
+    <div class="row" style="justify-content:flex-end">${multi?`<button class="btn" data-check>Check</button>`:""}<button class="btn" data-next style="display:none">Continue</button></div>
+  </div></div>`);
+  ui.appendChild(s);
+  const fb=s.querySelector("[data-fb]"), nb=s.querySelector("[data-next]"), btns=[...s.querySelectorAll(".opt")];
+  let done=false;
+  const pass=()=>{ done=true; fb.className="fb ok"; fb.innerHTML="&#10003; Correct! "+(explain||""); nb.style.display="inline-block"; nb.focus(); };
+  nb.onclick=()=>{ s.remove(); onPass&&onPass(); };
+  btns.forEach(b=>b.onclick=()=>{
+    if(done) return;
+    const i=+b.dataset.i;
+    if(multi){ b.classList.toggle("sel"); return; }
+    if(opts[i].ok){ b.classList.add("right"); pass(); }
+    else { b.classList.add("wrong"); fb.className="fb no"; fb.innerHTML="Not quite. "+(opts[i].why||"Try another answer."); }
+  });
+  if(multi){ s.querySelector("[data-check]").onclick=()=>{
+    if(done) return;
+    const sel=btns.filter(b=>b.classList.contains("sel")).map(b=>+b.dataset.i);
+    const right=opts.map((o,i)=>o.ok?i:-1).filter(i=>i>=0);
+    if(sel.length===right.length && sel.every(i=>opts[i].ok)){ sel.forEach(i=>btns[i].classList.add("right")); s.querySelector("[data-check]").style.display="none"; pass(); }
+    else { btns.forEach(b=>b.classList.remove("wrong")); sel.filter(i=>!opts[i].ok).forEach(i=>btns[i].classList.add("wrong"));
+      fb.className="fb no"; fb.innerHTML=`Not yet. ${sel.filter(i=>opts[i].ok).length} of your picks are right. You need exactly ${right.length}.`; }
+  }; }
+  s.addEventListener("keydown",e=>{ const n=parseInt(e.key); if(n>=1&&n<=btns.length){ btns[n-1].click(); e.stopPropagation(); }});
+  btns[0].focus();
+  return s;
+}
+/* ordering check: click items in the right order */
+function showOrder({q,items,explain,onPass}){
+  // items given in correct order; display shuffled (deterministic)
+  const order=[2,0,3,1].slice(0,items.length).length===items.length?[2,0,3,1]:items.map((_,i)=>i).reverse();
+  const s=el(`<div class="screen" style="background:rgba(5,11,26,.45)"><div class="card" style="width:600px">
+    <h3>Timeline check</h3><h2 style="font-size:21px">${q}</h2>
+    <div>${order.map(i=>`<button class="opt" data-i="${i}"><span class="order-slot"></span>${items[i]}</button>`).join("")}</div>
+    <div class="fb" data-fb>Click from oldest to newest.</div>
+    <div class="row" style="justify-content:flex-end"><button class="btn secondary" data-reset>Reset</button><button class="btn" data-next style="display:none">Continue</button></div>
+  </div></div>`);
+  ui.appendChild(s);
+  const btns=[...s.querySelectorAll(".opt")], fb=s.querySelector("[data-fb]"), nb=s.querySelector("[data-next]");
+  let picked=[];
+  const reset=()=>{picked=[];btns.forEach(b=>{b.className="opt";b.querySelector(".order-slot").textContent="";});fb.className="fb";fb.textContent="Click from oldest to newest.";};
+  s.querySelector("[data-reset]").onclick=reset;
+  btns.forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i; if(picked.includes(i)) return;
+    picked.push(i); b.classList.add("sel"); b.querySelector(".order-slot").textContent=picked.length;
+    if(picked.length===items.length){
+      if(picked.every((v,k)=>v===k)){ btns.forEach(x=>x.classList.add("right")); fb.className="fb ok"; fb.innerHTML="&#10003; Perfect order! "+(explain||""); nb.style.display="inline-block"; nb.focus(); s.querySelector("[data-reset]").style.display="none"; }
+      else { fb.className="fb no"; fb.textContent="Close, but not in order. Press Reset and try again."; btns.forEach(x=>x.classList.add("wrong")); }
+    }
+  });
+  nb.onclick=()=>{ s.remove(); onPass&&onPass(); };
+  btns[0].focus();
+}
+function levelComplete(id, title, lines){
+  progress[id]=true; saveProgress();
+  const next = id==="l1"?["Next: Dive Sim",()=>setScene(Level2())]: id==="l2"?["Next: Live as a Coelacanth",()=>setScene(Level3())]:["Final Review Quiz",()=>setScene(QuizScene())];
+  const s=el(`<div class="screen" style="background:rgba(5,11,26,.55)"><div class="card" style="text-align:center">
+    <h3>Mission complete</h3><h2 style="font-size:30px">${title}</h2>${lines.map(l=>`<p>${l}</p>`).join("")}
+    <div class="row"><button class="btn" data-lcn>${next[0]}</button><button class="btn secondary" data-lcm>Menu</button></div></div></div>`);
+  ui.appendChild(s); s.querySelector("[data-lcn]").onclick=next[1]; s.querySelector("[data-lcm]").onclick=()=>setScene(MenuScene); s.querySelector("[data-lcn]").focus();
+}
+function topBar(title, extra=""){
+  const b=el(`<div style="position:absolute;left:0;right:0;top:0;height:0;pointer-events:none">
+    <button class="btn secondary small" style="position:absolute;right:8px;top:8px;pointer-events:auto" data-menu>Menu</button>
+    <div style="position:absolute;left:12px;top:10px;font-weight:bold;color:var(--gold);font-size:15px;text-shadow:0 2px 3px #000">${title}</div>${extra}</div>`);
+  b.querySelector("[data-menu]").onclick=()=>setScene(MenuScene);
+  hud.appendChild(b);
+}
+/* ============ LEVEL 1: Time Travel ============ */
+function Level1(){
+  const stops=[
+    {lab:"Devonian",sub:"419–359 Ma",col:["#1d5a7a","#071a2e"],card:{title:"Devonian: the first coelacanths",lines:[
+      "Coelacanths are <b>lobe-finned fishes</b>. Their paired fins sit on fleshy, bony stalks.",
+      "The oldest known coelacanth, <i>Eoactinistia</i>, is about <b>407–409 million years</b> old. It was found in Australia and is known from a single jawbone."]},
+      check:{type:"multi",q:"Spot the ancient lobe-fin features. Pick the 3 that coelacanths really have.",need:3,opts:[
+        {t:"Fleshy, stalked lobe fins",ok:true},{t:"A gas-filled swim bladder",ok:false},{t:"An oil-filled notochord instead of a bony spine",ok:true},
+        {t:"A tail with a small extra middle lobe",ok:true},{t:"Thin ray fins attached straight to the body",ok:false}],
+        explain:"Its swim bladder is filled with fat, not gas."}},
+    {lab:"Carboniferous",sub:"359–299 Ma",col:["#245e5a","#08201f"],card:{title:"Carboniferous: still swimming",lines:[
+      "Coelacanths keep turning up in the fossil record, period after period.",
+      "About <b>125 fossil species</b> of coelacanth are known in all."]}},
+    {lab:"Permian",sub:"299–252 Ma",col:["#5a3d2a","#1a0f08"],card:{title:"Permian: the Great Dying",lines:[
+      "The Permian ends with the <b>largest mass extinction ever</b>, about 252 million years ago.",
+      "Coelacanths <b>survived</b> it. We find them again in Triassic rocks."]}},
+    {lab:"Triassic",sub:"252–201 Ma",col:["#6a4b23","#1e1406"],card:{title:"Triassic: enter the dinosaurs",lines:[
+      "The first dinosaurs appear on land.",
+      "Coelacanths had already been around for about <b>150 million years</b>."]}},
+    {lab:"Jurassic",sub:"201–145 Ma",col:["#1f5f4a","#06201a"],card:{title:"Jurassic: a familiar shape",lines:[
+      "Fossil coelacanths look a lot like the living one: lobe fins and a three-lobed tail.",
+      "That's why people call it a <b>\"living fossil.\"</b> Scientists debate the label, though. Today's species is still a modern species."]}},
+    {lab:"Cretaceous",sub:"145–66 Ma",col:["#3d3a6b","#0e0c24"],card:{title:"Cretaceous: the last fossils",lines:[
+      "The <b>youngest coelacanth fossils</b> are from the Late Cretaceous.",
+      "Sources differ on their exact age, from about 66 to 75 million years ago."]}},
+    {lab:"Mass extinction",sub:"66 Ma",col:["#6b2a1d","#1a0705"],card:{title:"66 million years ago: impact",lines:[
+      "An asteroid-linked mass extinction wipes out the non-avian dinosaurs.",
+      "With no younger fossils, scientists concluded that <b>coelacanths were extinct</b> too."]},
+      check:{type:"mc",q:"Scientists thought coelacanths died out because…",opts:[
+        {t:"no coelacanth fossils younger than the Cretaceous had been found",ok:true},
+        {t:"people had seen the last one alive in 1900",ok:false,why:"Nobody had seen a living coelacanth before 1938."},
+        {t:"they can't live in salt water",ok:false,why:"Living coelacanths are marine fish."},
+        {t:"fishermen had caught them all",ok:false,why:"The idea came from the fossil record, not from fishing."}],
+        explain:"A group that vanishes from the fossil record and later turns up alive is a <b>Lazarus taxon</b>."}},
+    {lab:"1938",sub:"East London",col:["#1f4f86","#06142a"],card:{kicker:"22 December 1938",title:"The rediscovery",lines:[
+      "A trawler brings in a strange blue fish caught off the <b>Chalumna River</b>, near <b>East London, South Africa</b>.",
+      "Museum curator <b>Marjorie Courtenay-Latimer</b> saves it and sends a sketch to <b>Prof. J.L.B. Smith</b>. He recognizes a coelacanth and names it <i>Latimeria chalumnae</i>."]},
+      check:{type:"mc",q:"<i>Latimeria chalumnae</i> was named after…",opts:[
+        {t:"the trawler's captain and his ship",ok:false,why:"Close, but the name honors someone else."},
+        {t:"Courtenay-Latimer and the Chalumna River",ok:true},
+        {t:"J.L.B. Smith and his hometown",ok:false,why:"Smith did the naming. He didn't name it after himself."},
+        {t:"a fossil species from the Devonian",ok:false,why:"It honors people and places from 1938."}],
+        explain:"The genus honors the curator, and the species name honors the river."}},
+    {lab:"1952",sub:"Comoros",col:["#1f5a86","#06182a"],card:{kicker:"20 December 1952",title:"Found: its real home",lines:[
+      "After a <b>14-year search</b> with reward posters, a second coelacanth is caught on a hand line off <b>Anjouan, Comoros</b>.",
+      "The Comoros turn out to be the main known home of the African coelacanth."]}},
+    {lab:"1998",sub:"Indonesia",col:["#2a5e6e","#061a20"],card:{kicker:"1997–1998",title:"A second species",lines:[
+      "In 1997 biologist <b>Mark Erdmann</b>, on his honeymoon, spots a coelacanth in a Manado fish market in Sulawesi, Indonesia.",
+      "In July 1998 fishermen bring him a live one from a <b>deep-set shark net</b>. It's a new species, <i>Latimeria menadoensis</i>, almost 10,000 km from the Comoros."]}},
+    {lab:"Today",sub:"2020s",col:["#164a7a","#050B1A"],card:{title:"Today: rare and protected",lines:[
+      "Known from the Comoros, South Africa, Mozambique, Madagascar, Kenya, Tanzania and Indonesia.",
+      "IUCN: African coelacanth <b>Critically Endangered</b>, Indonesian coelacanth <b>Vulnerable</b>. Both are on <b>CITES Appendix I</b>."]},
+      check:{type:"order",q:"Put these discoveries in order.",items:["1938: fish trawled off the Chalumna River","1952: specimen caught off Anjouan, Comoros","1997: coelacanth seen in a Manado market","2000: divers find coelacanths at Sodwana Bay"],
+        explain:"Coelacanths have now been found across the western Indian Ocean and in Indonesia."}}
+  ];
+  const X0=70, DX=82;
+  let idx=0, fishX=X0, visited=new Set(), passed=new Set(), modal=false, finished=false;
+  const sx=i=>X0+i*DX;
+  function open(i){
+    modal=true; const st=stops[i];
+    showCard({kicker:st.card.kicker||`${st.lab} · ${st.sub}`,title:st.card.title,lines:st.card.lines,btn:st.check&&!passed.has(i)?"Quick check":"Continue",onDone:()=>{
+      visited.add(i);
+      if(st.check && !passed.has(i)){
+        const done=()=>{ passed.add(i); modal=false; afterStop(i); };
+        if(st.check.type==="order") showOrder({q:st.check.q,items:st.check.items,explain:st.check.explain,onPass:done});
+        else showCheck({q:st.check.q,opts:st.check.opts,multi:st.check.type==="multi",need:st.check.need,explain:st.check.explain,onPass:done});
+      } else { modal=false; afterStop(i); }
+    }});
+  }
+  function afterStop(i){
+    if(i===stops.length-1 && !finished){ finished=true; modal=true;
+      levelComplete("l1","Time traveler!",["You crossed about <b>400 million years</b> of coelacanth history.","Key idea: a <b>Lazarus taxon</b> vanishes from the fossil record and later turns up alive."]); }
+    else if(i<stops.length-1) toast("Press <span class='kbd'>&rarr;</span> or tap <b>Next</b> to travel on.",2500);
+  }
+  function go(d){
+    if(modal) return;
+    const n=idx+d; if(n<0||n>=stops.length) return;
+    if(d>0 && !visited.has(idx)) { open(idx); return; }
+    if(d>0 && stops[idx].check && !passed.has(idx)) { open(idx); return; }
+    idx=n;
+  }
+  let arrived=true;
+  return {
+    enter(){
+      topBar("Level 1 · Time Travel");
+      const ctl=el(`<div class="row" style="position:absolute;bottom:10px;right:12px;pointer-events:auto">
+        <button class="btn secondary" data-p>&#9664; Back</button><button class="btn" data-o>Read card</button><button class="btn" data-n>Next &#9654;</button></div>`);
+      ctl.querySelector("[data-p]").onclick=()=>go(-1); ctl.querySelector("[data-n]").onclick=()=>go(1); ctl.querySelector("[data-o]").onclick=()=>{ if(!modal) open(idx); };
+      hud.appendChild(ctl);
+      toast("Travel along the timeline. Read each card, and answer the quick checks to keep going.",5000);
+      setTimeout(()=>{ if(scene===this && !visited.has(0) && !modal) open(0); },900);
+    },
+    onKey(k){ if(k==="right") go(1); if(k==="left") go(-1); if((k==="enter"||k==="action") && !modal) open(idx); },
+    onPointer(p){ if(modal) return; for(let i=0;i<stops.length;i++){ if(Math.abs(p.x-sx(i))<30 && Math.abs(p.y-440)<40){ if(i<=idx || (visited.has(idx) && (!stops[idx].check||passed.has(idx)) && i===idx+1)) idx=i; } } },
+    update(dt){
+      const tx=sx(idx); const was=Math.abs(fishX-tx)<2; fishX+= (tx-fishX)*Math.min(1,dt*2.2);
+      const now=Math.abs(fishX-tx)<2;
+      if(now && !was && !arrived && !visited.has(idx) && !modal){ open(idx); }
+      arrived=now;
+    },
+    draw(g,dt){
+      // era tint blends between neighbouring stops
+      const f=clamp((fishX-X0)/DX,0,stops.length-1), i0=Math.floor(f), i1=Math.min(stops.length-1,i0+1), t=f-i0;
+      oceanGradient(g, mixColor(stops[i0].col[0],stops[i1].col[0],t), mixColor(stops[i0].col[1],stops[i1].col[1],t));
+      drawParticles(g,dt,0.2);
+      // era props
+      g.save(); g.globalAlpha=.25; g.strokeStyle="#cfe7ff"; g.lineWidth=3;
+      for(let k=0;k<4;k++){ const ax=150+k*220+Math.sin(T*0.2+k)*20, ay=120+(k%2)*80; g.beginPath(); for(let a=0;a<12;a+=0.2){ const r=2+a*2.2; g.lineTo(ax+Math.cos(a)*r, ay+Math.sin(a)*r);} g.stroke(); }
+      g.restore();
+      // big era label
+      g.fillStyle="rgba(255,255,255,.08)"; g.font="900 92px Trebuchet MS, sans-serif"; g.textAlign="center"; g.fillText(stops[idx].lab.toUpperCase(), W/2, 220);
+      // ribbon
+      g.fillStyle="rgba(5,11,26,.75)"; roundRect(g,30,400,W-60,90,14); g.fill();
+      g.strokeStyle=C.gold; g.lineWidth=4; g.beginPath(); g.moveTo(X0,440); g.lineTo(sx(stops.length-1),440); g.stroke();
+      g.setLineDash([6,6]); g.strokeStyle="rgba(242,177,52,.6)"; g.beginPath(); g.moveTo(sx(6)+18,425); g.lineTo(sx(7)-18,425); g.stroke(); g.setLineDash([]);
+      g.font="11px Trebuchet MS, sans-serif"; g.fillStyle="#9fb6d4"; g.fillText("(66 million-year gap: no fossils)", (sx(6)+sx(7))/2, 418);
+      for(let i=0;i<stops.length;i++){
+        const x=sx(i), cur=i===idx;
+        g.fillStyle= passed.has(i)||(visited.has(i)&&!stops[i].check)? C.aqua : (cur? C.gold : "#2b5288");
+        g.beginPath(); g.arc(x,440,cur?11:8,0,Math.PI*2); g.fill();
+        if(stops[i].check && !passed.has(i)){ g.fillStyle="#10203d"; g.font="bold 11px Trebuchet MS, sans-serif"; g.fillText("?",x,444); }
+        g.fillStyle=cur?"#fff":"#b8cbe3"; g.font=(cur?"bold ":"")+"12px Trebuchet MS, sans-serif"; g.fillText(stops[i].lab,x,466);
+        g.fillStyle="#7f9bbf"; g.font="10px Trebuchet MS, sans-serif"; g.fillText(stops[i].sub,x,480);
+      }
+      g.fillStyle="#7f9bbf"; g.font="11px Trebuchet MS, sans-serif"; g.textAlign="left"; g.fillText("Timeline not to scale · Ma = million years ago",40,500); g.textAlign="center";
+      // fish riding the timeline
+      drawCoelacanth(g, clamp(fishX,120,W-120), 330+Math.sin(T*1.2)*8, 0.75, {phase:T*2.4, seed:1});
+      g.fillStyle=C.gold; g.beginPath(); g.moveTo(fishX-8,392); g.lineTo(fishX+8,392); g.lineTo(fishX,402); g.fill();
+      // progress
+      g.textAlign="left"; g.fillStyle="#cfe0f5"; g.font="14px Trebuchet MS, sans-serif";
+      g.fillText(`Cards read: ${visited.size}/${stops.length}   Checks passed: ${passed.size}/4`, 40, 392);
+    },
+    _test:{ get state(){return {idx,visited:[...visited],passed:[...passed],finished,modal};} }
+  };
+}
+/* ============ LEVEL 2: Dive Sim ============ */
+const MAP={lon0:25,lon1:140,lat0:16,lat1:-36,x:40,y:60,w:880,h:400};
+const mp=(lon,lat)=>[MAP.x+(lon-MAP.lon0)/(MAP.lon1-MAP.lon0)*MAP.w, MAP.y+(lat-MAP.lat0)/(MAP.lat1-MAP.lat0)*MAP.h];
+const LAND=[
+ [[25,16],[38,16],[43,12],[51,11.8],[51,10],[48,5],[42,-1],[40,-5],[39,-8],[40.5,-11],[40.6,-15],[35,-20],[35.5,-24],[32.6,-28.5],[30,-31],[27.5,-33.5],[25,-34.5]],
+ [[49.3,-12],[50.5,-15.5],[47,-25],[45,-25.5],[43.5,-22],[44.3,-17],[47,-14]],
+ [[72.6,16],[73.5,15],[76,9],[77.5,8],[80,13],[80.3,16]],
+ [[79.8,9.8],[81.8,7.5],[81,6],[80,6.3]],
+ [[95.3,5.6],[98,4],[104,-2],[106,-6],[102,-4],[97,1]],
+ [[105,-6],[114.5,-7.5],[114,-8.7],[106,-7.4]],
+ [[109,1.5],[111,-3],[116,-4],[118,1],[119,5],[117,7],[115,5],[110,2]],
+ [[119.5,-5.5],[119,-3],[120,0],[121.5,1],[124.9,1.6],[122,0.3],[121.5,-1],[123.3,-1],[122.5,-4],[121,-5]],
+ [[131,-1],[135,-3],[138,-1.5],[140,-2.5],[140,-9],[137,-7],[134,-4],[132,-3]],
+ [[122,-17],[129,-15],[131,-12],[136,-12],[137,-16],[140,-17.5],[140,-36],[115,-36],[114,-26],[114,-22]],
+ [[100,16],[101,13],[100,7],[103,1.5],[104,1.3],[103,4],[102,6],[105,9],[109,12],[109,16]]
+];
+const SITES=[
+ {n:"East London / Chalumna River",lon:27.9,lat:-33.0,t:"1938: the first living coelacanth known to science, trawled off the Chalumna River."},
+ {n:"Sodwana Bay, South Africa",lon:32.7,lat:-27.5,t:"2000: trimix divers found coelacanths in a cave at 104 m in Jesser Canyon."},
+ {n:"Mozambique (Pebane)",lon:38.1,lat:-17.3,t:"1991: first record. A 179 cm female was carrying 26 near-term pups."},
+ {n:"Comoros",lon:43.3,lat:-11.7,t:"The main known population. 1952 specimen off Anjouan; first sightings in the wild by submersible in 1987.",dive:"comoros"},
+ {n:"Madagascar (Anakao)",lon:43.6,lat:-23.7,t:"1995: first confirmed catch, in a deep-set shark gill net at 140–150 m."},
+ {n:"Kenya (Malindi)",lon:40.1,lat:-3.2,t:"2001: first Kenyan coelacanth, caught by a prawn trawler."},
+ {n:"Tanzania",lon:39.1,lat:-5.6,t:"2003: first record. Many more since, mostly bycatch in shark gill nets."},
+ {n:"Manado Tua, Sulawesi",lon:124.7,lat:1.6,t:"1997–98: the second species, <i>Latimeria menadoensis</i>, found here.",dive:"sulawesi"},
+ {n:"Biak, Papua",lon:136,lat:-1.1,t:"Coelacanths later filmed here by remotely operated vehicle (ROV), about 1,800 km east of Manado."}
+];
+function drawMap(g, hi){
+  oceanGradient(g,"#0e3560","#071a33");
+  g.fillStyle="#0b2a4d"; roundRect(g,MAP.x,MAP.y,MAP.w,MAP.h,12); g.fill();
+  g.strokeStyle="rgba(92,225,230,.08)"; g.lineWidth=1;
+  for(let lon=30;lon<=140;lon+=10){ const [x]=mp(lon,0); g.beginPath(); g.moveTo(x,MAP.y); g.lineTo(x,MAP.y+MAP.h); g.stroke(); }
+  for(let lat=10;lat>=-30;lat-=10){ const [,y]=mp(30,lat); g.beginPath(); g.moveTo(MAP.x,y); g.lineTo(MAP.x+MAP.w,y); g.stroke(); }
+  const [,eq]=mp(30,0); g.strokeStyle="rgba(242,177,52,.25)"; g.setLineDash([4,6]); g.beginPath(); g.moveTo(MAP.x,eq); g.lineTo(MAP.x+MAP.w,eq); g.stroke(); g.setLineDash([]);
+  g.fillStyle="#34507a"; g.strokeStyle="#5c7aa6";
+  for(const poly of LAND){ g.beginPath(); poly.forEach(([lo,la],i)=>{const [x,y]=mp(lo,la); i?g.lineTo(x,y):g.moveTo(x,y);}); g.closePath(); g.fill(); g.stroke(); }
+  g.fillStyle="#9fb6d4"; g.font="bold 14px Trebuchet MS, sans-serif"; g.textAlign="center";
+  let p=mp(30,-12); g.fillText("AFRICA",p[0]-10,p[1]); p=mp(75,-15); g.fillText("INDIAN OCEAN",p[0],p[1]);
+  p=mp(130,-25); g.fillText("AUSTRALIA",p[0],p[1]); p=mp(114,-0.8); g.font="11px Trebuchet MS, sans-serif"; g.fillText("Borneo",p[0],p[1]);
+  p=mp(46.5,-19); g.fillText("Madagascar",p[0]+48,p[1]);
+  SITES.forEach((s,i)=>{ const [x,y]=mp(s.lon,s.lat); const r=s.dive?9:6; const pulse=hi===i?3+Math.sin(T*6)*2:0;
+    g.fillStyle=s.dive?C.gold:C.aqua; g.beginPath(); g.arc(x,y,r+pulse,0,Math.PI*2); g.fill(); g.strokeStyle="#050B1A"; g.lineWidth=2; g.stroke(); });
+  g.fillStyle="#7f9bbf"; g.font="11px Trebuchet MS, sans-serif"; g.textAlign="left"; g.fillText("Schematic map, not to scale · gold = dive sites · aqua = other known records", MAP.x+8, MAP.y+MAP.h-8);
+}
+function Level2(){
+  let mode="map", hi=-1, site=null, sub={x:200,d:2,vx:0,vy:0}, ids=0, toastedDepth=new Set(), photo=null, done=false, camY=0;
+  const PPM=4; // pixels per metre
+  const MAXD=290;
+  const wallX=d=> 860 - Math.min(d,300)*0.9 + Math.sin(d*0.09)*18 + Math.sin(d*0.31)*6;
+  let caves=[];
+  function setupDive(which){
+    site=which; mode="dive"; sub={x:180,d:2,vx:0,vy:0}; ids=0; camY=0; toastedDepth=new Set();
+    const sp = which==="sulawesi"?"indo":"afr";
+    const seeds = which==="sulawesi"? [31,47,58]:[11,23,42];
+    caves=[{d:158,fish:null},{d:186,fish:{seed:seeds[0],sp}},{d:214,fish:{seed:seeds[1],sp}},{d:242,fish:{seed:seeds[2],sp}}].map(c=>({...c,x:wallX(c.d)-10,done:false,seen:false}));
+    ui.innerHTML=""; clearHUD();
+    topBar(`Level 2 · Dive Sim · ${which==="sulawesi"?"Sulawesi":"Comoros"}`);
+    hud.appendChild(touchControls([{key:"action",label:"Photo"}]));
+    hud.appendChild(el(`<div class="footer" style="bottom:76px">Steer with <span class="kbd">&larr;</span><span class="kbd">&uarr;</span><span class="kbd">&darr;</span><span class="kbd">&rarr;</span> or WASD &middot; <span class="kbd">Space</span> takes a photo near a cave</div>`));
+    toast(which==="sulawesi"?"Daytime dive off Manado Tua. <i>L. menadoensis</i> lives around 150–250 m on steep, rocky slopes with caves.":"Daytime dive off Grande Comore. Coelacanths rest in lava caves at about 150–250 m.",5500);
+  }
+  function showMap(){
+    mode="map"; ui.innerHTML=""; clearHUD(); topBar("Level 2 · Dive Sim · Map");
+    const s=el(`<div style="position:absolute;inset:0;pointer-events:none">
+      <div class="card" style="position:absolute;left:470px;top:300px;width:450px;padding:12px 16px;pointer-events:auto" data-info>
+        <h3>Known coelacanth locations</h3><p style="font-size:15px">Click or tap any dot to read about it. Then pick a <b style="color:var(--gold)">gold</b> dive site.</p>
+        <div class="row" style="justify-content:flex-start"><button class="btn small" data-c>Dive: Comoros</button><button class="btn small" data-s>Dive: Sulawesi</button></div></div></div>`);
+    s.querySelector("[data-c]").onclick=()=>setupDive("comoros"); s.querySelector("[data-s]").onclick=()=>setupDive("sulawesi");
+    ui.appendChild(s);
+  }
+  function siteInfo(i){
+    hi=i; const s=SITES[i]; const box=ui.querySelector("[data-info] p"); if(box) box.innerHTML=`<b>${s.n}</b><br>${s.t}`;
+  }
+  function openPhoto(cave){
+    photo=cave; const f=cave.fish;
+    const others = f.sp==="indo"? [31,47,58,66,73].filter(x=>x!==f.seed) : [11,23,42,55,61].filter(x=>x!==f.seed);
+    const r=rng(f.seed*3+ids); const pick=[f.seed, others[Math.floor(r()*others.length)]];
+    let third; do{ third=others[Math.floor(r()*others.length)]; }while(third===pick[1]); pick.push(third);
+    const order=[0,1,2].sort(()=>r()-0.5);
+    const cards=order.map(k=>pick[k]);
+    const labels=cards.map(sd=>"CC-"+String(sd).padStart(3,"0"));
+    const s=el(`<div class="screen" style="background:rgba(5,11,26,.7)"><div class="card" style="width:820px;max-width:820px">
+      <h3>Photo ID · match the spot pattern</h3><h2 style="font-size:20px">Which catalog fish did you just photograph?</h2>
+      <p style="font-size:15px">Every coelacanth's white-spot pattern is unique, like a fingerprint. Researchers use photos to tell individuals apart.</p>
+      <div class="row" style="align-items:flex-start">
+        <div style="text-align:center"><canvas width="250" height="140" data-ph style="border:3px solid var(--aqua);border-radius:8px;position:static;width:250px;height:140px"></canvas><div style="font-size:13px;color:var(--aqua)">YOUR PHOTO</div></div>
+        <div style="display:flex;gap:8px">${cards.map((sd,i)=>`<button class="opt" style="width:170px;padding:6px;text-align:center" data-sd="${sd}"><canvas width="160" height="96" style="position:static;width:160px;height:96px"></canvas><br><b>${labels[i]}</b> <span class="kbd">${i+1}</span></button>`).join("")}</div>
+      </div>
+      <div class="fb" data-fb>Compare the biggest spots on the side and near the gill cover.</div>
+      <div class="row" style="justify-content:flex-end"><button class="btn" data-next style="display:none">Continue dive</button></div></div></div>`);
+    ui.appendChild(s);
+    const ph=s.querySelector("[data-ph]").getContext("2d");
+    ph.fillStyle="#0b1d36"; ph.fillRect(0,0,250,140); drawCoelacanth(ph,138,72,0.85,{seed:f.seed,species:f.sp,phase:0.6});
+    const vg=ph.createRadialGradient(125,70,30,125,70,150); vg.addColorStop(0,"rgba(0,0,0,0)"); vg.addColorStop(1,"rgba(0,0,0,.6)"); ph.fillStyle=vg; ph.fillRect(0,0,250,140);
+    const btns=[...s.querySelectorAll("[data-sd]")];
+    btns.forEach(b=>{ const c=b.querySelector("canvas").getContext("2d"); c.fillStyle="#0b1d36"; c.fillRect(0,0,160,96); drawCoelacanth(c,88,50,0.55,{seed:+b.dataset.sd,species:f.sp,phase:0.6}); });
+    const fb=s.querySelector("[data-fb]"), nb=s.querySelector("[data-next]");
+    let ok=false;
+    btns.forEach(b=>b.onclick=()=>{ if(ok) return;
+      if(+b.dataset.sd===f.seed){ ok=true; b.classList.add("right"); cave.done=true; ids++;
+        fb.className="fb ok"; fb.innerHTML=`&#10003; Match! That's <b>${"CC-"+String(f.seed).padStart(3,"0")}</b>. Re-sighting the same fish over years shows that coelacanths stay in one area and reuse the same caves.`;
+        nb.style.display="inline-block"; nb.focus(); }
+      else { b.classList.add("wrong"); fb.className="fb no"; fb.textContent="Not a match. Look at the size and placement of the biggest white spots."; }
+    });
+    s.addEventListener("keydown",e=>{const n=parseInt(e.key); if(n>=1&&n<=3){btns[n-1].click();}});
+    nb.onclick=()=>{ s.remove(); photo=null; if(ids>=3) finish(); else toast(`${ids}/3 coelacanths identified. Keep exploring the caves.`); };
+    btns[0].focus();
+  }
+  function finish(){
+    done=true;
+    levelComplete("l2","Photo ID expert!",[
+      "You identified 3 resting coelacanths at about <b>180–245 m</b>, in water near <b>17–20 °C</b>.",
+      "By day they rest in caves in small, peaceful groups. <b>At night</b> they leave one by one to drift-hunt, often deeper, and come back before sunrise."]);
+  }
+  const depthFacts=[
+    [15,"Surface water is warm and bright. Coelacanths don't live up here."],
+    [60,"Red light has faded. Everything looks blue now."],
+    [100,"Welcome to the <b>twilight zone</b>. Coelacanths have big eyes with a reflective layer, like a cat's."],
+    [133,"133 m: the <b>shallowest</b> depth recorded for a tracked coelacanth at Grande Comore."],
+    [150,"Cave zone! Coelacanths have been seen at <b>150–253 m</b> in water of <b>16.5–22.8 °C</b>."],
+    [200,"200 m: their favorite depth by day. They spend most of their time at <b>200–300 m</b>."],
+    [260,"Fun fact: one large coelacanth was tracked down to <b>698 m</b> at night."]
+  ];
+  const temp=d=> d<30? 27 : Math.max(14, 27-(d-30)*(10/220));
+  return {
+    enter(){ showMap(); },
+    onPointer(p){ if(mode!=="map") return; SITES.forEach((s,i)=>{ const [x,y]=mp(s.lon,s.lat); if(Math.hypot(p.x-x,p.y-y)<16) siteInfo(i); }); },
+    onKey(k){ if(mode==="dive" && k==="action" && !photo && !done){
+      const c=caves.find(c=>Math.abs(c.d-sub.d)<14 && Math.abs(sub.x-c.x)<120);
+      if(!c) { toast("Get closer to a cave entrance to take a photo."); return; }
+      if(!c.fish){ toast("Empty cave. Not every cave is occupied. Caves may limit where coelacanths can live."); c.seen=true; return; }
+      if(c.done){ toast("Already identified. Try another cave."); return; }
+      openPhoto(c);
+    } },
+    update(dt){
+      if(mode!=="dive" || photo || done) return;
+      const ax=(keys.has("right")?1:0)-(keys.has("left")?1:0), ay=(keys.has("down")?1:0)-(keys.has("up")?1:0);
+      sub.vx=lerp(sub.vx,ax*150,dt*2.5); sub.vy=lerp(sub.vy,ay*28,dt*2.5);
+      sub.x=clamp(sub.x+sub.vx*dt,40,wallX(sub.d)-70); sub.d=clamp(sub.d+sub.vy*dt,0,MAXD);
+      for(const [d,msg] of depthFacts){ if(sub.d>=d && !toastedDepth.has(d)){ toastedDepth.add(d); toast(msg,4800); } }
+      camY=lerp(camY, sub.d*PPM-H*0.45, Math.min(1,dt*4));
+      camY=clamp(camY,-60,MAXD*PPM+120-H);
+    },
+    draw(g,dt){
+      if(mode==="map"){ drawMap(g,hi); return; }
+      const dTop=camY/PPM, dBot=(camY+H)/PPM;
+      // water colour by depth (light fading)
+      const col=d=> d<120? mixColor(C.surface,C.twilight,d/120) : mixColor(C.twilight,C.deep,clamp((d-120)/100,0,1));
+      const gr=g.createLinearGradient(0,0,0,H); gr.addColorStop(0,col(Math.max(0,dTop))); gr.addColorStop(1,col(Math.max(0,dBot))); g.fillStyle=gr; g.fillRect(0,0,W,H);
+      if(camY<0){ g.fillStyle="#9fd3f5"; g.fillRect(0,0,W,-camY); }
+      // marine snow
+      g.fillStyle="rgba(220,235,255,.35)"; for(let i=0;i<60;i++){ const x=(i*137.5)%W, y=((i*91.3 - T*12 - camY*0.3)%H+H)%H; g.fillRect(x,y,1.5,1.5); }
+      // wall / slope
+      g.fillStyle="#1a1410"; g.beginPath(); g.moveTo(W,-camY);
+      for(let d=0; d<=MAXD+40; d+=4){ g.lineTo(wallX(d), d*PPM-camY); }
+      g.lineTo(W,(MAXD+40)*PPM-camY); g.closePath(); g.fill();
+      g.strokeStyle="#3a2c22"; g.lineWidth=3; g.beginPath(); for(let d=0;d<=MAXD+40;d+=4){ const x=wallX(d),y=d*PPM-camY; d?g.lineTo(x,y):g.moveTo(x,y);} g.stroke();
+      // caves
+      for(const c of caves){ const y=c.d*PPM-camY; if(y<-80||y>H+80) continue;
+        g.fillStyle="#050302"; g.beginPath(); g.ellipse(c.x+40,y,70,34,0,0,Math.PI*2); g.fill();
+        if(c.fish) drawCoelacanth(g,c.x+44,y+6,0.42,{seed:c.fish.seed,species:c.fish.sp,phase:T*0.8,flip:true});
+        g.fillStyle=c.done?C.aqua:"#9fb6d4"; g.font="12px Trebuchet MS, sans-serif"; g.textAlign="center"; g.fillText(c.done?"ID'd ✓":`cave · ${c.d} m`, c.x+40, y-40);
+      }
+      // seabed below
+      const sy=(MAXD+15)*PPM-camY; if(sy<H){ g.fillStyle="#120d09"; g.fillRect(0,sy,W,H-sy); }
+      // sub
+      const sxp=sub.x, syp=sub.d*PPM-camY;
+      // darkness mask with headlight
+      const dark=clamp((sub.d-40)/160,0,0.66);
+      if(dark>0){
+        g.save(); g.fillStyle=`rgba(0,0,0,${dark})`;
+        g.beginPath(); g.rect(0,0,W,H);
+        g.moveTo(sxp+40,syp); g.arc(sxp+40,syp,30,0,Math.PI*2,true);
+        g.fill(); g.restore();
+        g.save(); g.globalCompositeOperation="lighter";
+        const lg=g.createRadialGradient(sxp+40,syp,10,sxp+200,syp+10,260); lg.addColorStop(0,`rgba(255,240,190,${0.7*dark})`); lg.addColorStop(1,"rgba(255,240,190,0)");
+        g.fillStyle=lg; g.beginPath(); g.moveTo(sxp+40,syp-8); g.lineTo(sxp+460,syp-140); g.lineTo(sxp+460,syp+160); g.lineTo(sxp+40,syp+8); g.fill(); g.restore();
+      }
+      g.save(); g.translate(sxp,syp);
+      g.fillStyle=C.gold; roundRect(g,-50,-22,90,44,20); g.fill();
+      g.fillStyle="#1b2d4a"; g.beginPath(); g.arc(28,0,16,0,Math.PI*2); g.fill(); g.fillStyle="rgba(92,225,230,.6)"; g.beginPath(); g.arc(30,-3,10,0,Math.PI*2); g.fill();
+      g.fillStyle="#c8891f"; g.fillRect(-60,-8,12,16); g.fillStyle="#e6e6e6"; g.fillRect(-28,-30,30,10);
+      g.strokeStyle="#c8891f"; g.lineWidth=3; g.beginPath(); g.moveTo(-64,-14+Math.sin(T*20)*6); g.lineTo(-64,14-Math.sin(T*20)*6); g.stroke();
+      g.restore();
+      // HUD: depth gauge + temperature + light
+      g.fillStyle="rgba(5,11,26,.8)"; roundRect(g,10,40,124,336,10); g.fill();
+      g.fillStyle="#9fb6d4"; g.font="12px Trebuchet MS, sans-serif"; g.textAlign="left"; g.fillText("DEPTH",22,60);
+      g.fillStyle=C.aqua; g.font="bold 30px Trebuchet MS, sans-serif"; g.fillText(Math.round(sub.d)+" m",22,92);
+      g.fillStyle="#9fb6d4"; g.font="12px Trebuchet MS, sans-serif"; g.fillText("TEMP (approx.)",22,118);
+      g.fillStyle=C.gold; g.font="bold 24px Trebuchet MS, sans-serif"; g.fillText(temp(sub.d).toFixed(1)+" °C",22,144);
+      g.fillStyle="#9fb6d4"; g.font="12px Trebuchet MS, sans-serif"; g.fillText("SUNLIGHT",22,170);
+      const light=Math.max(0,Math.exp(-sub.d/45)); g.fillStyle="#223a5e"; g.fillRect(22,178,100,10); g.fillStyle="#ffe9a8"; g.fillRect(22,178,100*light,10);
+      // gauge bar
+      g.fillStyle="#223a5e"; g.fillRect(28,200,14,128); const zy=d=>200+d/300*128;
+      g.fillStyle="rgba(242,177,52,.45)"; g.fillRect(28,zy(150),14,zy(253)-zy(150));
+      g.fillStyle="#fff"; g.fillRect(24,zy(sub.d)-1.5,22,3);
+      g.fillStyle="#9fb6d4"; g.font="10px Trebuchet MS, sans-serif"; [0,100,200,300].forEach(d=>g.fillText(d+"",50,zy(d)+4)); g.fillStyle=C.gold; g.fillText("cave zone",64,zy(200)+4);
+      g.fillStyle="#cfe0f5"; g.font="14px Trebuchet MS, sans-serif"; g.fillStyle=C.aqua; g.font="bold 16px Trebuchet MS, sans-serif"; g.textAlign="left"; g.fillText(`Photo IDs: ${ids}/3`, 20, 362);
+      const near=caves.find(c=>Math.abs(c.d-sub.d)<14 && Math.abs(sub.x-c.x)<120 && !c.done);
+      if(near){ g.fillStyle=C.aqua; g.font="bold 16px Trebuchet MS, sans-serif"; g.textAlign="center"; g.fillText(near.fish?"Press SPACE / Photo to ID this coelacanth":"Cave in range: press SPACE to look", W/2, H-120); }
+    },
+    _test:{ get state(){return {mode,ids,sub,caves,done,photo:!!photo};}, dive:setupDive, tp(d,x){sub.d=d; if(x)sub.x=x;} }
+  };
+}
+/* ============ LEVEL 3: Live as a Coelacanth ============ */
+function Level3(){
+  const WORLD=3200, CAVE={x:150,y:250};
+  const floorY=x=> 430 + Math.sin(x*0.004)*25 + Math.sin(x*0.013)*10 + (x>1600? (x-1600)*0.02:0) - 80*Math.exp(-(((x-150)/260)**2));
+  const depthAt=y=> Math.round(110 + y*0.5);   // screen y → metres (approx; cave ≈ 235 m)
+  let warned=false, fish, prey, sharks, nets, energy, clock, eaten, state, camX, pulses, phase, inv, firstEat, netHits, sensedOnce, started;
+  function reset(){
+    fish={x:CAVE.x+40,y:CAVE.y,vx:0,vy:0,hs:0,mouth:0,face:1};
+    const r=rng(77); prey=[];
+    const xs=[560,760,980,1180,1380,1560,1760,1950,2150,2350,2550,2760,2950];
+    xs.forEach(x=>{ const px=x+r()*60; prey.push({x:px,y:floorY(px)-10-r()*14,found:false,eaten:false,kind:r()<0.5?"squid":"fish"}); });
+    sharks=[{x:900,y:170,dir:1,min:700,max:1500,sp:55},{x:2200,y:220,dir:-1,min:1800,max:2900,sp:65}];
+    nets=[{x:1300,top:-40,bot:300},{x:2050,top:-40,bot:330},{x:2700,top:-40,bot:290}];
+    energy=100; clock=19.0; eaten=0; state="intro"; camX=0; pulses=[]; phase=0; inv=0; firstEat=true; netHits=0; sensedOnce=false; warned=false;
+  }
+  reset();
+  const NEED=5, DAWN=29.5; // 05:30 next day
+  const fmtClock=c=>{ const h=Math.floor(c)%24, m=Math.floor((c%1)*60); return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`; };
+  function intro(){
+    state="intro";
+    showCard({kicker:"Level 3 · 19:00, sunset",title:"Tonight, you are the coelacanth",lines:[
+      "Leave your cave, <b>drift-hunt</b> along the slope, and eat at least <b>5 prey</b>. Get home before <b>dawn (05:30)</b>.",
+      "<span class='kbd'>&larr;&rarr;&uarr;&darr;</span> drift and steer (slow is efficient) · <span class='kbd'>Space</span> headstand to scan the seabed with your <b>rostral organ</b> · <span class='kbd'>Shift</span> burst (costs lots of energy).",
+      "Watch out for <b style='color:var(--coral)'>sharks</b> and <b style='color:var(--coral)'>deep-set shark nets</b>. Ride the <b style='color:var(--aqua)'>currents</b> to save energy."],btn:"Leave the cave",onDone:()=>{state="play";}});
+  }
+  function fail(reason){
+    state="over";
+    const s=el(`<div class="screen" style="background:rgba(5,11,26,.6)"><div class="card" style="text-align:center"><h3>Try again</h3><h2>${reason[0]}</h2><p>${reason[1]}</p>
+      <div class="row"><button class="btn" data-r>Retry night</button><button class="btn secondary" data-m>Menu</button></div></div></div>`);
+    ui.appendChild(s); s.querySelector("[data-r]").onclick=()=>{ s.remove(); reset(); intro(); }; s.querySelector("[data-m]").onclick=()=>setScene(MenuScene); s.querySelector("[data-r]").focus();
+  }
+  function win(){
+    state="won";
+    levelComplete("l3","Home before dawn!",[
+      `You ate <b>${eaten}</b> prey and got home at <b>${fmtClock(clock)}</b> with <b>${Math.round(energy)}%</b> energy left.`,
+      "Real coelacanths drift-hunt for about <b>9 hours</b> a night at roughly <b>3 m per minute</b>. That slow, low-energy lifestyle fits their small gills and slow metabolism.",
+      netHits? `You got tangled in a net ${netHits}×. In the real ocean, <b>bycatch</b> in deep-set shark gill nets is the biggest threat.` : "You avoided every net. <b>Bycatch</b> in deep-set shark gill nets is the biggest threat to real coelacanths."]);
+  }
+  const currents=[{x0:450,x1:1250,y0:330,y1:400,dir:1},{x0:1500,x1:2600,y0:120,y1:190,dir:-1},{x0:1700,x1:2900,y0:300,y1:370,dir:1},{x0:350,x1:1400,y0:90,y1:150,dir:-1}];
+  return {
+    enter(){
+      topBar("Level 3 · Live as a Coelacanth");
+      hud.appendChild(touchControls([{key:"action",label:"Headstand"},{key:"burst",label:"Burst"}]));
+      intro();
+    },
+    onKey(k){ if(state==="play" && k==="action"){ fish.hsTarget = fish.hsTarget?0:1; if(fish.hsTarget) pulses.push({r:0}); } },
+    update(dt){
+      if(state!=="play") return;
+      clock += dt*(10.5/200); // whole night ≈ 200 s
+      const ax=(keys.has("right")?1:0)-(keys.has("left")?1:0), ay=(keys.has("down")?1:0)-(keys.has("up")?1:0);
+      const burst=keys.has("burst") && (ax||ay);
+      const inHS = (fish.hsTarget||0) > 0;
+      const sp = inHS? 22 : (burst? 230 : 85);
+      // currents
+      let cx=0; for(const c of currents){ if(fish.x>c.x0&&fish.x<c.x1&&fish.y>c.y0&&fish.y<c.y1) cx=c.dir*55; }
+      fish.vx=lerp(fish.vx, ax*sp + cx, dt*(burst?4:1.6)); fish.vy=lerp(fish.vy, ay*sp*0.7, dt*(burst?4:1.6));
+      fish.x=clamp(fish.x+fish.vx*dt, 60, WORLD-40); fish.y=clamp(fish.y+fish.vy*dt, 40, floorY(fish.x)-18);
+      if(Math.abs(fish.vx)>8) fish.face = fish.vx>0?1:-1;
+      fish.hs = lerp(fish.hs, fish.hsTarget||0, dt*2.5);
+      const speed=Math.hypot(fish.vx-cx,fish.vy);
+      phase += dt*(1.2 + speed*0.03);
+      // energy: base + effort; currents help (effort counted relative to water)
+      const effort = (ax||ay)? (burst? 9 : 0.6) : 0;
+      energy -= dt*(0.25 + effort);
+      if(inv>0) inv-=dt;
+      // sensing in headstand
+      if(fish.hs>0.6){
+        if(Math.random()<dt*1.5) pulses.push({r:0});
+        const snout={x:fish.x+fish.face*18, y:fish.y+40};
+        for(const p of prey){ if(!p.found && !p.eaten && Math.hypot(p.x-snout.x,p.y-snout.y)<170){ p.found=true;
+          if(!sensedOnce){ sensedOnce=true; toast("Prey sensed! Your <b>rostral organ</b> picks up its weak electric field. Swim to it to eat."); } } }
+      }
+      pulses.forEach(p=>p.r+=dt*120); pulses=pulses.filter(p=>p.r<170);
+      // eating
+      fish.mouth=Math.max(0,fish.mouth-dt*2);
+      const mouthPt={x:fish.x+fish.face*38*Math.cos(fish.hs*1.35), y:fish.y+38*Math.sin(fish.hs*1.35)};
+      for(const p of prey){ if(p.found && !p.eaten && Math.hypot(p.x-mouthPt.x,p.y-mouthPt.y)<44){ p.eaten=true; eaten++; energy=Math.min(100,energy+14); fish.mouth=1;
+        if(firstEat){ firstEat=false; toast("Gulp! The <b>hinged skull (intracranial joint)</b> lets the mouth open wide. Prey is swallowed whole."); }
+        else if(eaten===NEED) toast("That's 5 prey. Head back <b>west to your cave</b> before dawn!"); else toast(`Prey eaten: ${eaten}/${NEED}`,1800); } }
+      // sharks
+      for(const s of sharks){ s.x+=s.dir*s.sp*dt; if(s.x>s.max) s.dir=-1; if(s.x<s.min) s.dir=1; s.y+=Math.sin(T+s.min)*10*dt;
+        if(inv<=0 && Math.abs(s.x-fish.x)<85 && Math.abs(s.y-fish.y)<34){ inv=2.5; energy-=18; fish.vx=0; fish.vy=-120; fish.x+= (fish.x<s.x?-60:60);
+          toast("Shark! You burst away with your powerful tail. Escapes like that cost a lot of energy."); } }
+      // nets
+      for(const n of nets){ if(inv<=0 && Math.abs(fish.x-n.x)<26 && fish.y>n.top && fish.y<n.bot){
+        netHits++; inv=3; energy-=25; clock+=0.75; fish.x += (fish.x<n.x? -90 : 90); fish.vx=fish.vy=0;
+        state="pause";
+        showCard({kicker:"Bycatch",title:"Tangled in a shark gill net!",lines:[
+          "Deep-set gill nets meant for sharks catch coelacanths by accident. That's called <b>bycatch</b>, and it's the main threat to coelacanths today, especially in Tanzania, Madagascar and Indonesia.",
+          "A real fish would probably die. In the game you struggle free, but lose 25% energy and 45 minutes. Look for the gap <b>under</b> each net."],btn:"Keep going",onDone:()=>{ state="play"; }});
+        return;
+      } }
+      // win / lose
+      const home = Math.hypot(fish.x-CAVE.x,fish.y-CAVE.y)<90;
+      if(home && eaten>=NEED){ win(); return; }
+      if(energy<=0){ energy=0; fail(["Out of energy","Coelacanths have a slow metabolism and small gills. Drift with the currents, move gently and eat to refuel."]); return; }
+      if(clock>=DAWN){ fail(["Dawn caught you outside","Coelacanths usually head back to their caves before sunrise. Plan your route and leave time to swim home."]); return; }
+      if(clock>=28.5 && !warned){ warned=true; toast("04:30: dawn is coming. Head back to the cave!"); }
+      camX=clamp(lerp(camX, fish.x-W*0.4, Math.min(1,dt*3)),0,WORLD-W);
+    },
+    draw(g,dt){
+      // night water (slightly brighter towards dawn)
+      const dawnT=clamp((clock-27.5)/2,0,1);
+      oceanGradient(g, mixColor("#081a33","#1a3a66",dawnT), mixColor("#02060f","#0b1a33",dawnT));
+      g.save(); g.translate(-camX,0);
+      // marine snow
+      g.fillStyle="rgba(200,220,255,.25)"; for(let i=0;i<120;i++){ const x=(i*97.3)%WORLD, y=((i*53.7 - T*8)%H+H)%H; g.fillRect(x,y,1.5,1.5); }
+      // currents
+      for(const c of currents){ g.fillStyle="rgba(92,225,230,.05)"; g.fillRect(c.x0,c.y0,c.x1-c.x0,c.y1-c.y0);
+        g.strokeStyle="rgba(92,225,230,.35)"; g.lineWidth=2;
+        for(let x=c.x0+((T*40*c.dir)%60+60)%60; x<c.x1; x+=60){ const y=(c.y0+c.y1)/2; g.beginPath(); g.moveTo(x-12*c.dir,y-6); g.lineTo(x,y); g.lineTo(x-12*c.dir,y+6); g.stroke(); } }
+      // slope / floor
+      g.fillStyle="#140f0b"; g.beginPath(); g.moveTo(0,H); for(let x=0;x<=WORLD;x+=20) g.lineTo(x,floorY(x)); g.lineTo(WORLD,H); g.fill();
+      g.strokeStyle="#2b2018"; g.lineWidth=3; g.beginPath(); for(let x=0;x<=WORLD;x+=20) x?g.lineTo(x,floorY(x)):g.moveTo(x,floorY(x)); g.stroke();
+      // cave (left)
+      g.fillStyle="#140f0b"; g.beginPath(); g.moveTo(0,0); g.lineTo(0,H); g.lineTo(120,H); g.quadraticCurveTo(300,250,110,120); g.quadraticCurveTo(150,40,0,0); g.fill();
+      g.fillStyle="#020101"; g.beginPath(); g.ellipse(CAVE.x,CAVE.y,90,55,0,0,Math.PI*2); g.fill();
+      g.fillStyle=eaten>=NEED?C.gold:"#9fb6d4"; g.font="bold 13px Trebuchet MS, sans-serif"; g.textAlign="center"; g.fillText(eaten>=NEED?"HOME CAVE: return here!":"HOME CAVE",CAVE.x,CAVE.y-64);
+      // nets
+      for(const n of nets){
+        g.strokeStyle="rgba(228,87,46,.75)"; g.lineWidth=1.2;
+        for(let y=n.top; y<n.bot; y+=12){ g.beginPath(); g.moveTo(n.x-22,y); g.lineTo(n.x+22,y); g.stroke(); }
+        for(let x=-22;x<=22;x+=11){ g.beginPath(); g.moveTo(n.x+x,n.top); g.lineTo(n.x+x+Math.sin(T+x)*3,n.bot); g.stroke(); }
+        g.fillStyle=C.coral; for(let x=-22;x<=22;x+=11){ g.beginPath(); g.arc(n.x+x,n.bot,3,0,Math.PI*2); g.fill(); }
+        g.strokeStyle="rgba(228,87,46,.5)"; g.beginPath(); g.moveTo(n.x,n.bot); g.lineTo(n.x,n.bot+14); g.stroke();
+        g.fillStyle="#ffb39c"; g.font="11px Trebuchet MS, sans-serif"; g.fillText("shark net",n.x,n.bot+28);
+      }
+      // prey
+      for(const p of prey){ if(p.eaten) continue;
+        if(!p.found){ g.fillStyle="rgba(140,120,100,.25)"; g.beginPath(); g.ellipse(p.x,p.y+6,10,3,0,0,Math.PI*2); g.fill(); continue; }
+        g.save(); g.translate(p.x,p.y+Math.sin(T*3+p.x)*2);
+        g.strokeStyle=C.aqua; g.globalAlpha=.5+Math.sin(T*6)*.3; g.beginPath(); g.arc(0,0,16,0,Math.PI*2); g.stroke(); g.globalAlpha=1;
+        if(p.kind==="squid"){ g.fillStyle="#e8a0b4"; g.beginPath(); g.ellipse(0,0,10,5,0,0,Math.PI*2); g.fill(); g.strokeStyle="#e8a0b4"; for(let k=-2;k<=2;k++){g.beginPath();g.moveTo(-9,k*2);g.lineTo(-17,k*3+Math.sin(T*5+k)*2);g.stroke();} }
+        else { g.fillStyle="#c9c27a"; g.beginPath(); g.ellipse(0,0,9,4,0,0,Math.PI*2); g.fill(); g.beginPath(); g.moveTo(-8,0); g.lineTo(-14,-5); g.lineTo(-14,5); g.fill(); }
+        g.restore(); }
+      // sharks
+      for(const s of sharks) drawShark(g,s.x,s.y,0.8,s.dir<0,T);
+      // sensing pulses
+      const sn={x:fish.x+fish.face*18*(1-fish.hs)+fish.face*0, y:fish.y+40*fish.hs};
+      for(const p of pulses){ g.strokeStyle=`rgba(92,225,230,${1-p.r/170})`; g.lineWidth=2; g.beginPath(); g.arc(sn.x,sn.y,p.r,0,Math.PI*2); g.stroke(); }
+      // player fish
+      if(!(inv>0 && Math.floor(T*10)%2)) drawCoelacanth(g, fish.x, fish.y, 0.5, {phase, seed:1, headstand:fish.hs, flip:fish.face<0, mouth:fish.mouth});
+      g.restore();
+      // HUD
+      g.fillStyle="rgba(5,11,26,.8)"; roundRect(g,10,38,230,150,10); g.fill();
+      g.textAlign="left"; g.fillStyle="#9fb6d4"; g.font="12px Trebuchet MS, sans-serif"; g.fillText("ENERGY",22,58);
+      g.fillStyle="#223a5e"; g.fillRect(22,64,200,14); g.fillStyle= energy>35? "#4cd17a": energy>15? C.gold : C.coral; g.fillRect(22,64,2*Math.max(0,energy),14);
+      g.fillStyle="#9fb6d4"; g.fillText("NIGHT CLOCK",22,98); g.fillStyle=clock>=28.5?C.coral:C.gold; g.font="bold 22px Trebuchet MS, sans-serif"; g.fillText(fmtClock(clock)+"  →  05:30",22,122);
+      g.fillStyle="#cfe0f5"; g.font="14px Trebuchet MS, sans-serif"; g.fillText(`Prey: ${eaten}/${NEED}`,22,146);
+      g.fillText(`Depth ≈ ${depthAt(fish.y)} m`,120,146);
+      g.fillStyle="#9fb6d4"; g.font="12px Trebuchet MS, sans-serif"; g.fillText(fish.hs>0.6?"HEADSTAND · scanning":"Space: headstand scan",22,172);
+      // diagonal fin-gait indicator
+      g.fillStyle="rgba(5,11,26,.8)"; roundRect(g,W-170,40,160,120,10); g.fill();
+      g.fillStyle="#9fb6d4"; g.font="11px Trebuchet MS, sans-serif"; g.textAlign="center"; g.fillText("PAIRED FINS (top view)",W-90,56);
+      g.fillStyle="#1F3A6B"; g.beginPath(); g.ellipse(W-90,100,14,38,0,0,Math.PI*2); g.fill();
+      const a=Math.sin(phase)>0;
+      const fin=(x,y,on,l)=>{ g.fillStyle=on?C.aqua:"#2b5288"; g.beginPath(); g.ellipse(x,y,13,6,0,0,Math.PI*2); g.fill(); g.fillStyle="#cfe0f5"; g.font="9px Trebuchet MS, sans-serif"; g.fillText(l,x+(x<W-90?-22:22),y+3); };
+      fin(W-115,82,a,"L-pec"); fin(W-65,82,!a,"R-pec"); fin(W-115,122,!a,"L-pel"); fin(W-65,122,a,"R-pel");
+      g.fillStyle="#9fb6d4"; g.font="10px Trebuchet MS, sans-serif"; g.fillText("diagonal pairs, like a walking tetrapod",W-90,152);
+    },
+    _test:{ get state(){return {state,fish,energy,clock,eaten,prey,netHits};}, tp(x,y){fish.x=x;fish.y=y;}, skipIntro(){ ui.innerHTML=""; state="play"; } }
+  };
+}
+/* ============ Review Quiz + Score ============ */
+const QUIZ=[
+ {q:"About how old are the oldest coelacanth fossils?",o:["About 4 million years","About 66 million years","About 400 million years","About 4,000 years"],a:2,e:"The oldest known coelacanth (<i>Eoactinistia</i>, Australia) is about 407–409 million years old, from the Devonian."},
+ {q:"Who saved the 1938 fish for science?",o:["Mark Erdmann","Marjorie Courtenay-Latimer","Hans Fricke","Ahmed Hussein"],a:1,e:"The East London Museum curator spotted it in a pile of fish and contacted J.L.B. Smith."},
+ {q:"A \"Lazarus taxon\" is a group that…",o:["disappears from the fossil record, then is found alive","lives only in caves","evolved from lungfish","was named after a scientist"],a:0,e:"Coelacanths were 'extinct' in the fossil record for about 66 million years, until 1938."},
+ {q:"Where was the second species, <i>Latimeria menadoensis</i>, discovered?",o:["Madagascar","Kenya","Sulawesi, Indonesia","Sodwana Bay, South Africa"],a:2,e:"Mark Erdmann saw one in a Manado market (1997), and a live one was caught off Manado Tua (1998)."},
+ {q:"What do coelacanths usually do during the day?",o:["Hunt near the surface","Rest in caves around 150–250 m deep","Bury themselves in sand","Migrate thousands of kilometers"],a:1,e:"They rest in small groups in caves by day and drift-hunt at night."},
+ {q:"What is the rostral organ used for?",o:["Breathing air","Storing oil","Sensing weak electric fields from prey","Making light"],a:2,e:"It's an electroreceptor in the snout. A headstand brings it close to the seabed."},
+ {q:"How do a coelacanth's paired fins move?",o:["All four together","Only the front pair moves","In diagonal pairs, like a walking tetrapod","They don't move. It uses only its tail"],a:2,e:"Left pectoral with right pelvic, then right pectoral with left pelvic. It drifts and doesn't walk on the seafloor."},
+ {q:"According to the 2021 scale study, about how long can coelacanths live?",o:["About 10 years","About 20 years","About 100 years","About 1,000 years"],a:2,e:"Growth rings on the scales suggest about 100 years. Gestation is about 5 years, too."},
+ {q:"What is the biggest threat to coelacanths today?",o:["Coral bleaching","Bycatch in deep-set shark gill nets","Being hunted by whales","Plastic straws"],a:1,e:"They're caught by accident in shark nets. <i>L. chalumnae</i> is Critically Endangered (IUCN)."},
+ {q:"According to the 2013 genome study, which living fish is the closest relative of tetrapods?",o:["The coelacanth","The lungfish","The shark","The tuna"],a:1,e:"Lungfish edged out coelacanths. Both are lobe-finned fishes, though."}
+];
+function QuizScene(){
+  let i=0, score=0, answered=false;
+  function render(){
+    ui.innerHTML="";
+    const it=QUIZ[i];
+    const s=el(`<div class="screen"><div class="card" style="width:660px">
+      <h3>Final review · Question ${i+1} of ${QUIZ.length} · Score ${score}</h3>
+      <div style="height:6px;background:#163259;border-radius:3px;margin:4px 0 10px"><div style="height:6px;width:${i/QUIZ.length*100}%;background:var(--gold);border-radius:3px"></div></div>
+      <h2 style="font-size:22px">${it.q}</h2>
+      ${it.o.map((t,k)=>`<button class="opt" data-k="${k}"><span class="order-slot">${k+1}</span>${t}</button>`).join("")}
+      <div class="fb" data-fb></div>
+      <div class="row" style="justify-content:flex-end"><button class="btn" data-next style="display:none">${i<QUIZ.length-1?"Next question":"See my score"}</button></div>
+    </div></div>`);
+    ui.appendChild(s);
+    const btns=[...s.querySelectorAll(".opt")], fb=s.querySelector("[data-fb]"), nb=s.querySelector("[data-next]");
+    answered=false;
+    btns.forEach(b=>b.onclick=()=>{ if(answered) return; answered=true; const k=+b.dataset.k;
+      btns[it.a].classList.add("right");
+      if(k===it.a){ score++; fb.className="fb ok"; fb.innerHTML="&#10003; Correct! "+it.e; }
+      else { b.classList.add("wrong"); fb.className="fb no"; fb.innerHTML="&#10007; Not this time. "+it.e; }
+      s.querySelector("h3").textContent=`Final review · Question ${i+1} of ${QUIZ.length} · Score ${score}`;
+      nb.style.display="inline-block"; nb.focus(); });
+    nb.onclick=()=>{ i++; if(i<QUIZ.length) render(); else setScene(ScoreScene(score)); };
+    btns[0].focus();
+  }
+  return {
+    enter(){ topBar("Final Review Quiz"); render(); },
+    onKeyRaw(e){ const n=parseInt(e.key); if(!answered && n>=1&&n<=4){ const b=ui.querySelectorAll(".opt")[n-1]; b&&b.click(); } },
+    draw(g,dt){ ambientBackground(g,dt); },
+    _test:{ get state(){return {i,score,answered};} }
+  };
+}
+function ScoreScene(score){
+  const best=progress.quiz?Math.max(progress.quiz.score,score):score;
+  progress.quiz={score:best,last:score}; saveProgress();
+  const date=new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+  const msg= score>=9?"Outstanding: a true coelacanth expert!": score>=7?"Great work. You know your living fossil!": score>=5?"Solid start. Replay a level and try again!":"Keep exploring. Replay the levels and retake the quiz!";
+  const lv=(b,n)=>`<span class="pill" style="${b?"border-color:#4cd17a;color:#7ff0a4":"opacity:.6"}">${b?"&#10003;":"&#9675;"} ${n}</span>`;
+  return {
+    enter(){
+      const s=el(`<div class="screen"><div class="cert" id="cert">
+        <div style="color:var(--aqua);letter-spacing:3px;font-size:13px">COELACANTH QUEST · CERTIFICATE OF COMPLETION</div>
+        <div style="margin:10px 0 2px"><input class="name" id="nm" maxlength="40" placeholder="Type your name" aria-label="Your name" value="${esc(store.get("name",""))}"></div>
+        <div class="big" id="sc">${score} / 10</div>
+        <div style="font-size:18px">${msg}</div>
+        <div style="margin:10px 0">${lv(progress.l1,"Time Travel")}${lv(progress.l2,"Dive Sim")}${lv(progress.l3,"Live as a Coelacanth")}</div>
+        <canvas id="certfish" width="300" height="90" style="position:static;width:300px;height:90px"></canvas>
+        <div style="font-size:15px;color:#cfe0f5">Date: <b id="dt">${date}</b></div>
+        <div class="row" style="margin-top:8px"><button class="btn" id="pr">Print / Save</button><button class="btn secondary" id="rq">Retake quiz</button><button class="btn secondary" id="mn">Menu</button></div>
+        <div style="font-size:12px;color:#9fb6d4;margin-top:4px">Show this screen to your teacher or take a screenshot (Chromebook: Ctrl + Show windows).</div>
+      </div></div>`);
+      ui.appendChild(s);
+      const nm=s.querySelector("#nm"); nm.oninput=()=>store.set("name",nm.value);
+      const cf=s.querySelector("#certfish").getContext("2d"); drawCoelacanth(cf,150,48,0.6,{seed:1,phase:0.5});
+      s.querySelector("#pr").onclick=()=>window.print(); s.querySelector("#rq").onclick=()=>setScene(QuizScene()); s.querySelector("#mn").onclick=()=>setScene(MenuScene);
+      if(!nm.value) nm.focus();
+    },
+    draw(g,dt){ ambientBackground(g,dt); }
+  };
+}
+
+/* ============ boot ============ */
+window.CQ = { setScene, TitleScene, MenuScene, Level1, Level2, Level3, QuizScene, ScoreScene, get scene(){return scene;}, keys, progress };
+setScene(TitleScene);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
