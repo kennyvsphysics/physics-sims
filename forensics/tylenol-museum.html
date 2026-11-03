@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unsolved: The 1982 Tylenol Murders | A Virtual Museum</title>
+<style>
+:root{
+  --bg:#121318;--bg2:#1a1c23;--panel:#22252e;--panel2:#2a2e39;--line:#363a48;
+  --ink:#ece8df;--mute:#aaa69b;--brass:#c9a54a;--brass2:#e6c872;
+  --red:#c0574a;--green:#5fb878;--paper:#efe6d2;--paperInk:#2b2620;--wc:#c9a54a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+body{min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#2a2633 0%,var(--bg) 55%) fixed}
+h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif;font-weight:normal;letter-spacing:.2px}
+h1{font-size:34px;margin:0 0 6px}
+h2{font-size:26px;margin:0 0 6px}
+h3{font-size:19px;margin:0 0 6px}
+p{margin:6px 0}
+a{color:var(--brass2)}
+button{font-family:inherit}
+:focus-visible{outline:3px solid var(--brass2);outline-offset:2px}
+.sr{position:absolute;left:-9999px}
+/* header */
+#top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:7px 14px;background:rgba(12,13,17,.94);border-bottom:1px solid var(--line);backdrop-filter:blur(4px)}
+#top .brand{display:flex;align-items:center;gap:8px;background:none;border:0;color:var(--ink);cursor:pointer;padding:4px 6px;border-radius:8px;margin-right:auto}
+#top .brand b{font-family:Georgia,serif;font-weight:normal;font-size:19px;letter-spacing:.5px}
+#top .brand small{color:var(--mute);font-size:12px;display:block;line-height:1}
+.nav{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:6px 13px;font-size:14px;cursor:pointer}
+.nav:hover{border-color:var(--brass)}
+.nav.on{background:var(--brass);color:#1b1608;border-color:var(--brass)}
+.nav .pill{display:inline-block;background:#00000040;border-radius:999px;padding:0 7px;margin-left:4px;font-weight:700}
+main{max-width:1260px;margin:0 auto;padding:14px 18px 50px}
+/* buttons */
+.btn{white-space:nowrap;display:inline-flex;align-items:center;gap:6px;background:var(--brass);color:#1b1608;border:0;border-radius:9px;padding:9px 16px;font-weight:700;font-size:15px;cursor:pointer;box-shadow:0 2px 0 #7c6424}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.btn.ghost:hover{border-color:var(--brass)}
+.btn.small{padding:6px 11px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--mute)}
+.small{font-size:13px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kicker{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--wc);font-weight:700}
+/* toast */
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);opacity:0;transition:.35s;background:#1d1f27;border:1px solid var(--brass);color:var(--ink);padding:11px 18px;border-radius:12px;z-index:50;box-shadow:0 10px 30px #0008;pointer-events:none;max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* welcome */
+.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:22px;align-items:center;margin-top:10px}
+@media (max-width:900px){.hero{grid-template-columns:1fr}}
+.hero h1{font-size:44px;line-height:1.05}
+.hero .tag{color:var(--brass2);font-size:15px;letter-spacing:3px;text-transform:uppercase}
+.advisory{border-left:4px solid var(--brass);background:#1b1c22;padding:10px 14px;border-radius:8px;font-size:14px}
+input.text,textarea{background:#14161b;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font:inherit;width:100%}
+input.text:focus,textarea:focus{border-color:var(--brass);outline:none}
+textarea{min-height:92px;resize:vertical;font-size:15px}
+/* lobby */
+.lobby-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.floor{display:grid;grid-template-columns:1fr 1fr 1.15fr 1fr 1fr;grid-template-rows:auto auto;gap:0;border:6px solid #3a3530;border-radius:14px;background:#191a1f;box-shadow:inset 0 0 0 2px #00000060,0 14px 40px #0007;overflow:hidden}
+.room{position:relative;min-height:168px;padding:12px 12px 10px;border:3px solid #3a3530;background:linear-gradient(180deg,#22242c,#1b1c22);color:var(--ink);text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:4px;transition:background .2s}
+.room:hover,.room:focus-visible{background:linear-gradient(180deg,#2c2f39,#20222a)}
+.room .num{font-family:Georgia,serif;font-size:13px;color:var(--rc);letter-spacing:2px}
+.room .ttl{font-family:Georgia,serif;font-size:19px;line-height:1.15}
+.room .sub{font-size:13px;color:var(--mute)}
+.room .ico{width:46px;height:46px;margin-top:auto}
+.room .door{position:absolute;bottom:-3px;left:50%;width:44px;height:6px;margin-left:-22px;background:#191a1f}
+.room .st{position:absolute;right:9px;top:9px;width:42px;height:42px}
+.room .time{position:absolute;right:10px;bottom:9px;font-size:12px;color:var(--mute)}
+.rotunda{grid-column:3;grid-row:1 / span 2;border:3px solid #3a3530;background:radial-gradient(circle at 50% 40%,#2d2a22,#1b1b20 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;gap:8px}
+.rotunda h3{color:var(--brass2)}
+@media (max-width:900px){.floor{grid-template-columns:1fr 1fr}.rotunda{grid-column:1 / span 2;grid-row:auto}}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--mute);margin-top:10px}
+/* wing */
+.wing-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:2px solid var(--wc);padding-bottom:8px;margin-bottom:12px;flex-wrap:wrap}
+.wing-head h1{font-size:32px}
+.wing-grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:16px;align-items:start}
+@media (max-width:1000px){.wing-grid{grid-template-columns:1fr}}
+.side{display:flex;flex-direction:column;gap:12px;position:sticky;top:64px}
+@media (max-width:1000px){.side{position:static}}
+.plaques{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:12px}
+.plaque{background:var(--bg2);border-left:4px solid var(--wc);padding:9px 12px;border-radius:8px;font-size:15px}
+.plaque b{color:var(--wc);display:block;font-family:Georgia,serif;font-weight:normal;font-size:17px;margin-bottom:2px}
+.ix{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--wc);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.ix-title{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.ix-title h3{margin:0}
+.hands{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;background:var(--wc);color:#14130f;padding:3px 9px;border-radius:999px;font-weight:800}
+.progress{font-size:13px;color:var(--mute)}
+.done-banner{background:#1d3326;border:1px solid var(--green);color:#c9f0d4;border-radius:9px;padding:8px 12px;margin-top:10px;font-size:14px}
+.spark{background:linear-gradient(160deg,#2f2a1c,#22252e 60%);border:1px solid var(--brass);border-radius:12px;padding:12px 14px}
+.spark h3{color:var(--brass2);display:flex;align-items:center;gap:7px;font-size:18px}
+.spark ol{margin:6px 0 8px 18px;padding:0;font-size:14.5px}
+.spark li{margin-bottom:5px}
+.terms{display:flex;flex-wrap:wrap;gap:5px}
+.term{font-size:12.5px;background:#14161b;border:1px solid var(--line);border-radius:999px;padding:3px 9px;color:#e9dcb5;cursor:pointer}
+.term:hover{border-color:var(--brass)}
+.note-box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.note-box h3{font-size:17px;display:flex;justify-content:space-between;align-items:center}
+.star{background:none;border:1px solid var(--line);color:var(--mute);border-radius:999px;padding:4px 10px;cursor:pointer;font-size:13px}
+.star.on{color:#1b1608;background:var(--brass2);border-color:var(--brass2);font-weight:700}
+.saved{font-size:12px;color:var(--green);min-height:16px}
+.wing-nav{display:flex;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap}
+/* generic choice */
+.opt{display:block;width:100%;text-align:left;background:#191b21;color:var(--ink);border:2px solid var(--line);border-radius:10px;padding:9px 12px;margin:6px 0;font-size:15px;cursor:pointer}
+.opt:hover{border-color:var(--wc)}
+.opt.right{border-color:var(--green);background:#1b2e22}
+.opt.wrong{border-color:var(--red);background:#331d1b}
+.opt.pick{border-color:var(--brass);background:#2d2818}
+.fb{font-size:14.5px;margin-top:6px;min-height:20px}
+.fb.ok{color:#9be3b0}.fb.no{color:#f2a99f}
+/* victims */
+.memorial{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;background:#0e0f13;border-radius:10px;padding:14px;border:1px solid #2b2d35}
+.candle{background:linear-gradient(180deg,#1b1c22,#15161b);border:1px solid #33353f;border-radius:10px;color:var(--ink);padding:10px 10px 12px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:200px}
+.candle:hover{border-color:var(--wc)}
+.candle.lit{border-color:#6b5a2c;background:radial-gradient(circle at 50% 18%,#3a3020 0,#1b1c22 55%)}
+.candle .nm{font-family:Georgia,serif;font-size:17px;line-height:1.15}
+.candle .meta{font-size:12.5px;color:var(--mute)}
+.candle .mem{font-size:13px;line-height:1.35;color:#e9e2d0;margin-top:4px}
+.flame{transform-origin:50% 100%;animation:flick 1.6s ease-in-out infinite}
+@keyframes flick{0%,100%{transform:scale(1,1)}40%{transform:scale(.92,1.06)}70%{transform:scale(1.05,.95)}}
+@media (prefers-reduced-motion:reduce){.flame,.spin,.flow{animation:none!important}}
+/* timeline */
+.tl-mode{display:flex;gap:6px;margin-bottom:10px}
+.track{position:relative;display:flex;justify-content:space-between;align-items:flex-start;padding:22px 6px 4px;overflow-x:auto;gap:2px}
+.track:before{content:"";position:absolute;left:10px;right:10px;top:31px;height:3px;background:linear-gradient(90deg,var(--wc),#7a8aa8)}
+.tdot{position:relative;z-index:1;background:none;border:0;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:58px;padding:0 2px}
+.tdot i{display:block;width:20px;height:20px;border-radius:50%;background:#1a1c23;border:3px solid var(--wc)}
+.tdot.on i{background:var(--wc);box-shadow:0 0 0 5px #5b8fd640}
+.tdot.seen i{background:#38496b}
+.tdot.on.seen i{background:var(--wc)}
+.tdot span{font-size:11.5px;color:var(--mute);text-align:center;line-height:1.15;max-width:76px}
+.tcard{background:var(--bg2);border-radius:10px;padding:12px 14px;margin-top:8px;border-left:4px solid var(--wc);min-height:84px}
+.tcard .when{font-size:13px;color:var(--wc);font-weight:700;letter-spacing:.5px}
+.order{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px}
+.ocard{background:#191b21;border:2px solid var(--line);color:var(--ink);border-radius:10px;padding:10px;text-align:left;cursor:pointer;font-size:14.5px;display:flex;gap:8px;align-items:flex-start}
+.ocard .k{flex:none;width:26px;height:26px;border-radius:50%;border:2px dashed var(--line);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+.ocard.placed{border-color:var(--green);background:#1b2e22}
+.ocard.placed .k{background:var(--green);border:0;color:#0d1d12}
+.ocard.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+/* suspects */
+.unsolved{display:inline-block;border:3px solid var(--red);color:var(--red);font-family:Georgia,serif;font-size:22px;letter-spacing:4px;padding:2px 14px;transform:rotate(-4deg);border-radius:6px}
+.files{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:-2px}
+.ftab{background:#cdbf9f;color:#2b2620;border:0;border-radius:8px 8px 0 0;padding:7px 12px;font-weight:700;font-size:13.5px;cursor:pointer;opacity:.75}
+.ftab.on{opacity:1;background:var(--paper)}
+.ftab.seen:not(.on){opacity:.95}
+.ftab .ck{color:#2d6b3c}
+.folder{background:var(--paper);color:var(--paperInk);border-radius:0 10px 10px 10px;padding:14px 16px;min-height:200px;font-size:15px;position:relative;font-family:"Courier New",Courier,monospace}
+.folder h3{font-family:Georgia,serif;color:#5b1d16;font-size:21px}
+.folder .status{position:absolute;right:14px;top:12px;border:2px solid #8b2a1e;color:#8b2a1e;padding:1px 8px;font-weight:800;letter-spacing:1px;transform:rotate(3deg);font-size:13px;font-family:Arial,sans-serif;background:#efe6d2}
+.folder dt{font-weight:800;margin-top:8px;font-family:Arial,sans-serif;font-size:12.5px;letter-spacing:1px;text-transform:uppercase;color:#6b5b45}
+.folder dd{margin:2px 0 0 0}
+.evgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.ev{background:#191b21;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.ev .tag{font-size:11.5px;letter-spacing:1.5px;color:var(--wc);font-weight:800;text-transform:uppercase}
+.ev p{font-size:14.5px}
+.ev .opt{font-size:13.5px;padding:7px 10px;margin:4px 0}
+/* cyanide */
+.bio-wrap{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:12px}
+@media (max-width:860px){.bio-wrap{grid-template-columns:1fr}}
+.bio-svg{width:100%;height:auto;background:#0d1a1c;border-radius:10px;border:1px solid #234044;display:block}
+.hot{cursor:pointer}
+.hot:hover>*:first-child,.hot:focus>*:first-child{stroke:#fff;stroke-width:3}
+.hot:focus{outline:none}
+.info{background:var(--bg2);border-radius:10px;padding:10px 12px;border-left:4px solid var(--wc);min-height:120px;font-size:14.5px}
+.meter{height:18px;background:#14161b;border-radius:999px;border:1px solid var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,#3fb6a8,#8fe0c9);transition:width 1.4s ease}
+.meter.low i{background:linear-gradient(90deg,#c0574a,#e08a3c)}
+.spin{animation:spin 2s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+.flips{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.flip{background:#191b21;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px;min-height:96px;cursor:pointer;text-align:left;font-size:14px}
+.flip.on{border-color:var(--wc);background:#13282a}
+.flip b{display:block;color:var(--wc);margin-bottom:3px}
+/* safety */
+.pkg-wrap{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:12px}
+@media (max-width:860px){.pkg-wrap{grid-template-columns:1fr}}
+.pkg-svg{width:100%;height:auto;background:#1a1d16;border-radius:10px;border:1px solid #39402e;display:block}
+.hs circle{fill:var(--wc);stroke:#111;stroke-width:2}
+.hs text{fill:#111;font:bold 15px Arial;pointer-events:none}
+.hs.found circle{fill:#5fb878}
+.hs{cursor:pointer}
+.hs:focus{outline:none}.hs:focus circle,.hs:hover circle{stroke:#fff;stroke-width:3}
+.rules{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.rule{background:#191b21;border:1px solid var(--line);border-radius:9px;padding:6px 9px;font-size:13px;flex:1 1 150px}
+.rule b{color:var(--wc);display:block}
+.insp{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.insp .card{background:#191b21;border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
+.insp svg{width:100%;height:120px}
+/* recall */
+.decision{background:var(--bg2);border-radius:10px;padding:12px 14px;margin-bottom:10px;border-left:4px solid var(--wc)}
+.decision .q{font-weight:600}
+.real{background:#2d2214;border:1px solid #6b4a22;border-radius:9px;padding:9px 12px;margin-top:6px;font-size:14.5px}
+.real b{color:#f0b56c}
+.chart{width:100%;max-width:420px;height:auto}
+.credo{font-family:Georgia,serif;font-style:italic;color:#f0d9b0}
+/* news */
+.versus{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+@media (max-width:860px){.versus{grid-template-columns:1fr}}
+.era{border-radius:12px;padding:10px;border:1px solid var(--line)}
+.era.old{background:#231f17}
+.era.new{background:#151a26}
+.era h3{margin-bottom:6px}
+.phone{width:260px;max-width:100%;margin:0 auto;background:#0b0c10;border:3px solid #444a5a;border-radius:28px;padding:16px 10px;min-height:320px}
+.post{background:#1d2230;border-radius:12px;padding:8px 10px;margin-bottom:8px;font-size:13px;font-family:Arial,sans-serif}
+.post .who{font-weight:700;font-size:12px;color:#9fb4dd}
+.post.alert{background:#4a1d1d;border:1px solid #c0574a}
+.post .opt{font-size:12.5px;padding:5px 8px;margin:4px 0}
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px}
+.chip{background:#191b21;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px}
+.chip .row{margin-top:6px;gap:6px}
+.chip.ok{border-color:var(--green)}
+.chip.bad{border-color:var(--red)}
+/* legacy */
+.match{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:760px){.match{grid-template-columns:1fr}}
+.mbtn{display:block;width:100%;text-align:left;background:#191b21;border:2px solid var(--line);color:var(--ink);border-radius:10px;padding:9px 11px;margin-bottom:7px;cursor:pointer;font-size:14.5px}
+.mbtn.sel{border-color:var(--brass)}
+.mbtn.done{border-color:var(--green);background:#1b2e22;cursor:default}
+.mbtn .pair{font-size:12px;color:#9be3b0;font-weight:700}
+.cases{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.case{background:var(--bg2);border-top:3px solid var(--wc);border-radius:9px;padding:9px 11px;font-size:14px}
+.case b{display:block;font-family:Georgia,serif;font-weight:normal;font-size:16px;color:#cfe0e8}
+/* passport */
+.passport{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;background:#1f2a3a;border:2px solid #3d4f6b;border-radius:16px;padding:18px}
+@media (max-width:800px){.passport{grid-template-columns:repeat(2,1fr)}}
+.pslot{background:#f1ead8;color:#2b2620;border-radius:10px;padding:10px;text-align:center;min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:none;cursor:pointer;font:inherit}
+.pslot svg{width:110px;height:110px}
+.pslot small{font-size:12px;color:#6b5b45}
+/* notebook */
+.nb{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px}
+.nb .note-box textarea{min-height:80px}
+/* finale */
+.sugg{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.scard{background:var(--bg2);border-radius:12px;padding:12px;border-top:4px solid var(--wc)}
+.scard .why{font-size:12.5px;color:var(--mute)}
+.focus-opt{display:flex;gap:8px;align-items:flex-start;background:#14161b;border:2px solid var(--line);border-radius:9px;padding:8px 10px;margin:6px 0;cursor:pointer;font-size:14.5px;width:100%;text-align:left;color:var(--ink)}
+.focus-opt.on{border-color:var(--brass);background:#2d2818}
+.focus-opt .dot{flex:none;width:16px;height:16px;border-radius:50%;border:2px solid var(--brass);margin-top:2px}
+.focus-opt.on .dot{background:var(--brass)}
+/* quiz */
+.quiz{max-width:760px;margin:0 auto}
+.qbar{display:flex;gap:4px;margin:8px 0 14px}
+.qbar i{flex:1;height:7px;border-radius:4px;background:#2c2f39}
+.qbar i.r{background:var(--green)}.qbar i.w{background:var(--red)}.qbar i.c{background:var(--brass)}
+/* certificate */
+.cert{max-width:900px;margin:10px auto;background:var(--paper);color:var(--paperInk);border-radius:6px;padding:30px 44px;position:relative;box-shadow:0 14px 40px #0009;border:12px double #9a7b2f;font-family:Georgia,"Times New Roman",serif;text-align:center}
+.cert h1{font-size:34px;color:#4a3410;margin:4px 0}
+.cert .nm{font-size:40px;border-bottom:2px solid #9a7b2f;display:inline-block;padding:0 30px 4px;margin:8px 0;color:#1d1a15}
+.cert .lbl{font-family:Arial,sans-serif;font-size:11.5px;letter-spacing:2px;text-transform:uppercase;color:#7a6440}
+.cert .focus{font-size:20px;font-style:italic;margin:4px 0 10px}
+.cert ul{list-style:none;padding:0;margin:6px 0;display:grid;grid-template-columns:1fr 1fr;gap:2px 20px;text-align:left;font-family:Arial,sans-serif;font-size:13.5px}
+.cert .seal{position:absolute;right:26px;bottom:20px;width:110px;height:110px}
+.cert .foot{padding-right:120px;display:flex;justify-content:space-between;font-family:Arial,sans-serif;font-size:12.5px;margin-top:16px;color:#5b4a30;text-align:left;gap:12px}
+/* teacher */
+.tn table{border-collapse:collapse;width:100%;font-size:14.5px}
+.tn td,.tn th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tn th{color:var(--brass2);font-weight:600}
+.tn h3{color:var(--brass2);margin-top:14px}
+.tn ul{margin:4px 0 8px 20px;padding:0}
+.tn li{margin-bottom:3px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:900px){.two{grid-template-columns:1fr}}
+/* print */
+#printArea{display:none}
+@media print{
+  @page{margin:12mm}
+  body{background:#fff!important;color:#000}
+  #top,main,#toast{display:none!important}
+  #printArea{display:block!important;color:#000}
+  #printArea .cert{box-shadow:none;margin:0 auto;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printArea .pnb h2{font-family:Georgia,serif;margin:14px 0 4px;font-size:18px}
+  #printArea .pnb pre{white-space:pre-wrap;font-family:Arial,sans-serif;font-size:12.5px;border:1px solid #999;padding:6px 8px;border-radius:4px;min-height:40px}
+}
+</style>
+</head>
+<body>
+<header id="top">
+  <button class="brand" data-go="lobby" aria-label="Museum lobby">
+    <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 12 16 4l13 8z" fill="#c9a54a"/><rect x="5" y="13" width="22" height="2" fill="#c9a54a"/><g fill="#e6c872"><rect x="7" y="16" width="3" height="10"/><rect x="14.5" y="16" width="3" height="10"/><rect x="22" y="16" width="3" height="10"/></g><rect x="4" y="27" width="24" height="2.5" fill="#c9a54a"/></svg>
+    <span><b>UNSOLVED</b><small>The 1982 Tylenol Murders · A Virtual Museum</small></span>
+  </button>
+  <button class="nav" data-go="lobby" id="navLobby">Museum Map</button>
+  <button class="nav" data-go="passport" id="navPass">Passport <span class="pill" id="stampCount">0/8</span></button>
+  <button class="nav" data-go="notebook" id="navNote">Field Notebook</button>
+  <button class="nav" data-go="finale" id="navFin">Choose Your Exhibit</button>
+  <button class="nav" data-go="teacher" id="navTeach">Teacher Notes</button>
+</header>
+<main id="main" tabindex="-1"></main>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="printArea"></div>
+<script>
+"use strict";
+/* ================= State ================= */
+const KEY='tylenolMuseum.v1';
+function defState(){return {name:'',stamps:{},visited:{},stars:{},notes:{},prog:{},quiz:null,focus:'',started:false};}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');return s?Object.assign(defState(),s):defState();}catch(e){return defState();}}
+let S=load();
+let saveTimer=null;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(save,250);}
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function P(id){if(!S.prog[id])S.prog[id]={};return S.prog[id];}
+function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2600);}
+
+/* ================= Icons (inline SVG) ================= */
+const ICON={
+ candle:c=>`<svg viewBox="0 0 48 48" class="ico" aria-hidden="true"><ellipse cx="24" cy="44" rx="14" ry="3" fill="#00000060"/><rect x="18" y="20" width="12" height="23" rx="2" fill="#efe6d2"/><path d="M24 7c4 5 5 8 0 12-5-4-4-7 0-12z" fill="${c}"/><rect x="23.3" y="17" width="1.4" height="4" fill="#333"/></svg>`,
+ clock:c=>`<svg viewBox="0 0 48 48" class="ico" aria-hidden="true"><circle cx="24" cy="24" r="17" fill="none" stroke="${c}" stroke-width="3"/><path d="M24 13v11l8 5" stroke="${c}" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M4 44h40" stroke="${c}" stroke-width="2"/><circle cx="10" cy="44" r="2.5" fill="${c}"/><circle cx="24" cy="44" r="2.5" fill="${c}"/><circle cx="38" cy="44" r="2.5" fill="${c}"/></svg>`,
+ folder:c=>`<svg viewBox="0 0 48 48" class="ico" aria-hidden="true"><path d="M5 12h14l4 4h20v24H5z" fill="#efe6d2"/><path d="M5 18h38v22H5z" fill="#d8caa8"/><rect x="11" y="24" width="24" height="7" fill="none" stroke="${c}" stroke-width="2" transform="rotate(-6 23 27)"/><text x="23" y="30" font-size="5.5" text-anchor="middle" fill="${c}" font-family="Arial" font-weight="bold" transform="rotate(-6 23 27)">UNSOLVED</text></svg>`,
+ mito:c=>`<svg viewBox="0 0 48 48" class="ico" aria-hidden="true"><ellipse cx="24" cy="24" rx="20" ry="12" fill="#1d4d4a" stroke="${c}" stroke-width="2.5"/><path d="M8 24c3-6 5 6 8 0s5 6 8 0 5 6 8 0 5 6 8 0" stroke="${c}" stroke-width="2" fill="none"/></svg>`,
+ bottle:c=>`<svg viewBox="0 0 48 48" class="ico" aria-hidden="true"><rect x="16" y="5" width="16" height="7" rx="1.5" fill="#eee"/><rect x="15" y="11" width="18" height="4" fill="${c}"/><rect x="13" y="15" width="22" height="28" rx="4" fill="#f4f4f4"/><rect x="13" y="22" width="22" height="12" fill="#c8312b"/><rect x="13" y="25" width="22" height="3" fill="#f2c94c"/></svg>`,
+ chart:c=>`<svg viewBox="0 0 48 48" class="ico" aria-hidden="true"><path d="M6 42h38" stroke="#aaa" stroke-width="2"/><rect x="9" y="12" width="8" height="30" fill="${c}"/><rect x="20" y="36" width="8" height="6" fill="#c0574a"/><rect x="31" y="16" width="8" height="26" fill="${c}"/><path d="M13 9 24 32 35 13" stroke="#fff" stroke-width="1.5" fill="none" stroke-dasharray="2 2"/></svg>`,
+ radio:c=>`<svg viewBox="0 0 48 48" class="ico" aria-hidden="true"><rect x="3" y="16" width="24" height="18" rx="3" fill="#6b4a2b"/><circle cx="11" cy="25" r="5" fill="#2b2015"/><rect x="18" y="20" width="6" height="2" fill="#e6c872"/><rect x="18" y="24" width="6" height="2" fill="#e6c872"/><line x1="8" y1="16" x2="4" y2="6" stroke="#aaa" stroke-width="1.5"/><rect x="30" y="8" width="15" height="30" rx="3" fill="#222" stroke="${c}" stroke-width="2"/><rect x="32" y="12" width="11" height="4" rx="1" fill="${c}"/><rect x="32" y="18" width="11" height="3" rx="1" fill="#555"/><rect x="32" y="23" width="11" height="3" rx="1" fill="#555"/></svg>`,
+ ripple:c=>`<svg viewBox="0 0 48 48" class="ico" aria-hidden="true"><circle cx="24" cy="24" r="4" fill="${c}"/><circle cx="24" cy="24" r="10" fill="none" stroke="${c}" stroke-width="2"/><circle cx="24" cy="24" r="16" fill="none" stroke="${c}" stroke-width="1.6" opacity=".7"/><circle cx="24" cy="24" r="21" fill="none" stroke="${c}" stroke-width="1.2" opacity=".4"/></svg>`,
+ bulb:`<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-4 12.7V18h8v-3.3A7 7 0 0 0 12 2z" fill="#e6c872"/><rect x="8.5" y="19" width="7" height="2" rx="1" fill="#e6c872"/></svg>`
+};
+function stampSVG(w,on,date){
+  const c=on?w.wc:'#b9ad94';
+  return `<svg viewBox="0 0 120 120" aria-hidden="true"><g transform="rotate(${on?(-8+w.n*3):0} 60 60)" opacity="${on?1:.55}">
+  <circle cx="60" cy="60" r="54" fill="none" stroke="${c}" stroke-width="${on?5:2}" ${on?'':'stroke-dasharray="6 5"'}/>
+  <circle cx="60" cy="60" r="44" fill="none" stroke="${c}" stroke-width="1.5"/>
+  <g transform="translate(36 30) scale(1)">${ICON[w.icon](c).replace('class="ico"','width="48" height="48"')}</g>
+  <text x="60" y="94" text-anchor="middle" font-family="Georgia" font-size="11" fill="${c}">${on?'VISITED':'WING '+w.n}</text>
+  ${on?`<text x="60" y="106" text-anchor="middle" font-family="Arial" font-size="8" fill="${c}">${esc(date||'')}</text>`:''}
+  </g></svg>`;
+}
+
+/* ================= Wings ================= */
+const WINGS=[
+ {id:'victims',n:1,title:'In Memoriam',sub:'The Seven Victims',wc:'#d9b55a',min:5,icon:'candle',
+  sparks:['Who were the seven people, and how have their families kept their memory alive for 40+ years?','Why did the randomness of the victims make this crime so frightening to the whole country?','How can journalists (and you!) write about real victims respectfully?'],
+  terms:['Tylenol murders victims Chicago Tribune 2022','Janus family Tylenol 1982','Tylenol murders families case records'],
+  focuses:['Remembering the Seven: who the victims were and the families they left','Victims\' families and the fight to unseal the case records']},
+ {id:'timeline',n:2,title:'72 Hours & 44 Years',sub:'Timeline / Order of Events',wc:'#6b9be0',min:6,icon:'clock',
+  sparks:['Which decision in the first 24 hours saved the most lives? Defend your pick.','How did a nurse, firefighters, a doctor and a medical examiner\'s team each add one piece of the puzzle?','What has happened in the 44 years since, and why is there still no ending?'],
+  terms:['Tylenol murders timeline 1982','Helen Jensen nurse Tylenol','Cappitelli Keyworth firefighters Tylenol','Tylenol murders 40 years later'],
+  focuses:['72 hours that changed America: the order of events','The first responders who cracked the medical mystery']},
+ {id:'suspects',n:3,title:'Case Files',sub:'Suspects & Investigation',wc:'#d0675a',min:7,icon:'folder',
+  sparks:['What evidence pointed toward each suspect, and what evidence was missing?','What is the difference between a suspect, a person of interest, and someone convicted of a crime?','Could modern DNA testing still solve this case? What makes it so hard?'],
+  terms:['James Lewis Tylenol extortion letter','Roger Arnold Tylenol suspect','Tylenol murders DNA testing','Unknown Wanderer Tylenol 2026'],
+  focuses:['Unsolved: weighing the evidence against each suspect','Cold-case forensics: what DNA could (and can\'t) reveal']},
+ {id:'cyanide',n:4,title:'Inside the Cell',sub:'Cyanide Biology',wc:'#3fb6a8',min:7,icon:'mito',
+  sparks:['How does cyanide stop cellular respiration at Complex IV (cytochrome c oxidase)?','Why are the brain and heart hit first?','How do cyanide antidotes work, and why does speed matter?'],
+  terms:['cyanide cytochrome c oxidase','electron transport chain Complex IV','cyanide poisoning CDC NIOSH','cyanide antidote sodium thiosulfate'],
+  focuses:['How cyanide shuts down cellular respiration','Why cyanide was so hard to detect in 1982']},
+ {id:'safety',n:5,title:'Sealed for Safety',sub:'Product Safety Advances',wc:'#8fbf5a',min:5,icon:'bottle',
+  sparks:['What did medicine packages look like before 1982, and why was that a problem?','How do foil seals and shrink bands show tampering?','Why did the FDA switch from "tamper-resistant" to "tamper-evident"?'],
+  terms:['21 CFR 211.132 tamper-evident','Federal Anti-Tampering Act 1983','Tylenol triple seal 1982','why caplets replaced capsules'],
+  focuses:['From cotton ball to foil seal: the birth of tamper-evident packaging','The laws that made tampering a federal crime']},
+ {id:'recall',n:6,title:'The Recall Room',sub:'Recall & Public Relations',wc:'#e08a3c',min:6,icon:'chart',
+  sparks:['Why is J&J\'s response taught as a model of crisis PR, and what are the fair critiques?','How did the company\'s Credo shape its choices?','Compare the 1982 recall with a recent product recall. What changed?'],
+  terms:['James Burke Tylenol crisis','Johnson & Johnson Credo Tylenol','Tylenol 1982 recall case study','Tylenol triple seal relaunch'],
+  focuses:['The recall that rewrote crisis PR','Hero or smart business? Judging J&J\'s choices']},
+ {id:'news',n:7,title:'Then vs. Now',sub:'News & Public Alerts',wc:'#a78bdb',min:5,icon:'radio',
+  sparks:['How did warnings reach people in 1982 with no internet or cell phones?','Would social media make a 2026 version safer or scarier?','How can you tell if a safety alert is real?'],
+  terms:['City News Bureau Tylenol 1982','Wireless Emergency Alerts FCC','FDA recalls safety alerts','MIT study false news spreads faster'],
+  focuses:['Bullhorns to smartphones: public safety alerts then and now','Rumors vs. real alerts: misinformation in a crisis']},
+ {id:'legacy',n:8,title:'Ripples',sub:'Copycats & Legacy',wc:'#7fb3c8',min:4,icon:'ripple',
+  sparks:['Why do copycat crimes happen after heavily publicized cases?','How did each copycat case change products or laws?','What is the legacy of this case for shoppers today?'],
+  terms:['Stella Nickell Excedrin 1986','Diane Elsroth Tylenol 1986','Sudafed tampering 1991','Halloween candy poisoning myth'],
+  focuses:['Copycats and the laws they inspired','How one crime changed the medicine cabinet forever']}
+];
+const W=id=>WINGS.find(w=>w.id===id);
+</script>
+<script>
+"use strict";
+/* ================= Wing content ================= */
+const WR={};
+const pl=(arr)=>`<div class="plaques">${arr.map(([b,t])=>`<div class="plaque"><b>${b}</b>${t}</div>`).join('')}</div>`;
+function ixBox(title,prog,inner,done){
+  return `<div class="ix-title"><h3>${title}</h3><span class="row"><span class="hands">Hands-on</span><span class="progress">${prog}</span></span></div>${inner}${done?`<div class="done-banner">✓ Exhibit complete. Your passport is stamped! Jot a note on the right, then head to the next wing.</div>`:''}`;
+}
+
+/* ---------- 1 VICTIMS ---------- */
+const VICTIMS=[
+ {nm:'Mary Kellerman',age:'12',town:'Elk Grove Village',mem:'A seventh grader and only child. She made pottery, cooked with her mom, took guitar lessons and gymnastics, rode her pony, and played Atari with her dad.'},
+ {nm:'Adam Janus',age:'27',town:'Arlington Heights',mem:'Came to the U.S. from Poland at age 8. A postal supervisor and father of two young children who liked tinkering with clocks.'},
+ {nm:'Stanley Janus',age:'25',town:'Lisle',mem:'Adam\'s youngest brother. He ran an auto parts store and had married Terri in June 1982.'},
+ {nm:'Theresa "Terri" Janus',age:'20*',town:'Lisle',mem:'A business student, newly married to Stanley in June 1982.'},
+ {nm:'Mary "Lynn" Reiner',age:'27',town:'Winfield',mem:'A mother of four. Her youngest child had been born just days earlier.'},
+ {nm:'Mary McFarland',age:'31',town:'Elmhurst',mem:'Worked at the Illinois Bell phone store in Lombard. The mother of two young sons.'},
+ {nm:'Paula Prince',age:'35',town:'Chicago',mem:'A United Airlines flight attendant who lived in Chicago\'s Old Town neighborhood.'}
+];
+function candleSVG(lit){
+  return `<svg width="56" height="78" viewBox="0 0 56 78" aria-hidden="true">
+   ${lit?'<circle cx="28" cy="20" r="18" fill="#f3c969" opacity=".16"/>':''}
+   <ellipse cx="28" cy="74" rx="18" ry="3" fill="#00000080"/>
+   <rect x="19" y="32" width="18" height="41" rx="3" fill="${lit?'#f4ecd8':'#9d978a'}"/>
+   <rect x="27.2" y="26" width="1.6" height="7" fill="#333"/>
+   ${lit?'<g class="flame"><path d="M28 6c6 8 7 13 0 20-7-7-6-12 0-20z" fill="#f3c969"/><path d="M28 13c3 4 3 7 0 11-3-4-3-7 0-11z" fill="#fff4d0"/></g>':''}
+  </svg>`;
+}
+WR.victims={
+ intro:pl([['Seven lives','Between Sept 29 and Oct 1, 1982, seven people in the Chicago area died after taking Tylenol capsules that someone had laced with cyanide.'],['Ordinary reasons','A cold. A headache. A long workday. They took a trusted medicine for everyday aches.'],['One family, three losses','Adam Janus died first. His brother Stanley and sister-in-law Terri took capsules from the same bottle while grieving at his home.'],['Remember them as people','This wall shares who they were, not how they died. Light a candle to read each remembrance.']]),
+ ix(){const p=P('victims');p.lit=p.lit||[];const n=p.lit.length;
+  return ixBox('The Memorial Wall',`${n}/7 candles lit`,
+   `<p class="muted small">Click or press Enter on each candle to light it.</p>
+   <div class="memorial">${VICTIMS.map((v,i)=>{const on=p.lit.includes(i);return `<button class="candle ${on?'lit':''}" data-act="candle" data-arg="${i}" aria-pressed="${on}" aria-label="${esc(v.nm)}, ${v.age.replace('*','')}, ${esc(v.town)}${on?'. '+esc(v.mem):'. Light a candle'}">
+     ${candleSVG(on)}<span class="nm">${esc(v.nm)}</span><span class="meta">${v.age}, ${esc(v.town)}</span>${on?`<span class="mem">${esc(v.mem)}</span>`:'<span class="meta">Light a candle</span>'}</button>`;}).join('')}</div>
+   <p class="muted small" style="margin-top:8px">*Age 20 per the Chicago Tribune's 2022 memorial (born June 1962). Some 1982 reports listed her as 19. Details come from the Chicago Tribune's 2022 memorial and UPI reporting.</p>`,n>=7);},
+ done(){return (P('victims').lit||[]).length>=7;}
+};
+
+/* ---------- 2 TIMELINE ---------- */
+const TL_H=[
+ {s:'Sept 28',w:'Tue Sept 28 · 4 p.m.',t:'A 50-count bottle of Extra-Strength Tylenol is bought at a Jewel store in Elk Grove Village.'},
+ {s:'6:15 am',w:'Wed Sept 29 · 6:15 a.m.',t:'Mary Kellerman, 12, home with a cold, takes one capsule. She dies that morning.'},
+ {s:'11 am',w:'Sept 29 · about 11 a.m.',t:'Adam Janus buys Tylenol in Arlington Heights. He dies at 3:15 p.m. Doctors first suspect a heart attack.'},
+ {s:'3:45 pm',w:'Sept 29 · about 3:45 p.m.',t:'In Winfield, new mom Mary "Lynn" Reiner takes capsules for a headache.'},
+ {s:'5:15 pm',w:'Sept 29 · about 5:15 p.m.',t:'Grieving at Adam\'s house, Stanley and Terri Janus take capsules from the same bottle.'},
+ {s:'6:45 pm',w:'Sept 29 · about 6:45 p.m.',t:'Mary McFarland takes Tylenol on a break at work in Lombard.'},
+ {s:'8 pm',w:'Sept 29 · about 8 p.m.',t:'Village nurse Helen Jensen finds the Janus bottle: 44 capsules left out of 50. Her verdict: "There\'s something in the Tylenol."'},
+ {s:'9:16 pm',w:'Sept 29 · 9:16 p.m.',t:'A store camera photographs flight attendant Paula Prince buying Tylenol at a Walgreens on Wells Street.'},
+ {s:'Night',w:'Sept 29 · late night',t:'Firefighters link the Janus and Kellerman cases: both took Tylenol. A medical examiner\'s investigator smells almonds in both bottles. Same lot number: MC2880.'},
+ {s:'1:30 am',w:'Thu Sept 30 · 1:30 a.m.',t:'A lab finds huge amounts of cyanide in Stanley and Terri Janus\'s blood.'},
+ {s:'Morning',w:'Sept 30 · 3:07 to 5:30 a.m. and after',t:'City News Bureau bulletins go out; radio spreads the warning. The medical examiner confirms cyanide at a news conference. Police drive the streets with bullhorns.'},
+ {s:'Oct 1',w:'Fri Oct 1',t:'Terri Janus dies. Paula Prince is found in her apartment. The toll: seven.'},
+ {s:'Oct 5',w:'Tue Oct 5, 1982',t:'Johnson & Johnson recalls Tylenol capsules nationwide, about 31 million bottles.'}
+];
+const TL_Y=[
+ {s:'1982',w:'Nov 1982',t:'FDA requires tamper-resistant packaging (Nov 5). J&J unveils the triple-sealed bottle (Nov 11).'},
+ {s:'1983',w:'Oct 1983',t:'James Lewis is convicted of extortion for the $1 million letter. Congress passes the Federal Anti-Tampering Act.'},
+ {s:'1986',w:'Feb 1986',t:'A copycat cyanide death in New York. J&J stops selling over-the-counter capsules.'},
+ {s:'2009',w:'Feb 2009',t:'After tips around the 25th anniversary, the FBI reviews the case and searches Lewis\'s Massachusetts home.'},
+ {s:'2010',w:'2010',t:'DNA from Lewis, and from suspect Roger Arnold\'s exhumed body, reportedly does not match DNA on the bottles.'},
+ {s:'2011',w:'May 2011',t:'The FBI asks for "Unabomber" Ted Kaczynski\'s DNA. No link is ever announced.'},
+ {s:'2022',w:'2022 · 40th anniversary',t:'A Chicago Tribune investigation reports investigators urged prosecutors to charge Lewis. No charges are filed.'},
+ {s:'2023',w:'July 2023',t:'James Lewis dies at 76 of natural causes. He was never charged with the murders.'},
+ {s:'2025',w:'May 2025',t:'Netflix releases the documentary series "Cold Case: The Tylenol Murders."'},
+ {s:'2026',w:'Sept 2026',t:'Idaho detectives share a possible lead (the "Unknown Wanderer"), but do not name him a suspect. The case remains open.'}
+];
+const ORDER=[
+ {k:'a',t:'Mary Kellerman takes one capsule for a cold'},
+ {k:'b',t:'Adam Janus dies at the hospital; doctors suspect a heart attack'},
+ {k:'c',t:'Nurse Helen Jensen finds the Janus family\'s Tylenol bottle'},
+ {k:'d',t:'A lab finds cyanide in Stanley and Terri Janus\'s blood'},
+ {k:'e',t:'A news bulletin about the deaths hits Chicago radio'},
+ {k:'f',t:'J&J recalls Tylenol capsules nationwide'}
+];
+const ORDER_SHOW=['c','f','a','e','b','d'];
+let tlWrong=null;
+WR.timeline={
+ intro:pl([['One day','All seven victims took poisoned capsules on the same day: Wednesday, Sept 29, 1982.'],['Puzzle solvers','A village nurse, off-duty firefighters, an ICU doctor, and the medical examiner\'s team connected the deaths overnight.'],['Warnings worked','Testing found three more tainted bottles, but no one else was poisoned after the warnings went out.'],['No ending','44 years later, no one has been charged. Switch to the "44 years" view to see why.']]),
+ ix(){const p=P('timeline');p.mode=p.mode||'h';p.sel=p.sel||{h:0,y:0};p.seen=p.seen||{h:[0],y:[0]};p.ord=p.ord||[];
+  const L=p.mode==='h'?TL_H:TL_Y,i=p.sel[p.mode],e=L[i];
+  const n=p.ord.length;
+  const track=`<div class="track" role="list">${L.map((x,j)=>`<button role="listitem" class="tdot ${j===i?'on':''} ${p.seen[p.mode].includes(j)?'seen':''}" data-act="tl" data-arg="${j}" aria-label="${esc(x.w)}"><i></i><span>${esc(x.s)}</span></button>`).join('')}</div>`;
+  const card=`<div class="tcard" aria-live="polite"><div class="when">${esc(e.w)}</div><div>${esc(e.t)}</div></div>
+   <div class="row" style="justify-content:space-between;margin-top:6px"><button class="btn ghost small" data-act="tlstep" data-arg="-1" ${i===0?'disabled':''}>← Earlier</button><span class="muted small">${i+1} of ${L.length} · use the dots or these buttons</span><button class="btn ghost small" data-act="tlstep" data-arg="1" ${i===L.length-1?'disabled':''}>Later →</button></div>`;
+  const ord=`<h3 style="margin-top:16px">Challenge: put the discovery in order</h3><p class="muted small" style="margin:0">Click the cards from first to last. (${n}/6 placed)</p>
+   <div class="order">${ORDER_SHOW.map(k=>{const o=ORDER.find(x=>x.k===k);const pos=p.ord.indexOf(k);return `<button class="ocard ${pos>=0?'placed':''} ${tlWrong===k?'shake':''}" data-act="ord" data-arg="${k}" ${pos>=0?'aria-disabled="true"':''}><span class="k">${pos>=0?pos+1:''}</span><span>${esc(o.t)}</span></button>`;}).join('')}</div>
+   <div class="fb ${tlWrong?'no':(n===6?'ok':'')}" aria-live="polite">${tlWrong?'Not yet. What happened before that?':(n===6?'Correct order! Notice how fast it moved: from the first death to a national recall in one week.':'')}</div>`;
+  return ixBox('Interactive Timeline',`${n===6?'challenge done':'order challenge '+n+'/6'}`,
+   `<div class="tl-mode" role="tablist"><button class="btn small ${p.mode==='h'?'':'ghost'}" data-act="tlmode" data-arg="h" role="tab" aria-selected="${p.mode==='h'}">The first week (Sept 28 to Oct 5, 1982)</button><button class="btn small ${p.mode==='y'?'':'ghost'}" data-act="tlmode" data-arg="y" role="tab" aria-selected="${p.mode==='y'}">The 44 years after</button></div>${track}${card}${ord}`,n===6);},
+ done(){return (P('timeline').ord||[]).length===6;}
+};
+
+/* ---------- 3 SUSPECTS ---------- */
+const FILES=[
+ {id:'lewis',tab:'James W. Lewis',h:'James W. Lewis (1946–2023)',st:'NEVER CHARGED WITH MURDER',dl:[
+  ['Why investigated','In October 1982 he sent Johnson & Johnson a letter demanding $1 million to "stop the killing."'],
+  ['What\'s known','A federal jury convicted him of extortion in 1983. He admitted writing the letter but always denied the murders. The FBI traced the letter through a postage meter at his wife\'s former workplace.'],
+  ['Later','The FBI searched his home in 2009. He gave DNA in 2010; no match was reported. In 2022 investigators re-interviewed him and urged prosecutors to charge him. They did not.'],
+  ['Status','Died July 2023, age 76, of natural causes. Never charged with the murders.']]},
+ {id:'arnold',tab:'Roger Arnold',h:'Roger Arnold (died 2008)',st:'NEVER CHARGED IN THIS CASE',dl:[
+  ['Why investigated','A Jewel warehouse dockworker. A bar owner told police Arnold had bought cyanide months earlier.'],
+  ['What\'s known','A police search in Oct 1982 found guns and books about poisons, but no cyanide. He denied any connection.'],
+  ['Later','In 1983 he shot and killed a man he mistook for the bar owner, and served about 15 years of a 30-year sentence. DNA taken from his body in 2010 reportedly did not match the bottles.'],
+  ['Status','Never charged in the Tylenol murders.']]},
+ {id:'masterson',tab:'Kevin Masterson',h:'Kevin Masterson',st:'NEVER CHARGED',dl:[
+  ['Why investigated','A Lombard man reported to have a grudge against Jewel stores. Police searched for him nationwide in 1982.'],
+  ['What\'s known','He was held on an unrelated warrant but never linked to the poisonings by evidence that led to charges.'],
+  ['Status','Never charged.']]},
+ {id:'photo',tab:'The man in the photo',h:'The man in the drugstore photo',st:'UNIDENTIFIED',dl:[
+  ['The evidence','A store camera photographed Paula Prince buying Tylenol at 9:16 p.m. on Sept 29.'],
+  ['Why it matters','Police suggested a bearded man behind her in line could be the killer.'],
+  ['Status','Never publicly identified. Remember: standing near someone is not evidence of a crime.']]},
+ {id:'recent',tab:'Recent leads',h:'Later leads (2011 and 2026)',st:'OPEN COLD CASE',dl:[
+  ['2011','The FBI asked for "Unabomber" Ted Kaczynski\'s DNA. He denied ever having potassium cyanide. No link was announced.'],
+  ['Sept 2026','Idaho detectives identified a man who died of cyanide in Boise in Dec 1982 (the "Unknown Wanderer"). They found a hand-drawn Chicago map and writings about poison in capsules, but cannot place him in Chicago at the time. He is NOT named a suspect, and the FBI says past claimed links have been "unsubstantiated."'],
+  ['Status','The case is still open. Chicago police still ask for tips.']]}
+];
+const EV=[
+ {tag:'Manufacturing records',t:'Tainted capsules came from batches made at two different plants (Pennsylvania and Texas).',o:['A worker at one factory poisoned them','The poison was added after the bottles reached stores','The acetaminophen itself was toxic'],a:1,why:'Two separate factories make a factory source very unlikely. Investigators concluded someone tampered with bottles in Chicago-area stores and put them back on the shelves.'},
+ {tag:'Lot numbers',t:'The Janus and Kellerman bottles had the same lot number: MC2880.',o:['It linked the cases and told stores which bottles to pull first','It proved one store sold every poisoned bottle','It identified the killer'],a:0,why:'Matching lots tied two "unrelated" deaths together. But tainted bottles from other lots and six different stores turned up too.'},
+ {tag:'Surveillance photo',t:'A store camera photographed Paula Prince buying Tylenol on Sept 29.',o:['It proved who the killer was','It gave a time, a place, and people nearby to look into','It showed the poison inside the bottle'],a:1,why:'A photo is a lead, not proof. The man behind her has never been identified.'},
+ {tag:'Extortion letter',t:'A $1 million demand letter was traced through a travel agency\'s postage meter.',o:['It proved the writer committed the murders','It linked the letter to James Lewis, leading to an extortion conviction','The FBI ignored it'],a:1,why:'Writing the letter was a crime (extortion), but it is not proof of murder. Lewis was never charged with the killings.'},
+ {tag:'DNA (modern lab)',t:'DNA found on several bottles is a mix from different people.',o:['DNA solved the case in 2010','Many hands touched the bottles, so separating the profiles is hard','Bottles can\'t hold DNA'],a:1,why:'Clerks, shoppers, and investigators all handled the bottles. Newer methods try to separate mixed profiles.'}
+];
+WR.suspects={
+ intro:`<div class="row" style="justify-content:space-between;margin-bottom:8px"><span class="unsolved">UNSOLVED</span><span class="muted small">Everyone in these files is a suspect or person of interest, not a proven killer.</span></div>`+pl([['Officially unsolved','No one has ever been charged with the seven murders.'],['Massive manhunt','More than 100 federal, state, and local investigators worked the case. The FBI calls it the largest product-tampering investigation in law-enforcement history.'],['The method','Investigators believe someone took bottles from stores, put cyanide into some capsules, and returned them to the shelves.'],['Why so hard?','Random victims. Six stores. Many hands on every bottle. No DNA testing in 1982. Today: key witnesses have died and some records are lost.']]),
+ ix(){const p=P('suspects');p.open=p.open||[];p.cur=p.cur||null;p.ev=p.ev||{};
+  const f=FILES.find(x=>x.id===p.cur);
+  const evOK=EV.filter((e,i)=>p.ev[i]===e.a).length;
+  const tabs=`<div class="files" role="tablist">${FILES.map(x=>`<button class="ftab ${x.id===p.cur?'on':''} ${p.open.includes(x.id)?'seen':''}" role="tab" aria-selected="${x.id===p.cur}" data-act="file" data-arg="${x.id}">${p.open.includes(x.id)?'<span class="ck">✓ </span>':''}${esc(x.tab)}</button>`).join('')}</div>`;
+  const folder=f?`<div class="folder" role="tabpanel"><span class="status">${f.st}</span><h3>${esc(f.h)}</h3><dl>${f.dl.map(([a,b])=>`<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join('')}</dl></div>`:`<div class="folder"><h3>Choose a case file</h3><p>Open each folder tab above. Read like a detective: What is the evidence? What is missing?</p></div>`;
+  const ev=`<h3 style="margin-top:16px">Evidence Lab: what does each clue really tell us?</h3><div class="evgrid">${EV.map((e,i)=>{const pick=p.ev[i];return `<div class="ev"><div class="tag">${esc(e.tag)}</div><p>${esc(e.t)}</p>${e.o.map((o,j)=>`<button class="opt ${pick===j?(j===e.a?'right':'wrong'):''}" data-act="ev" data-arg="${i}:${j}">${esc(o)}</button>`).join('')}<div class="fb ${pick==null?'':(pick===e.a?'ok':'no')}">${pick==null?'':(pick===e.a?'✓ '+esc(e.why):'Not quite. Try another answer.')}</div></div>`;}).join('')}</div>`;
+  const done=this.done();
+  return ixBox('Open the Case Files',`${p.open.length}/5 files · ${evOK}/5 clues`,tabs+folder+ev,done);},
+ done(){const p=P('suspects');return (p.open||[]).length>=5 && EV.every((e,i)=>(p.ev||{})[i]===e.a);}
+};
+
+/* ---------- 4 CYANIDE ---------- */
+const PARTS={
+ c1:['Complex I','Takes electrons from food molecules (carried by NADH) and starts them down the chain. It uses their energy to pump H⁺ ions across the membrane.'],
+ c3:['Complex III','Passes electrons on to cytochrome c and pumps more H⁺ ions.'],
+ cytc:['Cytochrome c','A small protein that shuttles electrons from Complex III to Complex IV.'],
+ c4:['Complex IV (cytochrome c oxidase)','The last stop. It hands electrons to oxygen, which joins with H⁺ to make water. This is the reason you need to breathe oxygen!','JAMMED. Cyanide binds to the iron in Complex IV. Electrons can\'t reach oxygen, so the whole chain backs up and stops.'],
+ atp:['ATP synthase','H⁺ ions flow back through this "turbine" and spin it to make ATP, the cell\'s energy currency.','Stalled. With no H⁺ being pumped, the turbine barely turns, and aerobic ATP production collapses.'],
+ o2:['Oxygen (O₂)','The final electron acceptor. Without it, the chain can\'t run.','Oxygen is still here, delivered by the blood, but the cell can\'t use it. That is the cyanide paradox.'],
+ cn:['Cyanide (CN⁻)','From potassium cyanide (KCN), a white crystalline solid. Turn it on with the red button to see what it does.','Cyanide ions are bound to Complex IV. The cell switches to emergency anaerobic metabolism, which makes very little ATP and builds up lactic acid.']
+};
+function hot(id,inner,label){return `<g class="hot" tabindex="0" role="button" aria-label="${esc(label)}" data-act="part" data-arg="${id}">${inner}</g>`;}
+function bioSVG(p){
+ if(!p.zoom){
+  const mitos=[[150,110,-20],[420,95,15],[200,230,10],[450,215,-25],[310,265,0]];
+  return `<svg class="bio-svg" viewBox="0 0 600 320" role="img" aria-label="A cell with a nucleus and several mitochondria">
+   <ellipse cx="300" cy="165" rx="282" ry="148" fill="#14302d" stroke="#3fb6a8" stroke-width="3"/>
+   <circle cx="300" cy="160" r="52" fill="#25403f" stroke="#6fc9bd" stroke-width="2"/><text x="300" y="165" text-anchor="middle" fill="#bfe9e2" font-size="14" font-family="Arial">nucleus</text>
+   ${mitos.map(([x,y,r],k)=>`<g class="hot" tabindex="0" role="button" aria-label="Zoom into mitochondrion ${k+1}" data-act="zoom" data-arg="1" transform="translate(${x} ${y}) rotate(${r})"><ellipse rx="52" ry="24" fill="#c86b3c" stroke="#ffb27a" stroke-width="2"/><path d="M-40 0c6-14 10 14 16 0s10 14 16 0 10 14 16 0 10 14 16 0" stroke="#ffd2a8" stroke-width="2.5" fill="none"/></g>`).join('')}
+   <text x="300" y="30" text-anchor="middle" fill="#e6c872" font-size="16" font-family="Arial" font-weight="bold">Click a mitochondrion (orange) to zoom in</text>
+  </svg>`;}
+ const cn=!!p.cn;
+ const box=(id,x,lab,fill)=>hot(id,`<rect x="${x}" y="105" width="64" height="90" rx="12" fill="${fill}" stroke="#9fe3d8" stroke-width="2"/><text x="${x+32}" y="156" text-anchor="middle" fill="#fff" font-size="20" font-family="Georgia">${lab}</text>`,PARTS[id][0]);
+ const ePath='M95 150 L232 150 L300 112 L372 150 L372 230';
+ const electrons=cn?`<g fill="#ffe36b">${[150,175,200,222,262,282].map((x,k)=>`<circle cx="${x}" cy="${k<4?150:122}" r="6"/>`).join('')}</g><text x="200" y="232" text-anchor="middle" fill="#ffe36b" font-size="12" font-family="Arial">↑ electrons backed up, nowhere to go</text>`
+   :[0,0.6,1.2,1.8,2.4].map(d=>`<circle r="6" fill="#ffe36b"><animateMotion dur="3s" begin="${d}s" repeatCount="indefinite" path="${ePath}"/></circle>`).join('');
+ const hplus=cn?'':[127,264,404].map(x=>`<g fill="#ff9d9d" font-family="Arial" font-size="13"><path d="M${x} 100 l0 -26 m-6 8 l6 -8 6 8" stroke="#ff9d9d" stroke-width="2" fill="none"/><text x="${x+8}" y="70">H⁺</text></g>`).join('');
+ return `<svg class="bio-svg" viewBox="0 0 600 320" role="img" aria-label="Electron transport chain on the inner mitochondrial membrane${cn?', blocked by cyanide':''}">
+  <rect x="0" y="0" width="600" height="120" fill="#10292b"/><text x="10" y="20" fill="#8ccfc5" font-size="12" font-family="Arial">INTERMEMBRANE SPACE (H⁺ builds up here)</text>
+  <rect x="0" y="120" width="600" height="60" fill="#2b5c56"/>
+  <g stroke="#3f7a72" stroke-width="2">${Array.from({length:30},(_,k)=>`<line x1="${k*20+10}" y1="124" x2="${k*20+10}" y2="176"/>`).join('')}</g>
+  <text x="441" y="148" text-anchor="middle" fill="#bfe9e2" font-size="10" font-family="Arial">INNER</text><text x="441" y="161" text-anchor="middle" fill="#bfe9e2" font-size="10" font-family="Arial">MEMBRANE</text><text x="10" y="216" fill="#8ccfc5" font-size="12" font-family="Arial">MATRIX</text>
+  ${hplus}
+  ${box('c1',63,'I','#3f8f86')}
+  ${box('c3',200,'III','#3f8f86')}
+  ${hot('cytc',`<circle cx="300" cy="110" r="15" fill="#d98b3c" stroke="#ffd2a8" stroke-width="2"/><text x="300" y="115" text-anchor="middle" fill="#fff" font-size="13" font-family="Arial" font-weight="bold">c</text>`,'Cytochrome c')}
+  ${box('c4',340,'IV',cn?'#8a2d26':'#3f8f86')}
+  ${hot('atp',`<rect x="478" y="100" width="44" height="95" rx="10" fill="#5a7fb8" stroke="#bcd3f5" stroke-width="2"/><g class="${cn?'':'spin'}"><circle cx="500" cy="240" r="30" fill="#5a7fb8" stroke="#bcd3f5" stroke-width="2"/><path d="M500 212v56M472 240h56M480 220l40 40M520 220l-40 40" stroke="#bcd3f5" stroke-width="2"/></g><text x="500" y="92" text-anchor="middle" fill="#bcd3f5" font-size="12" font-family="Arial">ATP synthase</text>`,'ATP synthase')}
+  ${cn?'':`<g font-family="Arial" font-size="12" font-weight="bold" fill="#0b2a26">${[0,1,2].map(k=>`<g><rect x="${540+(k%2)*8}" y="${270-k*8}" width="40" height="18" rx="9" fill="#8fe0c9"><animate attributeName="y" values="${290};${200}" dur="2.4s" begin="${k*0.8}s" repeatCount="indefinite"/></rect><text x="${560+(k%2)*8}" y="${283-k*8}" text-anchor="middle"><animate attributeName="y" values="303;213" dur="2.4s" begin="${k*0.8}s" repeatCount="indefinite"/>ATP</text></g>`).join('')}</g>`}
+  ${electrons}
+  ${hot('o2',cn?`<rect x="300" y="240" width="150" height="60" rx="10" fill="#14302d" stroke="#6fc9bd" stroke-dasharray="4 3"/><text x="375" y="262" text-anchor="middle" fill="#cfe" font-size="14" font-family="Arial">O₂  O₂  O₂  O₂</text><text x="375" y="284" text-anchor="middle" fill="#f2a99f" font-size="12" font-family="Arial">oxygen present, UNUSED</text>`
+     :`<rect x="300" y="240" width="150" height="60" rx="10" fill="#14302d" stroke="#6fc9bd"/><text x="375" y="264" text-anchor="middle" fill="#cfe" font-size="14" font-family="Arial">O₂ + e⁻ + H⁺</text><text x="375" y="286" text-anchor="middle" fill="#9fe3d8" font-size="14" font-family="Arial">→ H₂O (water)</text>`,'Oxygen')}
+  ${cn?hot('cn',`<circle cx="372" cy="196" r="20" fill="#c0574a" stroke="#fff" stroke-width="2"/><text x="372" y="201" text-anchor="middle" fill="#fff" font-size="13" font-family="Arial" font-weight="bold">CN⁻</text>`,'Cyanide bound to Complex IV'):''}
+  <text x="10" y="312" fill="#8ccfc5" font-size="11" font-family="Arial">Yellow dots = electrons. Click any labeled part to learn more.</text>
+ </svg>`;
+}
+WR.cyanide={
+ intro:pl([['Breathing happens in cells','You breathe so your mitochondria can use oxygen to make ATP, the energy every cell runs on.'],['The jam','Cyanide blocks the last enzyme in the chain, cytochrome c oxidase (Complex IV). Energy production crashes.'],['The paradox','Blood still carries oxygen, but cells can\'t use it. The organs that need the most oxygen, the brain and heart, fail first.'],['Fast','With a large dose, collapse can come within minutes. The tampered capsules held far more than a lethal dose.']]),
+ ix(){const p=P('cyanide');p.parts=p.parts||[];const cn=!!p.cn;
+  const cur=p.cur&&PARTS[p.cur];
+  const info=cur?`<b style="color:var(--wc)">${cur[0]}</b><p>${esc(cn&&cur[2]?cur[2]:cur[1])}</p>`:`<b style="color:var(--wc)">${p.zoom?'Electron transport chain':'A human cell'}</b><p>${p.zoom?'Electrons flow from Complex I → III → cytochrome c → IV → oxygen. Their energy pumps H⁺ ions that spin ATP synthase. Click a part, then add cyanide.':'Cellular respiration\'s final stage happens in the mitochondria. Zoom in to see it.'}</p>`;
+  const flips=[['Looked natural','Doctors first suspected a heart attack in one victim and a stroke in another.'],['No quick test','The local hospital couldn\'t test for cyanide. An ICU doctor suspected cyanide and sent blood samples to a 24-hour lab.'],['The smell clue','Cyanide can smell like bitter almonds, but only some people can detect it. A medical examiner\'s investigator could.'],['Unthinkable','No one expected poison inside the country\'s most popular pain reliever.']];
+  p.flip=p.flip||[];
+  const q=['Cyanide stops red blood cells from carrying oxygen','Cells can\'t USE the oxygen because Complex IV is blocked','The acetaminophen in Tylenol used up the oxygen'];
+  const qa=1;
+  const zoomBtns=p.zoom?`<button class="btn ghost small" data-act="zoom" data-arg="0">← Back to the whole cell</button>
+     <button class="btn small" style="background:${cn?'#5fb878':'#c0574a'};color:#fff;box-shadow:none" data-act="cn">${cn?'Remove cyanide (reset)':'☠ Add cyanide (CN⁻)'}</button>`:'';
+  return ixBox('Interactive: Inside the Mitochondrion',`${p.zoom?'zoomed in':'start: zoom in'} · ${p.cnTried?'cyanide tested':'try cyanide'} · ${p.parts.includes('c4')?'Complex IV ✓':'click Complex IV'} · ${p.q===qa?'check ✓':'check question'}`,
+   `<div class="bio-wrap"><div>${bioSVG(p)}<div class="row" style="margin-top:8px">${zoomBtns}</div></div>
+    <div><div class="info" aria-live="polite">${info}</div>
+     <p style="margin:10px 0 4px" class="small"><b>ATP production:</b> ${p.zoom?(cn?'<span style="color:#f2a99f">CRASHING</span>':'<span style="color:#9be3b0">normal</span>'):'(zoom in)'}</p>
+     <div class="meter ${cn?'low':''}"><i style="width:${cn?6:p.zoom?100:60}%"></i></div>
+     <p class="small muted" style="margin-top:8px">Hit first: <b>brain</b> and <b>heart</b>. Early signs (non-graphic): dizziness, headache, confusion, fast breathing; then loss of consciousness.</p></div></div>
+   <h3 style="margin-top:14px">Check yourself</h3>
+   <p>Blood tests can show plenty of oxygen in the blood. So why are the cells starving for energy?</p>
+   ${q.map((t,j)=>`<button class="opt ${p.q===j?(j===qa?'right':'wrong'):''}" data-act="cyq" data-arg="${j}">${esc(t)}</button>`).join('')}
+   <div class="fb ${p.q==null?'':(p.q===qa?'ok':'no')}">${p.q==null?'':(p.q===qa?'✓ Right. The oxygen is delivered but can\'t be used. (Blocking oxygen transport in red blood cells is how carbon monoxide works, a different poison.)':'Not quite. Think about where cyanide acts: inside the mitochondria, not in the blood.')}</div>
+   <h3 style="margin-top:14px">Why was it so hard to recognize in 1982? <span class="muted small">(click each card)</span></h3>
+   <div class="flips">${flips.map(([a,b],j)=>`<button class="flip ${p.flip.includes(j)?'on':''}" data-act="flip" data-arg="${j}"><b>${a}</b>${p.flip.includes(j)?esc(b):'<span class="muted">Click to reveal</span>'}</button>`).join('')}</div>`,this.done());},
+ done(){const p=P('cyanide');return !!(p.zoom&&p.cnTried&&(p.parts||[]).includes('c4')&&p.q===1);}
+};
+
+/* ---------- 5 SAFETY ---------- */
+const FEAT_A={
+ a1:['Glued box flaps','The outer box is glued shut, so you can\'t open it and close it again without visible damage.'],
+ a2:['Plastic neck seal','A tight plastic band shrunk around the cap and neck. It must be torn to open the bottle.'],
+ a3:['Foil inner seal','A foil seal bonded over the bottle\'s mouth, under the cap. A hole or tear means someone got in.'],
+ a4:['Warning label','A label tells you to not use the product if a seal is broken. FDA rules require a statement describing the safety features.'],
+ a5:['Solid caplet (1986)','After a 1986 copycat death, J&J stopped selling over-the-counter capsules. Solid, capsule-shaped "caplets" can\'t be pulled apart and refilled.']
+};
+const FEAT_B={
+ b1:['Plain cap','Just a cap and a cotton ball. Nothing shows whether the bottle was opened before you bought it.'],
+ b2:['Two-piece capsule','The two halves could be pulled apart, refilled, and pushed back together without obvious signs.'],
+ b3:['Tuck-flap box','The box flaps simply tuck in. Easy to open and close again.']
+};
+function hs(id,x,y,n,found,label){return `<g class="hs ${found?'found':''}" tabindex="0" role="button" aria-label="${esc(label)}${found?' (found)':''}" data-act="feat" data-arg="${id}"><circle cx="${x}" cy="${y}" r="15"/><text x="${x}" y="${y+5}" text-anchor="middle">${found?'✓':n}</text></g>`;}
+function pkgSVG(p){
+ const f=p.found||[];
+ if(p.view==='before'){
+  return `<svg class="pkg-svg" viewBox="0 0 600 330" role="img" aria-label="A 1982 package before safety seals">
+   <text x="300" y="28" text-anchor="middle" fill="#e6e0c8" font-family="Georgia" font-size="20">BEFORE: a typical package, early 1982</text>
+   <g><rect x="40" y="110" width="150" height="190" fill="#b33b31"/><path d="M40 110 l20 -34 h110 l20 34z" fill="#c9473c"/><path d="M60 76 l55 -20 55 20" fill="none" stroke="#e8d7b0" stroke-width="2" stroke-dasharray="5 4"/><rect x="40" y="170" width="150" height="34" fill="#f2c94c"/><text x="115" y="193" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="13" fill="#7a1d16">PAIN RELIEVER</text></g>
+   <g><rect x="255" y="74" width="90" height="34" rx="5" fill="#f1f1f1"/><rect x="245" y="108" width="110" height="190" rx="16" fill="#f7f7f7"/><rect x="245" y="160" width="110" height="70" fill="#c8312b"/><ellipse cx="300" cy="125" rx="40" ry="10" fill="#fff" stroke="#ccc"/><text x="300" y="129" text-anchor="middle" font-size="10" font-family="Arial" fill="#999">cotton</text></g>
+   <g transform="translate(430 150)"><rect x="0" y="0" width="56" height="30" rx="15" fill="#c8312b"/><rect x="74" y="0" width="56" height="30" rx="15" fill="#f4f4f4" stroke="#bbb"/><text x="65" y="60" text-anchor="middle" fill="#e6e0c8" font-family="Arial" font-size="13">capsule pulls apart</text><path d="M58 15h14" stroke="#e6c872" stroke-width="2" stroke-dasharray="3 2"/></g>
+   ${hs('b1',300,62,1,(p.bf||[]).includes('b1'),'Plain cap')}${hs('b2',495,128,2,(p.bf||[]).includes('b2'),'Two-piece capsule')}${hs('b3',115,58,3,(p.bf||[]).includes('b3'),'Tuck-flap box')}
+  </svg>`;}
+ return `<svg class="pkg-svg" viewBox="0 0 600 330" role="img" aria-label="The triple-sealed package from November 1982, plus a later caplet">
+   <text x="300" y="28" text-anchor="middle" fill="#e6e0c8" font-family="Georgia" font-size="20">AFTER: triple-sealed (Nov 1982) + caplet (1986)</text>
+   <g><rect x="40" y="110" width="150" height="190" fill="#b33b31"/><rect x="40" y="96" width="150" height="16" fill="#c9473c"/><g fill="#f2c94c">${[60,85,110,135,160].map(x=>`<circle cx="${x}" cy="104" r="3.5"/>`).join('')}</g><rect x="40" y="170" width="150" height="34" fill="#f2c94c"/><text x="115" y="193" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="13" fill="#7a1d16">SAFETY SEALED</text><text x="115" y="260" text-anchor="middle" font-family="Arial" font-size="11" fill="#fbe">glued flaps</text></g>
+   <g><rect x="255" y="62" width="90" height="34" rx="5" fill="#f1f1f1"/><rect x="250" y="92" width="100" height="22" fill="#f2c94c" opacity=".92"/><text x="300" y="107" text-anchor="middle" font-family="Arial" font-size="10" font-weight="bold" fill="#7a1d16">SAFETY SEAL</text>
+     <rect x="245" y="114" width="110" height="186" rx="16" fill="#f7f7f7"/><rect x="245" y="160" width="110" height="74" fill="#c8312b"/><rect x="245" y="236" width="110" height="26" fill="#ffd84a"/><text x="300" y="248" text-anchor="middle" font-family="Arial" font-size="8.5" font-weight="bold" fill="#5a1610">DO NOT USE IF</text><text x="300" y="258" text-anchor="middle" font-family="Arial" font-size="8.5" font-weight="bold" fill="#5a1610">SEAL IS BROKEN</text></g>
+   <g><circle cx="410" cy="88" r="30" fill="#cfd4da" stroke="#8a929c" stroke-width="3"/><circle cx="410" cy="88" r="22" fill="none" stroke="#e9edf1" stroke-width="2"/><text x="410" y="132" text-anchor="middle" fill="#e6e0c8" font-family="Arial" font-size="12">foil under the cap</text><path d="M345 80 L380 85" stroke="#e6c872" stroke-dasharray="3 3"/></g>
+   <g transform="translate(450 200)"><rect x="0" y="0" width="110" height="38" rx="19" fill="#f4f4f4" stroke="#bbb"/><text x="55" y="66" text-anchor="middle" fill="#e6e0c8" font-family="Arial" font-size="12">solid caplet: one piece</text></g>
+   ${hs('a1',115,80,1,f.includes('a1'),'Glued box flaps')}${hs('a2',226,103,2,f.includes('a2'),'Plastic neck seal')}${hs('a3',455,70,3,f.includes('a3'),'Foil inner seal')}${hs('a4',370,250,4,f.includes('a4'),'Warning label')}${hs('a5',505,180,5,f.includes('a5'),'Solid caplet')}
+ </svg>`;
+}
+function miniBottle(kind){
+ const band=kind==='torn'?`<path d="M38 52 h18 l4 6 -4 6 h-18z" fill="#f2c94c"/><path d="M64 52 h18 v12 h-14 l3 -6z" fill="#f2c94c"/>`:`<rect x="38" y="52" width="44" height="12" fill="#f2c94c"/>`;
+ if(kind==='foil')return `<svg viewBox="0 0 120 120" aria-hidden="true"><rect x="36" y="56" width="48" height="58" rx="8" fill="#f7f7f7"/><rect x="36" y="76" width="48" height="22" fill="#c8312b"/><ellipse cx="60" cy="56" rx="24" ry="7" fill="#cfd4da" stroke="#8a929c" stroke-width="2"/><circle cx="66" cy="55" r="4" fill="#333"/><path d="M58 52 l4 4 m2 -6 l-3 6" stroke="#555" stroke-width="1.5"/><rect x="70" y="18" width="34" height="16" rx="3" fill="#f1f1f1" transform="rotate(20 87 26)"/><text x="60" y="12" text-anchor="middle" font-size="9" fill="#ccc" font-family="Arial">cap off</text></svg>`;
+ return `<svg viewBox="0 0 120 120" aria-hidden="true"><rect x="40" y="30" width="40" height="22" rx="4" fill="#f1f1f1"/>${band}<rect x="36" y="64" width="48" height="50" rx="8" fill="#f7f7f7"/><rect x="36" y="78" width="48" height="22" fill="#c8312b"/></svg>`;
+}
+const INSP=[{k:'ok',t:'Package A: neck band smooth and complete',a:0},{k:'torn',t:'Package B: neck band split and loose',a:1},{k:'foil',t:'Package C: foil seal has a small hole',a:1}];
+WR.safety={
+ intro:pl([['Before','In 1982 many pill bottles had just a cap and a cotton ball. Capsules could be pulled apart and closed again without obvious signs.'],['Nov 5, 1982','About five weeks after the deaths, the FDA required tamper-resistant packaging for most over-the-counter medicines.'],['Nov 11, 1982','J&J unveiled a triple-sealed Tylenol package: glued box, plastic neck seal, and foil inner seal.'],['Evident, not "proof"','Since 1998 the FDA says "tamper-evident." No package is truly tamper-proof; it shows you if someone got in.']]),
+ ix(){const p=P('safety');p.view=p.view||'after';p.found=p.found||[];p.bf=p.bf||[];p.insp=p.insp||{};
+  const map=p.view==='after'?FEAT_A:FEAT_B;const cur=p.cur&&(FEAT_A[p.cur]||FEAT_B[p.cur]);
+  const inspOK=INSP.filter((x,i)=>p.insp[i]===x.a).length;
+  const rules=[['Nov 5, 1982','FDA tamper-resistant packaging rule'],['Oct 13, 1983','Federal Anti-Tampering Act: tampering becomes a federal crime'],['Feb 1986','J&J ends OTC capsules → caplets'],['June 1988','Tylenol gelcaps (solid, gelatin-coated)'],['Feb 1989','FDA: capsules need 2 tamper features, or sealed capsules'],['1998','FDA renames it "tamper-evident"']];
+  return ixBox('Inspect the Package',`after ${p.found.length}/5 · before ${p.bf.length}/3 · inspector ${inspOK}/3`,
+   `<div class="row" style="margin-bottom:8px"><button class="btn small ${p.view==='before'?'':'ghost'}" data-act="pview" data-arg="before">Before (early 1982)</button><button class="btn small ${p.view==='after'?'':'ghost'}" data-act="pview" data-arg="after">After (Nov 1982 →)</button><span class="muted small">Click the numbered circles to find every feature.</span></div>
+   <div class="pkg-wrap"><div>${pkgSVG(p)}</div><div class="info" aria-live="polite">${cur?`<b style="color:var(--wc)">${cur[0]}</b><p>${esc(cur[1])}</p>`:`<b style="color:var(--wc)">${p.view==='after'?'Find 5 safety features':'Find 3 weak spots'}</b><p>${p.view==='after'?'Each feature gives "visible evidence" of tampering, the FDA\'s standard.':'Why was it so easy for someone to tamper with a bottle and return it to the shelf?'}</p>`}
+     <div class="rules">${rules.map(([a,b])=>`<div class="rule"><b>${a}</b>${b}</div>`).join('')}</div></div></div>
+   <h3 style="margin-top:14px">You're the inspector: would you use it?</h3>
+   <div class="insp">${INSP.map((x,i)=>{const v=p.insp[i];return `<div class="card">${miniBottle(x.k)}<div class="small">${esc(x.t)}</div>
+     <div class="row" style="justify-content:center;margin-top:6px"><button class="opt ${v===0?(x.a===0?'right':'wrong'):''}" style="width:auto;padding:5px 10px;font-size:13px" data-act="insp" data-arg="${i}:0">Looks safe</button><button class="opt ${v===1?(x.a===1?'right':'wrong'):''}" style="width:auto;padding:5px 10px;font-size:13px" data-act="insp" data-arg="${i}:1">Don't use: report it</button></div>
+     <div class="fb ${v==null?'':(v===x.a?'ok':'no')}" style="font-size:13px">${v==null?'':(v===x.a?(x.a?'✓ A broken seal means don\'t use it. Return it and tell the store.':'✓ Seals intact. Still check the foil when you open it.'):'Look again at the seals.')}</div></div>`;}).join('')}</div>`,this.done());},
+ done(){const p=P('safety');return (p.found||[]).length>=5&&(p.bf||[]).length>=3&&INSP.every((x,i)=>(p.insp||{})[i]===x.a);}
+};
+
+/* ---------- 6 RECALL ---------- */
+const DEC=[
+ {when:'Sept 30, 1982',q:'Poison has been found in Tylenol capsules from Chicago-area stores. Your factories don\'t seem to be the source. What do you do first?',o:['Quietly pull only the bad lots in Chicago','Warn the public right away, pull the suspect lots, and stop advertising','Say nothing until police finish investigating'],real:'J&J warned hospitals and distributors, pulled the suspect lots, and halted Tylenol advertising. On Oct 5, after a copycat strychnine case in California, J&J and the FDA agreed to recall ALL Tylenol capsules nationwide: about 31 million bottles, worth about $100 million.'},
+ {when:'Early October',q:'Reporters are calling nonstop and the story leads every newscast. How do you handle the media?',o:['"No comment." Let the lawyers talk.','Be open: share what you know, keep the TV networks informed, work with the FBI and FDA','Blame the stores for not watching their shelves'],real:'CEO James Burke kept the heads of the TV network news divisions informed and met with the heads of the FBI and FDA. J&J sent about 450,000 messages to doctors, hospitals, and distributors.'},
+ {when:'October',q:'Millions of customers are scared and threw their Tylenol away. What about them?',o:['Nothing. It wasn\'t our fault.','Swap capsules for tablets for free and replace thrown-out capsules','Offer a discount on a new bottle'],real:'J&J offered to swap capsules for Tylenol tablets for free, and later to replace thrown-out capsules with no proof needed. It also published 40 million coupons worth $2.50.'},
+ {when:'November 1982',q:'How do you bring Tylenol back?',o:['Give it a new name so people forget','Bring back the same capsules with a huge ad campaign','Relaunch with a brand-new tamper-resistant package'],real:'On Nov 11, 1982 (43 days after the first deaths), Burke unveiled a triple-sealed package. It added about 2.4 cents to the cost of each package. Within about a year, Tylenol\'s market share climbed back to about 30%.'}
+];
+function chartSVG(){
+ const bars=[['Before','35%',35,'#e08a3c'],['After the deaths','~7%',7,'#c0574a'],['About a year later','~30%',30,'#e08a3c']];
+ return `<svg class="chart" viewBox="0 0 420 220" role="img" aria-label="Tylenol market share: about 35 percent before, about 7 percent after, about 30 percent a year later">
+  <line x1="40" y1="190" x2="410" y2="190" stroke="#777"/>
+  ${bars.map(([l,v,h,c],i)=>`<rect x="${60+i*120}" y="${190-h*4}" width="80" height="${h*4}" fill="${c}" rx="4"/><text x="${100+i*120}" y="${182-h*4}" text-anchor="middle" fill="#f3e3c8" font-family="Arial" font-weight="bold" font-size="15">${v}</text><text x="${100+i*120}" y="208" text-anchor="middle" fill="#bbb" font-family="Arial" font-size="12">${l}</text>`).join('')}
+  <text x="40" y="14" fill="#bbb" font-family="Arial" font-size="12">Tylenol\'s share of the pain-reliever market (approx.)</text></svg>`;
+}
+WR.recall={
+ intro:pl([['The biggest bet','About 31 million bottles recalled nationwide at a cost of about $100 million. (Some 1982 reports said 22 million.)'],['The CEO','James E. Burke led J&J. He said the company\'s Credo, which puts customers first, guided him: "The credo is all about the consumer."'],['The crash','Tylenol\'s share of the pain-reliever market fell from about 35% to about 7%.'],['The comeback','Within about a year it was back near 30%. Business schools still teach it as a crisis case study.']]),
+ ix(){const p=P('recall');p.d=p.d||{};const n=Object.keys(p.d).length;
+  return ixBox('You\'re the CEO: What would you do?',`${n}/4 decisions`,
+   `<p class="muted small" style="margin-top:0">There\'s no "wrong" choice here. Pick what YOU would do, then see what really happened.</p>
+   ${DEC.map((d,i)=>{const c=p.d[i];const locked=c!=null;return `<div class="decision"><div class="kicker">Decision ${i+1} · ${d.when}</div><p class="q">${esc(d.q)}</p>
+    ${d.o.map((o,j)=>`<button class="opt ${c===j?'pick':''}" data-act="dec" data-arg="${i}:${j}" ${locked?'aria-disabled="true"':''}>${esc(o)}${c===j?' ← your choice':''}</button>`).join('')}
+    ${locked?`<div class="real"><b>What really happened:</b> ${esc(d.real)}</div>`:''}</div>`;}).join('')}
+   <div class="two" style="margin-top:6px"><div>${chartSVG()}</div><div class="panel" style="background:#241d14;border-color:#5a4426"><b style="color:#f0b56c">Debate it</b><p class="small">Some people call J&J heroes. Others say the crime happened after the product left J&J's control, and a giant company could afford a $100 million loss. Was it ethics, smart business, or both?</p><p class="small credo">"The credo is all about the consumer." (James E. Burke, J&amp;J CEO)</p></div></div>`,n>=4);},
+ done(){return Object.keys(P('recall').d||{}).length>=4;}
+};
+
+/* ---------- 7 NEWS ---------- */
+const OLD={
+ tele:['News wire','3:07 a.m., Sept 30: the City News Bureau, a 24-hour Chicago news service, sent the first bulletin about the Janus deaths. A second bulletin followed around 5:30 a.m., and local radio picked up the story.'],
+ radio:['Radio','Morning radio spread the warning fast, long before most people saw a newspaper.'],
+ tv:['TV news conference','On Sept 30 the county medical examiner confirmed cyanide at a news conference. The story led national news for weeks.'],
+ paper:['Newspapers','Front pages carried lot numbers and warnings. But a printed paper comes out only once a day.'],
+ car:['Police loudspeakers','Police cars drove through neighborhoods with bullhorns telling people to throw out Tylenol. Health workers went door to door with flyers. Chicago\'s mayor banned Tylenol sales in the city.']
+};
+const NEWSTXT={phone:['Phone alerts today','Wireless Emergency Alerts (since 2012) let officials send location-targeted alerts to phones. The FDA posts recalls online, with email subscriptions. But rumors can travel just as fast.']};
+const CHIPS=[
+ ['wire','A 3 a.m. bulletin on a city news wire service','old'],
+ ['bull','Police cars with bullhorns driving through neighborhoods','old'],
+ ['lot','Pharmacists checking lot codes by hand and pulling bottles','old'],
+ ['ban','The mayor bans Tylenol sales in the city','old'],
+ ['wea','A location-targeted Wireless Emergency Alert buzzes your phone','new'],
+ ['fda','An FDA recall notice arrives by email subscription','new'],
+ ['viral','A viral post with an unverified "leaked" photo','new'],
+ ['live','A livestreamed press conference with live comments','new']
+];
+const TRUST=[
+ {who:'U.S. FDA ✓ (official account)',t:'Recall: [Brand] pain reliever, lot #A1234. Stop using it and check the lot number on your bottle. Details at fda.gov.',a:0,why:'An official source, a specific lot number, and a .gov site you can check yourself.'},
+ {who:'@realnews_4u_2day · joined 3 days ago',t:'BREAKING!!! ALL pain relievers in Chicago are POISONED. My cousin\'s friend works at a hospital. SHARE before they delete this!!!',a:1,why:'No source, all caps, "share before they delete," a brand-new account. Classic rumor signs.'},
+ {who:'Screenshot forwarded in a group chat',t:'[Image of a "news" headline. No link, no date, no outlet name.]',a:1,why:'Screenshots are easy to fake. Search for the story on trusted news sites first.'}
+];
+function newsroomSVG(p){
+ const s=p.old||[];const h=(id,inner,label)=>`<g class="hot" tabindex="0" role="button" aria-label="${label}${s.includes(id)?' (seen)':''}" data-act="old" data-arg="${id}">${inner}</g>`;
+ return `<svg viewBox="0 0 400 230" style="width:100%;height:auto;display:block;background:#2b2418;border-radius:9px" role="img" aria-label="A 1982 newsroom">
+  <rect x="0" y="170" width="400" height="60" fill="#3a2f20"/>
+  ${h('tele',`<rect x="14" y="110" width="80" height="60" rx="4" fill="#58616b" stroke="#ddd" stroke-width="1"/><rect x="26" y="80" width="56" height="34" fill="#f4efe0"/><g stroke="#888">${[88,95,102].map(y=>`<line x1="31" y1="${y}" x2="77" y2="${y}"/>`).join('')}</g><text x="54" y="160" text-anchor="middle" fill="#fff" font-size="10" font-family="Arial">WIRE</text>`,'News wire teletype')}
+  ${h('radio',`<rect x="110" y="120" width="70" height="48" rx="8" fill="#7a5530" stroke="#e6c872"/><circle cx="130" cy="144" r="13" fill="#2b2015"/><rect x="150" y="132" width="22" height="4" fill="#e6c872"/><rect x="150" y="142" width="22" height="4" fill="#e6c872"/>`,'Radio')}
+  ${h('tv',`<rect x="196" y="74" width="92" height="74" rx="10" fill="#3b3b3b" stroke="#bbb"/><rect x="204" y="82" width="64" height="56" rx="6" fill="#7aa3b8"/><text x="236" y="114" text-anchor="middle" font-size="9" fill="#123" font-family="Arial">NEWS</text><circle cx="278" cy="96" r="4" fill="#aaa"/><rect x="226" y="148" width="20" height="22" fill="#555"/>`,'Television news')}
+  ${h('paper',`<rect x="300" y="112" width="84" height="56" fill="#efe9d8" stroke="#b7aa8a"/><text x="342" y="128" text-anchor="middle" font-size="9" font-weight="bold" font-family="Georgia" fill="#222">DAILY NEWS</text><rect x="308" y="134" width="68" height="5" fill="#333"/><g stroke="#999">${[146,152,158].map(y=>`<line x1="308" y1="${y}" x2="376" y2="${y}"/>`).join('')}</g>`,'Newspaper')}
+  ${h('car',`<rect x="120" y="186" width="150" height="30" rx="8" fill="#1d3557"/><rect x="146" y="172" width="90" height="18" rx="6" fill="#26456e"/><rect x="180" y="164" width="20" height="8" fill="#c0574a"/><circle cx="150" cy="218" r="9" fill="#111"/><circle cx="240" cy="218" r="9" fill="#111"/><path d="M276 194 l18 -8 v24z" fill="#ccc"/><text x="314" y="204" fill="#f3e3c8" font-size="11" font-family="Arial">"Don't take Tylenol!"</text>`,'Police car with loudspeaker')}
+  <text x="200" y="22" text-anchor="middle" fill="#f3e3c8" font-family="Georgia" font-size="16">Chicago, Sept 30, 1982</text><text x="200" y="40" text-anchor="middle" fill="#cbb98f" font-family="Arial" font-size="11">click each object</text>
+ </svg>`;
+}
+WR.news={
+ intro:pl([['3:07 a.m.','The first bulletin came from the City News Bureau, a 24-hour Chicago news service. By morning, radio was spreading it.'],['Bullhorns','Police drove through neighborhoods with loudspeakers. Health workers went door to door with flyers.'],['Today','Phones can get location-targeted Wireless Emergency Alerts (since 2012). The FDA posts recalls online.'],['The catch','A 2018 study found false news on Twitter was about 70% more likely to be retweeted than true news.']]),
+ ix(){const p=P('news');p.old=p.old||[];p.sort=p.sort||{};p.trust=p.trust||{};
+  const cur=p.cur&&(OLD[p.cur]||NEWSTXT[p.cur]);
+  const sortOK=CHIPS.filter(c=>p.sort[c[0]]===c[2]).length, trOK=TRUST.filter((t,i)=>p.trust[i]===t.a).length;
+  return ixBox('1982 Newsroom vs. 2026 Phone',`sorted ${sortOK}/8 · feed ${trOK}/3`,
+   `<div class="versus"><div class="era old"><h3>1982: How the warning spread</h3>${newsroomSVG(p)}<div class="info" style="margin-top:8px;min-height:90px" aria-live="polite">${cur?`<b style="color:var(--wc)">${cur[0]}</b><p>${esc(cur[1])}</p>`:'<p class="muted">Click the wire machine, radio, TV, newspaper, and police car.</p>'}</div></div>
+    <div class="era new"><h3>Today: a simulated phone feed</h3><div class="phone"><div class="post alert"><div class="who">⚠ Emergency Alert (example)</div>Example of a Wireless Emergency Alert format. Real alerts come from authorized officials.</div>
+    ${TRUST.map((t,i)=>{const v=p.trust[i];return `<div class="post"><div class="who">${esc(t.who)}</div>${esc(t.t)}<button class="opt ${v===0?(t.a===0?'right':'wrong'):''}" data-act="trust" data-arg="${i}:0">Trust it &amp; follow the steps</button><button class="opt ${v===1?(t.a===1?'right':'wrong'):''}" data-act="trust" data-arg="${i}:1">Don't share yet: verify first</button>${v==null?'':`<div class="fb ${v===t.a?'ok':'no'}" style="font-size:12px">${v===t.a?'✓ '+esc(t.why):'Look closer at the source.'}</div>`}</div>`;}).join('')}</div></div></div>
+   <h3 style="margin-top:14px">Sort it: 1982 or today?</h3>
+   <div class="chips">${CHIPS.map(([k,t,a])=>{const v=p.sort[k];return `<div class="chip ${v?(v===a?'ok':'bad'):''}"><div>${esc(t)}</div><div class="row"><button class="btn small ${v==='old'?'':'ghost'}" data-act="sort" data-arg="${k}:old">1982</button><button class="btn small ${v==='new'?'':'ghost'}" data-act="sort" data-arg="${k}:new">Today</button><span class="small" style="color:${v?(v===a?'#9be3b0':'#f2a99f'):'transparent'}">${v?(v===a?'✓':'✗ try again'):'.'}</span></div></div>`;}).join('')}</div>`,this.done());},
+ done(){const p=P('news');return CHIPS.every(c=>(p.sort||{})[c[0]]===c[2])&&TRUST.every((t,i)=>(p.trust||{})[i]===t.a);}
+};
+
+/* ---------- 8 LEGACY ---------- */
+const CAUSE=[{k:1,t:'Seven deaths from capsules tampered with on store shelves (1982)'},{k:2,t:'No specific federal law against product tampering'},{k:3,t:'A copycat cyanide death in New York (1986)'},{k:4,t:'Fear spreads in October 1982'}];
+const EFFECT=[{k:3,t:'J&J stops selling OTC capsules; solid caplets replace them'},{k:1,t:'FDA tamper-resistant packaging rule (Nov 1982)'},{k:4,t:'Some towns discourage trick-or-treating that Halloween'},{k:2,t:'Federal Anti-Tampering Act (Oct 1983)'}];
+let lgWrong=false;
+WR.legacy={
+ intro:pl([['Copycats','Hundreds of copycat tampering incidents followed across the U.S. after 1982.'],['More deaths','Copycat poisonings killed more people in 1986 and 1991, which led to more changes.'],['Halloween 1982','Some towns discouraged trick-or-treating that October. Poisoned candy from strangers has never been documented.'],['Still open','In Sept 2026, Idaho detectives shared a possible new lead with Chicago police. The case remains open.']]),
+ ix(){const p=P('legacy');p.m=p.m||[];const sel=p.sel;
+  const cases=[['Oct 1982 · California','A copycat strychnine case involving Tylenol helped push J&J to recall capsules nationwide.'],['Feb 1986 · New York','Diane Elsroth, 23, died after taking cyanide-laced Tylenol capsules. J&J stopped selling over-the-counter capsules.'],['June 1986 · Washington','Bruce Nickell and Sue Snow died from cyanide-laced Excedrin capsules. Bruce\'s wife, Stella Nickell, was convicted in 1988.'],['1991 · Washington','Kathleen Daneker and Stanley McWhorter died from tainted Sudafed capsules. Joseph Meling was convicted in 1993.']];
+  return ixBox('Cause → Effect: Trace the Ripples',`${p.m.length}/4 matched`,
+   `<p class="muted small" style="margin-top:0">Click a cause on the left, then the change it led to on the right.</p>
+   <div class="match"><div><div class="kicker">Cause</div>${CAUSE.map(c=>{const d=p.m.includes(c.k);return `<button class="mbtn ${d?'done':''} ${sel===c.k?'sel':''}" data-act="cause" data-arg="${c.k}" ${d?'aria-disabled="true"':''} aria-pressed="${sel===c.k}">${d?'<span class="pair">✓ MATCHED</span><br>':''}${esc(c.t)}</button>`;}).join('')}</div>
+   <div><div class="kicker">Effect</div>${EFFECT.map(e=>{const d=p.m.includes(e.k);return `<button class="mbtn ${d?'done':''}" data-act="effect" data-arg="${e.k}" ${d?'aria-disabled="true"':''}>${d?'<span class="pair">✓ MATCHED</span><br>':''}${esc(e.t)}</button>`;}).join('')}</div></div>
+   <div class="fb ${lgWrong?'no':(p.m.length===4?'ok':'')}" aria-live="polite">${lgWrong?'That\'s not the change it caused. Try another.':(p.m.length===4?'✓ All matched. One crime reshaped laws, products, and even Halloween.':(sel?'Now pick the effect.':''))}</div>
+   <h3 style="margin-top:14px">Copycat cases (all non-graphic summaries)</h3>
+   <div class="cases">${cases.map(([a,b])=>`<div class="case"><b>${a}</b>${esc(b)}</div>`).join('')}</div>`,p.m.length===4);},
+ done(){return (P('legacy').m||[]).length===4;}
+};
+</script>
+<script>
+"use strict";
+/* ================= Pages ================= */
+const today=()=>new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+function stampCount(){return WINGS.filter(w=>S.stamps[w.id]).length;}
+function noteArea(key,label,rows){return `<label class="sr" for="n-${key}">${label}</label><textarea id="n-${key}" data-note="${key}" ${rows?`rows="${rows}"`:''} placeholder="Facts that surprised you, questions, ideas for your slides...">${esc(S.notes[key]||'')}</textarea><div class="saved" id="sv-${key}"></div>`;}
+
+function pgWelcome(){
+ return `<section class="hero"><div>
+  <div class="tag">A self-guided virtual museum</div>
+  <h1>UNSOLVED<br><span style="color:var(--brass2)">The 1982 Chicago Tylenol Murders</span></h1>
+  <p style="font-size:18px;max-width:620px">In the fall of 1982, seven people near Chicago died after taking poisoned pain-reliever capsules. The killer was never caught. The case changed medicine packaging, federal law, crisis management, and how warnings reach the public.</p>
+  <p class="muted">Walk through 8 wings. Try every hands-on exhibit to earn passport stamps. Take notes and star topics. At the end, choose the angle for <b>your</b> research presentation.</p>
+  <div class="advisory" style="margin:12px 0"><b>Visitor advisory:</b> this museum deals with real deaths. It is written respectfully and is not graphic. If any part is upsetting, it's okay to take a break or tell your teacher.</div>
+  <div class="panel" style="max-width:520px"><label for="nameIn"><b>Your name for the certificate</b></label>
+   <div class="row" style="margin-top:6px;flex-wrap:nowrap"><input id="nameIn" class="text" maxlength="40" value="${esc(S.name)}" placeholder="First and last name" autocomplete="off"><button class="btn" data-act="start">Enter the museum →</button></div>
+   <p class="small muted" style="margin:6px 0 0">Progress saves automatically in this browser on this device.</p></div>
+ </div>
+ <div>${lobbySVGPreview()}</div></section>`;
+}
+function lobbySVGPreview(){
+ return `<svg viewBox="0 0 420 380" style="width:100%;max-width:460px;display:block;margin:auto" role="img" aria-label="Museum building">
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c1d26"/><stop offset="1" stop-color="#121318"/></linearGradient></defs>
+  <rect width="420" height="380" fill="url(#sky)" rx="14"/>
+  <path d="M30 130 L210 40 L390 130z" fill="#c9a54a"/><path d="M60 122 L210 54 L360 122z" fill="#2a2620"/>
+  <text x="210" y="112" text-anchor="middle" font-family="Georgia" font-size="16" fill="#e6c872" letter-spacing="3">MUSEUM OF</text>
+  <rect x="34" y="130" width="352" height="18" fill="#c9a54a"/><text x="210" y="144" text-anchor="middle" font-family="Georgia" font-size="13" fill="#1b1608" letter-spacing="4">THE UNSOLVED · 1982</text>
+  ${[0,1,2,3,4,5].map(i=>`<rect x="${54+i*58}" y="152" width="22" height="160" fill="#e8dcc0"/><rect x="${50+i*58}" y="150" width="30" height="8" fill="#d8caa8"/><rect x="${50+i*58}" y="306" width="30" height="8" fill="#d8caa8"/>`).join('')}
+  <rect x="193" y="236" width="34" height="76" fill="#0d0e12" rx="17"/>
+  <rect x="20" y="314" width="380" height="14" fill="#c9a54a"/><rect x="10" y="328" width="400" height="14" fill="#a8893a"/>
+ </svg>`;
+}
+function pgLobby(){
+ const n=stampCount();
+ const room=w=>{const on=!!S.stamps[w.id];const vis=!!S.visited[w.id];const st=!!S.stars[w.id];
+  return `<button class="room" style="--rc:${w.wc}" data-go="wing/${w.id}" aria-label="Wing ${w.n}: ${w.title}, ${w.sub}. ${on?'Stamped.':vis?'Visited.':'Not visited.'}${st?' Starred.':''} Press ${w.n}.">
+   <span class="num">WING ${w.n}${st?' ★':''}</span><span class="ttl">${w.title}</span><span class="sub">${w.sub}</span>${ICON[w.icon](w.wc)}
+   <span class="st">${on?stampSVG(w,true,''):''}</span><span class="time">~${w.min} min${vis&&!on?' · in progress':''}</span><span class="door"></span></button>`;};
+ const L=WINGS;
+ return `<div class="lobby-head"><div><div class="kicker" style="--wc:var(--brass)">Museum map</div><h1>Welcome${S.name?', '+esc(S.name.split(' ')[0]):''}.</h1><p class="muted" style="margin:0">Visit the wings in any order. Finish each hands-on exhibit to earn its stamp. Press <b>1–8</b> to jump to a wing, <b>Esc</b> to come back here.</p></div>
+  <div class="panel" style="min-width:230px"><div class="small muted">Passport</div><div style="font-size:26px;font-family:Georgia">${n} / 8 stamps</div><div class="meter" style="margin-top:4px"><i style="width:${n/8*100}%"></i></div></div></div>
+ <div class="floor">
+  ${room(L[0])}${room(L[1])}
+  <div class="rotunda"><svg width="70" height="70" viewBox="0 0 70 70" aria-hidden="true"><circle cx="35" cy="35" r="32" fill="none" stroke="#c9a54a" stroke-width="2"/><path d="M35 8c7 10 8 16 0 25-8-9-7-15 0-25z" fill="#f3c969" class="flame"/><rect x="29" y="34" width="12" height="26" fill="#efe6d2"/></svg>
+   <h3>The Rotunda</h3><p class="small muted" style="margin:0">Your research desk</p>
+   <button class="btn small" data-go="notebook">📓 Field Notebook</button>
+   <button class="btn small" data-go="passport">🛂 Passport</button>
+   <button class="btn small" data-go="finale" style="background:#e6c872">★ Choose Your Exhibit</button>
+   <p class="small muted" style="margin:0">Then take the quiz &amp; print your certificate</p></div>
+  ${room(L[2])}${room(L[3])}
+  ${room(L[4])}${room(L[5])}
+  ${room(L[6])}${room(L[7])}
+ </div>
+ <div class="legend"><span>⏱ About 45–60 minutes total</span><span>✓ Stamp = hands-on exhibit finished</span><span>★ = topics you starred</span><span>Suggested path: 1 → 8, but any order works</span></div>`;
+}
+function pgWing(id){
+ const w=W(id);if(!w)return pgLobby();
+ const prev=WINGS[(w.n+6)%8],next=WINGS[w.n%8];
+ const st=!!S.stars[id];
+ return `<div style="--wc:${w.wc}">
+ <div class="wing-head"><div><div class="kicker">Wing ${w.n} of 8 · ${w.sub} · about ${w.min} min</div><h1>${w.title}</h1></div>
+  <div class="row"><span class="small muted" id="stampStatus">${S.stamps[id]?'✓ Stamped '+esc(S.stamps[id]):'Finish the hands-on exhibit to earn this stamp'}</span><span style="width:54px;height:54px;display:inline-block">${stampSVG(w,!!S.stamps[id],'')}</span></div></div>
+ <div class="wing-grid"><div>
+  ${WR[id].intro}
+  <div class="ix" id="ix-${id}">${WR[id].ix()}</div>
+ </div>
+ <aside class="side">
+  <div class="spark"><h3>${ICON.bulb} Research Spark</h3><ol>${w.sparks.map(q=>`<li>${esc(q)}</li>`).join('')}</ol>
+   <div class="small muted" style="margin-bottom:4px">Search terms (click to copy into your notes):</div><div class="terms">${w.terms.map(t=>`<button class="term" data-act="term" data-arg="${esc(id)}|${esc(t)}">${esc(t)}</button>`).join('')}</div></div>
+  <div class="note-box"><h3><span>📓 My notes: ${w.title}</span></h3>${noteArea(id,'Notes for '+w.title)}
+   <button class="star ${st?'on':''}" data-act="star" data-arg="${id}" aria-pressed="${st}">${st?'★ Starred for my project':'☆ Star this topic for my project'}</button></div>
+ </aside></div>
+ <div class="wing-nav"><button class="btn ghost" data-go="wing/${prev.id}">← Wing ${prev.n}: ${prev.title}</button><button class="btn ghost" data-go="lobby">Museum map</button><button class="btn" data-go="wing/${next.id}">Wing ${next.n}: ${next.title} →</button></div>
+ </div>`;
+}
+function pgPassport(){
+ return `<h1>My Museum Passport</h1><p class="muted">${stampCount()} of 8 stamps. Finish a wing's hands-on exhibit to earn its stamp. Click a page to visit that wing.</p>
+ <div class="passport">${WINGS.map(w=>`<button class="pslot" data-go="wing/${w.id}" aria-label="Wing ${w.n} ${w.title}: ${S.stamps[w.id]?'stamped':'not stamped'}">${stampSVG(w,!!S.stamps[w.id],S.stamps[w.id])}<b>${w.title}</b><small>${S.stamps[w.id]?'Stamped '+esc(S.stamps[w.id]):S.visited[w.id]?'Visited · exhibit not finished':'Not visited yet'}</small></button>`).join('')}</div>
+ <div class="row" style="margin-top:14px"><button class="btn" data-go="finale">Choose Your Exhibit →</button><button class="btn ghost" data-go="lobby">Museum map</button></div>`;
+}
+function pgNotebook(){
+ return `<div class="row" style="justify-content:space-between"><div><h1>Field Notebook</h1><p class="muted" style="margin:0">Notes save automatically. Star the topics you might research.</p></div>
+  <div class="row"><button class="btn" data-act="download">⬇ Download .txt</button><button class="btn ghost" data-act="printnb">🖨 Print notebook</button></div></div>
+ <div class="note-box" style="margin:12px 0"><h3>General notes &amp; big questions</h3>${noteArea('general','General notes')}</div>
+ <div class="nb">${WINGS.map(w=>`<div class="note-box" style="border-top:3px solid ${w.wc}"><h3><span>${w.n}. ${w.title}${S.stamps[w.id]?' ✓':''}</span><button class="star ${S.stars[w.id]?'on':''}" data-act="star" data-arg="${w.id}" aria-pressed="${!!S.stars[w.id]}">${S.stars[w.id]?'★ Starred':'☆ Star'}</button></h3>${noteArea(w.id,'Notes for '+w.title,3)}<button class="btn ghost small" data-go="wing/${w.id}">Go to wing</button></div>`).join('')}</div>
+ <div class="panel" style="margin-top:16px"><b>Start over?</b> <span class="muted small">This erases all notes, stamps and stars in this browser.</span> <button class="btn ghost small" data-act="reset" style="margin-left:8px">Reset my progress</button></div>`;
+}
+function scoreWings(){
+ return WINGS.map(w=>{let s=0,why=[];if(S.stars[w.id]){s+=3;why.push('you starred it');}if(S.stamps[w.id]){s+=1;why.push('you finished the exhibit');}if((S.notes[w.id]||'').trim().length>40){s+=1;why.push('you took detailed notes');}return {w,s,why};}).sort((a,b)=>b.s-a.s||a.w.n-b.w.n);
+}
+function pgFinale(){
+ const sc=scoreWings(),top=sc.filter(x=>x.s>0).slice(0,3);
+ const fo=(t,w)=>`<button class="focus-opt ${S.focus===t?'on':''}" data-act="focus" data-arg="${esc(t)}" style="--wc:${w.wc}" aria-pressed="${S.focus===t}"><span class="dot"></span><span>${esc(t)}</span></button>`;
+ const custom=S.focus&&!WINGS.some(w=>w.focuses.includes(S.focus))?S.focus:'';
+ return `<h1>Choose Your Exhibit</h1><p class="muted">If you were adding a ninth wing to this museum, what would it be about? Pick the angle for your research presentation.</p>
+ ${top.length?`<h3>Suggested for you</h3><div class="sugg">${top.map(({w,why})=>`<div class="scard" style="--wc:${w.wc}"><div class="kicker">Wing ${w.n} · ${w.title}</div><div class="why">Because ${why.join(', ')}.</div>${w.focuses.map(t=>fo(t,w)).join('')}</div>`).join('')}</div>`:`<div class="panel">Star topics or finish exhibits and suggestions will appear here. You can still choose below.</div>`}
+ <details style="margin-top:14px" ${top.length?'':'open'}><summary style="cursor:pointer;font-weight:700">See all 16 possible focuses</summary><div class="sugg" style="margin-top:8px">${WINGS.map(w=>`<div class="scard" style="--wc:${w.wc}"><div class="kicker">${w.title}</div>${w.focuses.map(t=>fo(t,w)).join('')}</div>`).join('')}</div></details>
+ <div class="panel" style="margin-top:14px"><label for="customFocus"><b>Or write your own focus</b></label><div class="row" style="margin-top:6px;flex-wrap:nowrap"><input id="customFocus" class="text" maxlength="90" value="${esc(custom)}" placeholder="e.g. How forensic toxicology has changed since 1982"><button class="btn ghost" data-act="customfocus">Use mine</button></div></div>
+ <div class="panel" style="margin-top:14px;border-color:var(--brass)"><b>My chosen focus:</b> <span id="focusShow" class="serif" style="font-size:19px;color:var(--brass2)">${S.focus?esc(S.focus):'not chosen yet'}</span>
+  <div class="row" style="margin-top:8px"><button class="btn" data-go="quiz">Take the 10-question quiz →</button><button class="btn ghost" data-go="cert">Skip to certificate</button></div></div>`;
+}
+/* ---------- Quiz ---------- */
+const QUIZ=[
+ {q:'How many people died in the 1982 Chicago-area Tylenol poisonings?',o:['3','7','12','31'],a:1,ex:'Seven people died between Sept 29 and Oct 1, 1982.'},
+ {q:'Who first connected the deaths to Tylenol?',o:['An FBI profiler, months later','Local firefighters, a village nurse, and doctors, within hours','The killer\'s confession','A newspaper reader'],a:1,ex:'Off-duty firefighters, nurse Helen Jensen, an ICU doctor and the medical examiner\'s team linked them overnight.'},
+ {q:'Tainted capsules came from batches made at two different factories. What did that suggest?',o:['Both factories had a careless worker','The bottles were tampered with after reaching stores','The capsules expired','The bottles were counterfeit'],a:1,ex:'Two plants made a factory source unlikely; tampering happened in stores.'},
+ {q:'Cyanide blocks which part of cellular respiration?',o:['Glycolysis in the cytoplasm','Complex IV (cytochrome c oxidase)','Hemoglobin in red blood cells','The cell nucleus'],a:1,ex:'Cyanide binds Complex IV, the last enzyme of the electron transport chain.'},
+ {q:'Why are cells starved of energy even with oxygen in the blood?',o:['The lungs stop working first','Cells can\'t use the oxygen to make ATP','Oxygen turns into cyanide','The heart pumps too fast'],a:1,ex:'Oxygen is delivered but can\'t accept electrons, so ATP production crashes.'},
+ {q:'What was James Lewis convicted of?',o:['The seven murders','Extortion: a $1 million letter to J&J','Product tampering','Nothing at all'],a:1,ex:'He was convicted of extortion in 1983 and never charged with the murders.'},
+ {q:'What is the official status of the case today?',o:['Solved in 2010 with DNA','Solved by a 2023 confession','Unsolved: no one has been charged','Closed for good'],a:2,ex:'The case remains open and unsolved.'},
+ {q:'About how many bottles did J&J recall nationwide?',o:['31,000','About 31 million','About 3 billion','None, only Chicago stores'],a:1,ex:'About 31 million bottles, worth about $100 million (some 1982 reports said 22 million).'},
+ {q:'FDA rules after 1982 require packaging that...',o:['Is impossible to open','Gives visible evidence if someone tampered with it','Is made of glass','Has a child lock only'],a:1,ex:'Packages must give "visible evidence" of tampering; since 1998 they are called tamper-evident.'},
+ {q:'After a 1986 copycat death, what did J&J do?',o:['Stopped selling OTC capsules and switched to caplets','Stopped making Tylenol','Moved its factories overseas','Nothing'],a:0,ex:'J&J ended over-the-counter capsules; solid caplets replaced them.'}
+];
+let qz={i:0,ans:[]};
+function pgQuiz(){
+ if(qz.i>=QUIZ.length){const sc=qz.ans.filter((a,i)=>a===QUIZ[i].a).length;
+  return `<div class="quiz"><h1>Quiz complete</h1><div class="panel" style="text-align:center"><div style="font-size:48px;font-family:Georgia;color:var(--brass2)">${sc} / ${QUIZ.length}</div><p>${sc>=8?'Excellent. You really explored the museum.':sc>=5?'Good work. Revisit a wing or two to fill the gaps.':'Revisit the wings, then try again.'}</p>
+   <div class="row" style="justify-content:center"><button class="btn" data-go="cert">🎓 Get my certificate</button><button class="btn ghost" data-act="retake">Retake quiz</button></div></div>
+   <div style="margin-top:12px">${QUIZ.map((q,i)=>`<div class="small" style="margin:4px 0">${qz.ans[i]===q.a?'✓':'✗'} <b>${i+1}.</b> ${esc(q.ex)}</div>`).join('')}</div></div>`;}
+ const q=QUIZ[qz.i],ans=qz.ans[qz.i],done=ans!=null;
+ return `<div class="quiz"><div class="kicker" style="--wc:var(--brass)">Question ${qz.i+1} of ${QUIZ.length}</div>
+  <div class="qbar">${QUIZ.map((x,i)=>`<i class="${qz.ans[i]==null?(i===qz.i?'c':''):(qz.ans[i]===x.a?'r':'w')}"></i>`).join('')}</div>
+  <h2>${esc(q.q)}</h2>${q.o.map((o,j)=>`<button class="opt ${done?(j===q.a?'right':(j===ans?'wrong':'')):''}" data-act="qa" data-arg="${j}" ${done?'aria-disabled="true"':''}>${String.fromCharCode(65+j)}. ${esc(o)}</button>`).join('')}
+  <div class="fb ${done?(ans===q.a?'ok':'no'):''}" aria-live="polite">${done?(ans===q.a?'✓ Correct. ':'✗ Not quite. ')+esc(q.ex):'<span class="muted">Tip: press A–D to answer.</span>'}</div>
+  ${done?`<div class="row" style="margin-top:10px"><button class="btn" data-act="qnext" id="qnext">${qz.i===QUIZ.length-1?'See my score':'Next question →'}</button></div>`:''}</div>`;
+}
+/* ---------- Certificate ---------- */
+function code(){const s=(S.name||'')+'|'+(S.focus||'')+'|'+Object.keys(S.stamps).sort().join(',');let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return ('TM-'+((h>>>0).toString(36).toUpperCase())).slice(0,10);}
+function certHTML(pid){
+ const st=WINGS.filter(w=>S.stamps[w.id]);const stars=WINGS.filter(w=>S.stars[w.id]);
+ return `<div class="cert" id="${pid||'certificate'}"><div class="lbl">Museum of the Unsolved · Self-Guided Exhibition</div>
+  <h1>Certificate of Investigation</h1><div class="lbl" style="margin-top:8px">This certifies that</div>
+  <div class="nm">${esc(S.name||'(enter your name on the welcome page)')}</div>
+  <p style="margin:2px 0 8px">explored <b>${st.length} of 8</b> wings of <i>Unsolved: The 1982 Chicago Tylenol Murders</i>${S.quiz?` and scored <b>${S.quiz.score}/${S.quiz.of}</b> on the exhibit quiz`:''}.</p>
+  <div class="lbl">Chosen research focus</div><div class="focus">${esc(S.focus||'(not chosen yet: visit "Choose Your Exhibit")')}</div>
+  <div class="lbl">Wings stamped</div><ul>${WINGS.map(w=>`<li>${S.stamps[w.id]?'✔':'☐'} ${w.n}. ${w.title}: ${w.sub}</li>`).join('')}</ul>
+  ${stars.length?`<div class="lbl" style="margin-top:6px">Starred topics</div><div style="font-family:Arial;font-size:13.5px">${stars.map(w=>w.title).join(' · ')}</div>`:''}
+  <div class="foot"><div>Date: <b>${today()}</b><br>Completion code: <b>${code()}</b></div><div style="max-width:420px;font-style:italic">In memory of Mary Kellerman, Adam Janus, Stanley Janus, Theresa Janus, Mary Reiner, Mary McFarland and Paula Prince.</div></div>
+  <svg class="seal" viewBox="0 0 110 110" aria-hidden="true"><circle cx="55" cy="55" r="50" fill="#b8913a"/><circle cx="55" cy="55" r="42" fill="none" stroke="#f3e3b0" stroke-width="2" stroke-dasharray="3 3"/><text x="55" y="50" text-anchor="middle" font-family="Georgia" font-size="13" fill="#fff8e0">CASE</text><text x="55" y="66" text-anchor="middle" font-family="Georgia" font-size="13" fill="#fff8e0">STUDIED</text><text x="55" y="82" text-anchor="middle" font-family="Arial" font-size="8" fill="#fff8e0">1982 · ${new Date().getFullYear()}</text></svg>
+ </div>`;
+}
+function pgCert(){
+ return `<div class="row" style="justify-content:space-between"><h1>Your Certificate</h1><div class="row"><button class="btn" data-act="printcert">🖨 Print / Save as PDF</button><button class="btn ghost" data-act="download">⬇ Notebook .txt</button></div></div>
+ ${!S.name?'<p class="fb no">Add your name: <input id="certName" class="text" style="max-width:260px" placeholder="Your name"> <button class="btn small" data-act="certname">Save name</button></p>':''}
+ ${certHTML()}
+ <p class="muted small" style="text-align:center">Turn in: this certificate (print or "Save as PDF") and your Field Notebook .txt file, as your teacher directs.</p>`;
+}
+/* ---------- Teacher ---------- */
+function pgTeacher(){
+ return `<div class="tn"><h1>Teacher Notes</h1><p class="muted">For Kenneth Tui's Forensics class and any substitute. Students can work through this alone in about 45–60 minutes.</p>
+ <div class="two"><div class="panel"><h3 style="margin-top:0">Running it with a sub</h3><ul>
+  <li>Open <b>index.html</b> in Chrome (works offline; no internet or logins needed). Use the full-screen browser window.</li>
+  <li>Students type their name on the welcome screen, then explore the 8 wings in any order.</li>
+  <li>Each wing has short panels, a hands-on exhibit (finishing it earns a passport stamp), a Research Spark card, and a notes box.</li>
+  <li>Finish: <b>Choose Your Exhibit</b> → <b>Quiz</b> (10 questions) → <b>Certificate</b>.</li>
+  <li>Keys: 1–8 opens a wing from the map, Esc returns to the map, A–D answers quiz questions.</li></ul>
+  <h3>What to collect</h3><ul><li>The certificate: Print → "Save as PDF" (or a screenshot), showing name, focus, stamps, and quiz score.</li><li>The Field Notebook .txt (Notebook → Download), which has their notes, starred topics and chosen focus.</li><li>Optional exit ticket: "My focus is ___ because ___. Two questions I'll research: ___."</li></ul></div>
+ <div class="panel"><h3 style="margin-top:0">Suggested timing (about 56 minutes)</h3><table><tr><th>Stop</th><th>Minutes</th></tr>
+  <tr><td>Welcome + museum map</td><td>3</td></tr>${WINGS.map(w=>`<tr><td>${w.n}. ${w.title} (${w.sub})</td><td>${w.min}</td></tr>`).join('')}<tr><td>Choose Your Exhibit + quiz + certificate</td><td>8</td></tr></table>
+  <p class="small muted">Short on time? Assign wings 1, 2, 3 plus one choice, then the finale.</p></div></div>
+ <div class="two" style="margin-top:14px"><div class="panel"><h3 style="margin-top:0">Sensitivity notes</h3><ul>
+  <li>The case involves seven real deaths, including a 12-year-old. Family members are still living and speak publicly.</li>
+  <li>The museum is deliberately non-graphic: no images of victims, no descriptions of final moments, no exact poison amounts, and <b>no tampering methods</b>.</li>
+  <li>Suspects are framed as suspects only. No one was ever charged with the murders. Please remind students not to call anyone "the killer" in their slides.</li>
+  <li>The "Then vs. Now" phone feed is simulated with a made-up brand and accounts.</li>
+  <li>Students who find the topic upsetting can focus on Product Safety, Recall &amp; PR, or News &amp; Alerts.</li></ul></div>
+ <div class="panel"><h3 style="margin-top:0">Accuracy &amp; saving</h3><ul>
+  <li>Facts come from a sourced fact sheet (FBI, FDA/Federal Register, Chicago Tribune, NYT, UPI archives, CDC/NIOSH, FCC, Science). Where sources disagree (Terri Janus's age, 31 vs. 22 million bottles, Lewis's sentence), the museum says so or uses the safest wording.</li>
+  <li>Progress is saved in the browser (localStorage) on <b>that Chromebook and that sign-in</b>. Clearing browsing data, guest mode, or switching devices starts over, so collect the .txt and certificate before class ends.</li>
+  <li>On shared computers, students can use Notebook → "Reset my progress" when finished.</li>
+  <li>Printing uses Chrome's print dialog. Choose "Save as PDF" to turn work in digitally.</li></ul></div></div></div>`;
+}
+
+/* ================= Router ================= */
+let route='';
+function render(){
+ const h=(location.hash||'').replace(/^#/,'');
+ let r=h||(S.started?'lobby':'welcome');
+ const [pg,arg]=r.split('/');route=pg;
+ const m=$('#main');
+ let html;
+ switch(pg){
+  case 'welcome':html=pgWelcome();break;
+  case 'wing':html=pgWing(arg);if(W(arg)&&!S.visited[arg]){S.visited[arg]=today();save();}break;
+  case 'passport':html=pgPassport();break;
+  case 'notebook':html=pgNotebook();break;
+  case 'finale':html=pgFinale();break;
+  case 'quiz':html=pgQuiz();break;
+  case 'cert':html=pgCert();break;
+  case 'teacher':html=pgTeacher();break;
+  default:html=pgLobby();route='lobby';
+ }
+ m.innerHTML=html;
+ document.querySelectorAll('#top .nav').forEach(b=>b.classList.toggle('on',b.dataset.go===route));
+ $('#stampCount').textContent=stampCount()+'/8';
+ window.scrollTo(0,0);
+ m.focus({preventScroll:true});
+}
+function go(r){if(location.hash==='#'+r)render();else location.hash=r;}
+window.addEventListener('hashchange',render);
+
+function refreshWing(id,focusSel){
+ const box=$('#ix-'+id);if(!box)return;
+ const y=window.scrollY;
+ box.innerHTML=WR[id].ix();
+ if(focusSel){const el=box.querySelector(focusSel);if(el)el.focus({preventScroll:true});}
+ window.scrollTo(0,y);
+ checkStamp(id);
+}
+function checkStamp(id){
+ if(!S.stamps[id]&&WR[id].done()){S.stamps[id]=today();save();const w=W(id);
+  toast(`🛂 Passport stamped: <b>${w.title}</b> (${stampCount()}/8)`);
+  $('#stampCount').textContent=stampCount()+'/8';
+  const ss=$('#stampStatus');if(ss){ss.textContent='✓ Stamped '+S.stamps[id];ss.nextElementSibling.innerHTML=stampSVG(w,true,'');}
+  const box=$('#ix-'+id);if(box)box.innerHTML=WR[id].ix();
+ } else save();
+}
+const sel=(act,arg)=>`[data-act="${act}"][data-arg="${CSS.escape(String(arg))}"]`;
+
+/* ================= Actions ================= */
+const ACT={
+ start(){const v=($('#nameIn')||{}).value||'';S.name=v.trim();S.started=true;save();go('lobby');},
+ candle(a){const p=P('victims');const i=+a;if(!p.lit.includes(i))p.lit.push(i);else return;refreshWing('victims',sel('candle',a));},
+ tl(a){const p=P('timeline');p.sel[p.mode]=+a;if(!p.seen[p.mode].includes(+a))p.seen[p.mode].push(+a);refreshWing('timeline',sel('tl',a));},
+ tlstep(a){const p=P('timeline');const L=p.mode==='h'?TL_H:TL_Y;const n=Math.max(0,Math.min(L.length-1,p.sel[p.mode]+(+a)));p.sel[p.mode]=n;if(!p.seen[p.mode].includes(n))p.seen[p.mode].push(n);refreshWing('timeline',sel('tlstep',a));},
+ tlmode(a){P('timeline').mode=a;refreshWing('timeline',sel('tlmode',a));},
+ ord(a){const p=P('timeline');if(p.ord.includes(a))return;if(ORDER[p.ord.length].k===a){p.ord.push(a);tlWrong=null;}else tlWrong=a;refreshWing('timeline',sel('ord',a));tlWrong=null;},
+ file(a){const p=P('suspects');p.cur=a;if(!p.open.includes(a))p.open.push(a);refreshWing('suspects',sel('file',a));},
+ ev(a){const [i,j]=a.split(':').map(Number);P('suspects').ev[i]=j;refreshWing('suspects',sel('ev',a));},
+ zoom(a){const p=P('cyanide');p.zoom=a==='1';if(!p.zoom){p.cn=false;}p.cur=null;refreshWing('cyanide',p.zoom?'[data-act="cn"]':'[data-act="zoom"]');},
+ cn(){const p=P('cyanide');p.cn=!p.cn;if(p.cn){p.cnTried=true;p.cur='c4';if(!p.parts.includes('c4'))p.parts.push('c4');}refreshWing('cyanide','[data-act="cn"]');},
+ part(a){const p=P('cyanide');p.cur=a;if(!p.parts.includes(a))p.parts.push(a);refreshWing('cyanide',sel('part',a));},
+ cyq(a){P('cyanide').q=+a;refreshWing('cyanide',sel('cyq',a));},
+ flip(a){const p=P('cyanide');if(!p.flip.includes(+a))p.flip.push(+a);refreshWing('cyanide',sel('flip',a));},
+ pview(a){const p=P('safety');p.view=a;p.cur=null;refreshWing('safety',sel('pview',a));},
+ feat(a){const p=P('safety');p.cur=a;const L=a[0]==='a'?p.found:p.bf;if(!L.includes(a))L.push(a);refreshWing('safety',sel('feat',a));},
+ insp(a){const [i,j]=a.split(':').map(Number);P('safety').insp[i]=j;refreshWing('safety',sel('insp',a));},
+ dec(a){const [i,j]=a.split(':').map(Number);const p=P('recall');if(p.d[i]!=null)return;p.d[i]=j;refreshWing('recall',sel('dec',a));},
+ old(a){const p=P('news');p.cur=a;if(!p.old.includes(a))p.old.push(a);refreshWing('news',sel('old',a));},
+ sort(a){const [k,v]=a.split(':');P('news').sort[k]=v;refreshWing('news',sel('sort',a));},
+ trust(a){const [i,j]=a.split(':').map(Number);P('news').trust[i]=j;refreshWing('news',sel('trust',a));},
+ cause(a){const p=P('legacy');if(p.m.includes(+a))return;p.sel=+a;lgWrong=false;refreshWing('legacy',sel('cause',a));},
+ effect(a){const p=P('legacy');const k=+a;if(p.m.includes(k))return;if(!p.sel){toast('Pick a cause on the left first.');return;}
+  if(p.sel===k){p.m.push(k);p.sel=null;lgWrong=false;}else lgWrong=true;refreshWing('legacy',sel('effect',a));lgWrong=false;},
+ star(a){S.stars[a]=!S.stars[a];if(!S.stars[a])delete S.stars[a];save();
+  document.querySelectorAll(sel('star',a)).forEach(b=>{const on=!!S.stars[a];b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);b.textContent=route==='wing'?(on?'★ Starred for my project':'☆ Star this topic for my project'):(on?'★ Starred':'☆ Star');});
+  toast(S.stars[a]?'★ Starred: '+W(a).title:'Star removed');},
+ term(a){const [id,t]=a.split('|');const ta=$('#n-'+id);const add='Search: '+t;S.notes[id]=((S.notes[id]||'').trim()?(S.notes[id]||'').replace(/\s+$/,'')+'\n':'')+add;if(ta){ta.value=S.notes[id];}save();
+  try{navigator.clipboard&&navigator.clipboard.writeText(t).catch(()=>{});}catch(e){}toast('Added to your notes: <b>'+esc(t)+'</b>');},
+ focus(a){S.focus=a;save();document.querySelectorAll('.focus-opt').forEach(b=>{const on=b.dataset.arg===a;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);});const f=$('#focusShow');if(f)f.textContent=a;toast('Focus chosen ✓');},
+ customfocus(){const v=($('#customFocus').value||'').trim();if(!v){toast('Type your focus first.');return;}ACT.focus(v);},
+ qa(a){if(qz.ans[qz.i]!=null)return;qz.ans[qz.i]=+a;render();const n=$('#qnext');if(n)n.focus();},
+ qnext(){qz.i++;if(qz.i>=QUIZ.length){S.quiz={score:qz.ans.filter((x,i)=>x===QUIZ[i].a).length,of:QUIZ.length,date:today()};save();}render();},
+ retake(){qz={i:0,ans:[]};render();},
+ certname(){const v=($('#certName').value||'').trim();if(v){S.name=v;save();render();}},
+ printcert(){$('#printArea').innerHTML=certHTML('certPrint');window.print();},
+ printnb(){$('#printArea').innerHTML=`<div class="pnb"><h1 style="font-family:Georgia">Field Notebook: ${esc(S.name||'')}</h1><p>Unsolved: The 1982 Chicago Tylenol Murders · ${today()}</p><p><b>Chosen focus:</b> ${esc(S.focus||'(not chosen)')}</p><h2>General notes</h2><pre>${esc(S.notes.general||'')}</pre>${WINGS.map(w=>`<h2>${w.n}. ${w.title}${S.stars[w.id]?' ★':''}${S.stamps[w.id]?' (stamped)':''}</h2><pre>${esc(S.notes[w.id]||'')}</pre>`).join('')}</div>`;window.print();},
+ download(){const blob=new Blob([notebookText()],{type:'text/plain'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='tylenol-museum-notebook-'+((S.name||'student').replace(/[^a-z0-9]+/gi,'-').toLowerCase())+'.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('Notebook downloaded ⬇');},
+ reset(){if(confirm('Erase ALL your notes, stamps, stars and quiz results in this browser?')){S=defState();qz={i:0,ans:[]};save();location.hash='welcome';render();}}
+};
+function notebookText(){
+ const L=[];L.push('FIELD NOTEBOOK: Unsolved: The 1982 Chicago Tylenol Murders (virtual museum)');L.push('Name: '+(S.name||''));L.push('Date: '+today());
+ L.push('Chosen focus: '+(S.focus||'(not chosen)'));L.push('Stamps: '+stampCount()+'/8'+(S.quiz?'   Quiz: '+S.quiz.score+'/'+S.quiz.of:''));
+ L.push('Starred topics: '+(WINGS.filter(w=>S.stars[w.id]).map(w=>w.title).join(', ')||'(none)'));L.push('');
+ L.push('== GENERAL NOTES ==');L.push((S.notes.general||'').trim()||'(none)');L.push('');
+ WINGS.forEach(w=>{L.push(`== ${w.n}. ${w.title.toUpperCase()} (${w.sub})${S.stars[w.id]?' [STARRED]':''}${S.stamps[w.id]?' [stamped]':''} ==`);L.push((S.notes[w.id]||'').trim()||'(no notes)');L.push('Research Spark questions:');w.sparks.forEach((q,i)=>L.push('  '+(i+1)+'. '+q));L.push('Search terms: '+w.terms.join('; '));L.push('');});
+ return L.join('\r\n');
+}
+
+/* ================= Events ================= */
+document.addEventListener('click',e=>{
+ const g=e.target.closest('[data-go]');if(g){e.preventDefault();go(g.dataset.go);return;}
+ const a=e.target.closest('[data-act]');if(a&&ACT[a.dataset.act]){e.preventDefault();if(a.getAttribute('aria-disabled')==='true'&&a.dataset.act!=='candle')return;ACT[a.dataset.act](a.dataset.arg,a);}
+});
+document.addEventListener('input',e=>{
+ const k=e.target.dataset&&e.target.dataset.note;if(!k)return;S.notes[k]=e.target.value;saveSoon();
+ const s=document.getElementById('sv-'+k);if(s){s.textContent='Saving...';clearTimeout(s._t);s._t=setTimeout(()=>{s.textContent='✓ Saved';},400);}
+});
+document.addEventListener('keydown',e=>{
+ const t=e.target,typing=t&&(t.tagName==='TEXTAREA'||t.tagName==='INPUT');
+ if(typing){if(e.key==='Enter'&&t.id==='nameIn'){ACT.start();}if(e.key==='Enter'&&t.id==='customFocus'){ACT.customfocus();}return;}
+ if((e.key==='Enter'||e.key===' ')&&t&&t.getAttribute&&t.getAttribute('role')==='button'&&t.tagName!=='BUTTON'){e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true}));return;}
+ if(e.ctrlKey||e.metaKey||e.altKey)return;
+ if(e.key==='Escape'&&route!=='lobby'&&route!=='welcome'){go('lobby');return;}
+ if(/^[1-8]$/.test(e.key)&&(route==='lobby'||route==='wing'||route==='passport')){go('wing/'+WINGS[+e.key-1].id);return;}
+ if(route==='quiz'&&qz.i<QUIZ.length){const m='abcd'.indexOf(e.key.toLowerCase());if(m>=0&&qz.ans[qz.i]==null){ACT.qa(String(m));}}
+});
+window.addEventListener('beforeprint',()=>{if(!$('#printArea').innerHTML)$('#printArea').innerHTML=certHTML('certPrint');});
+window.addEventListener('afterprint',()=>{$('#printArea').innerHTML='';});
+window.addEventListener('beforeunload',save);
+
+/* test hook */
+window.TM={state:()=>S,wings:WINGS.map(w=>w.id),stampCount,notebookText,go,quiz:QUIZ};
+render();
+</script>
+</body>
+</html>
