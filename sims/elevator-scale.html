@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elevator Scale Lab</title>
+<!-- Self-contained offline simulator for AP Physics 1 and NYS Regents Physics (Mr. Tiu). Apparent weight in an elevator. No internet, install or login needed. Saves settings with localStorage keys starting "elevsim:". -->
+<style>
+*{box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{font-family:system-ui,"Segoe UI",Roboto,Arial,sans-serif;margin:0;background:#f4f6fa;color:#222;font-size:14px;line-height:1.4}
+header{background:#234;color:#fff;padding:6px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-height:44px}
+header h1{font-size:17px;margin:0;white-space:nowrap}
+header .sp{flex:1}
+header .grp{display:flex;align-items:center;gap:4px;font-size:13px;color:#cde}
+header button{background:#3a5068;color:#fff;border:1px solid #567;padding:4px 10px}
+header button.on{background:#ffd76a;color:#222;border-color:#c9a237;font-weight:bold}
+header select{font:inherit;font-size:13px;padding:3px;border-radius:6px}
+#predBtn.on{background:#ff8f6b;border-color:#c44;color:#111}
+#xp{font-weight:bold;color:#ffd76a;white-space:nowrap;font-size:13px}
+button{font:inherit;font-size:13px;padding:5px 10px;border:1px solid #889;border-radius:6px;background:#eef;cursor:pointer;color:#222;touch-action:manipulation}
+button:hover:not(:disabled){filter:brightness(.95)}button:disabled{opacity:.45;cursor:default}
+button.on{background:#ffd76a;border-color:#c9a237}button.go{background:#2b6cb0;color:#fff;border-color:#1f4f82;font-weight:bold}
+button.ok{background:#d3f0dc;border-color:#3a9b57}button.warn{background:#ffe0d6;border-color:#c55}
+button.danger{background:#c92a2a;color:#fff;border-color:#8a1c1c;font-weight:bold}
+#wrap{display:grid;grid-template-columns:minmax(0,1fr) 404px;gap:8px;padding:8px}
+.panel{background:#fff;border-radius:8px;box-shadow:0 1px 3px #0002;padding:8px 10px;margin-bottom:8px}
+.panel h3{margin:0 0 4px;font-size:14px;color:#234}
+canvas{display:block;width:100%;touch-action:manipulation}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px;margin:4px 0}
+.g{font-size:12px;color:#556}
+.hide{display:none!important}sub{font-size:75%}
+#clock{font-family:monospace;font-size:13px}
+/* passenger + planet pickers */
+#pax{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:4px 0}
+.pb{display:flex;align-items:center;gap:4px;padding:2px 4px;text-align:left;background:#f6f8fc;border-color:#c8d3e6;min-width:0}
+.pb canvas{width:40px;height:34px;flex:none}
+.pb span{font-size:11.5px;line-height:1.15;overflow:hidden}.pb span i{font-style:normal;color:#556;font-size:10.5px;display:block}
+.pb.on{background:#ffd76a;border-color:#c9a237;font-weight:bold}
+#planets{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
+.plb{font-size:12px;padding:3px 7px;background:#eef2f8;border-color:#b8c9e6;display:inline-flex;align-items:center;gap:4px}
+.plb i{width:11px;height:11px;border-radius:50%;display:inline-block;border:1px solid #0003}
+.plb.on{background:#ffd76a;border-color:#c9a237;font-weight:bold}
+.inl{display:inline-flex;align-items:center;gap:4px;font-size:12.5px}
+.inl input[type=number]{width:74px;font:inherit;font-size:12.5px;padding:2px 4px;border:1px solid #aab;border-radius:4px}
+select{font:inherit;font-size:12.5px;padding:2px}
+/* motion tabs */
+.tabs{display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap}
+.tabs button{font-weight:bold;background:#eef2f8;border-color:#b8c9e6}.tabs button.on{background:#234;color:#fff;border-color:#234}
+#cases{display:flex;flex-wrap:wrap;gap:4px}
+#cases button{font-size:12.5px;padding:4px 8px;background:#e6f4ea;border-color:#a6d4b2}#cases button.on{background:#ffd76a;border-color:#c9a237;font-weight:bold}
+.ctl{font-size:12.5px}.ctl .lab{display:flex;justify-content:space-between;gap:4px;align-items:center}
+.ctl input[type=range]{width:100%;margin:1px 0}
+.ctl input[type=number]{width:70px;font:inherit;font-size:12.5px;padding:1px 4px;border:1px solid #aab;border-radius:4px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 14px}
+.grid5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px 10px}
+#desc{font-size:13px;background:#fffbe6;border:1px solid #f0e2a8;padding:5px 8px;border-radius:6px;margin:6px 0 2px}
+table.t{border-collapse:collapse;font-size:12.5px;width:100%}table.t th,table.t td{border:1px solid #d6dbe6;padding:2px 5px;text-align:right}
+table.t th{background:#eef2f8;text-align:center}table.t td:first-child{text-align:left}
+#phTbl input{width:64px;font:inherit;font-size:12px;padding:1px 3px;border:1px solid #aab;border-radius:4px;text-align:right}
+#phTbl input.lbl{width:150px;text-align:left}
+#phTbl tr.cur td{background:#fff3c4}
+/* readouts */
+#banner{font-weight:bold;padding:6px 8px;border-radius:6px;font-size:14px;margin-bottom:6px;border:1px solid}
+#banner small{display:block;font-weight:normal;font-size:12.5px}
+#banner.more{background:#ffe8cc;border-color:#e8a33d;color:#7a4300}#banner.less{background:#e3efff;border-color:#6b9be0;color:#163f7a}
+#banner.same{background:#d3f0dc;border-color:#3a9b57;color:#1d5b2f}#banner.zero{background:#f0e3ff;border-color:#9b6bd6;color:#4b1f7a}#banner.hid{background:#eee;border-color:#bbb;color:#555}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tile{border-radius:8px;padding:5px 8px;border:2px solid #d6dbe6;background:#fbfcfe}
+.tile span{font-size:12px;color:#556;display:block}.tile b{font-size:24px;font-family:"Courier New",monospace;letter-spacing:-.5px;display:block;white-space:nowrap}
+#tW{border-color:#e03131}#tW b{color:#c92a2a}#tN{border-color:#1971c2}#tN b{color:#1864ab}
+.bar{height:12px;border-radius:6px;background:#eef1f6;margin:3px 0;position:relative;overflow:hidden}.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;transition:width .1s}
+#eqn{font-size:13px;margin:6px 0;padding:4px 6px;background:#f4f6fa;border-radius:6px;font-family:"Cambria Math","Times New Roman",serif}
+#kin td{font-family:monospace}
+#capNote{font-size:12.5px;color:#b02a1e;font-weight:bold;min-height:0}
+/* predict */
+#predPanel{border:2px solid #ff8f6b}
+.choice{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:4px 0}
+.choice button{font-size:12.5px}.choice button.on{background:#ffd76a;border-color:#c9a237;font-weight:bold}
+#pfb{font-size:13px;margin-top:4px}#pfb .good{background:#eaf7ee;border-left:4px solid #2b8a3e;padding:4px 6px;border-radius:5px}#pfb .bad{background:#fdecea;border-left:4px solid #c0392b;padding:4px 6px;border-radius:5px}
+/* challenges */
+#chList{max-height:330px;overflow:auto;padding-right:2px}
+.ch{border:1px solid #d6dbe6;border-radius:8px;padding:5px 7px;margin:4px 0;background:#fbfcfe;font-size:12.5px}
+.ch.done{background:#eaf7ee;border-color:#8cc79d}.ch.act{box-shadow:0 0 0 3px #ffd76a}
+.ch b.tt{font-size:13px;color:#234}.ch .row{margin:3px 0}.ch input{width:84px;font:inherit;font-size:12.5px;padding:2px 4px;border:1px solid #aab;border-radius:4px}
+.ch .fb{font-size:12.5px}.ch .mc button{font-size:12px;padding:3px 7px}
+#rank{font-size:12.5px;margin-bottom:4px}#rankBar{height:8px;background:#eef1f6;border-radius:4px;overflow:hidden}#rankBar i{display:block;height:100%;background:linear-gradient(90deg,#f5c542,#e09b00)}
+/* bottom */
+#bottom{display:grid;grid-template-columns:minmax(0,1fr) 404px;gap:8px;padding:0 8px 8px}
+#tblWrap{max-height:250px;overflow:auto;border:1px solid #dde3ec;border-radius:6px}#tblWrap th{position:sticky;top:0}
+details{font-size:13px}details summary{cursor:pointer;font-weight:bold;color:#234}
+#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#222e;color:#fff;padding:9px 16px;border-radius:10px;font-size:14px;max-width:640px;z-index:20;box-shadow:0 4px 16px #0005}
+#toast button{margin-left:8px}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:30;width:100vw;height:100vh}
+@media (max-width:1100px){#wrap,#bottom{grid-template-columns:1fr}#pax{grid-template-columns:repeat(4,minmax(0,1fr))}}
+#dataTbl{font-size:11.5px}#dataTbl td,#dataTbl th{padding:2px 3px;white-space:nowrap}
+.grid5 .ctl input[type=number]{width:54px}.grid5 .ctl .lab span:first-child{white-space:nowrap}
+
+</style></head><body>
+<noscript><p style="padding:20px;font:16px sans-serif">This simulator needs JavaScript. Open the file in Google Chrome.</p></noscript>
+<header><h1>Elevator Scale Lab</h1>
+ <div class="grp">Level: <button id="lvRegents">Regents Physics</button><button id="lvAP">AP Physics 1</button></div>
+ <div class="grp">Show reading in <select id="units"><option value="N">newtons (N)</option><option value="kg">“kg” (Earth scale)</option><option value="lb">pounds (lb)</option></select></div>
+ <button id="muteBtn" title="Sound on/off">Sound: ON</button>
+ <span class="sp"></span>
+ <span id="xp" title="Points from challenges and predictions"></span>
+ <button id="predBtn" title="Hide the readings, predict first, then check">✎ Predict mode: OFF</button>
+</header>
+<div id="wrap">
+ <div id="left">
+  <div class="panel">
+   <canvas id="scene" width="920" height="400" aria-label="Elevator scene and free-body diagram"></canvas>
+   <div class="row">
+    <button id="runBtn" class="go">▶ Run</button><button id="resetBtn">⟲ Reset</button>
+    <label class="inl">Speed <select id="speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
+    <button id="cutBtn" class="danger" title="Cut the elevator cable while it runs">✂ Cut the cable!</button>
+    <button id="brakeBtn" class="warn" title="Grab the rails and stop the car">🛑 Safety brake</button>
+    <span id="clock"></span><span style="flex:1"></span>
+    <label class="inl">Scale <select id="scaleSel"></select></label>
+   </div>
+   <div id="pax"></div>
+   <div class="row" id="customM"><span class="inl">Custom mass <input type="number" id="cm" min="0.001" max="100000" step="any" value="60"> kg</span><span class="g" id="paxNote"></span></div>
+   <div id="planets"></div>
+   <div class="row"><span class="inl" id="customG">Custom g <input type="range" id="cgR" min="0" max="30" step="0.01" style="width:140px"><input type="number" id="cg" min="0" max="300" step="any"> m/s²</span><span class="inl" id="earthGL">Earth g = <select id="earthG"><option>9.81</option><option>9.8</option><option>10</option></select> m/s²</span><span class="g" id="planetNote"></span></div>
+  </div>
+  <div class="panel">
+   <div class="tabs"><button data-tab="cases">Quick cases</button><button data-tab="drive">Drive it (sliders)</button><button data-tab="trip">Trip planner &amp; phases</button></div>
+   <div id="tab-cases"><div id="cases"></div></div>
+   <div id="tab-drive" class="hide"><div class="grid3" id="driveCtl"></div><div class="g">Tip: move the acceleration slider <b>while it runs</b>. You are the elevator operator! Up is positive.</div></div>
+   <div id="tab-trip" class="hide">
+    <div class="grid5" id="tripCtl"></div>
+    <div class="row"><button id="planBtn" class="go">Plan this trip</button><span class="g">Real elevators: a ≈ 1–1.5 m/s², cruise 2–10 m/s. Edit any phase below, then ▶ Run.</span></div>
+    <table class="t" id="phTbl"></table>
+    <div class="row"><button id="addPh">+ Add phase</button><button id="delPh">− Remove last</button><span class="g" id="phNote"></span></div>
+   </div>
+   <div id="desc"></div>
+  </div>
+ </div>
+ <div id="right">
+  <div class="panel" id="roPanel">
+   <div id="banner"></div>
+   <div class="tiles"><div class="tile" id="tW"><span>True weight, F<sub>g</sub> = mg</span><b id="wVal"></b></div><div class="tile" id="tN"><span>Scale reading, F<sub>N</sub></span><b id="nVal"></b></div></div>
+   <div class="bar"><i id="barW" style="background:#e03131"></i></div><div class="bar"><i id="barN" style="background:#1971c2"></i></div>
+   <div id="ratio" class="g"></div>
+   <div id="eqn"></div>
+   <div id="capNote"></div>
+   <table class="t" id="kin"></table>
+  </div>
+  <div class="panel hide" id="predPanel"><h3>✎ Predict, then check</h3>
+   <div class="row">Predict the scale during: <select id="pPhase" style="max-width:220px"></select></div>
+   <div class="g">Compared with the true weight, the scale will read…</div>
+   <div class="choice" id="pChoice"><button data-c="more">MORE than weight</button><button data-c="same">the SAME as weight</button><button data-c="less">LESS than weight</button><button data-c="zero">ZERO (weightless)</button></div>
+   <div class="row" id="pNumRow">Number (optional): <input type="number" id="pNum" step="any" style="width:100px"> <span id="pUnit"></span></div>
+   <div class="row"><button id="pCheck" class="go">✔ Check &amp; run</button><button id="pAgain" class="hide">↺ New prediction</button><span class="g" id="pStreak"></span></div>
+   <div id="pfb"></div>
+  </div>
+  <div class="panel" id="chPanel"><h3>Challenges <span class="g">(press “Set it up” to load each one in the sim)</span></h3>
+   <div id="rank"></div><div id="rankBar"><i></i></div>
+   <div id="chList"></div>
+  </div>
+ </div>
+</div>
+<div id="bottom">
+ <div class="panel"><h3>Live graphs <span class="g">(up is positive; shading = scale reads more/less than weight)</span></h3><canvas id="graphs" width="920" height="250" aria-label="Graphs of position, velocity, acceleration and scale reading"></canvas></div>
+ <div class="panel"><h3>Data table</h3>
+  <div class="row">Record every <select id="dtRow"><option>0.1</option><option selected>0.25</option><option>0.5</option><option>1</option></select> s
+   <button id="csvBtn">⬇ Download CSV</button><button id="clrTbl">Clear</button><span class="g" id="nRows"></span></div>
+  <div id="tblWrap"><table class="t" id="dataTbl"></table></div></div>
+</div>
+<div class="panel" style="margin:0 8px 8px"><details><summary>How to use this simulator (students &amp; teacher notes)</summary>
+<ul>
+<li><b>Pick a passenger</b> and a <b>planet</b>, then pick how the elevator moves: a <b>Quick case</b>, <b>Drive it</b> with sliders, or plan a <b>Trip</b> from one floor to another. Press <b>▶ Run</b>.</li>
+<li>The scale measures the <b>normal force</b> F<sub>N</sub> the scale pushes up on the rider. With up as positive, Newton’s 2nd law gives F<sub>N</sub> − mg = ma, so <b>F<sub>N</sub> = m(g + a)</b> = mg + ma.</li>
+<li>Only the <b>acceleration</b> changes the reading, not the velocity. Moving at constant velocity (up or down) reads the same as standing still.</li>
+<li>When a = −g (cable cut), the reading is 0: <b>free fall</b> feels weightless. If the car is pulled down even faster than g, the rider floats to the ceiling and the ceiling has to push down on them.</li>
+<li>The “kg” setting shows what a bathroom scale calibrated on Earth would display (reading ÷ 9.81). On the Moon it shows a much smaller “kg” number, even though the mass hasn’t changed!</li>
+<li><b>Predict mode</b> hides the readings. Pick a phase, predict more/same/less/zero (and a number if you want), then check.</li>
+<li><b>Regents</b> shows F<sub>N</sub> = mg + ma. <b>AP</b> adds the full Newton’s 2nd law setup, g-force ratio, the ceiling force, brake strength and more challenges.</li>
+<li>Teacher notes: masses are approximate. The scale is ideal (it reads the normal force instantly). Air resistance and buoyancy are ignored. The safety brake decelerates at a set rate (default 9.81 m/s², like the strongest real safety gear). The building has 100 floors, 4 m apart; the car stops itself at the top and bottom of the shaft. Quick cases use a = 2 m/s², a bit snappier than real elevators (1–1.5 m/s²). Settings, points and finished challenges are saved on this Chromebook (localStorage keys starting “elevsim:”).</li>
+</ul></details></div>
+<div id="toast" class="hide"></div>
+<canvas id="confetti"></canvas>
+
+<script>
+// ===== Elevator Scale Lab: physics (pure JS, testable in node) =====
+const PHYS = (() => {
+  const G_EARTH = 9.81, FLOOR_H = 4, TOP_FLOOR = 100, Y_MIN = -2 * FLOOR_H, Y_MAX = TOP_FLOOR * FLOOR_H, LB_PER_N = 1 / 4.448, CEIL_M = 1.0;
+  // Approximate masses (typical adults unless noted)
+  const PASSENGERS = [
+    { id: 'gerbil', name: 'Gerbil', m: 0.07, note: 'about 60–80 g' },
+    { id: 'snake', name: 'Ball python', m: 1.5, note: 'adult, about 1–2 kg' },
+    { id: 'chicken', name: 'Chicken', m: 2.5, note: 'hen, about 2–3 kg' },
+    { id: 'cat', name: 'Cat', m: 4.5, note: 'house cat, about 4–5 kg' },
+    { id: 'child', name: 'Child (8 yr)', m: 25, note: 'about 25 kg' },
+    { id: 'dog', name: 'Labrador', m: 30, note: 'about 25–36 kg' },
+    { id: 'person', name: 'Person', m: 70, note: 'typical adult, about 70 kg' },
+    { id: 'sumo', name: 'Sumo wrestler', m: 150, note: 'about 120–200 kg' },
+    { id: 'piano', name: 'Grand piano', m: 450, note: 'concert grand, about 400–500 kg' },
+    { id: 'horse', name: 'Horse', m: 500, note: 'riding horse, about 400–600 kg' },
+    { id: 'gwagon', name: 'Golden G-Wagon', m: 2500, note: 'big luxury SUV, about 2,500 kg (gold paint not included)' },
+    { id: 'elephant', name: 'Elephant', m: 5000, note: 'African elephant, about 3,000–6,000 kg' },
+    { id: 'trex', name: 'T. rex', m: 8000, note: 'scientists estimate about 5,000–9,000 kg' },
+    { id: 'custom', name: 'Custom', m: 60, note: 'your own mass' },
+  ];
+  const PLANETS = [
+    { id: 'earth', name: 'Earth', g: 9.81 }, { id: 'moon', name: 'Moon', g: 1.62 }, { id: 'mercury', name: 'Mercury', g: 3.70 },
+    { id: 'venus', name: 'Venus', g: 8.87 }, { id: 'mars', name: 'Mars', g: 3.71 }, { id: 'jupiter', name: 'Jupiter', g: 24.79 },
+    { id: 'saturn', name: 'Saturn', g: 10.44 }, { id: 'uranus', name: 'Uranus', g: 8.69 }, { id: 'neptune', name: 'Neptune', g: 11.15 },
+    { id: 'pluto', name: 'Pluto', g: 0.62 }, { id: 'sun', name: 'The Sun', g: 274 }, { id: 'space', name: 'Deep space', g: 0 }, { id: 'custom', name: 'Custom g', g: 5 },
+  ];
+  const SCALES = [
+    { id: 'bath', name: 'Bathroom scale', max: 1800, note: 'max about 400 lb (1,800 N)' },
+    { id: 'ind', name: 'Industrial floor scale', max: 50000, note: 'max about 11,000 lb (50,000 N)' },
+    { id: 'truck', name: 'Truck scale', max: 900000, note: 'max about 200,000 lb (900,000 N)' },
+  ];
+  const sgn = x => x > 0 ? 1 : x < 0 ? -1 : 0;
+  // scale reading if the rider is touching the floor (normal force, never negative)
+  const reading = (m, g, a) => m * Math.max(0, g + a);
+  function compare(m, g, a) { const N = reading(m, g, a), W = m * g, tol = 1e-9 * Math.max(1, W);
+    if (N <= tol && W > tol) return 'zero'; if (Math.abs(N - W) <= tol) return W <= tol ? 'zero' : 'same'; return N > W ? 'more' : 'less'; }
+  function caseInfo(v, a, g) {
+    const mv = Math.abs(v) > 0.005, up = v > 0, A = Math.abs(a) < 1e-9 ? 0 : a;
+    if (g + A < -1e-9) return { k: 'ceil', txt: 'Accelerating DOWN faster than g', sub: 'The floor drops away faster than the rider can fall: the rider floats up to the ceiling and the scale reads 0.' };
+    if (Math.abs(g + A) <= 1e-9 && g > 0) return { k: 'free', txt: 'FREE FALL (a = −g)', sub: 'Car and rider fall together. Nothing needs to push on the rider, so the scale reads 0: weightless!' };
+    if (g === 0 && A === 0) return { k: 'space', txt: mv ? 'Coasting in deep space' : 'Floating in deep space', sub: 'No gravity and no acceleration: no forces, so the scale reads 0.' };
+    if (A === 0) return mv ? { k: 'const', txt: 'Constant velocity ' + (up ? 'UP' : 'DOWN'), sub: 'a = 0, so forces are balanced: the scale reads your true weight.' } : { k: 'rest', txt: 'At rest', sub: 'a = 0, so forces are balanced: the scale reads your true weight.' };
+    if (A > 0) return !mv ? { k: 'startUp', txt: 'Starting upward from rest', sub: 'a points UP, so the scale reads MORE than the weight.' } : up ? { k: 'spdUp', txt: 'Speeding up going UP', sub: 'a points UP, so the scale reads MORE than the weight.' } : { k: 'slowDn', txt: 'Slowing down going DOWN', sub: 'a points UP (it opposes the downward motion), so the scale reads MORE.' };
+    return !mv ? { k: 'startDn', txt: 'Starting downward from rest', sub: 'a points DOWN, so the scale reads LESS than the weight.' } : up ? { k: 'slowUp', txt: 'Slowing down going UP', sub: 'a points DOWN (it opposes the upward motion), so the scale reads LESS.' } : { k: 'spdDn', txt: 'Speeding up going DOWN', sub: 'a points DOWN, so the scale reads LESS than the weight.' };
+  }
+  // Turn a phase script into concrete phases. Kinds: {a} fixed accel, {ag} multiple of g, {cut} a = −g, {brake} decelerate at B until stopped.
+  function resolve(script, g, v0, B) {
+    let v = v0; const out = [];
+    for (const p of script) {
+      let a, dur = p.dur;
+      if (p.kind === 'cut') a = -g; else if (p.kind === 'ag') a = p.ag * g;
+      else if (p.kind === 'brake') { a = v === 0 ? 0 : -sgn(v) * B; dur = v === 0 ? 0 : Math.abs(v) / B; }
+      else a = p.a;
+      out.push({ label: p.label, kind: p.kind || 'a', a, dur, key: !!p.key, v0: v }); v = p.kind === 'brake' ? 0 : v + a * dur;
+    }
+    return out;
+  }
+  function planTrip(f0, f1, vmax, a1, a2) {
+    const d = (f1 - f0) * FLOOR_H, s = sgn(d), D = Math.abs(d);
+    if (!D) return [{ label: 'Doors open (already there)', dur: 2, a: 0, key: true }];
+    let vp = vmax, t1 = vmax / a1, t3 = vmax / a2, d1 = vmax * vmax / (2 * a1), d3 = vmax * vmax / (2 * a2), t2;
+    if (d1 + d3 <= D) t2 = (D - d1 - d3) / vmax; else { vp = Math.sqrt(2 * D * a1 * a2 / (a1 + a2)); t1 = vp / a1; t3 = vp / a2; t2 = 0; }
+    const ph = [{ label: 'Doors close', dur: 1, a: 0 }, { label: 'Speed up', dur: t1, a: s * a1, key: true }];
+    if (t2 > 1e-6) ph.push({ label: 'Cruise', dur: t2, a: 0 });
+    ph.push({ label: 'Slow down', dur: t3, a: -s * a2 }, { label: 'Arrive: ding!', dur: 1.5, a: 0 });
+    return ph;
+  }
+  // Quick cases (a = 2.0 m/s² is a bit snappier than a real elevator, which is about 1–1.5 m/s²)
+  const PRESETS = [
+    { id: 'rest', name: 'At rest', floor: 10, v0: 0, script: [{ label: 'Parked', dur: 5, a: 0, key: true }] },
+    { id: 'constUp', name: 'Constant velocity ↑', floor: 10, v0: 3, script: [{ label: 'Cruise up at 3 m/s', dur: 5, a: 0, key: true }] },
+    { id: 'spdUp', name: 'Speeding up ↑', floor: 10, v0: 0, script: [{ label: 'Doors close', dur: 1, a: 0 }, { label: 'Speed up going up', dur: 3, a: 2, key: true }, { label: 'Cruise', dur: 2, a: 0 }] },
+    { id: 'slowUp', name: 'Slowing down ↑', floor: 10, v0: 6, script: [{ label: 'Cruise up', dur: 1, a: 0 }, { label: 'Slow down going up', dur: 3, a: -2, key: true }, { label: 'Stopped', dur: 1, a: 0 }] },
+    { id: 'spdDn', name: 'Speeding up ↓', floor: 60, v0: 0, script: [{ label: 'Doors close', dur: 1, a: 0 }, { label: 'Speed up going down', dur: 3, a: -2, key: true }, { label: 'Cruise', dur: 2, a: 0 }] },
+    { id: 'slowDn', name: 'Slowing down ↓', floor: 60, v0: -6, script: [{ label: 'Cruise down', dur: 1, a: 0 }, { label: 'Slow down going down', dur: 3, a: 2, key: true }, { label: 'Stopped', dur: 1, a: 0 }] },
+    { id: 'free', name: 'Cable cut! (free fall)', floor: 70, v0: 0, script: [{ label: 'Parked', dur: 1, a: 0 }, { label: 'SNAP! Free fall', dur: 2.5, kind: 'cut', key: true }, { label: 'Safety brake', kind: 'brake' }, { label: 'Phew. Stopped.', dur: 1.5, a: 0 }] },
+    { id: 'hyper', name: 'Faster than g ↓ (a > g)', floor: 85, v0: 0, script: [{ label: 'Parked', dur: 1, a: 0 }, { label: 'Rocket-boosted DOWN at 1.5g', dur: 2, kind: 'ag', ag: -1.5, key: true }, { label: 'Safety brake', kind: 'brake' }, { label: 'Stopped', dur: 1.5, a: 0 }] },
+    { id: 'trip', name: 'Typical trip L → 30', trip: [0, 30, 4, 1.2, 1.2] },
+  ];
+  function newState(y0, v0) { return { t: 0, y: y0, v: v0, a: 0, pi: 0, pt: 0, ov: null, h: 0, hv: 0, N: 0, Fc: 0, ended: null, done: false }; }
+  // env: { g, m, phases | null, driveA, B }. Advances exactly for piecewise-constant acceleration.
+  function step(st, dt, env) {
+    let left = dt, guard = 0;
+    while (left > 1e-12 && guard++ < 50 && !st.ended) {
+      let a, h = left, brakeStop = false;
+      if (st.ov === 'cut') a = -env.g;
+      else if (st.ov === 'brake') { if (st.v === 0) { st.ov = 'stopped'; a = 0; } else { a = -sgn(st.v) * env.B; const ts = Math.abs(st.v) / env.B; if (ts <= h) { h = ts; brakeStop = true; } } }
+      else if (st.ov === 'stopped') a = 0;
+      else if (env.phases) { while (st.pi < env.phases.length && st.pt >= env.phases[st.pi].dur - 1e-12) { st.pt = 0; st.pi++; }
+        const p = env.phases[st.pi]; if (p) { a = p.a; h = Math.min(h, p.dur - st.pt); if (p.kind === 'brake' && p.dur > 0) { const ts = Math.abs(st.v) / Math.abs(p.a); if (ts <= h + 1e-9) { h = Math.min(h, ts); brakeStop = h >= ts - 1e-9; } } } else a = 0; }
+      else a = env.driveA;
+      st.a = a; st.y += st.v * h + 0.5 * a * h * h; st.v += a * h; if (brakeStop) st.v = 0;
+      // rider inside the car (relative height h above scale)
+      const ge = env.g + a;
+      if (st.h <= 0 && ge >= 0) { st.h = 0; st.hv = 0; }
+      else { st.h += st.hv * h - 0.5 * ge * h * h; st.hv -= ge * h; if (st.h <= 0) { st.h = 0; st.hv = 0; } if (st.h >= CEIL_M) { st.h = CEIL_M; if (st.hv > 0) st.hv = 0; } }
+      st.t += h; st.pt += h; left -= h;
+      if (st.y > Y_MAX) { st.y = Y_MAX; st.v = 0; st.ended = 'top'; } if (st.y < Y_MIN) { st.y = Y_MIN; st.v = 0; st.ended = 'bottom'; }
+    }
+    if (env.phases && st.ov === null) { while (st.pi < env.phases.length && st.pt >= env.phases[st.pi].dur - 1e-12) { st.pt = 0; st.pi++; } if (st.pi >= env.phases.length) st.done = true; }
+    if (st.ov === 'stopped' && st.t > (st.stopT || (st.stopT = st.t)) + 1.5) st.done = true;
+    const ge = env.g + st.a; st.N = st.h <= 0 ? env.m * Math.max(0, ge) : 0; st.Fc = st.h >= CEIL_M && ge < 0 ? -env.m * ge : 0;
+    return st;
+  }
+  const floorOf = y => y / FLOOR_H;
+  const floorName = y => { const f = Math.round(y / FLOOR_H); return f === 0 ? 'L' : f < 0 ? 'B' + (-f) : String(f); };
+  return { G_EARTH, FLOOR_H, TOP_FLOOR, Y_MIN, Y_MAX, LB_PER_N, CEIL_M, PASSENGERS, PLANETS, SCALES, PRESETS, reading, compare, caseInfo, resolve, planTrip, newState, step, floorOf, floorName, sgn };
+})();
+if (typeof module !== 'undefined') module.exports = PHYS;
+
+</script>
+<script>
+// ===== Elevator Scale Lab: original vector cartoons (canvas paths, no images or emoji) =====
+const ART = (() => {
+  const E = (g, x, y, rx, ry, fill, stroke, rot) => { g.beginPath(); g.ellipse(x, y, Math.abs(rx), Math.abs(ry), rot || 0, 0, Math.PI * 2); if (fill) { g.fillStyle = fill; g.fill(); } if (stroke) { g.strokeStyle = stroke; g.lineWidth = 1.5; g.stroke(); } };
+  const RR = (g, x, y, w, h, r, fill, stroke) => { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); if (fill) { g.fillStyle = fill; g.fill(); } if (stroke) { g.strokeStyle = stroke; g.lineWidth = 1.5; g.stroke(); } };
+  const PG = (g, pts, fill, stroke) => { g.beginPath(); g.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) g.lineTo(pts[i], pts[i + 1]); g.closePath(); if (fill) { g.fillStyle = fill; g.fill(); } if (stroke) { g.strokeStyle = stroke; g.lineWidth = 1.5; g.stroke(); } };
+  const L = (g, x0, y0, x1, y1, col, w) => { g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.strokeStyle = col; g.lineWidth = w; g.lineCap = 'round'; g.stroke(); };
+  const eye = (g, x, y, r) => { E(g, x, y, r, r, '#fff'); E(g, x + r * 0.25, y, r * 0.55, r * 0.55, '#111'); };
+  function human(g, o) {
+    const w = o.wide || 1, hr = o.headR || 11, legTop = o.legTop || -46, sh = o.shirt, sk = o.skin || '#e0ac7d';
+    const tw = 15 * w;
+    // legs + shoes
+    RR(g, -tw * 0.72, legTop, tw * 0.62, -legTop - 2, 3, o.pants); RR(g, tw * 0.1, legTop, tw * 0.62, -legTop - 2, 3, o.pants);
+    E(g, -tw * 0.42, -2, 8 * Math.max(1, w * 0.7), 3.5, '#222'); E(g, tw * 0.42, -2, 8 * Math.max(1, w * 0.7), 3.5, '#222');
+    // torso
+    const top = legTop - 34 - (o.tall || 0);
+    if (o.belly) E(g, 0, legTop - 12, tw * 1.05, 26, sh, '#0003'); else RR(g, -tw, top, tw * 2, legTop - top + 4, 7, sh);
+    if (o.mawashi) { RR(g, -tw * 1.0, legTop - 6, tw * 2, 12, 3, o.mawashi); }
+    // arms
+    L(g, -tw + 2, top + 5, -tw - 6, legTop + 2, sh === sk ? sk : sh, 7); L(g, tw - 2, top + 5, tw + 6, legTop + 2, sh === sk ? sk : sh, 7);
+    E(g, -tw - 6, legTop + 4, 4.5, 4.5, sk); E(g, tw + 6, legTop + 4, 4.5, 4.5, sk);
+    // head
+    const hy = top - hr + 1; E(g, 0, hy, hr, hr, sk, '#0002');
+    if (o.hair) { g.beginPath(); g.arc(0, hy - 1, hr + 0.5, Math.PI * 1.05, Math.PI * 1.95); g.fillStyle = o.hair; g.fill(); }
+    if (o.knot) E(g, 0, hy - hr - 3, 4, 4, '#111');
+    E(g, -hr * 0.35, hy, 1.6, 1.8, '#222'); E(g, hr * 0.35, hy, 1.6, 1.8, '#222');
+    g.beginPath(); g.arc(0, hy + hr * 0.25, hr * 0.38, 0.15 * Math.PI, 0.85 * Math.PI); g.strokeStyle = '#7a3b2e'; g.lineWidth = 1.6; g.stroke();
+  }
+  const D = {
+    person: { x0: -24, x1: 24, h: 104, f: g => human(g, { shirt: '#1f8a8a', pants: '#2f4b7c', hair: '#3b2a1e' }) },
+    child: { x0: -20, x1: 20, h: 84, f: g => human(g, { shirt: '#f08c00', pants: '#4263eb', hair: '#7a4a1e', headR: 12, legTop: -30, tall: -8 }) },
+    sumo: { x0: -38, x1: 38, h: 104, f: g => human(g, { shirt: '#e8b48a', skin: '#e8b48a', pants: '#e8b48a', wide: 2.0, belly: true, mawashi: '#3b3b8f', knot: true, hair: '#111', headR: 12 }) },
+    gerbil: { x0: -86, x1: 60, h: 56, f: g => {
+      g.beginPath(); g.moveTo(-34, -16); g.quadraticCurveTo(-62, -2, -80, -18); g.strokeStyle = '#a77b4f'; g.lineWidth = 4; g.lineCap = 'round'; g.stroke(); E(g, -81, -19, 5, 4, '#6b4a2b');
+      E(g, 0, -22, 38, 21, '#c9965f'); E(g, 6, -12, 24, 9, '#f2dcc0'); E(g, 36, -30, 19, 16, '#c9965f'); E(g, 30, -45, 6, 9, '#e3b48a', '#a77b4f', -0.3);
+      eye(g, 42, -34, 4); E(g, 55, -28, 2.8, 2.4, '#e88');
+      for (const dy of [-2, 2]) L(g, 52, -27 + dy, 64, -29 + dy * 3, '#5558', 1);
+      E(g, -16, -2, 7, 3, '#e3b48a'); E(g, 18, -2, 7, 3, '#e3b48a'); } },
+    snake: { x0: -40, x1: 40, h: 74, f: g => {
+      E(g, 0, -10, 38, 10, '#4d8a3a', '#2f5a23'); E(g, 0, -27, 31, 9, '#56963f', '#2f5a23'); E(g, -2, -42, 23, 8, '#4d8a3a', '#2f5a23');
+      for (const [x, y] of [[-20, -10], [8, -11], [26, -9], [-12, -27], [14, -27], [-6, -42]]) E(g, x, y, 5, 3, '#2f5a23');
+      g.beginPath(); g.moveTo(10, -46); g.quadraticCurveTo(22, -58, 12, -62); g.strokeStyle = '#4d8a3a'; g.lineWidth = 9; g.stroke();
+      E(g, 14, -64, 12, 8, '#56963f', '#2f5a23'); eye(g, 18, -67, 2.6);
+      L(g, 26, -63, 34, -63, '#d6336c', 1.6); L(g, 34, -63, 38, -66, '#d6336c', 1.3); L(g, 34, -63, 38, -60, '#d6336c', 1.3); } },
+    chicken: { x0: -34, x1: 34, h: 76, f: g => {
+      L(g, -6, -18, -9, -1, '#e8890c', 3); L(g, 7, -18, 6, -1, '#e8890c', 3); L(g, -9, -1, -15, 0, '#e8890c', 2.5); L(g, 6, -1, 12, 0, '#e8890c', 2.5);
+      PG(g, [-22, -38, -34, -60, -28, -36], '#f1f1f1', '#bbb'); E(g, 0, -34, 26, 20, '#fafafa', '#bbb'); E(g, -4, -34, 13, 8, '#e3e3e3', '#c4c4c4', -0.2);
+      E(g, 17, -58, 11, 11, '#fafafa', '#bbb'); for (const x of [11, 16, 21]) E(g, x, -70, 3.5, 4.5, '#e03131'); PG(g, [26, -60, 34, -57, 26, -54], '#f59f00'); E(g, 25, -51, 2.6, 4, '#e03131'); eye(g, 19, -61, 2.4); } },
+    cat: { x0: -30, x1: 26, h: 80, f: g => {
+      g.beginPath(); g.moveTo(14, -6); g.quadraticCurveTo(34, -10, 26, -34); g.strokeStyle = '#e8933a'; g.lineWidth = 6; g.lineCap = 'round'; g.stroke();
+      E(g, 0, -24, 21, 24, '#e8933a', '#b8661a'); E(g, 0, -16, 11, 14, '#fbe3c8');
+      for (const y of [-38, -30]) L(g, -18, y, -10, y + 2, '#b8661a', 2);
+      E(g, 1, -56, 16, 14, '#e8933a', '#b8661a'); PG(g, [-14, -62, -11, -78, -3, -67], '#e8933a', '#b8661a'); PG(g, [16, -62, 13, -78, 5, -67], '#e8933a', '#b8661a');
+      E(g, -5, -58, 2.6, 3.4, '#2b8a3e'); E(g, 7, -58, 2.6, 3.4, '#2b8a3e'); PG(g, [0, -52, 3, -52, 1.5, -50], '#d6336c');
+      for (const s of [-1, 1]) { L(g, s * 6, -50, s * 18, -52, '#5557', 1); L(g, s * 6, -49, s * 18, -47, '#5557', 1); }
+      E(g, -8, -1, 6, 3, '#e8933a'); E(g, 8, -1, 6, 3, '#e8933a'); } },
+    dog: { x0: -58, x1: 68, h: 80, f: g => {
+      L(g, -38, -46, -54, -66, '#d9ad5f', 6);
+      for (const x of [-30, -18, 18, 30]) RR(g, x - 4, -40, 9, 40, 3, '#d9ad5f');
+      E(g, 0, -44, 40, 17, '#e8c27a', '#b98b3e'); L(g, 34, -48, 44, -62, '#e8c27a', 16);
+      E(g, 46, -62, 14, 12, '#e8c27a', '#b98b3e'); E(g, 58, -56, 10, 7, '#e8c27a', '#b98b3e'); E(g, 66, -58, 3.5, 3, '#222');
+      E(g, 38, -60, 6, 12, '#c99a4a', null, 0.2); eye(g, 49, -66, 2.5); L(g, 30, -52, 40, -60, '#c92a2a', 4); } },
+    piano: { x0: -84, x1: 80, h: 104, f: g => {
+      for (const x of [-62, 58]) { RR(g, x - 5, -44, 10, 42, 2, '#222'); E(g, x, -2, 6, 3, '#c9a237'); }
+      RR(g, -8, -44, 16, 30, 2, '#333'); L(g, -6, -14, 6, -14, '#c9a237', 3);
+      g.beginPath(); g.moveTo(-74, -44); g.lineTo(42, -44); g.quadraticCurveTo(76, -44, 76, -56); g.lineTo(76, -64); g.lineTo(-74, -64); g.closePath(); g.fillStyle = '#1b1b1b'; g.fill();
+      PG(g, [-74, -66, 70, -66, 10, -102, -74, -70], '#2b2b2b', '#000'); L(g, 30, -66, 26, -90, '#888', 2);
+      RR(g, -84, -60, 12, 7, 1, '#fff', '#999'); for (let x = -83; x < -72; x += 3) L(g, x, -60, x, -56, '#111', 1.2);
+      g.fillStyle = '#c9a237'; g.font = 'bold 9px serif'; g.fillText('TIU & SONS', -38, -50); } },
+    horse: { x0: -72, x1: 80, h: 112, f: g => {
+      g.beginPath(); g.moveTo(-44, -66); g.quadraticCurveTo(-66, -52, -60, -26); g.strokeStyle = '#3b2412'; g.lineWidth = 8; g.lineCap = 'round'; g.stroke();
+      for (const x of [-34, -22, 24, 36]) { RR(g, x - 4.5, -54, 9, 52, 3, '#7a4a22'); RR(g, x - 5, -6, 10, 6, 1, '#222'); }
+      E(g, 0, -62, 46, 20, '#8b5a2b', '#5c3a1a');
+      PG(g, [28, -72, 46, -104, 60, -100, 46, -62], '#8b5a2b', '#5c3a1a');
+      E(g, 62, -98, 20, 9, '#8b5a2b', '#5c3a1a', 0.5); PG(g, [46, -106, 50, -116, 54, -104], '#8b5a2b', '#5c3a1a');
+      PG(g, [28, -74, 44, -106, 40, -108, 24, -78], '#3b2412'); eye(g, 56, -102, 2.6); E(g, 76, -88, 2, 2, '#222'); } },
+    gwagon: { x0: -104, x1: 100, h: 104, f: g => {
+      const gold = g.createLinearGradient(0, -100, 0, -20); gold.addColorStop(0, '#fff2a8'); gold.addColorStop(0.45, '#e6b422'); gold.addColorStop(1, '#a87b06');
+      RR(g, -96, -62, 194, 40, 6, gold, '#7a5a00'); RR(g, -88, -102, 140, 44, 5, gold, '#7a5a00');
+      RR(g, -80, -96, 40, 30, 3, '#bfe3f7', '#7a5a00'); RR(g, -34, -96, 38, 30, 3, '#bfe3f7', '#7a5a00'); RR(g, 10, -96, 36, 30, 3, '#bfe3f7', '#7a5a00');
+      E(g, -104, -48, 8, 18, '#222'); E(g, 92, -54, 6, 6, '#fff9db', '#7a5a00');
+      for (const x of [-58, 60]) { E(g, x, -20, 19, 19, '#1b1b1b'); E(g, x, -20, 9, 9, '#e6b422', '#7a5a00'); }
+      L(g, -96, -42, 98, -42, '#7a5a0088', 2); g.fillStyle = '#7a5a00'; g.font = 'bold 13px sans-serif'; g.fillText('G', 76, -40);
+      g.fillStyle = '#fff'; for (const [x, y, r] of [[-60, -100, 5], [40, -78, 4], [80, -60, 3]]) { PG(g, [x, y - r * 2, x + r * 0.5, y - r * 0.5, x + r * 2, y, x + r * 0.5, y + r * 0.5, x, y + r * 2, x - r * 0.5, y + r * 0.5, x - r * 2, y, x - r * 0.5, y - r * 0.5], '#fff'); } } },
+    elephant: { x0: -90, x1: 100, h: 150, f: g => {
+      L(g, -78, -96, -86, -66, '#7c8893', 3);
+      for (const x of [-56, -34, 10, 32]) RR(g, x - 11, -60, 22, 60, 6, '#8e9aa6', '#6c7883');
+      E(g, -12, -84, 72, 46, '#98a4b0', '#6c7883'); E(g, 58, -110, 34, 32, '#98a4b0', '#6c7883');
+      E(g, 40, -104, 24, 34, '#8692a0', '#6c7883', -0.15);
+      g.beginPath(); g.moveTo(84, -104); g.quadraticCurveTo(102, -70, 92, -30); g.quadraticCurveTo(90, -22, 98, -22); g.strokeStyle = '#98a4b0'; g.lineWidth = 13; g.lineCap = 'round'; g.stroke();
+      g.beginPath(); g.moveTo(80, -92); g.quadraticCurveTo(92, -80, 100, -86); g.strokeStyle = '#fffbea'; g.lineWidth = 5; g.stroke();
+      eye(g, 70, -118, 3.5); for (const x of [-56, -34, 10, 32]) for (const dx of [-5, 0, 5]) E(g, x + dx, -2, 2.2, 1.6, '#e9ecef'); } },
+    trex: { x0: -110, x1: 104, h: 156, f: g => {
+      PG(g, [-40, -96, -110, -80, -108, -74, -36, -66], '#4f9a4a', '#2f6a2b');
+      E(g, 16, -40, 16, 30, '#4f9a4a', '#2f6a2b'); RR(g, 10, -18, 14, 18, 3, '#4f9a4a'); PG(g, [6, 0, 34, 0, 30, -6, 8, -6], '#2f6a2b');
+      E(g, -10, -86, 50, 32, '#5aa654', '#2f6a2b'); E(g, -4, -74, 36, 16, '#b7d98a');
+      E(g, -14, -40, 16, 30, '#4f9a4a', '#2f6a2b'); RR(g, -20, -18, 14, 18, 3, '#4f9a4a'); PG(g, [-24, 0, 4, 0, 0, -6, -22, -6], '#2f6a2b');
+      PG(g, [28, -110, 44, -128, 96, -130, 104, -114, 100, -104, 56, -100, 34, -96], '#5aa654', '#2f6a2b');
+      PG(g, [40, -98, 98, -102, 96, -92, 50, -88], '#4f9a4a', '#2f6a2b');
+      g.fillStyle = '#fff'; for (let x = 58; x < 98; x += 7) { PG(g, [x, -104, x + 3, -99, x + 6, -104], '#fff'); PG(g, [x, -101, x + 3, -105, x + 6, -101], '#fff'); }
+      eye(g, 66, -120, 3.6); L(g, 60, -127, 72, -125, '#2f6a2b', 2.5);
+      L(g, 26, -82, 34, -74, '#4f9a4a', 4); L(g, 34, -74, 38, -76, '#2f6a2b', 2); } },
+    custom: { x0: -36, x1: 36, h: 72, f: (g, o) => {
+      RR(g, -35, -70, 70, 70, 3, '#c8a165', '#7a5a2b'); g.lineWidth = 2; L(g, -35, -35, 35, -35, '#7a5a2b', 2); L(g, -35, -70, 35, 0, '#7a5a2b88', 3);
+      g.fillStyle = '#fff'; RR(g, -30, -50, 60, 22, 3, '#fffbea', '#7a5a2b'); g.fillStyle = '#222'; g.font = 'bold 10px sans-serif'; g.textAlign = 'center'; g.fillText('m = ' + (o && o.m != null ? fmtM(o.m) : '?') + ' kg', 0, -36); g.textAlign = 'left'; } },
+  };
+  function fmtM(m) { if (typeof m !== 'number') return String(m); return m >= 1000 ? Math.round(m).toLocaleString('en-US') : m >= 10 ? +m.toFixed(1) + '' : +m.toPrecision(3) + ''; }
+  // draw passenger id with feet at (x,y), fitting height pxH and width maxW. sy = vertical squash (1 = none)
+  function draw(g, id, x, y, pxH, maxW, opt) {
+    const d = D[id] || D.custom; const k = Math.min(pxH / d.h, maxW / (d.x1 - d.x0)); const sy = (opt && opt.sy) || 1;
+    g.save(); g.translate(x - (d.x0 + d.x1) / 2 * k, y); g.scale(k, k * sy); g.lineJoin = 'round'; d.f(g, opt); g.restore();
+    return { w: (d.x1 - d.x0) * k, h: d.h * k * sy };
+  }
+  const SIZE = { gerbil: 26, snake: 34, chicken: 50, cat: 48, child: 100, dog: 74, person: 134, sumo: 134, piano: 116, horse: 168, gwagon: 120, elephant: 184, trex: 190, custom: 70 };
+  const sizeFor = (id, m) => id === 'custom' ? Math.max(40, Math.min(170, 40 + 32 * Math.log10(Math.max(1, m)))) : SIZE[id];
+  return { draw, D, sizeFor, E, RR, PG, L };
+})();
+
+</script>
+<script>
+// ===== Elevator Scale Lab: interface =====
+(() => {
+  const P = PHYS, $ = id => document.getElementById(id), LS = 'elevsim:';
+  const load = (k, d) => { try { const v = localStorage.getItem(LS + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } };
+  const save = (k, v) => { try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch (e) { } };
+  const S = {
+    level: load('level', 'regents'), units: load('units', 'N'), mute: load('mute', false), points: load('points', 0), done: load('done', {}),
+    pax: load('pax', 'person'), customM: load('customM', 60), planet: load('planet', 'earth'), customG: load('customG', 5), earthG: 9.81, scale: 'bath',
+    tab: 'cases', mode: 'script', preset: 'spdUp', script: null, y0: 40, v0: 0,
+    drive: { a: 0, v0: 0, floor: 20 }, trip: { f0: 0, f1: 30, vmax: 4, a1: 1.2, a2: 1.2 }, B: 9.81,
+    phases: null, st: null, running: false, speed: 1, log: [], tbl: [], rowK: 0, dtRow: 0.25, Aref: 9.81, cracked: false, cutT: null,
+    pred: { on: false, choice: null, revealed: false, streak: 0 }, chal: { active: null, hold: 0, sawZero: false },
+  };
+  const isAP = () => S.level === 'ap';
+  const pax = () => P.PASSENGERS.find(p => p.id === S.pax) || P.PASSENGERS[6];
+  const mass = () => S.pax === 'custom' ? Math.max(1e-6, +S.customM || 0) : pax().m;
+  const planet = () => P.PLANETS.find(p => p.id === S.planet) || P.PLANETS[0];
+  const gval = () => S.planet === 'earth' ? S.earthG : S.planet === 'custom' ? Math.max(0, +S.customG || 0) : planet().g;
+  const scaleObj = () => P.SCALES.find(s => s.id === S.scale);
+  const hidden = () => S.pred.on && !S.pred.revealed;
+  // ---------- number formatting ----------
+  function fmt(x, d) { if (!isFinite(x)) return '—'; const ax = Math.abs(x); if (d === undefined) d = ax >= 10000 ? 0 : ax >= 100 ? 1 : ax >= 1 ? 2 : ax >= 0.01 ? 3 : 4; if (ax === 0) d = Math.min(d, 1);
+    return x.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }).replace('-', '−'); }
+  const fmtS = (x, d) => (x > 0 ? '+' : '') + fmt(x, d);
+  const toU = (N, u) => (u || S.units) === 'kg' ? N / 9.81 : (u || S.units) === 'lb' ? N * P.LB_PER_N : N;
+  const fromU = (x, u) => (u || S.units) === 'kg' ? x * 9.81 : (u || S.units) === 'lb' ? x / P.LB_PER_N : x;
+  const uLab = u => ({ N: 'N', kg: 'kg', lb: 'lb' })[u || S.units];
+  const fU = (N, u) => fmt(toU(N, u)) + ' ' + uLab(u);
+  // ---------- sound (Web Audio, made on the fly) ----------
+  const SND = { ctx: null, hum: null, humG: null, noiseBuf: null };
+  function actx() { if (S.mute) return null; try { if (!SND.ctx) SND.ctx = new (window.AudioContext || window.webkitAudioContext)(); if (SND.ctx.state === 'suspended') SND.ctx.resume(); } catch (e) { return null; } return SND.ctx; }
+  function tone(f, dur, type, vol, f2, delay) { const c = actx(); if (!c) return; const t0 = c.currentTime + (delay || 0), o = c.createOscillator(), gn = c.createGain(); o.type = type || 'sine'; o.frequency.setValueAtTime(f, t0); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + dur);
+    gn.gain.setValueAtTime(0.0001, t0); gn.gain.exponentialRampToValueAtTime(vol || 0.15, t0 + 0.01); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); o.connect(gn); gn.connect(c.destination); o.start(t0); o.stop(t0 + dur + 0.05); }
+  function noise(dur, vol, freq, q) { const c = actx(); if (!c) return; if (!SND.noiseBuf) { const b = c.createBuffer(1, c.sampleRate, c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; SND.noiseBuf = b; }
+    const s = c.createBufferSource(), f = c.createBiquadFilter(), gn = c.createGain(), t0 = c.currentTime; s.buffer = SND.noiseBuf; s.loop = true; f.type = 'bandpass'; f.frequency.value = freq || 1000; f.Q.value = q || 1;
+    gn.gain.setValueAtTime(vol || 0.2, t0); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); s.connect(f); f.connect(gn); gn.connect(c.destination); s.start(t0); s.stop(t0 + dur + 0.05); }
+  const sfx = {
+    ding: () => { tone(1046, 0.6, 'sine', 0.18); tone(784, 0.9, 'sine', 0.16, null, 0.32); },
+    tick: () => tone(1500, 0.03, 'square', 0.02),
+    snap: () => { noise(0.35, 0.5, 2500, 0.7); tone(300, 0.4, 'sawtooth', 0.12, 60); },
+    brake: () => { noise(1.2, 0.25, 3200, 4); tone(1800, 1.0, 'sawtooth', 0.04, 900); },
+    crunch: () => { noise(0.5, 0.6, 400, 0.6); noise(0.3, 0.4, 1500, 1); tone(120, 0.4, 'square', 0.12, 40); },
+    good: () => { [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.25, 'triangle', 0.14, null, i * 0.09)); },
+    bad: () => { tone(330, 0.25, 'triangle', 0.12, 220); },
+    boom: () => { noise(0.9, 0.6, 150, 0.5); tone(90, 0.8, 'sine', 0.3, 30); },
+  };
+  function hum(v) { const c = S.mute ? null : SND.ctx; if (!c) { if (SND.humG) SND.humG.gain.value = 0; return; }
+    if (!SND.hum) { SND.hum = c.createOscillator(); SND.hum.type = 'sawtooth'; const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 260; SND.humG = c.createGain(); SND.humG.gain.value = 0; SND.hum.connect(f); f.connect(SND.humG); SND.humG.connect(c.destination); SND.hum.start(); }
+    const sp = Math.abs(v), on = S.running && sp > 0.01; SND.hum.frequency.setTargetAtTime(48 + Math.min(60, sp * 4), c.currentTime, 0.1); SND.humG.gain.setTargetAtTime(on ? Math.min(0.05, 0.012 + sp * 0.004) : 0, c.currentTime, 0.15); }
+  // ---------- toast + confetti ----------
+  let toastT = 0;
+  function toast(html, btns, ms) { const t = $('toast'); t.innerHTML = html; (btns || []).forEach(([lab, fn]) => { const b = document.createElement('button'); b.textContent = lab; b.onclick = () => { fn(); t.classList.add('hide'); }; t.appendChild(b); });
+    t.classList.remove('hide'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.add('hide'), ms || 5000); }
+  const CF = { parts: [], on: false };
+  function confetti(n) { const cv = $('confetti'); cv.width = innerWidth; cv.height = innerHeight; const cols = ['#ffd43b', '#ff6b6b', '#4dabf7', '#69db7c', '#f783ac', '#e6b422'];
+    for (let i = 0; i < (n || 120); i++) CF.parts.push({ x: innerWidth / 2 + (Math.random() - 0.5) * 300, y: innerHeight * 0.35, vx: (Math.random() - 0.5) * 14, vy: -Math.random() * 14 - 4, c: cols[i % cols.length], r: Math.random() * 6.28, life: 90 + Math.random() * 40 });
+    if (!CF.on) { CF.on = true; requestAnimationFrame(cfStep); } }
+  function cfStep() { const cv = $('confetti'), g = cv.getContext('2d'); g.clearRect(0, 0, cv.width, cv.height);
+    CF.parts = CF.parts.filter(p => p.life-- > 0); for (const p of CF.parts) { p.x += p.vx; p.y += p.vy; p.vy += 0.4; p.vx *= 0.99; p.r += 0.2; g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c; g.fillRect(-5, -3, 10, 6); g.restore(); }
+    if (CF.parts.length) requestAnimationFrame(cfStep); else { CF.on = false; g.clearRect(0, 0, cv.width, cv.height); } }
+  function addPoints(n, why) { S.points += n; save('points', S.points); updXP(); }
+  const RANKS = [[0, 'Elevator Trainee'], [20, 'Button Pusher'], [50, 'Elevator Operator'], [90, 'Shaft Mechanic'], [140, 'Chief Elevator Engineer'], [200, 'Golden G-Wagon Elevator Inspector']];
+  function rank() { let r = RANKS[0], nx = null; for (let i = 0; i < RANKS.length; i++) if (S.points >= RANKS[i][0]) { r = RANKS[i]; nx = RANKS[i + 1] || null; } return { name: r[1], lo: r[0], next: nx }; }
+  function updXP() { const r = rank(); $('xp').textContent = '★ ' + S.points + ' pts · ' + r.name;
+    $('rank').innerHTML = `<b>Rank: ${r.name}</b> · ${S.points} pts` + (r.next ? ` <span class="g">(${r.next[0] - S.points} pts to “${r.next[1]}”)</span>` : ' <span class="g">(top rank!)</span>');
+    $('rankBar').firstChild.style.width = (r.next ? (S.points - r.lo) / (r.next[0] - r.lo) * 100 : 100) + '%'; }
+  // ---------- motion setup ----------
+  const clone = o => JSON.parse(JSON.stringify(o));
+  function loadPreset(id) { const pr = P.PRESETS.find(p => p.id === id); S.preset = id; S.mode = 'script';
+    if (pr.trip) { const [f0, f1, vmax, a1, a2] = pr.trip; Object.assign(S.trip, { f0, f1, vmax, a1, a2 }); S.script = P.planTrip(f0, f1, vmax, a1, a2); S.y0 = f0 * P.FLOOR_H; S.v0 = 0; }
+    else { S.script = clone(pr.script); S.y0 = pr.floor * P.FLOOR_H; S.v0 = pr.v0; } }
+  function planTrip() { const t = S.trip; S.preset = null; S.mode = 'script'; S.script = P.planTrip(t.f0, t.f1, t.vmax, t.a1, t.a2); S.y0 = t.f0 * P.FLOOR_H; S.v0 = 0; }
+  function env() { return { g: gval(), m: mass(), phases: S.mode === 'script' ? S.phases : null, driveA: S.drive.a, B: S.B }; }
+  function startY() { return S.mode === 'drive' ? S.drive.floor * P.FLOOR_H : S.y0; }
+  function startV() { return S.mode === 'drive' ? S.drive.v0 : S.v0; }
+  function reset(keepPred) {
+    const g = gval(); S.running = false; S.cracked = false; S.cutT = null; S.chal.hold = 0; S.chal.sawZero = false;
+    S.phases = S.mode === 'script' ? P.resolve(S.script, g, startV(), S.B) : null;
+    S.st = P.newState(startY(), startV()); S.st.a = S.phases ? (S.phases[0] ? S.phases[0].a : 0) : S.drive.a; P.step(S.st, 0, env());
+    S.Aref = Math.max(g, 1e-9); const as = S.phases ? S.phases.map(p => p.a) : [S.drive.a]; for (const a of as) S.Aref = Math.max(S.Aref, g + a, Math.abs(a));
+    S.log = []; S.tbl = []; S.rowK = 0; S.lastFloor = Math.floor(S.st.y / P.FLOOR_H + 0.5); logSample(); addRow(); S.rowK = 1;
+    if (!keepPred) S.pred.revealed = false;
+    checkCap(true); updRunBtn(); fillPredPhases(); renderPhaseTable(); renderAll(); }
+  function tEnd() { return S.phases ? S.phases.reduce((s, p) => s + p.dur, 0) : 0; }
+  function curPhase() { if (!S.phases) return null; let t = 0; for (let i = 0; i < S.phases.length; i++) { t += S.phases[i].dur; if (S.st.t < t - 1e-9) return i; } return S.phases.length - 1; }
+  function logSample() { const st = S.st, m = mass(), g = gval(); S.log.push({ t: st.t, y: st.y, v: st.v, a: st.a, N: st.N, W: m * g, Fc: st.Fc, h: st.h }); if (S.log.length > 20000) S.log.splice(0, 5000); }
+  function addRow() { const st = S.st, m = mass(), g = gval(); S.tbl.push({ t: st.t, fl: P.floorName(st.y), y: st.y, v: st.v, a: st.a, W: m * g, N: st.N, rider: st.h >= P.CEIL_M ? 'on ceiling' : st.h > 0 ? 'floating' : (st.N === 0 && m * g > 0 ? 'weightless' : 'on scale') }); }
+  function advance(dt) {
+    let left = dt, n = 0; const st = S.st;
+    while (left > 1e-9 && n++ < 200000) {
+      if (st.done || st.ended) break;
+      const h = Math.min(left, 1 / 60, Math.max(1e-9, S.rowK * S.dtRow - st.t));
+      P.step(st, h, env()); left -= h; logSample();
+      if (st.t >= S.rowK * S.dtRow - 1e-9) { addRow(); S.rowK++; }
+      events();
+    }
+    if (st.done || st.ended) { if (S.tbl.length && Math.abs(S.tbl[S.tbl.length - 1].t - st.t) > 1e-9) addRow(); }
+  }
+  function events() {
+    const st = S.st, fl = Math.floor(st.y / P.FLOOR_H + 0.5);
+    if (fl !== S.lastFloor) { S.lastFloor = fl; if (S.running) sfx.tick(); }
+    checkCap(); chalWatch();
+    if (st.ended && S.running) { S.running = false; updRunBtn();
+      if (st.ended === 'bottom' && Math.abs(S.endV || 0) > 3) { sfx.boom(); toast('💥 <b>CRASH!</b> The car hit the buffers at the bottom of the shaft. Next time, hit the 🛑 safety brake!', null, 6000); }
+      else toast('The car reached the ' + st.ended + ' of the shaft, and the limit switch stopped it.', null, 4000); }
+    S.endV = st.v;
+    if (st.done && S.running) { S.running = false; updRunBtn(); if (S.mode === 'script') sfx.ding(); }
+  }
+  function checkCap(quiet) { const sc = scaleObj(); if (!S.cracked && S.st.N > sc.max) { S.cracked = true; if (!hidden()) { sfx.crunch(); const nx = P.SCALES[P.SCALES.indexOf(sc) + 1];
+        toast(`💥 <b>CRUNCH!</b> The ${sc.name.toLowerCase()} maxes out at ${sc.note.replace('max ', '')}, and it needed to read ${fU(S.st.N)}.` + (nx ? '' : ' Nothing on Earth can weigh that!'), nx ? [['Upgrade to ' + nx.name.toLowerCase(), () => { S.scale = nx.id; $('scaleSel').value = nx.id; reset(true); }]] : null, 7000); } } }
+  // ---------- run loop ----------
+  let lastTS = null;
+  function frame(ts) { if (S.running) { const dt = lastTS === null ? 0 : Math.min(0.05, (ts - lastTS) / 1000); advance(dt * S.speed); }
+    lastTS = ts; hum(S.running ? S.st.v : 0); if (S.running || dirty) { paint(); dirty = false; } requestAnimationFrame(frame); }
+  function run() { actx(); if (S.st.done || S.st.ended) reset(true); S.running = !S.running; lastTS = null; updRunBtn(); }
+  function updRunBtn() { $('runBtn').textContent = S.running ? '⏸ Pause' : (S.st && S.st.t > 0 && !S.st.done && !S.st.ended ? '▶ Resume' : '▶ Run'); }
+  function cut() { actx(); const g = gval(); if (S.st.done || S.st.ended) reset(true); S.st.ov = 'cut'; S.cutT = S.st.t; S.running = true; lastTS = null; updRunBtn(); sfx.snap(); S.Aref = Math.max(S.Aref, g);
+    if (g === 0) toast('Snip! But with g = 0 there is nothing pulling the car down, so it just keeps coasting.', null, 5000); }
+  function brake() { actx(); if (!S.running && S.st.v === 0) { toast('The car is not moving, so there is nothing to brake.', null, 3000); return; } S.st.ov = 'brake'; S.running = true; lastTS = null; S.Aref = Math.max(S.Aref, gval() + S.B, S.B); updRunBtn(); sfx.brake(); }
+  // ---------- canvas helpers ----------
+  function setupCanvas(cv) { const w = +cv.getAttribute('width'), h = +cv.getAttribute('height'); if (!cv._w) { cv._w = w; cv._h = h; const r = Math.min(2, window.devicePixelRatio || 1); cv.width = w * r; cv.height = h * r; cv.style.aspectRatio = w + ' / ' + h; cv._r = r; }
+    const g = cv.getContext('2d'); g.setTransform(cv._r, 0, 0, cv._r, 0, 0); return { g, W: cv._w, H: cv._h }; }
+  function lbl(g, txt, x, y, col, align, size, maxX) {
+    size = size || 14; const m = txt.match(/^(.*?)_([A-Za-z0-9]+)(.*)$/); const parts = m ? [[m[1], size], [m[2], size * 0.72, 4], [m[3], size]] : [[txt, size]];
+    g.save(); let w = 0; for (const pt of parts) { g.font = `bold ${pt[1]}px system-ui,sans-serif`; w += g.measureText(pt[0]).width; }
+    let cx = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x; g.lineJoin = 'round'; if (maxX) cx = Math.min(maxX - w, cx);
+    for (const pt of parts) { g.font = `bold ${pt[1]}px system-ui,sans-serif`; g.lineWidth = 3.5; g.strokeStyle = 'rgba(255,255,255,.92)'; g.strokeText(pt[0], cx, y + (pt[2] || 0)); g.fillStyle = col; g.fillText(pt[0], cx, y + (pt[2] || 0)); cx += g.measureText(pt[0]).width; }
+    g.restore(); return w; }
+  function arrow(g, x, y, dx, dy, col, o) {
+    o = o || {}; const L = Math.hypot(dx, dy); if (L < 1.5) return; g.save(); g.strokeStyle = g.fillStyle = col; g.lineWidth = o.w || 4; g.lineCap = 'round'; if (o.dash) g.setLineDash(o.dash);
+    const ux = dx / L, uy = dy / L, hl = Math.min(o.head || 14, L * 0.5); g.beginPath(); g.moveTo(x, y); g.lineTo(x + dx - ux * hl * 0.7, y + dy - uy * hl * 0.7); g.stroke(); g.setLineDash([]);
+    g.beginPath(); g.moveTo(x + dx, y + dy); g.lineTo(x + dx - ux * hl - uy * hl * 0.45, y + dy - uy * hl + ux * hl * 0.45); g.lineTo(x + dx - ux * hl + uy * hl * 0.45, y + dy - uy * hl - ux * hl * 0.45); g.closePath(); g.fill(); g.restore(); }
+  // ---------- planets: sky, ground, sky object ----------
+  const LOOK = {
+    earth: { sky: ['#6fb3e8', '#d7eeff'], ground: '#5e9e44', far: '#86b97a', obj: 'sun' }, moon: { sky: ['#03050c', '#121827'], ground: '#9b9b9b', far: '#7d7d7d', obj: 'earth', stars: 1, craters: 1 },
+    mercury: { sky: ['#020208', '#14141c'], ground: '#8c7e72', far: '#6f655c', obj: 'bigsun', stars: 1, craters: 1 }, venus: { sky: ['#d9a441', '#f2d58a'], ground: '#a5733b', far: '#c08a4a', obj: 'haze' },
+    mars: { sky: ['#c9774b', '#ecc3a0'], ground: '#b5532d', far: '#c96c42', obj: 'smallsun' }, jupiter: { sky: ['#c8915e', '#f1dcc0'], ground: null, far: null, obj: 'bands' },
+    saturn: { sky: ['#d9c08a', '#f6ebcc'], ground: null, obj: 'rings' }, uranus: { sky: ['#7fd0d8', '#c9f0f2'], ground: null, obj: 'haze' }, neptune: { sky: ['#2c56b8', '#7aa2ec'], ground: null, obj: 'bands' },
+    pluto: { sky: ['#020208', '#101018'], ground: '#e6d6c4', far: '#c9b8a6', obj: 'tinysun', stars: 1 }, sun: { sky: ['#ff7a00', '#ffe066'], ground: '#ff9f1c', far: '#ffb347', obj: 'flares' },
+    space: { sky: ['#000008', '#0a0a24'], ground: null, obj: 'galaxy', stars: 1 }, custom: { sky: ['#5f3dc4', '#c5b3ff'], ground: '#7950f2', far: '#9775fa', obj: 'smallsun', stars: 1 },
+  };
+  const STARS = Array.from({ length: 90 }, (_, i) => [((i * 197) % 580), ((i * 113 + i * i * 7) % 400), (i % 3) * 0.5 + 0.6]);
+  function drawSkyObj(g, kind, x, y, t) { const { E } = ART;
+    if (kind === 'sun') { E(g, x, y, 22, 22, '#ffe066'); g.strokeStyle = '#ffd43b'; g.lineWidth = 3; for (let i = 0; i < 10; i++) { const a = i * 0.628 + t * 0.2; g.beginPath(); g.moveTo(x + Math.cos(a) * 27, y + Math.sin(a) * 27); g.lineTo(x + Math.cos(a) * 34, y + Math.sin(a) * 34); g.stroke(); } }
+    else if (kind === 'earth') { E(g, x, y, 22, 22, '#2f74c0'); g.save(); g.beginPath(); g.arc(x, y, 22, 0, 7); g.clip(); E(g, x - 6, y - 4, 9, 6, '#4caf50'); E(g, x + 9, y + 8, 7, 5, '#4caf50'); E(g, x + 2, y - 15, 10, 3, '#fff'); g.restore(); }
+    else if (kind === 'bigsun') E(g, x, y, 30, 30, '#fff3bf', '#ffd43b');
+    else if (kind === 'smallsun') E(g, x, y, 10, 10, '#fff9db');
+    else if (kind === 'tinysun') E(g, x, y, 3, 3, '#fff');
+    else if (kind === 'haze') { g.fillStyle = '#ffffff40'; for (let i = 0; i < 4; i++) E(g, x + i * 12 - 18, y + (i % 2) * 8, 26, 9, '#ffffff38'); }
+    else if (kind === 'bands') { g.globalAlpha = 0.18; for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? '#7a4a22' : '#fff'; g.fillRect(0, i * 52 + 10, 580, 22); } g.globalAlpha = 1; }
+    else if (kind === 'rings') { g.save(); g.strokeStyle = '#a07d3e88'; g.lineWidth = 6; g.beginPath(); g.ellipse(x + 60, y + 20, 140, 18, -0.25, 0, 7); g.stroke(); g.lineWidth = 3; g.beginPath(); g.ellipse(x + 60, y + 20, 160, 22, -0.25, 0, 7); g.stroke(); g.restore(); }
+    else if (kind === 'flares') { for (let i = 0; i < 5; i++) { const xx = (i * 131 + t * 30) % 580; E(g, xx, 40 + i * 30, 30, 8, '#fff3bf55'); } }
+    else if (kind === 'galaxy') { g.save(); g.translate(x, y); g.rotate(-0.4); E(g, 0, 0, 30, 9, '#b197fc55'); E(g, 0, 0, 10, 5, '#e5dbffaa'); g.restore(); } }
+  // ---------- scene ----------
+  const PX = 55, CAR_FLOOR = 300, CX = 300, IX0 = 186, IX1 = 414, IY0 = 92, IY1 = 296;
+  function riderQuip(cmp, id) { const snd = { gerbil: 'Squeak! ', snake: 'Hsss… ', chicken: 'BAWK! ', cat: 'Mrrow?! ', dog: 'Woof! ', horse: 'Neigh! ', elephant: 'Pfrrrt! ', trex: 'RAWR! ', piano: '♪ ', gwagon: '✨ ' }[id] || '';
+    return { more: snd + 'Oof, heavy!', less: snd + 'Whoa, light!', zero: snd + 'Wheee!', ceil: snd + 'Ouch, ceiling!' }[cmp] || ''; }
+  function drawScene() {
+    const { g, W, H } = setupCanvas($('scene')), st = S.st, gv = gval(), m = mass(), lk = LOOK[S.planet] || LOOK.earth, t = st.t, hid = hidden();
+    const sy = wy => CAR_FLOOR - (wy - st.y) * PX;
+    g.clearRect(0, 0, W, H);
+    // sky
+    g.save(); g.beginPath(); g.rect(0, 0, 580, H); g.clip();
+    const sk = g.createLinearGradient(0, 0, 0, H); sk.addColorStop(0, lk.sky[0]); sk.addColorStop(1, lk.sky[1]); g.fillStyle = sk; g.fillRect(0, 0, 580, H);
+    if (lk.stars) { g.fillStyle = '#fff'; for (const [x, y, r] of STARS) { g.globalAlpha = 0.5 + 0.5 * Math.sin(x + performance.now() / 700); g.fillRect(x, (y + st.y * 0.5) % 400, r, r); } g.globalAlpha = 1; }
+    drawSkyObj(g, lk.obj, 48, 118, performance.now() / 1000);
+    const hz = CAR_FLOOR + st.y * PX * 0.02;
+    if (lk.ground) { if (hz < H) { g.fillStyle = lk.far; g.beginPath(); g.moveTo(0, hz); for (let x = 0; x <= 580; x += 40) g.lineTo(x, hz - 14 - 10 * Math.sin(x * 0.05 + 1)); g.lineTo(580, H); g.lineTo(0, H); g.fill(); }
+      const gy = sy(0); if (gy < H) { g.fillStyle = lk.ground; g.fillRect(0, gy, 580, H - gy); if (lk.craters) for (let x = 20; x < 580; x += 90) ART.E(g, x, gy + 30, 22, 5, '#0002'); } }
+    else { // gas giants / space: the tower floats on a platform
+      const gy = sy(-P.FLOOR_H * 2 - 0.5); if (gy < H) { g.fillStyle = '#495057'; g.fillRect(70, gy, 460, 16); g.fillStyle = '#ffa94d'; for (let x = 110; x < 520; x += 100) { ART.PG(g, [x, gy + 16, x + 20, gy + 16, x + 10, gy + 40 + 8 * Math.random()], '#ffa94d'); } } }
+    // building
+    const yTop = P.Y_MAX + P.FLOOR_H + 1, bTop = sy(yTop), bBot = Math.min(H, sy(-P.FLOOR_H * 2 - 0.5));
+    g.fillStyle = '#c3ccd6'; g.fillRect(90, Math.max(0, bTop), 420, bBot - Math.max(0, bTop));
+    if (bTop > -40) { g.fillStyle = '#5c6670'; g.fillRect(84, bTop - 10, 432, 12); g.fillStyle = '#343a40'; g.fillRect(250, bTop - 34, 100, 24); g.fillStyle = '#ffd43b'; g.font = 'bold 11px system-ui'; g.fillText('MOTOR ROOM', 262, bTop - 18); }
+    const f0 = Math.floor((st.y - 2) / P.FLOOR_H) - 1, f1 = Math.ceil((st.y + 7) / P.FLOOR_H) + 1;
+    for (let k = f0; k <= f1; k++) { const wy = k * P.FLOOR_H; if (wy < -P.FLOOR_H * 2 || wy > P.Y_MAX + P.FLOOR_H) continue; const y = sy(wy);
+      g.fillStyle = '#8a96a3'; g.fillRect(90, y - 3, 420, 6);
+      if (k < P.TOP_FLOOR + 1) for (const x of [96, 126, 452, 482]) { g.fillStyle = k < 0 ? '#6c757d' : '#9fd3f7'; g.fillRect(x, y - 175, 22, 120); g.fillStyle = '#ffffff55'; g.fillRect(x + 3, y - 172, 5, 114); } }
+    // shaft
+    g.fillStyle = '#343a40'; g.fillRect(170, Math.max(0, bTop), 260, bBot - Math.max(0, bTop)); g.strokeStyle = '#868e96'; g.lineWidth = 3; for (const x of [174, 426]) { g.beginPath(); g.moveTo(x, Math.max(0, bTop)); g.lineTo(x, bBot); g.stroke(); }
+    for (let k = f0; k <= f1; k++) { const wy = k * P.FLOOR_H; if (wy < -P.FLOOR_H * 2 || wy > P.Y_MAX) continue; const y = sy(wy); g.fillStyle = '#495057'; g.fillRect(170, y - 2, 8, 4); g.fillRect(422, y - 2, 8, 4);
+      g.fillStyle = '#ffd43b'; g.font = 'bold 14px system-ui'; g.textAlign = 'right'; g.fillText(P.floorName(wy), 166, y - 8); g.textAlign = 'left'; }
+    if (st.y < P.FLOOR_H * 3) { const py = sy(-P.FLOOR_H * 2); g.fillStyle = '#212529'; g.fillRect(170, py, 260, 12); for (const x of [210, 370]) { g.fillStyle = '#f08c00'; g.fillRect(x - 10, py - 18, 20, 18); } }
+    // cable
+    const ci = curPhase(), cp = S.phases ? S.phases[ci] : null, cutIdx = S.phases ? S.phases.findIndex(p => p.kind === 'cut') : -1;
+    const wasCut = S.cutT !== null || (cutIdx >= 0 && st.t > 0 && ci >= cutIdx);
+    const brk = st.ov === 'brake' || (st.ov === null && cp && cp.kind === 'brake' && st.v !== 0);
+    g.fillStyle = '#495057'; g.fillRect(CX - 40, 74, 80, 8); g.strokeStyle = '#dee2e6'; g.lineWidth = 4;
+    if (!wasCut) { for (const dx of [-5, 5]) { g.beginPath(); g.moveTo(CX + dx, 76); g.lineTo(CX + dx, Math.max(-5, bTop)); g.stroke(); } }
+    else { g.beginPath(); g.moveTo(CX, 80); g.quadraticCurveTo(CX + 14 * Math.sin(t * 9), 62, CX - 6, 44); g.stroke(); lbl(g, 'cable cut!', CX - 70, 40, '#c92a2a', 'left', 12); }
+    // car
+    g.fillStyle = '#9aa3ad'; g.fillRect(178, 80, 244, 220); g.fillStyle = '#f3ead8'; g.fillRect(IX0, IY0 - 4, IX1 - IX0, IY1 - IY0 + 4);
+    g.fillStyle = '#e6d8bb'; for (let x = IX0 + 38; x < IX1; x += 38) g.fillRect(x, IY0, 2, IY1 - IY0);
+    g.fillStyle = '#fff9db'; g.fillRect(CX - 30, IY0 - 4, 60, 5); g.fillStyle = '#6b5b4a'; g.fillRect(IX0, IY1, IX1 - IX0, 4);
+    if (brk) { g.strokeStyle = '#ffa94d'; g.lineWidth = 2; for (let i = 0; i < 14; i++) { const x = i % 2 ? 178 : 422, y = 90 + Math.random() * 200; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (i % 2 ? -1 : 1) * (6 + Math.random() * 14), y + 6 + Math.random() * 10); g.stroke(); } }
+    // scale
+    const sc = scaleObj(), sh = sc.id === 'bath' ? 12 : sc.id === 'ind' ? 10 : 8, sw = sc.id === 'bath' ? 76 : sc.id === 'ind' ? 200 : 226, sTop = IY1 - sh;
+    if (sc.id === 'bath') { ART.RR(g, CX - sw / 2, sTop, sw, sh, 4, '#f8f9fa', '#868e96'); g.fillStyle = '#212529'; g.fillRect(CX - 12, sTop + 3, 24, 6); }
+    else if (sc.id === 'ind') { g.fillStyle = '#5c7cfa'; g.fillRect(CX - sw / 2, sTop, sw, sh); g.fillStyle = '#364fc7'; g.fillRect(CX - sw / 2, sTop + sh - 3, sw, 3); }
+    else { g.fillStyle = '#495057'; g.fillRect(CX - sw / 2, sTop, sw, sh); g.fillStyle = '#fcc419'; for (let x = CX - sw / 2; x < CX + sw / 2; x += 20) g.fillRect(x, sTop, 10, 3); }
+    if (S.cracked) { g.strokeStyle = '#c92a2a'; g.lineWidth = 2; g.beginPath(); g.moveTo(CX - sw / 2 + 4, sTop + 2); g.lineTo(CX - 8, sTop + sh - 2); g.lineTo(CX, sTop + 3); g.lineTo(CX + 10, sTop + sh - 1); g.lineTo(CX + sw / 2 - 4, sTop + 4); g.stroke(); }
+    // rider
+    const id = S.pax, pxH = ART.sizeFor(id, m), gap = Math.max(0, sTop - IY0 - 6 - pxH), W0 = m * gv, N = st.N;
+    const ratio = W0 > 0 ? N / W0 : 0, cmp = st.h >= P.CEIL_M - 1e-9 && st.Fc > 0 ? 'ceil' : N <= 1e-12 ? (W0 > 0 || st.a !== 0 ? 'zero' : 'same') : Math.abs(N - W0) < 1e-9 * W0 ? 'same' : N > W0 ? 'more' : 'less';
+    let lift = st.h / P.CEIL_M * gap; if (cmp === 'zero' && st.h === 0 && gv > 0) lift = 3 + 3 * Math.sin(t * 5);
+    const squash = cmp === 'more' ? Math.max(0.84, 1 - 0.06 * (ratio - 1)) : cmp === 'less' ? Math.min(1.05, 1 + 0.04 * (1 - ratio)) : 1;
+    g.save(); g.beginPath(); g.rect(IX0, IY0 - 4, IX1 - IX0, IY1 - IY0 + 4); g.clip();
+    ART.draw(g, id, CX, sTop - lift, pxH, IX1 - IX0 - 10, { sy: squash, m });
+    if (ratio > 1.7 && cmp === 'more') { for (const dx of [-1, 1]) ART.E(g, CX + dx * 30, sTop - pxH * 0.8, 3, 5, '#4dabf7'); }
+    g.restore();
+    const q = riderQuip(cmp, id); if (q && S.running && !hid) { g.font = 'bold 13px system-ui'; const tw = g.measureText(q).width + 14; ART.RR(g, IX0 + 4, IY0 + 4, tw, 22, 8, '#ffffffee', '#495057'); g.fillStyle = '#222'; g.fillText(q, IX0 + 11, IY0 + 20); }
+    // scale display on top of car
+    ART.RR(g, 312, 44, 106, 34, 5, '#1b1f23', '#868e96'); g.fillStyle = '#adb5bd'; g.font = 'bold 9px system-ui'; g.fillText('SCALE READS', 318, 54);
+    g.font = 'bold 15px "Courier New",monospace'; g.fillStyle = S.cracked && !hid ? '#ff6b6b' : '#69db7c'; g.fillText(hid ? '? ? ?' : S.cracked ? 'ERR OVER' : fU(N), 318, 72, 96);
+    // a and v arrows beside the shaft
+    const ay = 190; lbl(g, 'motion', 468, 92, '#343a40', 'center', 12);
+    const vl = Math.max(-95, Math.min(95, st.v * 9)), al = Math.max(-95, Math.min(95, st.a * 7));
+    if (Math.abs(vl) > 2) arrow(g, 452, ay, 0, -vl, '#7b2cbf', { w: 5 }); lbl(g, 'v', 446, ay + (vl > 0 ? 18 : -10), '#7b2cbf', 'right', 14); lbl(g, fmt(st.v, 1), 452, ay + (vl > 0 ? 32 : vl < 0 ? -24 : 18), '#7b2cbf', 'center', 11);
+    if (Math.abs(al) > 2) arrow(g, 496, ay, 0, -al, '#2b8a3e', { w: 5 }); lbl(g, 'a', 502, ay + (al > 0 ? 18 : -10), '#2b8a3e', 'left', 14); lbl(g, fmt(st.a, 1), 496, ay + (al > 0 ? 32 : al < 0 ? -24 : 18), '#2b8a3e', 'center', 11);
+    g.restore();
+    // floor indicator
+    ART.RR(g, 10, 10, 112, 64, 8, '#111c', '#ffd43b'); g.fillStyle = '#ffd43b'; g.font = 'bold 10px system-ui'; g.fillText('TIU TOWER · FLOOR', 18, 24);
+    g.font = 'bold 30px "Courier New",monospace'; g.fillStyle = '#ff922b'; g.fillText((st.v > 0.05 ? '▲' : st.v < -0.05 ? '▼' : ' ') + P.floorName(st.y), 16, 56); g.font = '10px system-ui'; g.fillStyle = '#ddd'; g.fillText('height ' + fmt(st.y, 1) + ' m', 18, 69);
+    g.font = 'bold 12px system-ui'; g.textAlign = 'right'; g.fillStyle = '#fff'; g.strokeStyle = '#000a'; g.lineWidth = 3; const ptxt = planet().name + ' · g = ' + fmt(gv, 2) + ' m/s²'; g.strokeText(ptxt, 572, 20); g.fillText(ptxt, 572, 20); g.textAlign = 'left';
+    drawFBD(g, cmp);
+  }
+  function drawFBD(g, cmp) {
+    const st = S.st, m = mass(), gv = gval(), W0 = m * gv, N = st.N, Fc = st.Fc, Fnet = N - W0 - Fc, hid = hidden(), x0 = 590, w = 324;
+    ART.RR(g, x0, 6, w, 388, 10, '#fbfcfe', '#ccd'); g.fillStyle = '#234'; g.font = 'bold 14px system-ui'; g.fillText('Free-body diagram', x0 + 10, 26);
+    g.font = '12px system-ui'; g.fillStyle = '#556'; g.fillText(pax().name + ' (' + fmt(m) + ' kg) on ' + planet().name, x0 + 10, 42, w - 20);
+    const Fref = Math.max(m * S.Aref, W0, N, Fc, Math.abs(Fnet), 1e-12), U = 130 / Fref, cx = x0 + 120, cy = 214;
+    g.fillStyle = '#dee2e6'; ART.RR(g, cx - 22, cy - 22, 44, 44, 8, '#e9ecef', '#adb5bd');
+    if (W0 > 0) { arrow(g, cx - (Fc > 0 ? 8 : 0), cy + 22, 0, Math.max(2, W0 * U), '#e03131'); lbl(g, 'F_g = ' + fmt(W0) + ' N', cx + 26, Math.min(386, cy + 22 + W0 * U - 2), '#c92a2a', 'left', 13); }
+    if (hid) { g.setLineDash([5, 4]); g.strokeStyle = '#1971c2'; g.lineWidth = 2; g.strokeRect(cx - 14, cy - 92, 28, 66); g.setLineDash([]); lbl(g, 'F_N = ?', cx + 26, cy - 60, '#1864ab', 'left', 14); }
+    else {
+      if (N > 0) { arrow(g, cx, cy - 22, 0, -N * U, '#1971c2'); lbl(g, 'F_N = ' + fmt(N) + ' N', cx + 26, Math.max(62, cy - 22 - N * U + 14), '#1864ab', 'left', 13); }
+      else lbl(g, cmp === 'ceil' ? 'F_N = 0 (rider left the scale)' : 'F_N = 0', cx - 60, cy - 36, '#1864ab', 'left', 13);
+      if (Fc > 0) { arrow(g, cx + 8, cy + 22, 0, Fc * U, '#f08c00'); lbl(g, 'F_ceiling = ' + fmt(Fc) + ' N', cx + 26, Math.min(386, cy + 40 + Fc * U * 0.5), '#e8590c', 'left', 13); }
+      const nx = x0 + 262; if (Math.abs(Fnet) > 1e-6 * Fref) { arrow(g, nx, cy, 0, -Fnet * U, '#343a40', { dash: [7, 5], w: 3.5 }); lbl(g, 'F_net', nx, cy + (Fnet > 0 ? 18 : -10), '#343a40', 'center', 13); lbl(g, fmt(Fnet) + ' N', nx, cy + (Fnet > 0 ? 32 : -24), '#343a40', 'center', 11, x0 + w - 4); }
+      else lbl(g, 'F_net = 0', nx, cy + 4, '#2b6a3e', 'center', 13, x0 + w - 4);
+    }
+    g.font = '11px system-ui'; g.fillStyle = '#556'; g.fillText('Arrows to scale. Up is +. Dashed = net force (not a real force).', x0 + 10, 388, w - 20);
+    if (W0 === 0 && N === 0 && !hid) lbl(g, 'No gravity, no push: no forces!', x0 + 40, 140, '#5f3dc4', 'left', 13);
+  }
+  // ---------- readouts ----------
+  function cmpOf(N, W0, st) { if (st && st.Fc > 0) return 'zero'; if (N <= 1e-12) return W0 > 0 ? 'zero' : 'same'; if (Math.abs(N - W0) <= 1e-9 * Math.max(W0, 1e-12)) return 'same'; return N > W0 ? 'more' : 'less'; }
+  const CMPW = { more: 'MORE than the weight', less: 'LESS than the weight', same: 'the SAME as the weight', zero: 'ZERO' };
+  function eqnHTML(m, g, a, st) {
+    const W0 = m * g, ma = m * a, sum = W0 + ma, sA = a < 0 ? '−' : '+';
+    let s = isAP() ? `ΣF = F<sub>N</sub> − mg = ma &nbsp;⇒&nbsp; <b>F<sub>N</sub> = m(g + a)</b> = (${fmt(m)} kg)(${fmt(g, 2)} ${sA} ${fmt(Math.abs(a), 2)} m/s²) = <b>${fmt(Math.max(0, sum))} N</b>`
+      : `<b>F<sub>N</sub> = mg + ma</b> = (${fmt(m)})(${fmt(g, 2)}) + (${fmt(m)})(${fmt(a, 2)}) = ${fmt(W0)} N ${sA} ${fmt(Math.abs(ma))} N = <b>${fmt(Math.max(0, sum))} N</b>`;
+    if (sum < -1e-9) s = s.replace(/<b>[^<]*N<\/b>$/, '') + `${fmt(sum)} N?<br>A scale can only push, never pull, so the rider leaves the floor: <b>F<sub>N</sub> = 0</b>.` + (st.Fc > 0 ? ` Pinned to the ceiling, which pushes down with F<sub>ceiling</sub> = −m(g + a) = <b>${fmt(st.Fc)} N</b>.` : st.h > 0 ? ' The rider is in mid-air.' : '');
+    else if (st.h > 0) s += '<br>The rider is still in mid-air, so right now F<sub>N</sub> = 0.';
+    return s; }
+  function renderReadouts() {
+    const st = S.st, m = mass(), g = gval(), W0 = m * g, N = st.N, hid = hidden(), info = P.caseInfo(st.v, st.a, g), c = cmpOf(N, W0, st), b = $('banner');
+    if (hid) { b.className = 'hid'; b.innerHTML = 'Predict mode: the scale reading is hidden<small>Make your prediction in the orange panel, then press Check.</small>'; }
+    else { b.className = c; b.innerHTML = `${info.txt} → scale reads ${CMPW[c]}<small>${info.sub}</small>`; }
+    $('wVal').textContent = fU(W0); $('nVal').textContent = hid ? '? ? ?' : fU(N);
+    const mx = Math.max(W0, hid ? 0 : N, 1e-12); $('barW').style.width = (W0 / mx * 100) + '%'; $('barN').style.width = hid ? '0%' : (N / mx * 100) + '%';
+    $('ratio').innerHTML = hid ? '' : W0 > 0 ? `Scale reads <b>${fmt(N / W0, 2)} ×</b> the true weight` + (isAP() ? ` · g-force felt: ${fmt(N / (m * 9.81), 2)} g (Earth g’s)` : '') : 'g = 0 here, so the true weight is 0.';
+    $('eqn').innerHTML = hid ? 'F<sub>N</sub> = ? &nbsp;(predict first!)' : eqnHTML(m, g, st.a, st);
+    const sc = scaleObj(); $('capNote').textContent = S.cracked && !hid ? `💥 The ${sc.name.toLowerCase()} broke! It maxes out at ${sc.note.replace('max ', '')}. Choose a bigger scale above.` : '';
+    const ci = curPhase(), ph = S.mode === 'script' && S.phases[ci] ? S.phases[ci].label : S.mode === 'drive' ? 'driving' : '';
+    $('kin').innerHTML = `<tr><th>t</th><th>floor</th><th>height y</th><th>v</th><th>a</th></tr><tr><td>${fmt(st.t, 2)} s</td><td>${P.floorName(st.y)}</td><td>${fmt(st.y, 1)} m</td><td>${fmtS(st.v, 2)} m/s</td><td>${fmtS(st.a, 2)} m/s²</td></tr>`;
+    $('clock').textContent = `t = ${st.t.toFixed(2)} s` + (ph ? ' · ' + ph : '') + (st.ov === 'cut' ? ' · FREE FALL' : st.ov === 'brake' ? ' · BRAKING' : '');
+    document.querySelectorAll('#phTbl tr[data-i]').forEach(tr => tr.classList.toggle('cur', S.mode === 'script' && +tr.dataset.i === ci && st.t > 0 && !st.done));
+  }
+  // ---------- graphs ----------
+  const SHADE = { more: '#ffe8cc', less: '#dbe9ff', zero: '#eadcff' };
+  function drawGraphs() {
+    const { g, W, H } = setupCanvas($('graphs')), L = S.log, hid = hidden(); g.clearRect(0, 0, W, H); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+    const T = Math.max(S.phases ? tEnd() : 10, Math.ceil((S.st.t + 1e-9) / 5) * 5, 2);
+    const defs = [['Position y', 'm', s => s.y, '#2b6cb0'], ['Velocity v', 'm/s', s => s.v, '#7b2cbf'], ['Acceleration a', 'm/s²', s => s.a, '#2b8a3e'], ['Scale reading', uLab(), s => toU(s.N), '#1864ab', s => toU(s.W)]];
+    const pw = W / 4;
+    defs.forEach(([name, unit, f, col, f2], i) => {
+      const x0 = i * pw + 44, x1 = (i + 1) * pw - 10, y0 = 22, y1 = H - 26, X = t => x0 + (t / T) * (x1 - x0);
+      g.fillStyle = '#234'; g.font = 'bold 12.5px system-ui'; g.fillText(`${name} (${unit})`, i * pw + 10, 14);
+      if (i === 3 && hid) { g.fillStyle = '#888'; g.font = '13px system-ui'; g.fillText('hidden in predict mode', x0 + 10, (y0 + y1) / 2); return; }
+      let lo = Infinity, hi = -Infinity; for (const s of L) { const v = f(s); if (v < lo) lo = v; if (v > hi) hi = v; if (f2) { const w = f2(s); if (w < lo) lo = w; if (w > hi) hi = w; } }
+      if (i !== 0) { lo = Math.min(lo, 0); hi = Math.max(hi, 0); } if (!(hi - lo > 1e-9)) { const c = isFinite(hi) ? hi : 0, d = Math.max(1, Math.abs(c) * 0.1); lo = c - d; hi = c + d; }
+      const pad = (hi - lo) * 0.1; lo -= pad; hi += pad; const Y = v => y1 - (v - lo) / (hi - lo) * (y1 - y0);
+      // shading by reading vs weight
+      let run = null; for (let k = 0; k < L.length; k++) { const s = L[k], c = hid ? null : cmpOf(s.N, s.W, s); const cc = SHADE[c] || null;
+        if (!run || run.c !== cc || k === L.length - 1) { if (run && run.c) { g.fillStyle = run.c; g.fillRect(X(run.t), y0, Math.max(1, X(s.t) - X(run.t)), y1 - y0); } run = { c: cc, t: s.t }; } }
+      g.strokeStyle = '#99a'; g.lineWidth = 1; g.strokeRect(x0, y0, x1 - x0, y1 - y0);
+      if (lo < 0 && hi > 0) { g.strokeStyle = '#555'; g.beginPath(); g.moveTo(x0, Y(0)); g.lineTo(x1, Y(0)); g.stroke(); }
+      g.fillStyle = '#556'; g.font = '10.5px system-ui'; g.textAlign = 'right'; g.fillText(fmt(hi - pad, Math.abs(hi) < 10 ? 1 : 0), x0 - 3, y0 + 9); g.fillText(fmt(lo + pad, Math.abs(lo) < 10 ? 1 : 0), x0 - 3, y1); if (lo < 0 && hi > 0 && Y(0) > y0 + 16 && Y(0) < y1 - 14) g.fillText('0', x0 - 3, Y(0) + 4);
+      g.textAlign = 'center'; g.fillText('0', x0, y1 + 12); g.fillText(fmt(T, 0) + ' s', x1 - 8, y1 + 12); g.fillText('t', (x0 + x1) / 2, y1 + 12); g.textAlign = 'left';
+      if (f2) { g.strokeStyle = '#e03131'; g.setLineDash([5, 4]); g.lineWidth = 1.6; g.beginPath(); L.forEach((s, k) => { const x = X(s.t), y = Y(f2(s)); k ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke(); g.setLineDash([]); g.fillStyle = '#c92a2a'; g.font = '10px system-ui'; if (L.length) g.fillText('mg', x1 - 18, Y(f2(L[L.length - 1])) - 4); }
+      g.strokeStyle = col; g.lineWidth = 2.2; g.beginPath(); L.forEach((s, k) => { const x = X(s.t), y = Y(f(s)); k ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke();
+      if (L.length) { const s = L[L.length - 1]; g.fillStyle = col; g.beginPath(); g.arc(X(s.t), Y(f(s)), 3.5, 0, 7); g.fill(); }
+    });
+  }
+  // ---------- data table + CSV ----------
+  let tblN = -1, tblKey = '';
+  function renderTable() { const key = S.tbl.length + '|' + S.units + '|' + hidden(); if (key === tblKey) return; tblKey = key; const hid = hidden(), u = uLab();
+    const head = `<tr><th>t (s)</th><th>y (m)</th><th>v (m/s)</th><th>a (m/s²)</th><th>mg (N)</th><th>F<sub>N</sub> (N)</th><th>reads (${u})</th><th>rider</th></tr>`;
+    const rows = S.tbl.map(r => `<tr><td>${fmt(r.t, 2)}</td><td>${fmt(r.y, 2)}</td><td>${fmt(r.v, 2)}</td><td>${fmt(r.a, 2)}</td><td>${fmt(r.W)}</td><td>${hid ? '?' : fmt(r.N)}</td><td>${hid ? '?' : fmt(toU(r.N))}</td><td>${hid ? '?' : r.rider}</td></tr>`);
+    $('dataTbl').innerHTML = head + rows.join(''); $('nRows').textContent = S.tbl.length + ' rows'; const w = $('tblWrap'); w.scrollTop = w.scrollHeight; }
+  function csv() { const m = mass(), g = gval(), n = x => (+x.toFixed(4)).toString();
+    const lines = [`# Elevator Scale Lab`, `# passenger: ${pax().name}, mass ${m} kg (approximate)`, `# location: ${planet().name}, g = ${g} m/s^2; up is positive`, `# scale: ${scaleObj().name}`,
+      't (s),floor,y (m),v (m/s),a (m/s^2),true weight mg (N),scale reading F_N (N),scale reading (kg on an Earth-calibrated scale),scale reading (lb),rider'];
+    for (const r of S.tbl) lines.push([n(r.t), r.fl, n(r.y), n(r.v), n(r.a), n(r.W), n(r.N), n(r.N / 9.81), n(r.N * P.LB_PER_N), r.rider].join(','));
+    return lines.join('\n') + '\n'; }
+  function downloadCSV() { if (hidden()) { toast('Check your prediction first, then download the data.', null, 3000); return; } const b = new Blob([csv()], { type: 'text/csv' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `elevator-scale-${S.pax}-${S.planet}.csv`; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+  let dirty = true; const renderAll = () => { dirty = true; };
+  function paint() { drawScene(); renderReadouts(); drawGraphs(); renderTable(); }
+  // ---------- controls ----------
+  function ctl(box, label, unit, min, max, step, get, set, opts) {
+    const d = document.createElement('div'); d.className = 'ctl'; d.innerHTML = `<div class="lab"><span>${label}</span><span><input type="number" step="any"> ${unit}</span></div><input type="range" min="${min}" max="${max}" step="${step}">`;
+    const num = d.querySelector('input[type=number]'), rg = d.querySelector('input[type=range]'); const sync = () => { const v = get(); num.value = +(+v).toFixed(4); rg.value = v; };
+    const apply = (v, live) => { v = +v; if (!isFinite(v)) return; v = Math.max(opts && opts.lo !== undefined ? opts.lo : -1e9, Math.min(opts && opts.hi !== undefined ? opts.hi : 1e9, v)); set(v, live); };
+    rg.addEventListener('input', () => { apply(rg.value, true); num.value = rg.value; }); num.addEventListener('change', () => { apply(num.value); sync(); });
+    d._sync = sync; sync(); box.appendChild(d); return d; }
+  const syncers = [];
+  function invalidate() { S.pred.revealed = false; S.pred.choice = null; $('pfb').innerHTML = ''; $('pCheck').classList.remove('hide'); $('pAgain').classList.add('hide'); document.querySelectorAll('#pChoice button').forEach(b => b.classList.remove('on')); }
+  function buildControls() {
+    // passengers
+    const px = $('pax'); px.innerHTML = '';
+    for (const p of P.PASSENGERS) { const b = document.createElement('button'); b.className = 'pb'; b.dataset.id = p.id; b.title = p.name + ': ' + p.note;
+      b.innerHTML = `<canvas width="40" height="34"></canvas><span>${p.name}<i>${p.id === 'custom' ? 'you pick' : (p.m >= 1000 ? p.m.toLocaleString('en-US') : p.m) + ' kg'}</i></span>`;
+      const cv = b.querySelector('canvas'), r = Math.min(2, devicePixelRatio || 1); cv.width = 40 * r; cv.height = 34 * r; const g = cv.getContext('2d'); g.setTransform(r, 0, 0, r, 0, 0); ART.draw(g, p.id, 20, 32, 30, 38, { m: '?' });
+      b.onclick = () => { S.pax = p.id; save('pax', S.pax); invalidate(); syncUI(); const st = S.st, run = S.running; if (st.t > 0) { S.cracked = false; P.step(st, 0, env()); checkCap(); renderAll(); } else reset(); };
+      px.appendChild(b); }
+    $('cm').onchange = () => { const v = +$('cm').value; if (v > 0) { S.customM = v; save('customM', v); } invalidate(); syncUI(); reset(); };
+    // planets
+    const pl = $('planets'); pl.innerHTML = '';
+    for (const q of P.PLANETS) { const b = document.createElement('button'); b.className = 'plb'; b.dataset.id = q.id; const lk = LOOK[q.id];
+      b.innerHTML = `<i style="background:${lk.ground || lk.sky[0]}"></i>${q.name}${q.id === 'custom' ? '' : ' <span class="g">' + q.g + '</span>'}`; b.onclick = () => { S.planet = q.id; save('planet', q.id); invalidate(); syncUI(); reset(); }; pl.appendChild(b); }
+    $('cgR').oninput = () => { S.customG = +$('cgR').value; $('cg').value = S.customG; save('customG', S.customG); invalidate(); reset(); };
+    $('cg').onchange = () => { const v = +$('cg').value; if (v >= 0) { S.customG = v; $('cgR').value = Math.min(30, v); save('customG', v); } invalidate(); reset(); };
+    $('earthG').onchange = () => { S.earthG = +$('earthG').value; invalidate(); reset(); };
+    $('scaleSel').innerHTML = P.SCALES.map(s => `<option value="${s.id}">${s.name} (${s.note})</option>`).join('');
+    $('scaleSel').onchange = () => { S.scale = $('scaleSel').value; S.cracked = false; reset(true); };
+    // tabs
+    document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+    // quick cases
+    $('cases').innerHTML = ''; for (const p of P.PRESETS) { const b = document.createElement('button'); b.dataset.id = p.id; b.textContent = p.name; b.onclick = () => { loadPreset(p.id); invalidate(); syncUI(); reset(); }; $('cases').appendChild(b); }
+    // drive
+    const dc = $('driveCtl'); dc.innerHTML = '';
+    syncers.push(ctl(dc, 'Acceleration a', 'm/s²', -30, 20, 0.05, () => S.drive.a, (v, live) => { S.drive.a = v; S.Aref = Math.max(S.Aref, gval() + v, Math.abs(v)); invalidate(); if (S.mode !== 'drive') { S.mode = 'drive'; reset(); } else if (S.running || S.st.t > 0) { renderAll(); } else reset(); }));
+    syncers.push(ctl(dc, 'Starting velocity v₀', 'm/s', -10, 10, 0.1, () => S.drive.v0, v => { S.drive.v0 = v; S.mode = 'drive'; invalidate(); reset(); }, { lo: -30, hi: 30 }));
+    syncers.push(ctl(dc, 'Starting floor', '', 0, 100, 1, () => S.drive.floor, v => { S.drive.floor = Math.round(v); S.mode = 'drive'; invalidate(); reset(); }, { lo: -2, hi: 100 }));
+    S.brakeCtl = ctl(dc, 'Safety brake strength', 'm/s²', 2, 20, 0.01, () => S.B, v => { S.B = v; invalidate(); reset(); }, { lo: 0.5, hi: 50 }); syncers.push(S.brakeCtl);
+    // trip
+    const tc = $('tripCtl'); tc.innerHTML = ''; const T = S.trip;
+    syncers.push(ctl(tc, 'From floor', '', 0, 100, 1, () => T.f0, v => { T.f0 = Math.round(v); }, { lo: -2, hi: 100 }));
+    syncers.push(ctl(tc, 'To floor', '', 0, 100, 1, () => T.f1, v => { T.f1 = Math.round(v); }, { lo: -2, hi: 100 }));
+    syncers.push(ctl(tc, 'Cruise speed', 'm/s', 0.5, 10, 0.1, () => T.vmax, v => { T.vmax = v; }, { lo: 0.1, hi: 40 }));
+    syncers.push(ctl(tc, 'Speed-up a', 'm/s²', 0.2, 5, 0.1, () => T.a1, v => { T.a1 = v; }, { lo: 0.05, hi: 30 }));
+    syncers.push(ctl(tc, 'Slow-down a', 'm/s²', 0.2, 5, 0.1, () => T.a2, v => { T.a2 = v; }, { lo: 0.05, hi: 30 }));
+    $('planBtn').onclick = () => { planTrip(); invalidate(); syncUI(); reset(); };
+    $('addPh').onclick = () => { if (S.mode !== 'script') { planTrip(); } S.script.push({ label: 'New phase', dur: 2, a: 0 }); S.preset = null; invalidate(); syncUI(); reset(); };
+    $('delPh').onclick = () => { if (S.script && S.script.length > 1) { S.script.pop(); S.preset = null; invalidate(); syncUI(); reset(); } };
+    // header + run controls
+    $('lvRegents').onclick = () => setLevel('regents'); $('lvAP').onclick = () => setLevel('ap');
+    $('units').onchange = () => { S.units = $('units').value; save('units', S.units); $('pUnit').textContent = uLab(); renderChallenges(); renderAll(); };
+    $('muteBtn').onclick = () => { S.mute = !S.mute; save('mute', S.mute); if (S.mute && SND.humG) SND.humG.gain.value = 0; syncUI(); if (!S.mute) sfx.ding(); };
+    $('predBtn').onclick = () => { S.pred.on = !S.pred.on; invalidate(); syncUI(); reset(); };
+    $('runBtn').onclick = run; $('resetBtn').onclick = () => reset(true); $('cutBtn').onclick = cut; $('brakeBtn').onclick = brake;
+    $('speed').onchange = () => { S.speed = +$('speed').value; };
+    $('dtRow').onchange = () => { S.dtRow = +$('dtRow').value; reset(true); };
+    $('csvBtn').onclick = downloadCSV; $('clrTbl').onclick = () => { S.tbl = []; renderAll(); };
+    document.querySelectorAll('#pChoice button').forEach(b => b.onclick = () => { S.pred.choice = b.dataset.c; document.querySelectorAll('#pChoice button').forEach(x => x.classList.toggle('on', x === b)); });
+    $('pCheck').onclick = checkPrediction; $('pAgain').onclick = () => { invalidate(); reset(); };
+  }
+  function setTab(t) { S.tab = t; if (t === 'drive') { S.mode = 'drive'; } else if (t === 'cases') { if (!S.preset) loadPreset('spdUp'); else loadPreset(S.preset); } else if (t === 'trip') { if (S.mode !== 'script') planTrip(); }
+    invalidate(); syncUI(); reset(); }
+  function setLevel(l) { S.level = l; save('level', l); if (l === 'regents') { S.earthG = 9.81; $('earthG').value = '9.81'; S.B = 9.81; } syncUI(); renderChallenges(); reset(true); }
+  function renderPhaseTable() {
+    const tb = $('phTbl'); if (S.mode !== 'script') { tb.innerHTML = '<tr><td class="g">Drive mode has no script. Press “Plan this trip” to make one.</td></tr>'; $('phNote').textContent = ''; return; }
+    const ph = S.phases; let y = startY();
+    let h = '<tr><th>#</th><th>Phase</th><th>Duration (s)</th><th>a (m/s²)</th><th>v at end (m/s)</th><th>floor at end</th></tr>';
+    S.script.forEach((p, i) => { const r = ph[i], v1 = r.v0 + r.a * r.dur; y += r.v0 * r.dur + 0.5 * r.a * r.dur * r.dur;
+      const dcell = p.kind === 'brake' ? `auto (${fmt(r.dur, 2)})` : `<input type="number" step="any" min="0" data-i="${i}" data-k="dur" value="${+(+p.dur).toFixed(3)}">`;
+      const acell = p.kind === 'cut' ? `−g = ${fmt(r.a, 2)} <span class="g">(cut)</span>` : p.kind === 'ag' ? `${p.ag}g = ${fmt(r.a, 2)}` : p.kind === 'brake' ? `${fmtS(r.a, 2)} <span class="g">(brake)</span>` : `<input type="number" step="any" data-i="${i}" data-k="a" value="${+(+p.a).toFixed(3)}">`;
+      h += `<tr data-i="${i}"><td>${i + 1}</td><td><input class="lbl" data-i="${i}" data-k="label" value="${String(p.label).replace(/"/g, '&quot;')}"></td><td>${dcell}</td><td>${acell}</td><td>${fmt(p.kind === 'brake' ? 0 : v1, 2)}</td><td>${P.floorName(y)}</td></tr>`; });
+    tb.innerHTML = h; const vEnd = ph.length ? (ph[ph.length - 1].kind === 'brake' ? 0 : ph[ph.length - 1].v0 + ph[ph.length - 1].a * ph[ph.length - 1].dur) : 0;
+    $('phNote').innerHTML = `Ends at height ${fmt(y, 1)} m (floor ${P.floorName(y)}), final v = ${fmt(vEnd, 2)} m/s` + (Math.abs(vEnd) > 0.01 ? ' <b style="color:#b02a1e">(still moving at the end!)</b>' : '');
+    tb.querySelectorAll('input').forEach(inp => inp.onchange = () => { const i = +inp.dataset.i, k = inp.dataset.k; if (k === 'label') S.script[i].label = inp.value; else { const v = +inp.value; if (!isFinite(v) || (k === 'dur' && v < 0)) return; S.script[i][k] = v; } S.preset = null; invalidate(); reset(); });
+  }
+  function syncUI() {
+    $('lvRegents').classList.toggle('on', S.level === 'regents'); $('lvAP').classList.toggle('on', isAP());
+    $('units').value = S.units; $('muteBtn').textContent = S.mute ? 'Sound: OFF' : 'Sound: ON';
+    $('predBtn').classList.toggle('on', S.pred.on); $('predBtn').textContent = '✎ Predict mode: ' + (S.pred.on ? 'ON' : 'OFF'); $('predPanel').classList.toggle('hide', !S.pred.on);
+    document.querySelectorAll('.pb').forEach(b => b.classList.toggle('on', b.dataset.id === S.pax)); document.querySelectorAll('.plb').forEach(b => b.classList.toggle('on', b.dataset.id === S.planet));
+    $('customM').querySelector('.inl').classList.toggle('hide', S.pax !== 'custom'); $('cm').value = S.customM;
+    $('paxNote').textContent = (S.pax === 'custom' ? '' : pax().name + ': ' + pax().note + '. ') + 'All masses are approximate.';
+    $('customG').classList.toggle('hide', S.planet !== 'custom'); $('cg').value = S.customG; $('cgR').value = Math.min(30, S.customG);
+    $('earthGL').classList.toggle('hide', !(isAP() && S.planet === 'earth')); $('earthG').value = String(S.earthG);
+    $('planetNote').textContent = ({ moon: 'About 1/6 of Earth’s g.', jupiter: 'No solid surface: Tiu Tower stands on a floating platform.', saturn: 'No solid surface: floating platform.', uranus: 'No solid surface: floating platform.', neptune: 'No solid surface: floating platform.', sun: 'Surface gravity of the Sun. You would be vaporized, but physics is physics.', space: 'Far from every planet, g = 0. (ISS astronauts float because they are in free fall, like a cut cable!)', pluto: 'Tiny g: a great place to dunk a basketball.', venus: 'Almost Earth’s g, but 460 °C. Bring a fan.', mars: 'About 38% of Earth’s g.' })[S.planet] || '';
+    $('scaleSel').value = S.scale; document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === S.tab));
+    for (const t of ['cases', 'drive', 'trip']) $('tab-' + t).classList.toggle('hide', S.tab !== t);
+    document.querySelectorAll('#cases button').forEach(b => b.classList.toggle('on', S.mode === 'script' && b.dataset.id === S.preset));
+    S.brakeCtl.classList.toggle('hide', !isAP()); syncers.forEach(c => c._sync()); $('pUnit').textContent = uLab();
+    const pr = P.PRESETS.find(p => p.id === S.preset), blurb = { rest: 'The car sits still at floor 10. Balanced forces: the scale reads the true weight.', constUp: 'Already moving up at 3 m/s with no acceleration. Does moving change the reading? Run it and see.', spdUp: 'Starts at rest, then speeds up going up at 2 m/s². You feel pressed into the floor.', slowUp: 'Moving up at 6 m/s, then slows to a stop (a = −2 m/s²). That floaty stomach feeling at the top floor.', spdDn: 'Starts at floor 60 and speeds up going down at 2 m/s². You feel lighter.', slowDn: 'Moving down at 6 m/s, then slows to a stop (a = +2 m/s²). Your knees feel it at the bottom.', free: 'SNAP! The cable breaks: car and rider fall at a = −g and the scale reads 0. Then the safety brake grabs the rails and slows the car at 9.81 m/s². What does the scale read then?', hyper: 'An imaginary rocket-boosted elevator is pulled DOWN at 1.5g. The floor drops away faster than the rider can fall, so the rider floats to the ceiling.', trip: 'A realistic ride from the lobby to floor 30: speed up at 1.2 m/s², cruise at 4 m/s, slow down at 1.2 m/s².' };
+    $('desc').innerHTML = S.mode === 'drive' ? `<b>Drive it:</b> start at floor ${S.drive.floor} with v₀ = ${fmt(S.drive.v0, 1)} m/s and a = ${fmtS(S.drive.a, 2)} m/s². Up is positive. Press ▶ Run, then change a while it moves. Try ✂ Cut the cable and 🛑 Safety brake too!`
+      : pr && S.preset ? `<b>${pr.name}:</b> ${blurb[pr.id]}` : `<b>Custom script:</b> ${S.script.length} phases, starting at floor ${P.floorName(S.y0)}. Edit the phases in the Trip planner tab.`;
+    updXP(); renderAll(); }
+  // ---------- predict mode ----------
+  function fillPredPhases() { const sel = $('pPhase'), prev = sel.value; let opts;
+    if (S.mode === 'drive') opts = [`<option value="drive">Driving with a = ${fmtS(S.drive.a, 2)} m/s² (v₀ = ${fmt(S.drive.v0, 1)} m/s)</option>`];
+    else opts = S.phases.map((p, i) => `<option value="${i}">${i + 1}. ${p.label} (a = ${fmtS(p.a, 2)} m/s²)</option>`);
+    sel.innerHTML = opts.join(''); const key = S.phases ? S.phases.findIndex(p => p.key) : -1;
+    if (S.mode === 'drive') sel.value = 'drive'; else if ([...sel.options].some(o => o.value === prev) && S.pred.keepSel) sel.value = prev; else sel.value = String(Math.max(0, key)); }
+  function predTarget() { const v = $('pPhase').value; if (v === 'drive' || !S.phases) return { a: S.drive.a, v: S.drive.v0, label: 'driving' };
+    const p = S.phases[+v]; return { a: p.a, v: p.v0 + p.a * p.dur / 2, label: p.label }; }
+  function checkPrediction() {
+    actx(); if (!S.pred.choice) { toast('First pick MORE, SAME, LESS or ZERO.', null, 3000); return; }
+    const m = mass(), g = gval(), T = predTarget(), W0 = m * g, N = P.reading(m, g, T.a), truth = P.compare(m, g, T.a), info = P.caseInfo(T.v, T.a, g);
+    const okC = S.pred.choice === truth, raw = $('pNum').value.trim(); let numHTML = '', okN = null;
+    if (raw !== '') { const guess = fromU(+raw); okN = isFinite(guess) && Math.abs(guess - N) <= Math.max(0.03 * N, 0.01 * W0, 1e-9);
+      numHTML = okN ? `<br>🎯 Bullseye! Your ${fmt(+raw)} ${uLab()} is within 3% of the actual ${fU(N)}.` : `<br>Your number: ${fmt(+raw)} ${uLab()}. Actual: <b>${fU(N)}</b>.`; }
+    const why = `<b>${info.txt}</b>: ${info.sub}<br>F<sub>N</sub> = m(g + a) = (${fmt(m)})(${fmt(g, 2)} ${T.a < 0 ? '−' : '+'} ${fmt(Math.abs(T.a), 2)})` + (g + T.a < 0 ? ` < 0, so F<sub>N</sub> = 0` : ` = ${fmt(N)} N`) + ` vs true weight mg = ${fmt(W0)} N.`;
+    let pts = 0; if (okC) pts += 5; if (okN) pts += 5; S.pred.streak = okC ? S.pred.streak + 1 : 0;
+    $('pfb').innerHTML = `<div class="${okC ? 'good' : 'bad'}">${okC ? '✅ Correct! The scale reads ' + CMPW[truth] + '.' : '❌ Not quite: the scale reads ' + CMPW[truth] + '.'} ${why}${numHTML}${pts ? `<br><b>+${pts} pts</b>` : ''}</div>`;
+    $('pStreak').textContent = S.pred.streak > 1 ? `🔥 streak: ${S.pred.streak}` : '';
+    if (pts) addPoints(pts); if (okC) { sfx.good(); confetti(okN ? 160 : 80); } else sfx.bad();
+    S.pred.revealed = true; $('pCheck').classList.add('hide'); $('pAgain').classList.remove('hide'); S.pred.keepSel = true; const sel = $('pPhase').value; reset(true); $('pPhase').value = sel; S.pred.keepSel = false;
+    S.running = true; lastTS = null; updRunBtn(); return { okC, okN, truth, N };
+  }
+  // ---------- challenges ----------
+  const CH = [
+    { id: 'heavy', lv: 'both', title: 'Feel heavier', text: 'Make the person’s scale read MORE than their true weight for 1 second.', type: 'goal', set: { pax: 'person', planet: 'earth', drive: { a: 0, v0: 0, floor: 20 } },
+      goal: (st, m, g) => S.pax === 'person' && st.N > 1.02 * m * g, hold: 1, hint: 'Any upward acceleration works: speeding up going up OR slowing down going down.' },
+    { id: 'slowdn', lv: 'both', title: 'Going down, slowing down', text: 'A 70 kg person rides an elevator moving DOWN and SLOWING DOWN on Earth. Compared with the true weight (687 N), the scale reads…', type: 'mc', choices: ['MORE', 'the SAME', 'LESS'], ans: 0, set: { pax: 'person', planet: 'earth', preset: 'slowDn' },
+      expl: 'Slowing a downward motion takes an upward acceleration, so F<sub>N</sub> = m(g + a) is bigger than mg.' },
+    { id: 'n826', lv: 'both', title: 'Speeding up going up', text: 'A 70 kg person, elevator speeding up going up at 2.0 m/s² on Earth (g = 9.81 m/s²). What does the scale read, in newtons?', type: 'num', unit: 'N', ans: () => 70 * (9.81 + 2), set: { pax: 'person', planet: 'earth', preset: 'spdUp', units: 'N' }, hint: 'F<sub>N</sub> = mg + ma = (70)(9.81) + (70)(2.0)' },
+    { id: 'make450', lv: 'both', title: 'Make a 60 kg person read 450 N', text: 'Custom mass is set to 60 kg. In Drive it, find an acceleration that makes the scale read 450 N (±5 N) for 1 second while the car moves.', type: 'goal', set: { pax: 'custom', m: 60, planet: 'earth', drive: { a: 0, v0: 0, floor: 60 }, units: 'N' },
+      goal: (st, m, g) => Math.abs(m - 60) < 1e-9 && Math.abs(g - 9.81) < 1e-9 && Math.abs(st.N - 450) <= 5, hold: 1, hint: '450 N is less than mg = 588.6 N, so a must point down. Solve 450 = 60(9.81 + a). You can type the value in the box.' },
+    { id: 'gerbilJ', lv: 'both', title: 'Gerbil on Jupiter', text: 'What does the gerbil (70 g) weigh on a scale on Jupiter (g = 24.79 m/s²) while the elevator speeds up going DOWN at 3.0 m/s²? Answer in newtons.', type: 'num', unit: 'N', ans: () => 0.07 * (24.79 - 3), set: { pax: 'gerbil', planet: 'jupiter', drive: { a: -3, v0: 0, floor: 60 }, units: 'N' }, hint: 'Speeding up going down means a = −3.0 m/s². F<sub>N</sub> = m(g + a) with m = 0.07 kg.' },
+    { id: 'moonKg', lv: 'both', title: 'Moon “kilograms”', text: 'A 70 kg astronaut stands still on the Moon (g = 1.62 m/s²) on a bathroom scale calibrated on Earth. What “kg” number does the scale display?', type: 'num', unit: 'kg', ans: () => 70 * 1.62 / 9.81, set: { pax: 'person', planet: 'moon', preset: 'rest', units: 'kg' }, hint: 'The scale really measures force (70 × 1.62 N), then divides by 9.81 to show “kg”.' },
+    { id: 'cutSave', lv: 'both', title: 'Cut it… then save them!', text: 'Press ▶ Run, then ✂ Cut the cable and watch the scale read 0. Then hit 🛑 Safety brake before the car hits the bottom!', type: 'goal', set: { pax: 'person', planet: 'earth', drive: { a: 0, v0: 0, floor: 60 } },
+      goal: st => S.chal.sawZero && st.ov === 'stopped' && !st.ended, hold: 0, hint: 'Cut first, then brake. The brake has to stop the car before floor B2.' },
+    { id: 'eleMC', lv: 'both', title: 'Elephant vs. the industrial scale', text: 'The elephant (5,000 kg) stands on the industrial floor scale (max 50,000 N) on Earth. Which motion breaks the scale?', type: 'mc', choices: ['At rest', 'Constant velocity going down', 'Speeding up going down', 'Slowing down going down'], ans: 3, set: { pax: 'elephant', planet: 'earth', scale: 'ind', preset: 'slowDn' },
+      expl: 'mg = 49,050 N is just under 50,000 N. Slowing down while going down needs an upward acceleration, so F<sub>N</sub> = m(g + a) goes over the limit. Run it and listen!' },
+    { id: 'gwagon', lv: 'both', title: 'Golden G-Wagon on Mars', text: 'The Golden G-Wagon (2,500 kg) rides a freight elevator on Mars (g = 3.71 m/s²) that speeds up going up at 1.5 m/s². What does the scale read, in pounds? (1 lb = 4.448 N)', type: 'num', unit: 'lb', ans: () => 2500 * (3.71 + 1.5) / 4.448, set: { pax: 'gwagon', planet: 'mars', scale: 'ind', drive: { a: 1.5, v0: 0, floor: 10 }, units: 'lb' }, hint: 'Find F<sub>N</sub> = m(g + a) in newtons, then divide by 4.448.' },
+    { id: 'zeroNoCut', lv: 'ap', title: 'Weightless, cable intact', text: 'Make the person’s scale read zero WITHOUT cutting the cable (Earth). Hold it for half a second.', type: 'goal', set: { pax: 'person', planet: 'earth', drive: { a: 0, v0: 0, floor: 80 } },
+      goal: (st, m, g) => g > 0 && S.cutT === null && S.mode === 'drive' && st.N <= 0.005 * m * g && st.t > 0, hold: 0.5, hint: 'F<sub>N</sub> = m(g + a) = 0 when a = −g. Type the exact value in the box.' },
+    { id: 'trexJ', lv: 'ap', title: 'T. rex: Earth weight on Jupiter', text: 'Make the T. rex (8,000 kg) read exactly its EARTH weight (78,480 N) while on Jupiter (g = 24.79 m/s²). What acceleration is needed? (m/s², up = +)', type: 'num', unit: 'm/s²', ans: () => 9.81 - 24.79, set: { pax: 'trex', planet: 'jupiter', scale: 'truck', drive: { a: 0, v0: 0, floor: 90 }, units: 'N' }, hint: 'Solve m(24.79 + a) = m(9.81). The mass cancels! Then test your answer with the slider.' },
+    { id: 'trip770', lv: 'ap', title: 'Trip planner max reading', text: 'Trip from the lobby to floor 20 with a = 1.2 m/s² and cruise speed 4.0 m/s. What is the LARGEST scale reading for the 70 kg person, in newtons?', type: 'num', unit: 'N', ans: () => 70 * (9.81 + 1.2), set: { pax: 'person', planet: 'earth', trip: [0, 20, 4, 1.2, 1.2], units: 'N' }, hint: 'The largest reading happens while a points up: the speed-up phase.' },
+    { id: 'brake2x', lv: 'ap', title: 'Brake after free fall', text: 'After free fall, the safety brake slows the car at 9.81 m/s². What does the 70 kg person’s scale read while braking (Earth), in newtons?', type: 'num', unit: 'N', ans: () => 70 * (9.81 + 9.81), set: { pax: 'person', planet: 'earth', preset: 'free', units: 'N', B: 9.81 }, hint: 'Falling down and slowing down means a = +9.81 m/s². F<sub>N</sub> = m(g + a) = 2mg!' },
+    { id: 'chickCeil', lv: 'ap', title: 'Chicken on the ceiling', text: 'Pin the chicken to the ceiling of the elevator on Mars.', type: 'goal', set: { pax: 'chicken', planet: 'mars', drive: { a: 0, v0: 0, floor: 90 } },
+      goal: st => S.pax === 'chicken' && S.planet === 'mars' && st.h >= P.CEIL_M - 1e-9, hold: 0, hint: 'You need a downward acceleration bigger than Mars’s g = 3.71 m/s².' },
+    { id: 'hyperMC', lv: 'ap', title: 'Who pushes the floating rider?', text: 'In the “Faster than g ↓” case, the rider is pinned to the ceiling. Which forces act on the rider?', type: 'mc', choices: ['Only gravity', 'Gravity and the scale', 'Gravity and the ceiling (pushing down)', 'No forces at all'], ans: 2, set: { pax: 'person', planet: 'earth', preset: 'hyper' },
+      expl: 'Gravity alone can only give a = −g. To accelerate down faster than g, the ceiling must push down too: F<sub>ceiling</sub> = −m(g + a).' },
+  ];
+  const visCH = () => CH.filter(c => c.lv === 'both' || isAP());
+  function applySetup(c) {
+    if (c.pax) S.pax = c.pax; if (c.m != null) S.customM = c.m; if (c.planet) S.planet = c.planet; if (c.units) S.units = c.units; if (c.B) S.B = c.B; S.earthG = 9.81;
+    const W = (S.pax === 'custom' ? S.customM : pax().m) * gval(); S.scale = c.scale || (W < 1200 ? 'bath' : W < 35000 ? 'ind' : 'truck');
+    if (c.preset) { loadPreset(c.preset); S.tab = c.preset === 'trip' ? 'trip' : 'cases'; } else if (c.drive) { Object.assign(S.drive, c.drive); S.mode = 'drive'; S.tab = 'drive'; } else if (c.trip) { const [f0, f1, vmax, a1, a2] = c.trip; Object.assign(S.trip, { f0, f1, vmax, a1, a2 }); planTrip(); S.tab = 'trip'; }
+    invalidate(); syncUI(); reset(); }
+  function chalDone(c, msg) { if (!S.done[c.id]) { S.done[c.id] = 1; save('done', S.done); addPoints(10); } sfx.good(); confetti(140); toast('🏆 <b>Challenge complete: ' + c.title + '!</b> +10 pts' + (msg ? ' ' + msg : ''), null, 4500); S.chal.active = null; renderChallenges(); }
+  function chalWatch() { const st = S.st, m = mass(), g = gval(); if (st.N === 0 && m * g > 0 && (st.ov === 'cut' || S.cutT !== null && st.ov === 'cut')) S.chal.sawZero = true;
+    const c = CH.find(x => x.id === S.chal.active); if (!c || c.type !== 'goal' || !S.running && !S.testing) { S.chal.lastT = st.t; return; }
+    const dt = Math.max(0, st.t - (S.chal.lastT == null ? st.t : S.chal.lastT)); S.chal.lastT = st.t;
+    if (c.goal(st, m, g)) { S.chal.hold += dt; if (S.chal.hold >= c.hold - 1e-9) chalDone(c); } else S.chal.hold = 0; }
+  function renderChallenges() {
+    const L = $('chList'); L.innerHTML = '';
+    visCH().forEach((c, i) => { const d = document.createElement('div'); d.className = 'ch' + (S.done[c.id] ? ' done' : '') + (S.chal.active === c.id ? ' act' : ''); d.dataset.id = c.id;
+      let body = `<b class="tt">${S.done[c.id] ? '★' : '☆'} ${i + 1}. ${c.title}</b> <span class="g">${c.lv === 'ap' ? 'AP' : ''}</span><div>${c.text}</div><div class="row"><button class="setup">Set it up</button>`;
+      if (c.type === 'num') body += `<input type="number" step="any" class="ans"> ${c.unit} <button class="go chk">Check</button>`;
+      if (c.type === 'goal') body += `<span class="g">${S.chal.active === c.id ? '⏳ Watching… run the sim!' : 'Press Set it up, then make it happen.'}</span>`;
+      body += '</div>'; if (c.type === 'mc') body += `<div class="row mc">${c.choices.map((x, k) => `<button data-k="${k}">${x}</button>`).join('')}</div>`; body += '<div class="fb"></div>';
+      d.innerHTML = body; const fb = d.querySelector('.fb');
+      d.querySelector('.setup').onclick = () => { S.chal.active = c.id; S.chal.hold = 0; applySetup(c.set); renderChallenges(); };
+      if (c.type === 'num') d.querySelector('.chk').onclick = () => { const v = +d.querySelector('.ans').value, A = c.ans(); if (d.querySelector('.ans').value.trim() === '' || !isFinite(v)) return;
+        if (Math.abs(v - A) <= 0.02 * Math.abs(A) + 1e-9) chalDone(c, `Answer: ${fmt(A)} ${c.unit}.`); else { sfx.bad(); fb.innerHTML = `❌ Not yet. Hint: ${c.hint} <button class="show">Show answer</button>`; fb.querySelector('.show').onclick = () => { fb.innerHTML = `Answer: <b>${fmt(A)} ${c.unit}</b>. Press “Set it up” to see it in the sim.`; }; } };
+      if (c.type === 'mc') d.querySelectorAll('.mc button').forEach(b => b.onclick = () => { if (+b.dataset.k === c.ans) chalDone(c, c.expl.replace(/<[^>]+>/g, '')); else { sfx.bad(); fb.innerHTML = '❌ Not that one. Press “Set it up” and run it to test your idea.'; } });
+      if (c.type === 'goal' && S.chal.active === c.id) fb.innerHTML = `<span class="g">Hint: ${c.hint}</span>`;
+      L.appendChild(d); });
+    updXP(); }
+  // ---------- test hooks ----------
+  window.ELEV = { S, P, CH, setPax: id => { S.pax = id; syncUI(); reset(); }, setPlanet: id => { S.planet = id; syncUI(); reset(); }, preset: id => { loadPreset(id); S.tab = id === 'trip' ? 'trip' : 'cases'; invalidate(); syncUI(); reset(); },
+    drive: o => { Object.assign(S.drive, o); S.mode = 'drive'; S.tab = 'drive'; invalidate(); syncUI(); reset(); }, trip: arr => { const [f0, f1, vmax, a1, a2] = arr; Object.assign(S.trip, { f0, f1, vmax, a1, a2 }); planTrip(); S.tab = 'trip'; invalidate(); syncUI(); reset(); },
+    runFor: sec => { S.testing = true; advance(sec); S.testing = false; paint(); return { t: S.st.t, y: S.st.y, v: S.st.v, a: S.st.a, N: S.st.N, Fc: S.st.Fc, h: S.st.h, done: S.st.done, ended: S.st.ended }; },
+    reset: () => reset(true), cut, brake, csv, apply: applySetup, setLevel, setUnits: u => { S.units = u; syncUI(); paint(); }, paint, mass, gval, checkPrediction, chalWatch };
+  // ---------- init ----------
+  buildControls(); loadPreset('spdUp'); syncUI(); renderChallenges(); reset(); paint(); requestAnimationFrame(frame);
+  window.addEventListener('resize', () => renderAll());
+})();
+
+</script>
+</body></html>
