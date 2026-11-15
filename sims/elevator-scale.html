@@ -93,12 +93,69 @@ details{font-size:13px}details summary{cursor:pointer;font-weight:bold;color:#23
 #dataTbl{font-size:11.5px}#dataTbl td,#dataTbl th{padding:2px 3px;white-space:nowrap}
 .grid5 .ctl input[type=number]{width:54px}.grid5 .ctl .lab span:first-child{white-space:nowrap}
 
+/* ===== Arcade upgrade (games, badges, juice) ===== */
+header{background:linear-gradient(90deg,#1b2b44,#3b2a6b)}
+header h1{font-size:19px;letter-spacing:.2px}
+#musicBtn.on{background:#b197fc;border-color:#7048e8;color:#111;font-weight:bold}
+#runBtn{font-size:15px;padding:7px 16px;border-radius:8px;box-shadow:0 3px 0 #1f4f82}
+#runBtn:active{transform:translateY(2px);box-shadow:0 1px 0 #1f4f82}
+.pb{transition:transform .12s}.pb:hover:not(:disabled){transform:translateY(-2px)}
+@keyframes shk{0%,100%{transform:translate(0,0)}15%{transform:translate(-7px,3px)}30%{transform:translate(6px,-4px)}45%{transform:translate(-5px,2px)}60%{transform:translate(4px,-3px)}80%{transform:translate(-2px,1px)}}
+#scene.shake{animation:shk .5s}
+#arcade{border:2px solid #7048e8;background:linear-gradient(180deg,#f3f0ff,#fff 70%)}
+#arcade h3{display:flex;justify-content:space-between;align-items:center;color:#5f3dc4;font-size:15px}
+.gcards{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.gcard{text-align:left;padding:8px;border-radius:10px;border:2px solid #b197fc;background:#fff;display:flex;flex-direction:column;gap:3px;transition:transform .12s,box-shadow .12s}
+.gcard:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 4px 0 #b197fc;filter:none}
+.gcard b{font-size:15px;color:#5f3dc4}.gcard span{font-size:12px;color:#445}.gcard i{font-style:normal;font-size:11.5px;color:#7048e8;font-weight:bold}
+.ghud{display:flex;justify-content:space-between;gap:8px;font-weight:bold;font-size:13px;color:#5f3dc4;flex-wrap:wrap}
+.ghud .st{color:#e8590c}
+.gq{font-size:15px;margin:6px 0;line-height:1.35}
+.gtimer{height:9px;background:#e5dbff;border-radius:5px;overflow:hidden}.gtimer i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#f03e3e,#fab005 35%,#40c057)}
+.gans{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.gans button{font-size:15px;font-weight:800;padding:12px 6px;border-radius:10px;border:0;color:#fff;box-shadow:0 4px 0 #0003;letter-spacing:.3px}
+.gans button:active:not(:disabled){transform:translateY(2px);box-shadow:0 2px 0 #0003}
+.gans .more{background:#e8590c}.gans .same{background:#2f9e44}.gans .less{background:#1c7ed6}.gans .zero{background:#7048e8}
+.gans button.right{outline:4px solid #ffd43b;opacity:1!important}.gans button:disabled{opacity:.4}
+.gfb{border-radius:8px;padding:6px 8px;font-size:13px;margin:6px 0}.gfb.ok{background:#ebfbee;border-left:5px solid #2f9e44}.gfb.no{background:#fff5f5;border-left:5px solid #e03131}
+.gfb .pts{font-weight:900;color:#e8590c}
+.gbig{font-size:28px;font-weight:900;color:#5f3dc4;line-height:1.1}
+.gstars{font-size:30px;color:#fab005;letter-spacing:4px}
+.gtarget{display:flex;gap:10px;align-items:center;background:#1b1f23;color:#69db7c;border-radius:8px;padding:6px 10px;font-family:"Courier New",monospace;font-weight:bold;font-size:22px;margin:6px 0}
+.gtarget small{font-family:system-ui;font-size:11px;color:#adb5bd;font-weight:bold;line-height:1.1}
+.gin{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.gin input[type=number]{width:90px;font:inherit;font-size:16px;font-weight:bold;padding:5px 6px;border:2px solid #7048e8;border-radius:8px}
+.gin input[type=range]{flex:1;min-width:120px}
+.gmeter{position:relative;height:24px;border-radius:12px;margin:10px 0 2px;background:linear-gradient(90deg,#ffc9c9,#ffec99 28%,#b2f2bb 44%,#2f9e44 49%,#2f9e44 51%,#b2f2bb 56%,#ffec99 72%,#ffc9c9)}
+.gmeter b{position:absolute;top:-5px;width:5px;height:34px;background:#212529;border-radius:3px;transform:translateX(-2px);transition:left .9s cubic-bezier(.3,1.5,.5,1)}
+.gmeter span{position:absolute;top:28px;font-size:10.5px;color:#556;transform:translateX(-50%)}
+.gmeterlab{height:14px}
+.gaming #pax,.gaming #planets,.gaming .tabs,.gaming #tab-cases,.gaming #tab-drive,.gaming #tab-trip,.gaming #customM,.gaming #chPanel,.gaming #predBtn,.gaming #runBtn,.gaming #resetBtn,.gaming #cutBtn,.gaming #brakeBtn,.gaming #scaleSel{pointer-events:none;opacity:.45}
+#feel{margin:6px 0;padding:6px 8px 4px;border-radius:8px;background:#f8f9fa;border:1px solid #dee2e6}
+#feel .fh{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:#556}
+#feel .fh b{font-size:15px;color:#212529}
+#feel .ft{position:relative;height:14px;border-radius:7px;margin:4px 0;background:linear-gradient(90deg,#9775fa,#74c0fc 22%,#69db7c 36%,#69db7c 44%,#ffa94d 62%,#f03e3e)}
+#feel .ft i{position:absolute;top:-4px;width:6px;height:22px;border-radius:3px;background:#212529;transform:translateX(-3px);transition:left .15s}
+#feel .fl{position:relative;height:13px;font-size:10px;color:#667}#feel .fl span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+#feel .fl span:first-child{transform:none}#feel .fl span:last-child{transform:translateX(-100%)}
+.ptpop{position:fixed;z-index:40;font-weight:900;font-size:22px;color:#ffd43b;text-shadow:0 2px 0 #000,0 0 6px #000a;pointer-events:none;animation:ptup 1.2s ease-out forwards}
+@keyframes ptup{to{transform:translateY(-60px);opacity:0}}
+#bdgToast{position:fixed;bottom:18px;right:12px;z-index:35;background:#2b1f05;color:#fff;border:2px solid #fab005;border-radius:12px;padding:8px 14px;max-width:300px;box-shadow:0 6px 20px #0006;transform:translateX(130%);transition:transform .45s cubic-bezier(.3,1.4,.5,1)}
+#bdgToast.show{transform:none}#bdgToast b{color:#ffd43b;display:block;font-size:13px}#bdgToast span{font-size:13px}
+.bdgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:4px}
+.bd{display:flex;gap:6px;align-items:center;font-size:11.5px;padding:4px 6px;border-radius:8px;border:1px dashed #ccd;opacity:.5;line-height:1.15}
+.bd.got{opacity:1;border:1px solid #e0b100;background:#fff9db}
+.bd .md{flex:none;width:24px;height:24px;border-radius:50%;background:#dee2e6;display:grid;place-items:center;font-size:13px;font-weight:900;color:#868e96}
+.bd.got .md{background:radial-gradient(circle at 35% 35%,#ffe066,#f59f00);color:#7a4a00}
+.bd i{font-style:normal;color:#667;display:block;font-size:10.5px}
+@media (prefers-reduced-motion:reduce){#scene.shake{animation:none}.ptpop{animation-duration:.01s}}
+
 </style></head><body>
 <noscript><p style="padding:20px;font:16px sans-serif">This simulator needs JavaScript. Open the file in Google Chrome.</p></noscript>
-<header><h1>Elevator Scale Lab</h1>
+<header><h1>Elevator Scale Lab</h1><span class="g" style="color:#b197fc;font-weight:bold">ARCADE EDITION</span>
  <div class="grp">Level: <button id="lvRegents">Regents Physics</button><button id="lvAP">AP Physics 1</button></div>
  <div class="grp">Show reading in <select id="units"><option value="N">newtons (N)</option><option value="kg">“kg” (Earth scale)</option><option value="lb">pounds (lb)</option></select></div>
- <button id="muteBtn" title="Sound on/off">Sound: ON</button>
+ <button id="muteBtn" title="Sound on/off">Sound: ON</button><button id="musicBtn" title="Cheesy elevator music while the car moves">♫ Music: OFF</button>
  <span class="sp"></span>
  <span id="xp" title="Points from challenges and predictions"></span>
  <button id="predBtn" title="Hide the readings, predict first, then check">✎ Predict mode: OFF</button>
@@ -134,11 +191,13 @@ details{font-size:13px}details summary{cursor:pointer;font-weight:bold;color:#23
   </div>
  </div>
  <div id="right">
+  <div class="panel" id="arcade"></div>
   <div class="panel" id="roPanel">
    <div id="banner"></div>
    <div class="tiles"><div class="tile" id="tW"><span>True weight, F<sub>g</sub> = mg</span><b id="wVal"></b></div><div class="tile" id="tN"><span>Scale reading, F<sub>N</sub></span><b id="nVal"></b></div></div>
    <div class="bar"><i id="barW" style="background:#e03131"></i></div><div class="bar"><i id="barN" style="background:#1971c2"></i></div>
    <div id="ratio" class="g"></div>
+   <div id="feel"><div class="fh"><span>Stomach-o-meter: how it <i>feels</i></span><b id="fword"></b></div><div class="ft"><i id="fneedle"></i></div><div class="fl"><span style="left:0">weightless</span><span style="left:20%">floaty</span><span style="left:40%">normal</span><span style="left:64%">heavy</span><span style="left:100%">squished!</span></div></div>
    <div id="eqn"></div>
    <div id="capNote"></div>
    <table class="t" id="kin"></table>
@@ -155,6 +214,7 @@ details{font-size:13px}details summary{cursor:pointer;font-weight:bold;color:#23
    <div id="rank"></div><div id="rankBar"><i></i></div>
    <div id="chList"></div>
   </div>
+  <div class="panel" id="bdgPanel"><h3>Badges <span class="g" id="bdgCount"></span></h3><div class="bdgs" id="bdgList"></div></div>
  </div>
 </div>
 <div id="bottom">
@@ -166,6 +226,8 @@ details{font-size:13px}details summary{cursor:pointer;font-weight:bold;color:#23
 </div>
 <div class="panel" style="margin:0 8px 8px"><details><summary>How to use this simulator (students &amp; teacher notes)</summary>
 <ul>
+<li><b>Arcade (purple panel):</b> <b>Heavier or Lighter?</b> is 8 quick rounds: read the situation, watch the car, and tap MORE, SAME, LESS or ZERO before the timer runs out. Fast answers and streaks score more. <b>Bullseye Launch</b> is 5 rounds: calculate the acceleration that makes the scale hit a target reading, then launch to see how close you got. Both add points toward your rank.</li>
+<li><b>Badges</b> unlock for things like cutting a cable, saving a falling car, breaking a scale, pinning a rider to the ceiling or visiting 5 worlds. The <b>Stomach-o-meter</b> shows how the ride feels (scale reading ÷ true weight). <b>♫ Elevator music</b> plays while the car moves.</li>
 <li><b>Pick a passenger</b> and a <b>planet</b>, then pick how the elevator moves: a <b>Quick case</b>, <b>Drive it</b> with sliders, or plan a <b>Trip</b> from one floor to another. Press <b>▶ Run</b>.</li>
 <li>The scale measures the <b>normal force</b> F<sub>N</sub> the scale pushes up on the rider. With up as positive, Newton’s 2nd law gives F<sub>N</sub> − mg = ma, so <b>F<sub>N</sub> = m(g + a)</b> = mg + ma.</li>
 <li>Only the <b>acceleration</b> changes the reading, not the velocity. Moving at constant velocity (up or down) reads the same as standing still.</li>
@@ -176,6 +238,7 @@ details{font-size:13px}details summary{cursor:pointer;font-weight:bold;color:#23
 <li>Teacher notes: masses are approximate. The scale is ideal (it reads the normal force instantly). Air resistance and buoyancy are ignored. The safety brake decelerates at a set rate (default 9.81 m/s², like the strongest real safety gear). The building has 100 floors, 4 m apart; the car stops itself at the top and bottom of the shaft. Quick cases use a = 2 m/s², a bit snappier than real elevators (1–1.5 m/s²). Settings, points and finished challenges are saved on this Chromebook (localStorage keys starting “elevsim:”).</li>
 </ul></details></div>
 <div id="toast" class="hide"></div>
+<div id="bdgToast" role="status" aria-live="polite"></div>
 <canvas id="confetti"></canvas>
 
 <script>
@@ -250,6 +313,7 @@ const PHYS = (() => {
   const PRESETS = [
     { id: 'rest', name: 'At rest', floor: 10, v0: 0, script: [{ label: 'Parked', dur: 5, a: 0, key: true }] },
     { id: 'constUp', name: 'Constant velocity ↑', floor: 10, v0: 3, script: [{ label: 'Cruise up at 3 m/s', dur: 5, a: 0, key: true }] },
+    { id: 'constDn', name: 'Constant velocity ↓', floor: 60, v0: -3, script: [{ label: 'Cruise down at 3 m/s', dur: 5, a: 0, key: true }] },
     { id: 'spdUp', name: 'Speeding up ↑', floor: 10, v0: 0, script: [{ label: 'Doors close', dur: 1, a: 0 }, { label: 'Speed up going up', dur: 3, a: 2, key: true }, { label: 'Cruise', dur: 2, a: 0 }] },
     { id: 'slowUp', name: 'Slowing down ↑', floor: 10, v0: 6, script: [{ label: 'Cruise up', dur: 1, a: 0 }, { label: 'Slow down going up', dur: 3, a: -2, key: true }, { label: 'Stopped', dur: 1, a: 0 }] },
     { id: 'spdDn', name: 'Speeding up ↓', floor: 60, v0: 0, script: [{ label: 'Doors close', dur: 1, a: 0 }, { label: 'Speed up going down', dur: 3, a: -2, key: true }, { label: 'Cruise', dur: 2, a: 0 }] },
@@ -429,7 +493,7 @@ const ART = (() => {
   const planet = () => P.PLANETS.find(p => p.id === S.planet) || P.PLANETS[0];
   const gval = () => S.planet === 'earth' ? S.earthG : S.planet === 'custom' ? Math.max(0, +S.customG || 0) : planet().g;
   const scaleObj = () => P.SCALES.find(s => s.id === S.scale);
-  const hidden = () => S.pred.on && !S.pred.revealed;
+  const hidden = () => (S.pred.on && !S.pred.revealed) || !!(S.game && S.game.hide);
   // ---------- number formatting ----------
   function fmt(x, d) { if (!isFinite(x)) return '—'; const ax = Math.abs(x); if (d === undefined) d = ax >= 10000 ? 0 : ax >= 100 ? 1 : ax >= 1 ? 2 : ax >= 0.01 ? 3 : 4; if (ax === 0) d = Math.min(d, 1);
     return x.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }).replace('-', '−'); }
@@ -470,8 +534,8 @@ const ART = (() => {
   function cfStep() { const cv = $('confetti'), g = cv.getContext('2d'); g.clearRect(0, 0, cv.width, cv.height);
     CF.parts = CF.parts.filter(p => p.life-- > 0); for (const p of CF.parts) { p.x += p.vx; p.y += p.vy; p.vy += 0.4; p.vx *= 0.99; p.r += 0.2; g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c; g.fillRect(-5, -3, 10, 6); g.restore(); }
     if (CF.parts.length) requestAnimationFrame(cfStep); else { CF.on = false; g.clearRect(0, 0, cv.width, cv.height); } }
-  function addPoints(n, why) { S.points += n; save('points', S.points); updXP(); }
-  const RANKS = [[0, 'Elevator Trainee'], [20, 'Button Pusher'], [50, 'Elevator Operator'], [90, 'Shaft Mechanic'], [140, 'Chief Elevator Engineer'], [200, 'Golden G-Wagon Elevator Inspector']];
+  function addPoints(n, why) { const before = rank().name; S.points += n; save('points', S.points); updXP(); popPts('+' + n + ' pts'); const r = rank(); if (r.name !== before) rankUp(r.name); }
+  const RANKS = [[0, 'Elevator Trainee'], [20, 'Button Pusher'], [50, 'Elevator Operator'], [90, 'Shaft Mechanic'], [140, 'Chief Elevator Engineer'], [200, 'Golden G-Wagon Elevator Inspector'], [300, 'Sky Lobby Supervisor'], [450, 'Space Elevator Architect'], [650, 'Newton’s Personal Elevator Operator']];
   function rank() { let r = RANKS[0], nx = null; for (let i = 0; i < RANKS.length; i++) if (S.points >= RANKS[i][0]) { r = RANKS[i]; nx = RANKS[i + 1] || null; } return { name: r[1], lo: r[0], next: nx }; }
   function updXP() { const r = rank(); $('xp').textContent = '★ ' + S.points + ' pts · ' + r.name;
     $('rank').innerHTML = `<b>Rank: ${r.name}</b> · ${S.points} pts` + (r.next ? ` <span class="g">(${r.next[0] - S.points} pts to “${r.next[1]}”)</span>` : ' <span class="g">(top rank!)</span>');
@@ -523,7 +587,7 @@ const ART = (() => {
   // ---------- run loop ----------
   let lastTS = null;
   function frame(ts) { if (S.running) { const dt = lastTS === null ? 0 : Math.min(0.05, (ts - lastTS) / 1000); advance(dt * S.speed); }
-    lastTS = ts; hum(S.running ? S.st.v : 0); if (S.running || dirty) { paint(); dirty = false; } requestAnimationFrame(frame); }
+    lastTS = ts; hum(S.running ? S.st.v : 0); gameTick(); musicTick(); if (S.running || dirty) { paint(); dirty = false; } requestAnimationFrame(frame); }
   function run() { actx(); if (S.st.done || S.st.ended) reset(true); S.running = !S.running; lastTS = null; updRunBtn(); }
   function updRunBtn() { $('runBtn').textContent = S.running ? '⏸ Pause' : (S.st && S.st.t > 0 && !S.st.done && !S.st.ended ? '▶ Resume' : '▶ Run'); }
   function cut() { actx(); const g = gval(); if (S.st.done || S.st.ended) reset(true); S.st.ov = 'cut'; S.cutT = S.st.t; S.running = true; lastTS = null; updRunBtn(); sfx.snap(); S.Aref = Math.max(S.Aref, g);
@@ -675,6 +739,7 @@ const ART = (() => {
     $('eqn').innerHTML = hid ? 'F<sub>N</sub> = ? &nbsp;(predict first!)' : eqnHTML(m, g, st.a, st);
     const sc = scaleObj(); $('capNote').textContent = S.cracked && !hid ? `💥 The ${sc.name.toLowerCase()} broke! It maxes out at ${sc.note.replace('max ', '')}. Choose a bigger scale above.` : '';
     const ci = curPhase(), ph = S.mode === 'script' && S.phases[ci] ? S.phases[ci].label : S.mode === 'drive' ? 'driving' : '';
+    updFeel(c, N, W0, hid);
     $('kin').innerHTML = `<tr><th>t</th><th>floor</th><th>height y</th><th>v</th><th>a</th></tr><tr><td>${fmt(st.t, 2)} s</td><td>${P.floorName(st.y)}</td><td>${fmt(st.y, 1)} m</td><td>${fmtS(st.v, 2)} m/s</td><td>${fmtS(st.a, 2)} m/s²</td></tr>`;
     $('clock').textContent = `t = ${st.t.toFixed(2)} s` + (ph ? ' · ' + ph : '') + (st.ov === 'cut' ? ' · FREE FALL' : st.ov === 'brake' ? ' · BRAKING' : '');
     document.querySelectorAll('#phTbl tr[data-i]').forEach(tr => tr.classList.toggle('cur', S.mode === 'script' && +tr.dataset.i === ci && st.t > 0 && !st.done));
@@ -769,8 +834,9 @@ const ART = (() => {
     // header + run controls
     $('lvRegents').onclick = () => setLevel('regents'); $('lvAP').onclick = () => setLevel('ap');
     $('units').onchange = () => { S.units = $('units').value; save('units', S.units); $('pUnit').textContent = uLab(); renderChallenges(); renderAll(); };
+    $('musicBtn').onclick = () => { MUS.on = !MUS.on; save('music', MUS.on); actx(); syncMusic(); };
     $('muteBtn').onclick = () => { S.mute = !S.mute; save('mute', S.mute); if (S.mute && SND.humG) SND.humG.gain.value = 0; syncUI(); if (!S.mute) sfx.ding(); };
-    $('predBtn').onclick = () => { S.pred.on = !S.pred.on; invalidate(); syncUI(); reset(); };
+    $('predBtn').onclick = () => { if (G.mode) return; S.pred.on = !S.pred.on; invalidate(); syncUI(); reset(); };
     $('runBtn').onclick = run; $('resetBtn').onclick = () => reset(true); $('cutBtn').onclick = cut; $('brakeBtn').onclick = brake;
     $('speed').onchange = () => { S.speed = +$('speed').value; };
     $('dtRow').onchange = () => { S.dtRow = +$('dtRow').value; reset(true); };
@@ -807,7 +873,7 @@ const ART = (() => {
     for (const t of ['cases', 'drive', 'trip']) $('tab-' + t).classList.toggle('hide', S.tab !== t);
     document.querySelectorAll('#cases button').forEach(b => b.classList.toggle('on', S.mode === 'script' && b.dataset.id === S.preset));
     S.brakeCtl.classList.toggle('hide', !isAP()); syncers.forEach(c => c._sync()); $('pUnit').textContent = uLab();
-    const pr = P.PRESETS.find(p => p.id === S.preset), blurb = { rest: 'The car sits still at floor 10. Balanced forces: the scale reads the true weight.', constUp: 'Already moving up at 3 m/s with no acceleration. Does moving change the reading? Run it and see.', spdUp: 'Starts at rest, then speeds up going up at 2 m/s². You feel pressed into the floor.', slowUp: 'Moving up at 6 m/s, then slows to a stop (a = −2 m/s²). That floaty stomach feeling at the top floor.', spdDn: 'Starts at floor 60 and speeds up going down at 2 m/s². You feel lighter.', slowDn: 'Moving down at 6 m/s, then slows to a stop (a = +2 m/s²). Your knees feel it at the bottom.', free: 'SNAP! The cable breaks: car and rider fall at a = −g and the scale reads 0. Then the safety brake grabs the rails and slows the car at 9.81 m/s². What does the scale read then?', hyper: 'An imaginary rocket-boosted elevator is pulled DOWN at 1.5g. The floor drops away faster than the rider can fall, so the rider floats to the ceiling.', trip: 'A realistic ride from the lobby to floor 30: speed up at 1.2 m/s², cruise at 4 m/s, slow down at 1.2 m/s².' };
+    const pr = P.PRESETS.find(p => p.id === S.preset), blurb = { rest: 'The car sits still at floor 10. Balanced forces: the scale reads the true weight.', constUp: 'Already moving up at 3 m/s with no acceleration. Does moving change the reading? Run it and see.', constDn: 'Already moving down at 3 m/s with no acceleration. Do you feel lighter going down? Run it and see.', spdUp: 'Starts at rest, then speeds up going up at 2 m/s². You feel pressed into the floor.', slowUp: 'Moving up at 6 m/s, then slows to a stop (a = −2 m/s²). That floaty stomach feeling at the top floor.', spdDn: 'Starts at floor 60 and speeds up going down at 2 m/s². You feel lighter.', slowDn: 'Moving down at 6 m/s, then slows to a stop (a = +2 m/s²). Your knees feel it at the bottom.', free: 'SNAP! The cable breaks: car and rider fall at a = −g and the scale reads 0. Then the safety brake grabs the rails and slows the car at 9.81 m/s². What does the scale read then?', hyper: 'An imaginary rocket-boosted elevator is pulled DOWN at 1.5g. The floor drops away faster than the rider can fall, so the rider floats to the ceiling.', trip: 'A realistic ride from the lobby to floor 30: speed up at 1.2 m/s², cruise at 4 m/s, slow down at 1.2 m/s².' };
     $('desc').innerHTML = S.mode === 'drive' ? `<b>Drive it:</b> start at floor ${S.drive.floor} with v₀ = ${fmt(S.drive.v0, 1)} m/s and a = ${fmtS(S.drive.a, 2)} m/s². Up is positive. Press ▶ Run, then change a while it moves. Try ✂ Cut the cable and 🛑 Safety brake too!`
       : pr && S.preset ? `<b>${pr.name}:</b> ${blurb[pr.id]}` : `<b>Custom script:</b> ${S.script.length} phases, starting at floor ${P.floorName(S.y0)}. Edit the phases in the Trip planner tab.`;
     updXP(); renderAll(); }
@@ -828,7 +894,7 @@ const ART = (() => {
     const why = `<b>${info.txt}</b>: ${info.sub}<br>F<sub>N</sub> = m(g + a) = (${fmt(m)})(${fmt(g, 2)} ${T.a < 0 ? '−' : '+'} ${fmt(Math.abs(T.a), 2)})` + (g + T.a < 0 ? ` < 0, so F<sub>N</sub> = 0` : ` = ${fmt(N)} N`) + ` vs true weight mg = ${fmt(W0)} N.`;
     let pts = 0; if (okC) pts += 5; if (okN) pts += 5; S.pred.streak = okC ? S.pred.streak + 1 : 0;
     $('pfb').innerHTML = `<div class="${okC ? 'good' : 'bad'}">${okC ? '✅ Correct! The scale reads ' + CMPW[truth] + '.' : '❌ Not quite: the scale reads ' + CMPW[truth] + '.'} ${why}${numHTML}${pts ? `<br><b>+${pts} pts</b>` : ''}</div>`;
-    $('pStreak').textContent = S.pred.streak > 1 ? `🔥 streak: ${S.pred.streak}` : '';
+    if (S.pred.streak >= 3) badge('oracle'); $('pStreak').textContent = S.pred.streak > 1 ? `🔥 streak: ${S.pred.streak}` : '';
     if (pts) addPoints(pts); if (okC) { sfx.good(); confetti(okN ? 160 : 80); } else sfx.bad();
     S.pred.revealed = true; $('pCheck').classList.add('hide'); $('pAgain').classList.remove('hide'); S.pred.keepSel = true; const sel = $('pPhase').value; reset(true); $('pPhase').value = sel; S.pred.keepSel = false;
     S.running = true; lastTS = null; updRunBtn(); return { okC, okN, truth, N };
@@ -865,7 +931,7 @@ const ART = (() => {
     const W = (S.pax === 'custom' ? S.customM : pax().m) * gval(); S.scale = c.scale || (W < 1200 ? 'bath' : W < 35000 ? 'ind' : 'truck');
     if (c.preset) { loadPreset(c.preset); S.tab = c.preset === 'trip' ? 'trip' : 'cases'; } else if (c.drive) { Object.assign(S.drive, c.drive); S.mode = 'drive'; S.tab = 'drive'; } else if (c.trip) { const [f0, f1, vmax, a1, a2] = c.trip; Object.assign(S.trip, { f0, f1, vmax, a1, a2 }); planTrip(); S.tab = 'trip'; }
     invalidate(); syncUI(); reset(); }
-  function chalDone(c, msg) { if (!S.done[c.id]) { S.done[c.id] = 1; save('done', S.done); addPoints(10); } sfx.good(); confetti(140); toast('🏆 <b>Challenge complete: ' + c.title + '!</b> +10 pts' + (msg ? ' ' + msg : ''), null, 4500); S.chal.active = null; renderChallenges(); }
+  function chalDone(c, msg) { if (!S.done[c.id]) { S.done[c.id] = 1; save('done', S.done); addPoints(10); } if (Object.keys(S.done).length >= 5) badge('champ'); sfx.good(); confetti(140); toast('🏆 <b>Challenge complete: ' + c.title + '!</b> +10 pts' + (msg ? ' ' + msg : ''), null, 4500); S.chal.active = null; renderChallenges(); }
   function chalWatch() { const st = S.st, m = mass(), g = gval(); if (st.N === 0 && m * g > 0 && (st.ov === 'cut' || S.cutT !== null && st.ov === 'cut')) S.chal.sawZero = true;
     const c = CH.find(x => x.id === S.chal.active); if (!c || c.type !== 'goal' || !S.running && !S.testing) { S.chal.lastT = st.t; return; }
     const dt = Math.max(0, st.t - (S.chal.lastT == null ? st.t : S.chal.lastT)); S.chal.lastT = st.t;
@@ -885,13 +951,234 @@ const ART = (() => {
       if (c.type === 'goal' && S.chal.active === c.id) fb.innerHTML = `<span class="g">Hint: ${c.hint}</span>`;
       L.appendChild(d); });
     updXP(); }
+  // =====================================================================
+  // ---------- ARCADE EDITION: games, badges, music, juice ----------
+  // =====================================================================
+  const G = S.game = { mode: null, hide: false, round: 0, score: 0, streak: 0, best: 0, correct: 0 };
+  const rnd = n => Math.floor(Math.random() * n), pick = a => a[rnd(a.length)];
+  S.hi = load('hi', { rr: 0, bl: 0 });
+  // extra sounds
+  sfx.launch = () => { noise(0.7, 0.22, 700, 0.8); tone(180, 0.6, 'sawtooth', 0.05, 720); };
+  sfx.fanfare = () => { [523, 659, 784, 1046, 784, 1046].forEach((f, i) => tone(f, i > 3 ? 0.45 : 0.16, 'square', 0.07, null, [0, .12, .24, .36, .56, .68][i])); tone(262, 0.8, 'triangle', 0.08, null, 0.36); };
+  sfx.badge = () => { [1568, 1976, 2349, 3136].forEach((f, i) => tone(f, 0.25, 'triangle', 0.06, null, i * 0.07)); };
+  sfx.combo = n => { const b = 523 * Math.pow(2, Math.min(n, 9) / 12); [1, 1.26, 1.5, 2].forEach((m, i) => tone(b * m, 0.16, 'square', 0.06, null, i * 0.07)); };
+  sfx.beep = () => tone(880, 0.07, 'square', 0.04);
+  // screen shake on the big moments
+  function shake() { const c = $('scene'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake'); }
+  const _snap = sfx.snap, _crunch = sfx.crunch, _boom = sfx.boom;
+  sfx.snap = () => { _snap(); shake(); badge('snap'); };
+  sfx.crunch = () => { _crunch(); shake(); badge('smash'); };
+  sfx.boom = () => { _boom(); shake(); shake(); badge('crash'); };
+  // floating points
+  function popPts(txt) { const x = $('xp').getBoundingClientRect(), d = document.createElement('div'); d.className = 'ptpop'; d.textContent = txt;
+    d.style.left = Math.max(10, Math.min(innerWidth - 120, x.left)) + 'px'; d.style.top = (x.bottom + 6) + 'px'; document.body.appendChild(d); setTimeout(() => d.remove(), 1300); }
+  function rankUp(name) { setTimeout(() => { sfx.fanfare(); confetti(200); toast('🎉 <b>RANK UP!</b> You are now: <b>' + name + '</b>', null, 5000); }, 400); }
+
+  // ---------- Stomach-o-meter ----------
+  function updFeel(c, N, W0, hid) {
+    const box = $('feel'); if (!box) return; box.classList.toggle('hide', !(W0 > 0));
+    if (!(W0 > 0)) return; const r = N / W0, st = S.st;
+    let w = hid ? '? ? ?' : st.h >= P.CEIL_M - 1e-9 && st.Fc > 0 ? 'Stuck to the ceiling!' : r <= 1e-9 ? 'WEIGHTLESS!' : r < 0.75 ? 'Floaty' : r < 0.97 ? 'A little light' : r <= 1.03 ? 'Normal' : r < 1.5 ? 'Heavy' : 'SQUISHED!';
+    $('fword').textContent = w; $('fneedle').style.left = hid ? '40%' : Math.max(0, Math.min(100, r / 2.5 * 100)) + '%'; $('fneedle').style.opacity = hid ? .25 : 1;
+  }
+
+  // ---------- elevator music (synth lounge loop, only while the car moves) ----------
+  const MUS = { on: load('music', false), step: 0, next: 0 };
+  const semi = s => 440 * Math.pow(2, s / 12); // semitones from A4
+  const E5 = semi(7), G5 = semi(10), A5 = semi(12), B5 = semi(14), C5 = semi(3), D5 = semi(5), F5 = semi(8), C6 = semi(15);
+  const MEL = [E5, 0, G5, 0, A5, G5, E5, 0, D5, 0, E5, 0, C5, 0, 0, 0, E5, 0, G5, 0, A5, G5, A5, 0, C6, 0, B5, A5, G5, 0, 0, 0,
+               F5, 0, A5, 0, C6, A5, F5, 0, E5, 0, G5, 0, C5, 0, 0, 0, D5, 0, F5, 0, A5, 0, G5, 0, F5, E5, D5, 0, C5, 0, 0, 0];
+  const ROOT = [semi(-21), semi(-24), semi(-19), semi(-26)]; // C3 A2 D3 G2
+  function syncMusic() { $('musicBtn').classList.toggle('on', MUS.on); $('musicBtn').textContent = '♫ Music: ' + (MUS.on ? 'ON' : 'OFF'); }
+  function musicTick() {
+    const c = SND.ctx; if (!c || S.mute || !MUS.on || !S.running) { MUS.next = 0; return; }
+    const spb = 0.21; if (!MUS.next || MUS.next < c.currentTime) MUS.next = c.currentTime + 0.05;
+    while (MUS.next < c.currentTime + 0.3) {
+      const i = MUS.step % MEL.length, d = MUS.next - c.currentTime, root = ROOT[Math.floor(i / 8) % 4];
+      if (MEL[i]) tone(MEL[i], 0.22, 'triangle', 0.035, null, d);
+      if (i % 8 === 0) tone(root, 0.45, 'sine', 0.06, null, d); if (i % 8 === 4) tone(root * 1.5, 0.35, 'sine', 0.045, null, d);
+      if (i % 4 === 2) { tone(root * 4, 0.12, 'sine', 0.015, null, d); tone(root * 5, 0.12, 'sine', 0.015, null, d); }
+      MUS.step++; MUS.next += spb;
+    }
+  }
+
+  // ---------- badges ----------
+  const BADGES = [
+    ['snap', 'Snip!', 'Cut an elevator cable'], ['hero', 'Hero', 'Save a falling car with the safety brake'], ['crash', 'Crash Test Dummy', 'Crash into the bottom of the shaft'],
+    ['smash', 'Scale Smasher', 'Break a scale'], ['ceiling', 'Ceiling Hugger', 'Pin a rider to the ceiling'], ['zoo', 'Zookeeper', 'Give 8 different passengers a ride'],
+    ['tourist', 'Space Tourist', 'Ride on 5 different worlds'], ['sun', 'Hot Stuff', 'Ride the elevator on the Sun'], ['dino', 'Dino Lift', 'Take the T. rex for a ride'],
+    ['streak5', 'Hot Streak', '5 right in a row in Heavier or Lighter?'], ['perfect', 'Perfect Shift', '8 out of 8 in Heavier or Lighter?'], ['bullseye', 'Bullseye!', 'Hit a bullseye in Bullseye Launch'],
+    ['sharp', 'Sharpshooter', 'Score 600+ in Bullseye Launch'], ['champ', 'Challenge Champ', 'Finish 5 challenges'], ['oracle', 'Fortune Teller', '3 correct predictions in a row'],
+  ];
+  S.badges = load('badges', {}); S.seen = load('seen', { pax: {}, pl: {} });
+  const bq = []; let bqBusy = false;
+  function badge(id) { if (S.badges[id]) return; const b = BADGES.find(x => x[0] === id); if (!b) return; S.badges[id] = 1; save('badges', S.badges); bq.push(b); if (!bqBusy) nextBadge(); renderBadges(); }
+  function nextBadge() { const b = bq.shift(), el = $('bdgToast'); if (!b) { bqBusy = false; return; } bqBusy = true; sfx.badge(); confetti(60);
+    el.innerHTML = `<b>🏅 Badge unlocked: ${b[1]}</b><span>${b[2]}</span>`; el.classList.add('show'); setTimeout(() => { el.classList.remove('show'); setTimeout(nextBadge, 500); }, 3000); }
+  function renderBadges() { const got = BADGES.filter(b => S.badges[b[0]]).length; $('bdgCount').textContent = `(${got} of ${BADGES.length})`;
+    $('bdgList').innerHTML = BADGES.map(b => `<div class="bd ${S.badges[b[0]] ? 'got' : ''}" title="${b[2]}"><span class="md">${S.badges[b[0]] ? '★' : '?'}</span><span>${b[1]}<i>${b[2]}</i></span></div>`).join(''); }
+
+  // ---------- per-frame game logic ----------
+  function gameTick() {
+    const st = S.st; if (!st) return;
+    // play phase sound effects for scripted cable cuts and brakes
+    if (S.phases && S.running) { const ci = curPhase(); if (st.t < (G.lastT || 0)) G.lastPi = 0; if (ci !== G.lastPi) { const p = S.phases[ci]; if (p && p.kind === 'cut') sfx.snap(); if (p && p.kind === 'brake' && p.dur > 0) sfx.brake(); G.lastPi = ci; } }
+    G.lastT = st.t;
+    // ride-based badges
+    if (S.running) {
+      let ch = false; if (!S.seen.pax[S.pax]) { S.seen.pax[S.pax] = 1; ch = true; } if (!S.seen.pl[S.planet]) { S.seen.pl[S.planet] = 1; ch = true; }
+      if (ch) { save('seen', S.seen); if (Object.keys(S.seen.pax).length >= 8) badge('zoo'); if (Object.keys(S.seen.pl).length >= 5) badge('tourist'); }
+      if (S.planet === 'sun') badge('sun'); if (S.pax === 'trex') badge('dino'); if (st.h >= P.CEIL_M - 1e-9) badge('ceiling');
+    }
+    const hadCut = S.cutT !== null || (S.phases && S.phases.some(p => p.kind === 'cut') && curPhase() > S.phases.findIndex(p => p.kind === 'cut'));
+    if (hadCut && !st.ended && (st.ov === 'stopped' || (st.done && S.phases && S.phases.some(p => p.kind === 'brake')))) badge('hero');
+    // Heavier or Lighter? timer
+    if (G.mode === 'rr' && !G.answered) {
+      const left = RR_TIME - (performance.now() - G.t0) / 1000, bar = $('rrBar');
+      if (bar) bar.style.width = Math.max(0, left / RR_TIME * 100) + '%';
+      const sec = Math.ceil(left); if (sec <= 3 && sec > 0 && sec !== G.beeped) { G.beeped = sec; sfx.beep(); }
+      if (left <= 0) rrAnswer(null);
+    }
+    // Bullseye Launch: reveal, then stop the car
+    if (G.mode === 'bl' && G.launched) {
+      if (!G.shown && st.t >= 1.2) blResult();
+      if (st.t >= 3 && S.running) { S.running = false; updRunBtn(); }
+    }
+  }
+
+  // pick the smallest scale that will not break during this ride
+  function fitScale(maxN) { const sc = P.SCALES.find(s => s.max >= maxN * 1.1) || P.SCALES[P.SCALES.length - 1]; S.scale = sc.id; $('scaleSel').value = sc.id; S.cracked = false; reset(true); }
+  function maxReading() { const m = mass(), g = gval(); let mx = m * g; for (const p of (S.phases || [])) mx = Math.max(mx, m * Math.max(0, g + p.a)); return mx; }
+
+  // ---------- game shell ----------
+  function startGame(mode) {
+    actx(); Object.assign(G, { mode, round: 0, score: 0, streak: 0, best: 0, correct: 0, bulls: 0, hide: false, lastCase: null });
+    S.pred.on = false; S.chal.active = null; document.body.classList.add('gaming'); syncUI(); renderChallenges();
+    if (mode === 'rr') rrRound(); else blRound();
+  }
+  function quitGame() { G.mode = null; G.hide = false; G.launched = false; document.body.classList.remove('gaming'); S.running = false; updRunBtn(); renderArcade(); renderAll(); }
+  const stars = n => '★'.repeat(n) + '☆'.repeat(3 - n);
+
+  // ---------- Game 1: Heavier or Lighter? ----------
+  const RR_TIME = 12, RR_N = 8;
+  const RR_CASES = ['rest', 'constUp', 'constDn', 'spdUp', 'slowUp', 'spdDn', 'slowDn', 'free'];
+  const RR_WORDS = { rest: 'is parked. It is not moving at all.', constUp: 'is moving UP at a steady 3 m/s.', constDn: 'is moving DOWN at a steady 3 m/s.',
+    spdUp: 'starts moving UP and is speeding up.', slowUp: 'is moving UP and slowing down to a stop.', spdDn: 'starts moving DOWN and is speeding up.',
+    slowDn: 'is moving DOWN and slowing down to a stop.', free: 'is parked… then the cable SNAPS! It is falling freely.', hyper: 'gets pulled DOWN by a rocket at 1.5g (faster than falling!).' };
+  const RR_PAX = ['gerbil', 'snake', 'chicken', 'cat', 'child', 'dog', 'person', 'sumo', 'piano', 'horse', 'gwagon', 'elephant', 'trex'];
+  const RR_PL = ['earth', 'earth', 'earth', 'moon', 'mars', 'jupiter', 'venus', 'saturn', 'pluto', 'sun'];
+  function rrRound() {
+    G.round++; const cases = isAP() ? RR_CASES.concat('hyper') : RR_CASES; let c = pick(cases); if (c === G.lastCase) c = pick(cases); G.lastCase = c;
+    const px = pick(RR_PAX); let pl = pick(RR_PL); if (pl === 'sun' && P.PASSENGERS.find(p => p.id === px).m > 200) pl = 'earth';
+    G.hide = true; applySetup({ pax: px, planet: pl, preset: c }); fitScale(maxReading());
+    const key = S.phases.find(p => p.key) || S.phases[0], m = mass(), g = gval();
+    Object.assign(G, { truth: P.compare(m, g, key.a), keyA: key.a, keyV: key.v0 + key.a * key.dur / 2, cs: c, answered: false, beeped: 0, choice: null, t0: performance.now() });
+    S.running = true; lastTS = null; G.lastPi = 0; updRunBtn(); renderArcade();
+  }
+  function rrAnswer(choice) {
+    if (G.mode !== 'rr' || G.answered) return; G.answered = true; G.choice = choice; actx();
+    const secs = (performance.now() - G.t0) / 1000, ok = choice === G.truth;
+    if (ok) { G.streak++; G.correct++; G.best = Math.max(G.best, G.streak); const mult = Math.min(4, 1 + Math.floor(G.streak / 3)), bonus = Math.max(0, Math.round(50 * (1 - secs / RR_TIME)));
+      G.last = { ok, pts: (100 + bonus) * mult, mult, bonus }; G.score += G.last.pts; sfx.combo(G.streak); confetti(30 + G.streak * 15); if (G.streak >= 5) badge('streak5'); }
+    else { G.streak = 0; G.last = { ok: false, timeout: choice === null }; sfx.bad(); shake(); }
+    G.hide = false; renderAll(); renderArcade();
+  }
+  function rrEnd() {
+    G.mode = 'rrEnd'; G.hide = false; document.body.classList.remove('gaming'); const st = G.correct >= 7 ? 3 : G.correct >= 5 ? 2 : 1; G.stars = st;
+    G.newHi = G.score > S.hi.rr; if (G.newHi) { S.hi.rr = G.score; save('hi', S.hi); }
+    if (G.correct === RR_N) badge('perfect'); sfx.fanfare(); confetti(220); renderArcade(); if (G.correct) addPoints(G.correct * 2);
+  }
+
+  // ---------- Game 2: Bullseye Launch ----------
+  const BL_N = 5, BL_PAX = ['chicken', 'cat', 'child', 'dog', 'person', 'sumo', 'piano', 'horse'], BL_PL = ['earth', 'earth', 'earth', 'moon', 'mars', 'jupiter'];
+  function blRound() {
+    G.round++; applySetup({ pax: pick(BL_PAX), planet: pick(BL_PL), units: 'N', drive: { a: 0, v0: 0, floor: 50 } });
+    const g = gval(), m = mass(); let a; do { a = (rnd(25) - 12) * 0.5; } while (a === 0 || g + a < 0.6);
+    const T = m * (g + a); G.target = T >= 1000 ? Math.round(T) : Math.round(T * 10) / 10; G.aT = G.target / m - g;
+    Object.assign(G, { launched: false, shown: false, hint: false, aIn: null }); fitScale(m * (g + 20)); renderArcade();
+  }
+  function blLaunch() {
+    if (G.mode !== 'bl' || G.launched) return; const raw = $('blA').value.trim(), v = +raw;
+    if (raw === '' || !isFinite(v)) { toast('Type an acceleration first (m/s², up is +).', null, 3000); return; }
+    actx(); G.aIn = Math.max(-30, Math.min(30, v)); G.launched = true; G.shown = false;
+    Object.assign(S.drive, { a: G.aIn, v0: 0, floor: G.aIn < 0 ? 85 : 15 }); S.mode = 'drive'; invalidate(); syncUI(); reset();
+    S.running = true; lastTS = null; updRunBtn(); sfx.launch(); renderArcade();
+  }
+  function blResult() {
+    G.shown = true; const m = mass(), g = gval(), N = P.reading(m, g, G.aIn), T = G.target, err = Math.abs(N - T) / T;
+    let tier, pts; if (err <= 0.01) { tier = 'BULLSEYE!'; pts = 150; } else if (err <= 0.03) { tier = 'So close!'; pts = 100; } else if (err <= 0.10) { tier = 'Near miss'; pts = 40; } else { tier = 'Missed'; pts = 0; }
+    if (G.hint) pts = Math.round(pts / 2); G.score += pts; G.res = { N, err, tier, pts };
+    if (err <= 0.01) { G.bulls++; sfx.combo(6); confetti(180); badge('bullseye'); } else if (pts) { sfx.good(); confetti(50); } else { sfx.bad(); shake(); }
+    renderArcade(); requestAnimationFrame(() => { const b = $('blMark'); if (b) b.style.left = Math.max(0, Math.min(100, 50 + (N - T) / T / 0.25 * 50)) + '%'; });
+  }
+  function blEnd() {
+    G.mode = 'blEnd'; document.body.classList.remove('gaming'); const st = G.score >= 600 ? 3 : G.score >= 350 ? 2 : 1; G.stars = st;
+    G.newHi = G.score > S.hi.bl; if (G.newHi) { S.hi.bl = G.score; save('hi', S.hi); } if (G.score >= 600) badge('sharp');
+    sfx.fanfare(); confetti(220); renderArcade(); const xp = Math.round(G.score / 50); if (xp) addPoints(xp);
+  }
+
+  // ---------- arcade panel ----------
+  function renderArcade() {
+    const A = $('arcade'); let h = '';
+    const head = (t, quit) => `<h3><span>🎮 ${t}</span>${quit ? '<button id="gQuit">✕ Quit</button>' : ''}</h3>`;
+    if (!G.mode) {
+      h = head('Arcade') + `<div class="gcards">
+        <button class="gcard" id="gRR"><b>Heavier or Lighter?</b><span>8 quick rounds. Read the ride, then tap MORE, SAME, LESS or ZERO before time runs out.</span><i>Best: ${S.hi.rr.toLocaleString()}</i></button>
+        <button class="gcard" id="gBL"><b>Bullseye Launch</b><span>5 rounds. Calculate the acceleration that hits the target reading, then launch!</span><i>Best: ${S.hi.bl.toLocaleString()}</i></button></div>`;
+    } else if (G.mode === 'rr') {
+      const p = pax(), pl = planet(), m = mass(), g = gval(), mult = Math.min(4, 1 + Math.floor(G.streak / 3));
+      h = head('Heavier or Lighter?', true) + `<div class="ghud"><span>Round ${G.round}/${RR_N}</span><span class="st">Streak ${G.streak}${mult > 1 ? ' ×' + mult : ''}</span><span>Score ${G.score.toLocaleString()}</span></div>
+        <div class="gq">Rider: <b>${p.name}</b> (${fmt(m)} kg) on <b>${pl.name}</b>.<br>The elevator <b>${RR_WORDS[G.cs]}</b><br><span class="g">Compared with its true weight (${fU(m * g)}), the scale reads…</span></div>
+        <div class="gtimer"><i id="rrBar" style="width:${G.answered ? 0 : 100}%"></i></div>
+        <div class="gans">${[['more', 'MORE'], ['same', 'SAME'], ['less', 'LESS'], ['zero', 'ZERO']].map(([k, t]) => `<button class="${k} ${G.answered && k === G.truth ? 'right' : ''}" data-c="${k}" ${G.answered ? 'disabled' : ''}>${t}</button>`).join('')}</div>`;
+      if (G.answered) { const info = P.caseInfo(G.keyV, G.keyA, g), N = P.reading(m, g, G.keyA);
+        h += `<div class="gfb ${G.last.ok ? 'ok' : 'no'}"><b>${G.last.ok ? pick(['Nailed it!', 'Correct!', 'Yes!', 'Physics genius!']) : G.last.timeout ? '⏰ Time’s up!' : 'Not quite.'}</b> ${info.txt}: ${info.sub}<br>F<sub>N</sub> = m(g + a) = ${fU(N)} vs. true weight ${fU(m * g)}.` +
+          (G.last.ok ? `<br><span class="pts">+${G.last.pts}</span> <span class="g">(100 + ${G.last.bonus} speed${G.last.mult > 1 ? `, ×${G.last.mult} streak` : ''})</span>` : '') + `</div>
+          <button class="go" id="gNext">${G.round >= RR_N ? 'See results' : 'Next round'} →</button>`; }
+      else h += `<div class="g">Tip: the green <b>a</b> arrow next to the shaft is a big clue. Faster answers score more.</div>`;
+    } else if (G.mode === 'bl') {
+      const p = pax(), pl = planet(), m = mass(), g = gval();
+      h = head('Bullseye Launch', true) + `<div class="ghud"><span>Round ${G.round}/${BL_N}</span><span class="st">Bullseyes ${G.bulls}</span><span>Score ${G.score.toLocaleString()}</span></div>
+        <div class="gq">The <b>${p.name}</b> (${fmt(m)} kg) is on <b>${pl.name}</b> (g = ${fmt(g, 2)} m/s²). Its true weight is ${fmt(m * g)} N. Make the scale read:</div>
+        <div class="gtarget"><small>TARGET<br>READING</small>${fmt(G.target)} N</div>`;
+      if (!G.launched) h += `<div class="gin"><label for="blA"><b>a =</b></label><input type="number" id="blA" step="any" placeholder="?"> <b>m/s²</b> <span class="g">(up is +)</span></div>
+          <div class="row"><button class="go" id="blGo">🚀 Launch</button><button id="blHint" ${G.hint ? 'disabled' : ''}>Hint (½ points)</button></div>
+          ${G.hint ? `<div class="gfb ok">F<sub>N</sub> = m(g + a), so <b>a = F<sub>N</sub> ÷ m − g</b>. Is the target more or less than the true weight? That tells you if a points up or down.</div>` : ''}`;
+      else if (!G.shown) h += `<div class="gbig">Launching with a = ${fmtS(G.aIn, 2)} m/s²…</div>`;
+      else { const r = G.res;
+        h += `<div class="gmeter"><b id="blMark" style="left:50%"></b><span style="left:0%;transform:none">−25%</span><span style="left:50%">target</span><span style="left:100%;transform:translateX(-100%)">+25%</span></div><div class="gmeterlab"></div>
+          <div class="gfb ${r.pts ? 'ok' : 'no'}"><b>${r.tier}</b> Your a = ${fmtS(G.aIn, 2)} m/s² made the scale read <b>${fmt(r.N)} N</b> (${(r.err * 100).toFixed(1)}% off).<br>
+          Exact answer: a = ${fmt(G.target)} ÷ ${fmt(m)} − ${fmt(g, 2)} = <b>${fmtS(G.aT, 2)} m/s²</b>. ${r.pts ? `<span class="pts">+${r.pts}</span>` : ''}</div>
+          <button class="go" id="gNext">${G.round >= BL_N ? 'See results' : 'Next round'} →</button>`; }
+    } else {
+      const rr = G.mode === 'rrEnd', when = new Date();
+      h = head(rr ? 'Heavier or Lighter? Results' : 'Bullseye Launch Results') + `<div class="gstars">${stars(G.stars)}</div>
+        <div class="gbig">${G.score.toLocaleString()} pts ${G.newHi ? '<span style="font-size:14px;color:#e8590c">NEW BEST!</span>' : ''}</div>
+        <div>${rr ? `${G.correct} of ${RR_N} correct · best streak ${G.best}` : `${G.bulls} bullseye${G.bulls === 1 ? '' : 's'} in ${BL_N} launches`}</div>
+        <div class="g">${when.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}, ${when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} · ${isAP() ? 'AP Physics 1' : 'Regents'} level · Screenshot this to show your teacher.</div>
+        <div class="row"><button class="go" id="gAgain">Play again</button><button id="gBack">Back to arcade</button></div>`;
+    }
+    A.innerHTML = h;
+    const on = (id, f) => { const e = $(id); if (e) e.onclick = f; };
+    on('gRR', () => startGame('rr')); on('gBL', () => startGame('bl')); on('gQuit', quitGame); on('gBack', () => { G.mode = null; renderArcade(); });
+    on('gAgain', () => startGame(G.mode === 'rrEnd' ? 'rr' : 'bl'));
+    on('gNext', () => { if (G.mode === 'rr') { G.round >= RR_N ? rrEnd() : rrRound(); } else { G.round >= BL_N ? blEnd() : blRound(); } });
+    on('blGo', blLaunch); on('blHint', () => { G.hint = true; const v = $('blA').value; renderArcade(); $('blA').value = v; });
+    A.querySelectorAll('.gans button').forEach(b => b.onclick = () => rrAnswer(b.dataset.c));
+    const inp = $('blA'); if (inp) inp.onkeydown = e => { if (e.key === 'Enter') blLaunch(); };
+  }
+  document.addEventListener('keydown', e => {
+    if (G.mode !== 'rr' || G.answered || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+    const k = { '1': 'more', '2': 'same', '3': 'less', '4': 'zero', m: 'more', s: 'same', l: 'less', z: 'zero' }[e.key.toLowerCase()]; if (k) rrAnswer(k);
+  });
+
   // ---------- test hooks ----------
   window.ELEV = { S, P, CH, setPax: id => { S.pax = id; syncUI(); reset(); }, setPlanet: id => { S.planet = id; syncUI(); reset(); }, preset: id => { loadPreset(id); S.tab = id === 'trip' ? 'trip' : 'cases'; invalidate(); syncUI(); reset(); },
     drive: o => { Object.assign(S.drive, o); S.mode = 'drive'; S.tab = 'drive'; invalidate(); syncUI(); reset(); }, trip: arr => { const [f0, f1, vmax, a1, a2] = arr; Object.assign(S.trip, { f0, f1, vmax, a1, a2 }); planTrip(); S.tab = 'trip'; invalidate(); syncUI(); reset(); },
     runFor: sec => { S.testing = true; advance(sec); S.testing = false; paint(); return { t: S.st.t, y: S.st.y, v: S.st.v, a: S.st.a, N: S.st.N, Fc: S.st.Fc, h: S.st.h, done: S.st.done, ended: S.st.ended }; },
-    reset: () => reset(true), cut, brake, csv, apply: applySetup, setLevel, setUnits: u => { S.units = u; syncUI(); paint(); }, paint, mass, gval, checkPrediction, chalWatch };
+    reset: () => reset(true), cut, brake, csv, apply: applySetup, setLevel, setUnits: u => { S.units = u; syncUI(); paint(); }, paint, mass, gval, checkPrediction, chalWatch, G: () => G, rrAnswer, blLaunch, startGame, badge };
   // ---------- init ----------
-  buildControls(); loadPreset('spdUp'); syncUI(); renderChallenges(); reset(); paint(); requestAnimationFrame(frame);
+  buildControls(); loadPreset('spdUp'); syncUI(); renderChallenges(); renderArcade(); renderBadges(); syncMusic(); reset(); paint(); requestAnimationFrame(frame);
   window.addEventListener('resize', () => renderAll());
 })();
 
