@@ -1,0 +1,834 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Odd Force Out</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: a single-column "lab console" — HUD strip on top, a 2×2 bench of worksheet-style cards, feedback tray below. */
+:root{
+  color-scheme: dark;
+  --bg:#0D1726;          /* console navy */
+  --panel:#15233A;
+  --panel-2:#1C2E4A;
+  --line:#2A4063;
+  --text:#EAF0F8;
+  --muted:#9AAAC2;
+  --paper:#F6F7F1;       /* worksheet card */
+  --paper-grid:#E3E8DF;
+  --ink:#1B2433;
+  --force:#E5383B;       /* red force arrows, as on the worksheet */
+  --box:#FFD43B;         /* yellow block */
+  --good:#2FC98C;
+  --bad:#FF6B5E;
+  --gold:#FFC93C;
+  --f-display:"Bungee", "Arial Black", Impact, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--f-body); font-size:16px; line-height:1.45;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size:28px 28px;
+}
+.wrap{max-width:980px; margin:0 auto; padding-block:18px 48px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px));}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible, input:focus-visible, .card:focus-visible{outline:3px solid var(--gold); outline-offset:3px}
+.btn{border:0; border-radius:10px; padding:12px 20px; font-weight:700; background:var(--panel-2); border:1px solid var(--line); transition:transform .12s, background .12s}
+.btn:hover{background:#243a5c}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--gold); color:#2a1d00; border-color:transparent; font-family:var(--f-display); font-weight:400; letter-spacing:.02em}
+.btn.primary:hover{background:#ffd666}
+.btn.small{padding:7px 12px; font-size:14px}
+.row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+.muted{color:var(--muted)}
+.eyebrow{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); font-weight:700}
+
+/* ---------- Top bar ---------- */
+.topbar{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px}
+.logo{font-family:var(--f-display); font-size:18px; letter-spacing:.02em; display:flex; align-items:center; gap:10px; background:none; border:0; padding:0}
+.logo svg{flex:none}
+.iconbtn{width:42px; height:42px; display:grid; place-items:center; border-radius:10px; background:var(--panel); border:1px solid var(--line)}
+
+/* ---------- Home ---------- */
+.hero{display:grid; grid-template-columns:1.2fr 1fr; gap:28px; align-items:center; margin:10px 0 26px}
+.hero h1{font-family:var(--f-display); font-weight:400; font-size:clamp(34px,6vw,58px); line-height:1.02; margin:6px 0 14px; text-wrap:balance}
+.hero h1 .hl{color:var(--box)}
+.hero p{margin:0 0 16px; max-width:52ch; color:#cdd7e6}
+.namebox{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.namebox label{font-weight:700}
+.namebox input{flex:1; min-width:0; max-width:280px; padding:11px 14px; border-radius:10px; border:1px solid var(--line); background:var(--panel); color:var(--text); font:inherit}
+.hero-art{background:var(--paper); border-radius:16px; padding:10px; transform:rotate(1.5deg); box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.missions{display:grid; grid-template-columns:repeat(4,1fr); gap:14px}
+.mission{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; text-align:left; display:flex; flex-direction:column; gap:8px; transition:transform .15s, border-color .15s}
+.mission:hover{transform:translateY(-3px); border-color:var(--gold)}
+.mission .num{font-family:var(--f-display); font-size:13px; color:var(--gold)}
+.mission h3{margin:0; font-size:19px; line-height:1.15}
+.mission p{margin:0; font-size:14px; color:var(--muted); flex:1}
+.stars{display:flex; gap:3px}
+.star{width:20px; height:20px}
+.section-h{display:flex; justify-content:space-between; align-items:baseline; margin:30px 0 12px; gap:12px; flex-wrap:wrap}
+.section-h h2{font-family:var(--f-display); font-weight:400; font-size:20px; margin:0}
+.badges{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px}
+.badge{background:var(--panel); border:1px dashed var(--line); border-radius:12px; padding:12px; display:flex; gap:10px; align-items:center; opacity:.5}
+.badge.got{opacity:1; border-style:solid; border-color:#6b5a1a; background:linear-gradient(160deg,#2a2a1a, var(--panel))}
+.badge .medal{flex:none; width:38px; height:38px}
+.badge b{display:block; font-size:14px}
+.badge span{font-size:12px; color:var(--muted); line-height:1.25; display:block}
+.howto{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
+.howto div{background:var(--panel); border-radius:12px; padding:14px; border:1px solid var(--line); font-size:14px}
+.howto b{display:block; font-family:var(--f-display); font-weight:400; color:var(--gold); font-size:13px; margin-bottom:4px}
+
+/* ---------- HUD ---------- */
+.hud{display:grid; grid-template-columns:1fr auto auto; gap:14px; align-items:center; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 16px; margin-bottom:14px}
+.hud .lvl{min-width:0}
+.hud .lvl b{display:block; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.meter{height:10px; background:#0b1320; border-radius:99px; overflow:hidden; margin-top:6px; position:relative}
+.meter i{position:absolute; inset:0 auto 0 0; background:linear-gradient(90deg,var(--good),#9ff0c9); border-radius:99px; transition:width .5s cubic-bezier(.3,1.4,.5,1)}
+.stat{text-align:right}
+.stat .v{font-family:var(--f-mono); font-weight:700; font-size:22px; font-variant-numeric:tabular-nums}
+.stat .k{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.streak .v{color:var(--gold)}
+.streak.hot .v{animation:pulse .6s ease}
+@keyframes pulse{50%{transform:scale(1.25)}}
+
+.prompt{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin:4px 0 12px}
+.prompt h2{margin:0; font-size:19px; font-weight:700}
+.prompt h2 small{display:block; font-weight:400; color:var(--muted); font-size:14px}
+
+/* ---------- Cards ---------- */
+.bench{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px}
+.card{position:relative; background:var(--paper); color:var(--ink); border-radius:14px; border:3px solid transparent; padding:8px; text-align:left;
+  background-image:linear-gradient(var(--paper-grid) 1px, transparent 1px), linear-gradient(90deg, var(--paper-grid) 1px, transparent 1px);
+  background-size:20px 20px; background-position:-1px -1px;
+  transition:transform .15s, box-shadow .15s, border-color .15s, opacity .3s; display:flex; flex-direction:column; min-width:0;
+  box-shadow:0 4px 0 #071019}
+.card:not([disabled]):hover{transform:translateY(-4px) rotate(-.4deg); box-shadow:0 10px 0 #071019; border-color:var(--gold)}
+.card .key{position:absolute; top:8px; right:8px; width:26px; height:26px; border-radius:7px; background:var(--ink); color:var(--paper); font-family:var(--f-mono); font-size:13px; display:grid; place-items:center; z-index:2}
+.card .face{aspect-ratio:4/3; width:100%; display:grid; place-items:center; max-width:100%}
+.card .face svg{width:100%; height:100%; display:block}
+.card .words{font-family:var(--f-body); font-weight:700; font-size:clamp(15px,2.4vw,22px); text-align:center; padding:0 14%; line-height:1.3; color:var(--ink)}
+.card table{border-collapse:collapse; font-family:var(--f-mono); font-size:clamp(11px,1.7vw,15px); background:#fff; font-variant-numeric:tabular-nums}
+.card th,.card td{border:1.5px solid var(--ink); padding:3px 12px; text-align:center}
+.card th{background:#e9ecf3}
+.card .reading{display:none; font-size:14px; line-height:1.35; padding:8px 6px 4px; border-top:2px dashed #c9cfc2; margin-top:6px; color:#2b3546}
+.card .tag{display:none; position:absolute; left:8px; top:8px; z-index:2; font-family:var(--f-display); font-size:12px; padding:4px 8px; border-radius:7px}
+.revealed .card .reading{display:block}
+.revealed .card .tag{display:block}
+.card.belongs .tag{background:#d4f5e6; color:#0b5d3c}
+.card.odd .tag{background:var(--gold); color:#3b2a00}
+.card.odd{border-color:var(--gold); box-shadow:0 0 0 4px rgba(255,201,60,.35), 0 4px 0 #071019}
+.card.picked-wrong{border-color:var(--bad); animation:shake .45s}
+.card.picked-right{animation:pop .5s}
+.card.dimmed{opacity:.35}
+.card.eliminated{opacity:.3}
+.card.eliminated::after{content:"Belongs"; position:absolute; inset:auto 0 45% 0; text-align:center; font-family:var(--f-display); color:#0b5d3c; font-size:18px}
+@keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+@keyframes pop{40%{transform:scale(1.05)}}
+
+/* ---------- Feedback ---------- */
+.tray{margin-top:16px; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px 18px; display:grid; grid-template-columns:1fr auto; gap:14px; align-items:center}
+.tray h3{margin:0 0 4px; font-family:var(--f-display); font-weight:400; font-size:20px}
+.tray.ok h3{color:var(--good)} .tray.no h3{color:var(--bad)}
+.tray p{margin:0 0 6px; max-width:68ch}
+.tray .pts{font-family:var(--f-mono); color:var(--gold); font-weight:700}
+.tools{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+
+/* ---------- Results ---------- */
+.results{display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start; margin-top:8px}
+.bigstars{display:flex; gap:10px; margin:12px 0}
+.bigstars svg{width:64px; height:64px}
+.bigstars svg.on{animation:starIn .6s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes starIn{from{transform:scale(0) rotate(-90deg)}}
+.cert{background:var(--paper); color:var(--ink); border-radius:12px; padding:22px; border:8px double #c7a43a; position:relative}
+.cert .eyebrow{color:#7a6420}
+.cert h3{font-family:var(--f-display); font-weight:400; font-size:22px; margin:6px 0 2px}
+.cert .who{font-size:26px; font-weight:700; border-bottom:2px solid var(--ink); padding-bottom:4px; margin:14px 0 10px; word-break:break-word}
+.cert dl{display:grid; grid-template-columns:auto 1fr; gap:4px 14px; margin:10px 0 0; font-size:15px}
+.cert dt{color:#5b6475}
+.cert dd{margin:0; font-weight:700; font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+.cert .seal{position:absolute; right:16px; top:16px; width:60px; height:60px}
+.newbadges{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+.chip{background:#2a2a1a; border:1px solid #6b5a1a; color:var(--gold); border-radius:99px; padding:4px 10px; font-size:13px; font-weight:700}
+table.report{width:100%; border-collapse:collapse; font-size:15px}
+table.report th, table.report td{border-bottom:1px solid #d4d8cf; padding:6px 4px; text-align:left}
+table.report td.n{font-family:var(--f-mono); text-align:right}
+
+/* ---------- Toast + confetti ---------- */
+.toast{position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom, 0px)); transform:translate(-50%,140%); background:#20180a; border:2px solid var(--gold); color:var(--text);
+  border-radius:14px; padding:10px 16px 10px 10px; display:flex; gap:12px; align-items:center; transition:transform .45s cubic-bezier(.3,1.4,.5,1), visibility 0s .45s; z-index:50; max-width:calc(100% - 32px); visibility:hidden}
+.toast{transform:translate(-50%,calc(100% + 60px))}
+.toast.show{transform:translate(-50%,0); visibility:visible; transition:transform .45s cubic-bezier(.3,1.4,.5,1)}
+.toast b{font-family:var(--f-display); font-weight:400; color:var(--gold); display:block; font-size:14px}
+.toast span{font-size:14px}
+.floatpts{position:fixed; z-index:40; font-family:var(--f-display); color:var(--gold); font-size:26px; pointer-events:none; text-shadow:0 2px 0 #000; animation:floatUp 1.1s ease-out forwards}
+@keyframes floatUp{to{transform:translateY(-70px); opacity:0}}
+#fx{position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:45}
+
+@media (max-width:760px){
+  .hero{grid-template-columns:1fr}
+  .hero-art{display:none}
+  .missions{grid-template-columns:repeat(2,1fr)}
+  .howto{grid-template-columns:1fr}
+  .results{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .bench{gap:10px}
+  .card{padding:4px}
+  .card .reading{font-size:13px}
+  .card .key{width:22px; height:22px; font-size:11px; top:5px; right:5px}
+  .card table{font-size:10px}
+  .card th,.card td{padding:1px 4px; border-width:1px}
+  .card .words{padding:0 8%; font-size:14px}
+  .hud{grid-template-columns:1fr auto; }
+  .hud .streak{display:none}
+  .tray{grid-template-columns:1fr}
+  .missions{grid-template-columns:1fr}
+  .logo span{display:none}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important; transition:none!important}
+}
+</style>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="wrap">
+  <div class="topbar">
+    <button class="logo" id="homeBtn" aria-label="Back to mission select">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="9" y="9" width="16" height="16" fill="#FFD43B" stroke="#E5383B" stroke-width="2.5"/><path d="M25 17h7M29 13.5l3.5 3.5-3.5 3.5" stroke="#E5383B" stroke-width="2.5" fill="none"/><path d="M17 9V2M13.5 5.5 17 2l3.5 3.5" stroke="#E5383B" stroke-width="2.5" fill="none"/></svg>
+      <span>Odd Force Out</span>
+    </button>
+    <div class="row">
+      <button class="iconbtn" id="muteBtn" aria-label="Sound on" title="Sound on/off"></button>
+    </div>
+  </div>
+  <main id="app"></main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =========================================================
+   PHYSICS MODEL
+   Each puzzle is built around one motion state. Three cards
+   agree with it; one card is drawn from a different state.
+   ========================================================= */
+const STATES = {
+  rest:{v:0,  a:0,  short:"at rest"},
+  cvp: {v:1,  a:0,  short:"moving + (right) at a constant velocity"},
+  cvn: {v:-1, a:0,  short:"moving − (left) at a constant velocity"},
+  spp: {v:1,  a:1,  short:"moving + (right) and speeding up"},
+  sdp: {v:1,  a:-1, short:"moving + (right) and slowing down"},
+  spn: {v:-1, a:-1, short:"moving − (left) and speeding up"},
+  sdn: {v:-1, a:1,  short:"moving − (left) and slowing down"},
+};
+const ALL = Object.keys(STATES);
+const MOVING = ALL.filter(s=>s!=="rest");
+
+const NEWTON = {
+  rest:"No acceleration, so the forces must be balanced (net force = 0). That's Newton's 1st law.",
+  cvp:"Constant velocity means zero acceleration, so the forces are balanced even though it's moving (Newton's 1st law).",
+  cvn:"Constant velocity means zero acceleration, so the forces are balanced even though it's moving (Newton's 1st law).",
+  spp:"Speeding up while moving + means the acceleration is +, so the net force points + (Newton's 2nd law).",
+  sdp:"Slowing down while moving + means the acceleration is −. The net force points − (left), opposite the motion.",
+  spn:"Speeding up while moving − means the acceleration is −, so the net force points − (Newton's 2nd law).",
+  sdn:"Slowing down while moving − means the acceleration is +. The net force points + (right), opposite the motion.",
+};
+
+const TYPE_NAME = {fbd:"free-body diagram", xt:"position–time graph", vt:"velocity–time graph", words:"verbal description", dots:"dot diagram", vtab:"velocity table", xtab:"position table"};
+const TYPE_GROUP = {fbd:"fbd", xt:"graph", vt:"graph", words:"words", dots:"dots", vtab:"data", xtab:"data"};
+
+const LEVELS = [
+  {id:"L1", n:1, title:"At Rest & Cruising", blurb:"Balanced forces. Objects at rest or moving at a constant velocity.",
+   targets:["rest","cvp","cvn"], types:["fbd","xt","vt","words"], pool:["rest","cvp","cvn"], labeled:false, alt:false},
+  {id:"L2", n:2, title:"Speed Up, Slow Down", blurb:"Unbalanced forces. Which way does the net force point?",
+   targets:["spp","sdp","spn","sdn"], types:["fbd","dots","xt","vt","words"], pool:MOVING, labeled:false, alt:false},
+  {id:"L3", n:3, title:"Data Detective", blurb:"Dot diagrams and data tables join the line-up.",
+   targets:MOVING, types:["fbd","dots","xt","vt","vtab","xtab"], pool:ALL, labeled:true, alt:false, needTable:true},
+  {id:"L4", n:4, title:"Grand Challenge", blurb:"Everything mixed, with acceleration language. Speed bonus doubled.",
+   targets:ALL, types:["fbd","dots","xt","vt","words","vtab","xtab"], pool:ALL, labeled:true, alt:true, speedX:2},
+];
+const GOAL = 8; // correct answers to clear a mission
+
+const rnd = n => Math.floor(Math.random()*n);
+const pick = a => a[rnd(a.length)];
+const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){const j=rnd(i+1); [a[i],a[j]]=[a[j],a[i]];} return a; };
+function wpick(items, weights){ const t=weights.reduce((s,w)=>s+w,0); let r=Math.random()*t; for(let i=0;i<items.length;i++){ r-=weights[i]; if(r<=0) return items[i]; } return items[items.length-1]; }
+
+function matches(card, s){
+  return card.type==="fbd" ? card.net===STATES[s].a : card.state===s;
+}
+
+/* Build a card spec for a given type and state (FBD keyed by net force). */
+function makeCard(type, state, L){
+  const S = STATES[state];
+  const c = {type, state};
+  if(type==="fbd"){
+    c.net = S.a;
+    c.labeled = L.labeled;
+    c.vert = pick([15,20,25]);
+    if(c.net===0){ c.style = pick(["equal","equal","none"]); c.f = pick([10,15,20]); }
+    else { c.style = pick(["single","unequal","unequal"]); c.big = pick([20,25]); c.small = pick([5,10,15].filter(x=>x<c.big)); if(c.style==="single") c.big=pick([10,15,20]); }
+  }
+  if(type==="words"){
+    const W = {
+      rest:["The object is not moving – it is at rest.","The object stays in the same spot."],
+      cvp:["The object is moving to the right (+ direction) with a constant velocity.","The object moves right (+) at a steady speed."],
+      cvn:["The object is moving to the left (− direction) with a constant velocity.","The object moves left (−) at a steady speed."],
+      spp:["The object is moving to the right (+) and speeding up."],
+      sdp:["The object is moving to the right (+) and slowing down."],
+      spn:["The object is moving to the left (−) and speeding up."],
+      sdn:["The object is moving to the left (−) and slowing down."],
+    };
+    const ALT = {
+      rest:"Its velocity is zero and stays zero.",
+      cvp:"Velocity is + and acceleration is zero.", cvn:"Velocity is − and acceleration is zero.",
+      spp:"Velocity is + and acceleration is +.", sdp:"Velocity is + and acceleration is −.",
+      spn:"Velocity is − and acceleration is −.", sdn:"Velocity is − and acceleration is +.",
+    };
+    c.text = (L.alt && Math.random()<.5) ? ALT[state] : pick(W[state]);
+  }
+  if(type==="vt"){ c.v0 = pick([0,0,.15,.25]); c.v1 = pick([.8,.9]); c.c = pick([.45,.6,.75]); }
+  if(type==="xt"){ c.amp = pick([.75,.8,.85]); }
+  if(type==="vtab"){ c.k = pick([2,3,4]); c.c = pick([3,5,6,8]); }
+  if(type==="xtab"){ c.k = pick([1,2]); c.c = pick([2,3,5]); c.p = pick([3,4,6]); }
+  return c;
+}
+
+/* Generate a puzzle for a level. Rejection-sample until exactly one card is odd and no other motion state fits three cards. */
+function generate(L, target){
+  for(let tries=0; tries<400; tries++){
+    const T = STATES[target];
+    let types = L.types.filter(t=> !(target==="rest" && t==="dots"));
+    let four;
+    if(types.length===4) four = shuffle(types);
+    else {
+      four = shuffle(types).slice(0,4);
+      if(L.needTable && !four.some(t=>t==="vtab"||t==="xtab")) continue;
+      if(L.id==="L2" && !four.includes("fbd") && Math.random()<.7) continue;
+    }
+    const oddIdx = rnd(4), oddType = four[oddIdx];
+    let oddState;
+    if(oddType==="fbd"){
+      // choose a different net force; for slowing-down targets, favour the "force points along the motion" misconception
+      const nets = [-1,0,1].filter(n=>n!==T.a);
+      const w = nets.map(n => (T.a!==0 && n===T.v) ? 3 : (T.a!==0 && n===-T.a) ? 2 : 1);
+      const net = wpick(nets, w);
+      const cand = L.pool.concat(ALL).filter(s=>STATES[s].a===net);
+      oddState = pick(cand);
+    } else {
+      let cands = L.pool.filter(s=>s!==target);
+      if(oddType==="dots") cands = cands.filter(s=>s!=="rest");
+      const w = cands.map(s=>{ const S=STATES[s]; return (S.v===T.v ? 3 : 0) + (S.a===T.a ? 2 : 0) + 1; });
+      oddState = wpick(cands, w);
+    }
+    const cards = four.map((t,i)=> makeCard(t, i===oddIdx ? oddState : target, L));
+    // validation
+    if(cards.filter(c=>matches(c,target)).length!==3) continue;
+    if(matches(cards[oddIdx], target)) continue;
+    let ambiguous = false;
+    for(const s of ALL){ if(s!==target && cards.filter(c=>matches(c,s)).length>=3){ ambiguous=true; break; } }
+    if(ambiguous) continue;
+    return {target, cards, odd:oddIdx};
+  }
+  throw new Error("could not generate");
+}
+
+/* =========================================================
+   RENDERERS (worksheet look: navy ink, red plot lines)
+   ========================================================= */
+const INK="#1B2433", RED="#E5383B", YEL="#FFD43B";
+function arrowSVG(x1,y1,x2,y2,w=5){
+  const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy), ux=dx/L, uy=dy/L, h=11, hw=8;
+  const bx=x2-ux*h, by=y2-uy*h;
+  return `<line x1="${x1}" y1="${y1}" x2="${bx}" y2="${by}" stroke="${RED}" stroke-width="${w}"/>
+  <polygon points="${x2},${y2} ${bx-uy*hw},${by+ux*hw} ${bx+uy*hw},${by-ux*hw}" fill="${RED}"/>`;
+}
+function fbdSVG(c){
+  const cx=100, cy=78, hs=17, s=2.1; // px per newton
+  let g = `<text x="8" y="16" font-size="9" font-style="italic" fill="${INK}" font-family="Georgia,serif">Arrows represent forces.</text>`;
+  const lab=(x,y,t,anchor="middle")=> c.labeled ? `<text x="${x}" y="${y}" font-size="11" font-weight="700" fill="${INK}" text-anchor="${anchor}" font-family="JetBrains Mono,monospace">${t} N</text>` : "";
+  const V=c.vert*s*0.85;
+  g += arrowSVG(cx, cy-hs, cx, cy-hs-V) + lab(cx+10, cy-hs-V+10, c.vert, "start");
+  g += arrowSVG(cx, cy+hs, cx, cy+hs+V) + lab(cx+10, cy+hs+V-2, c.vert, "start");
+  let R=0, Lf=0;
+  if(c.net===0){ if(c.style==="equal"){R=Lf=c.f;} }
+  else if(c.style==="single"){ if(c.net>0) R=c.big; else Lf=c.big; }
+  else { if(c.net>0){R=c.big; Lf=c.small;} else {Lf=c.big; R=c.small;} }
+  if(R) g += arrowSVG(cx+hs, cy, cx+hs+R*s, cy) + lab(cx+hs+R*s-4, cy-9, R, "end");
+  if(Lf) g += arrowSVG(cx-hs, cy, cx-hs-Lf*s, cy) + lab(cx-hs-Lf*s+4, cy-9, Lf, "start");
+  g += `<rect x="${cx-hs}" y="${cy-hs}" width="${hs*2}" height="${hs*2}" fill="${YEL}" stroke="${RED}" stroke-width="2.5"/>`;
+  return `<svg viewBox="0 0 200 150" role="img" aria-label="Free-body diagram">${g}</svg>`;
+}
+function xFun(c){
+  const a=c.amp, lo=(1-a)/2, hi=lo+a;
+  return {
+    rest:t=>.5, cvp:t=>lo+a*t, cvn:t=>hi-a*t,
+    spp:t=>lo+a*t*t, sdp:t=>lo+a*(2*t-t*t), spn:t=>hi-a*t*t, sdn:t=>hi-a*(2*t-t*t)
+  }[c.state];
+}
+function vFun(c){
+  const {v0,v1}=c;
+  return {
+    rest:t=>0, cvp:t=>c.c, cvn:t=>-c.c,
+    spp:t=>v0+(v1-v0)*t, sdp:t=>v1-(v1-v0)*t, spn:t=>-(v0+(v1-v0)*t), sdn:t=>-(v1-(v1-v0)*t)
+  }[c.state];
+}
+function graphSVG(c){
+  const isV = c.type==="vt";
+  const X0=40, X1=180, f = isV ? vFun(c) : xFun(c);
+  let pts=[];
+  for(let i=0;i<=40;i++){ const t=i/40; const val=f(t); const x=X0+t*(X1-X0-6); const y= isV ? 75-val*56 : 128-val*108; pts.push(`${x.toFixed(1)},${y.toFixed(1)}`); }
+  let g="";
+  if(isV){
+    g += `<line x1="${X0}" y1="12" x2="${X0}" y2="138" stroke="${INK}" stroke-width="2.5"/>
+    <line x1="${X0}" y1="75" x2="${X1}" y2="75" stroke="${INK}" stroke-width="2.5"/>
+    <text x="${X0-9}" y="22" font-size="13" text-anchor="middle" fill="${INK}" font-weight="700">+</text>
+    <text x="${X0-9}" y="79" font-size="12" text-anchor="middle" fill="${INK}" font-weight="700">0</text>
+    <text x="${X0-9}" y="136" font-size="14" text-anchor="middle" fill="${INK}" font-weight="700">−</text>
+    <text transform="translate(16,75) rotate(-90)" font-size="13" text-anchor="middle" fill="${INK}" font-weight="700" font-family="Atkinson Hyperlegible,sans-serif">velocity</text>
+    <text x="${X1+6}" y="79" font-size="13" fill="${INK}" font-weight="700">t</text>`;
+  } else {
+    g += `<line x1="${X0}" y1="12" x2="${X0}" y2="130" stroke="${INK}" stroke-width="2.5"/>
+    <line x1="${X0-1}" y1="129" x2="${X1}" y2="129" stroke="${INK}" stroke-width="2.5"/>
+    <text transform="translate(24,72) rotate(-90)" font-size="13" text-anchor="middle" fill="${INK}" font-weight="700" font-family="Atkinson Hyperlegible,sans-serif">position</text>
+    <text x="${X1+6}" y="133" font-size="13" fill="${INK}" font-weight="700">t</text>`;
+  }
+  g += `<polyline points="${pts.join(" ")}" fill="none" stroke="${RED}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+  return `<svg viewBox="0 0 200 150" role="img" aria-label="${TYPE_NAME[c.type]}">${g}</svg>`;
+}
+function dotsSVG(c){
+  const S=STATES[c.state];
+  const gaps = S.a===0 ? [1,1,1,1,1] : (S.a===S.v ? [1,2,3,4,5] : [5,4,3,2,1]);
+  let pos=[0]; gaps.forEach(g=>pos.push(pos[pos.length-1]+g));
+  const max=pos[pos.length-1];
+  let xs = pos.map(p=>24+p/max*152);
+  if(S.v<0) xs = xs.map(x=>200-x);
+  let g = `<path d="M10 62 L190 62 L184 76 L190 90 L10 90 L16 76 Z" fill="#fff" stroke="${INK}" stroke-width="2"/>`;
+  xs.forEach(x=> g+=`<circle cx="${x.toFixed(1)}" cy="76" r="4" fill="${RED}"/>`);
+  g += S.v>0 ? arrowSVG(70,40,130,40,3.5) : arrowSVG(130,40,70,40,3.5);
+  g += `<text x="100" y="114" font-size="10.5" text-anchor="middle" font-style="italic" fill="${INK}" font-family="Georgia,serif">The arrow shows the direction</text>
+        <text x="100" y="127" font-size="10.5" text-anchor="middle" font-style="italic" fill="${INK}" font-family="Georgia,serif">the object is moving.</text>`;
+  return `<svg viewBox="0 0 200 150" role="img" aria-label="Dot diagram">${g}</svg>`;
+}
+function tableVals(c){
+  const s=c.state;
+  if(c.type==="vtab"){
+    const k=c.k, C=c.c;
+    return {rest:[0,0,0,0,0], cvp:[C,C,C,C,C], cvn:[-C,-C,-C,-C,-C],
+      spp:[0,k,2*k,3*k,4*k], sdp:[4*k,3*k,2*k,k,0], spn:[0,-k,-2*k,-3*k,-4*k], sdn:[-4*k,-3*k,-2*k,-k,0]}[s];
+  } else {
+    const k=c.k, C=c.c, P=c.p;
+    const mul=a=>a.map(x=>x*k);
+    return {rest:[P,P,P,P,P], cvp:[0,C,2*C,3*C,4*C], cvn:[4*C,3*C,2*C,C,0],
+      spp:mul([0,1,4,9,16]), sdp:mul([0,7,12,15,16]), spn:mul([16,15,12,7,0]), sdn:mul([16,9,4,1,0])}[s];
+  }
+}
+const fmt = n => (n<0?"−":"")+Math.abs(n).toFixed(1);
+function tableHTML(c){
+  const vals=tableVals(c), isV=c.type==="vtab";
+  let h=`<table aria-label="${TYPE_NAME[c.type]}"><thead><tr><th>Time</th><th>${isV?"Velocity":"Position"}</th></tr></thead><tbody>`;
+  vals.forEach((v,i)=> h+=`<tr><td>${i}.0 s</td><td>${fmt(v)} ${isV?"m/s":"m"}</td></tr>`);
+  return h+"</tbody></table>";
+}
+function renderFace(c){
+  switch(c.type){
+    case "fbd": return fbdSVG(c);
+    case "xt": case "vt": return graphSVG(c);
+    case "dots": return dotsSVG(c);
+    case "vtab": case "xtab": return tableHTML(c);
+    case "words": return `<div class="words">“${c.text}”</div>`;
+  }
+}
+
+/* What each card says, used in the feedback. */
+function reading(c){
+  const s=c.state;
+  if(c.type==="fbd"){
+    if(c.net===0) return c.style==="none" ? "Only equal up/down forces: net force = 0, so no acceleration (at rest or constant velocity)." : "Forces are balanced: net force = 0, so no acceleration (at rest or constant velocity).";
+    return c.net>0 ? "Unbalanced: the net force points + (right), so the acceleration is +." : "Unbalanced: the net force points − (left), so the acceleration is −.";
+  }
+  const R = {
+    xt:{rest:"Flat line: position never changes. At rest.", cvp:"Straight line sloping up: constant + velocity.", cvn:"Straight line sloping down: constant − velocity.",
+        spp:"Slopes up and gets steeper: moving + and speeding up.", sdp:"Slopes up and levels off: moving + and slowing down.",
+        spn:"Slopes down and gets steeper: moving − and speeding up.", sdn:"Slopes down and levels off: moving − and slowing down."},
+    vt:{rest:"Velocity is zero the whole time: at rest.", cvp:"Flat line above zero: constant + velocity.", cvn:"Flat line below zero: constant − velocity.",
+        spp:"Velocity is + and moving away from zero: speeding up moving +.", sdp:"Velocity is + and heading toward zero: slowing down moving +.",
+        spn:"Velocity is − and moving away from zero: speeding up moving −.", sdn:"Velocity is − and heading toward zero: slowing down moving −."},
+    dots:{cvp:"Arrow points right, even spacing: constant velocity moving +.", cvn:"Arrow points left, even spacing: constant velocity moving −.",
+        spp:"Arrow points right, gaps grow: speeding up moving +.", sdp:"Arrow points right, gaps shrink: slowing down moving +.",
+        spn:"Arrow points left, gaps grow: speeding up moving −.", sdn:"Arrow points left, gaps shrink: slowing down moving −."},
+    vtab:{rest:"Velocity stays 0 m/s: at rest.", cvp:"Velocity stays the same + value: constant velocity moving +.", cvn:"Velocity stays the same − value: constant velocity moving −.",
+        spp:"Velocity is + and growing: speeding up moving +.", sdp:"Velocity is + and shrinking toward 0: slowing down moving +.",
+        spn:"Velocity is − and growing in size: speeding up moving −.", sdn:"Velocity is − and shrinking toward 0: slowing down moving −."},
+    xtab:{rest:"Position never changes: at rest.", cvp:"Position goes up by the same amount each second: constant velocity moving +.", cvn:"Position goes down by the same amount each second: constant velocity moving −.",
+        spp:"Position increases by bigger amounts each second: speeding up moving +.", sdp:"Position increases by smaller amounts each second: slowing down moving +.",
+        spn:"Position decreases by bigger amounts each second: speeding up moving −.", sdn:"Position decreases by smaller amounts each second: slowing down moving −."},
+  };
+  if(c.type==="words") return "Says the object is "+STATES[s].short+".";
+  return R[c.type][s];
+}
+
+/* =========================================================
+   SOUND (Web Audio synth, no files)
+   ========================================================= */
+const Snd = {
+  ctx:null, on:true,
+  init(){ try{ if(!this.ctx) this.ctx=new (window.AudioContext||window.webkitAudioContext)(); if(this.ctx.state==="suspended") this.ctx.resume(); }catch(e){} },
+  tone(freq, t, dur, type="square", vol=.06, to){
+    if(!this.on||!this.ctx) return;
+    const c=this.ctx, o=c.createOscillator(), g=c.createGain(), s=c.currentTime+t;
+    o.type=type; o.frequency.setValueAtTime(freq,s); if(to) o.frequency.exponentialRampToValueAtTime(to, s+dur);
+    g.gain.setValueAtTime(0.0001,s); g.gain.exponentialRampToValueAtTime(vol,s+.012); g.gain.exponentialRampToValueAtTime(0.0001,s+dur);
+    o.connect(g).connect(c.destination); o.start(s); o.stop(s+dur+.02);
+  },
+  click(){ this.tone(880,0,.05,"square",.03); },
+  correct(streak){ const b=523.25*Math.pow(2,Math.min(streak,9)/12); [1,1.26,1.5,2].forEach((m,i)=>this.tone(b*m,i*.07,.16,"square",.055)); this.tone(b*4,.28,.25,"triangle",.04); },
+  wrong(){ this.tone(196,0,.18,"sawtooth",.06,110); this.tone(147,.16,.32,"sawtooth",.06,82); },
+  hint(){ this.tone(660,0,.1,"triangle",.05,990); },
+  badge(){ [1568,1976,2349,3136].forEach((f,i)=>this.tone(f,i*.06,.22,"triangle",.045)); },
+  fanfare(){ const n=[523,659,784,1047,784,1047]; const d=[0,.12,.24,.36,.56,.68]; n.forEach((f,i)=>this.tone(f,d[i],i>3?.4:.14,"square",.06)); this.tone(262,.36,.7,"triangle",.07); },
+};
+
+/* =========================================================
+   CONFETTI
+   ========================================================= */
+const FX = (()=>{
+  const cv=document.getElementById("fx"), ctx=cv.getContext("2d"); let parts=[], raf=0;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function size(){ cv.width=innerWidth*devicePixelRatio; cv.height=innerHeight*devicePixelRatio; }
+  addEventListener("resize", size); size();
+  const cols=["#FFD43B","#E5383B","#2FC98C","#6CB4FF","#ffffff"];
+  function burst(x,y,n=40,spread=1){
+    if(reduce) return;
+    for(let i=0;i<n;i++){ const a=Math.random()*Math.PI*2, sp=(2+Math.random()*6)*spread;
+      parts.push({x:x*devicePixelRatio,y:y*devicePixelRatio,vx:Math.cos(a)*sp*devicePixelRatio,vy:(Math.sin(a)*sp-4)*devicePixelRatio,r:(3+Math.random()*4)*devicePixelRatio,c:pick(cols),life:70+rnd(40),rot:Math.random()*6,vr:(Math.random()-.5)*.4}); }
+    if(!raf) raf=requestAnimationFrame(step);
+  }
+  function step(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    parts.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=.25*devicePixelRatio; p.vx*=.99; p.rot+=p.vr; p.life--;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.c; ctx.globalAlpha=Math.max(0,Math.min(1,p.life/30)); ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r); ctx.restore(); });
+    parts=parts.filter(p=>p.life>0);
+    raf = parts.length ? requestAnimationFrame(step) : 0;
+    if(!raf) ctx.clearRect(0,0,cv.width,cv.height);
+  }
+  return {burst, rain(){ for(let i=0;i<6;i++) setTimeout(()=>burst(Math.random()*innerWidth, innerHeight*.25, 50, 1.3), i*180); }};
+})();
+
+/* =========================================================
+   SAVE DATA (per browser only)
+   ========================================================= */
+const KEY="odd-force-out-v1";
+let save = {name:"", best:{}, badges:[], counts:{fbd:0,graph:0,dots:0,data:0,words:0}, mute:false};
+try{ const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s) save=Object.assign(save,s); }catch(e){}
+function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(save)); }catch(e){} }
+Snd.on = !save.mute;
+
+const BADGES = [
+  {id:"first", name:"First Find", desc:"Get your first answer right"},
+  {id:"streak5", name:"On a Roll", desc:"5 correct in a row"},
+  {id:"streak10", name:"Unstoppable", desc:"10 correct in a row"},
+  {id:"fast", name:"Quick Draw", desc:"Correct in under 4 seconds"},
+  {id:"buster", name:"Myth Buster", desc:"Spot a slowing-down object whose net force wrongly points along the motion"},
+  {id:"fbd", name:"Force Spotter", desc:"Find 5 odd free-body diagrams"},
+  {id:"graph", name:"Graph Reader", desc:"Find 5 odd graphs"},
+  {id:"dots", name:"Dot Tracker", desc:"Find 5 odd dot diagrams"},
+  {id:"data", name:"Data Detective", desc:"Find 5 odd data tables"},
+  {id:"flawless", name:"Flawless", desc:"Clear a mission with zero misses"},
+  {id:"solo", name:"No Hints Needed", desc:"Clear a mission without using a hint"},
+  {id:"master", name:"Newton's Master", desc:"Clear all four missions"},
+];
+function medalSVG(on, size=38){
+  return `<svg class="medal" viewBox="0 0 40 40" width="${size}" height="${size}" aria-hidden="true">
+   <path d="M12 2h6l3 10h-6zM28 2h-6l-3 10h6z" fill="${on?"#E5383B":"#3a4a63"}"/>
+   <circle cx="20" cy="25" r="12" fill="${on?"#FFC93C":"#2a3a52"}" stroke="${on?"#a77c00":"#44587a"}" stroke-width="2"/>
+   <rect x="15" y="20" width="10" height="10" fill="${on?"#FFD43B":"#3a4a63"}" stroke="${on?"#E5383B":"#56698a"}" stroke-width="1.6"/></svg>`;
+}
+function starSVG(on, cls="star"){ return `<svg class="${cls} ${on?"on":""}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.5 1.3 6.6L12 17.2 6.1 20.5l1.3-6.6L2.5 9.4l6.6-.8z" fill="${on?"#FFC93C":"#2a3a52"}" stroke="${on?"#a77c00":"#44587a"}" stroke-width="1.2"/></svg>`; }
+
+let toastQ=[], toastBusy=false;
+function award(id){
+  if(save.badges.includes(id)) return false;
+  save.badges.push(id); persist();
+  if(run) run.newBadges.push(id);
+  toastQ.push(BADGES.find(b=>b.id===id)); if(!toastBusy) nextToast();
+  return true;
+}
+function nextToast(){
+  const b=toastQ.shift(); const el=document.getElementById("toast");
+  if(!b){ toastBusy=false; return; }
+  toastBusy=true; Snd.badge();
+  el.innerHTML = medalSVG(true,40)+`<div><b>Badge unlocked</b><span>${b.name}: ${b.desc}</span></div>`;
+  el.classList.add("show");
+  setTimeout(()=>{ el.classList.remove("show"); setTimeout(nextToast,450); }, 2600);
+}
+
+/* =========================================================
+   GAME FLOW
+   ========================================================= */
+const app=document.getElementById("app");
+let run=null; // current mission run
+let q=null;   // current question
+
+function muteIcon(){
+  const b=document.getElementById("muteBtn");
+  b.setAttribute("aria-label", Snd.on?"Mute sound":"Turn sound on");
+  b.innerHTML = Snd.on
+    ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EAF0F8" stroke-width="2"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#EAF0F8"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>`
+    : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9AAAC2" stroke-width="2"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#9AAAC2"/><path d="M16 9l6 6M22 9l-6 6"/></svg>`;
+}
+document.getElementById("muteBtn").onclick=()=>{ Snd.on=!Snd.on; save.mute=!Snd.on; persist(); muteIcon(); Snd.init(); Snd.click(); };
+document.getElementById("homeBtn").onclick=()=>{ Snd.init(); Snd.click(); home(); };
+muteIcon();
+
+function home(){
+  run=null; q=null;
+  const sample = makeCard("fbd","spp",{labeled:false}); sample.style="unequal"; sample.big=25; sample.small=10;
+  app.innerHTML = `
+  <section class="hero">
+    <div>
+      <div class="eyebrow">Forces &amp; Motion · AP Physics 1 · Regents Physics</div>
+      <h1>Which one <span class="hl">doesn't belong?</span></h1>
+      <p>Each round shows four ways of describing an object's motion: force diagrams, graphs, dot diagrams, data tables and words. Three of them describe the same motion. Find the one that doesn't.</p>
+      <div class="namebox">
+        <label for="nm">Your name</label>
+        <input id="nm" maxlength="40" placeholder="First and last name" value="${esc(save.name)}" autocomplete="off">
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">${fbdSVG(sample)}</div>
+  </section>
+
+  <div class="section-h"><h2>Missions</h2><span class="muted">Get ${GOAL} right to clear a mission. Missed items come back for another try.</span></div>
+  <div class="missions">
+    ${LEVELS.map(L=>`<button class="mission" data-l="${L.id}">
+      <span class="num">Mission ${L.n}</span><h3>${L.title}</h3><p>${L.blurb}</p>
+      <div class="row" style="justify-content:space-between"><span class="stars">${[1,2,3].map(i=>starSVG((save.best[L.id]?.stars||0)>=i)).join("")}</span>
+      <span class="muted" style="font-family:var(--f-mono);font-size:13px">${save.best[L.id]?("Best "+save.best[L.id].score.toLocaleString()):"New"}</span></div>
+    </button>`).join("")}
+  </div>
+
+  <div class="section-h"><h2>Badges</h2><span class="muted">${save.badges.length} of ${BADGES.length} unlocked</span></div>
+  <div class="badges">${BADGES.map(b=>`<div class="badge ${save.badges.includes(b.id)?"got":""}">${medalSVG(save.badges.includes(b.id))}<div><b>${b.name}</b><span>${b.desc}</span></div></div>`).join("")}</div>
+
+  <div class="section-h"><h2>How scoring works</h2></div>
+  <div class="howto">
+    <div><b>100 points</b>for each correct pick, plus up to 50 for speed.</div>
+    <div><b>Streaks</b>Every 3 in a row raises your multiplier: ×2, ×3, up to ×4.</div>
+    <div><b>Hints</b>A hint marks one card that belongs, but halves the points for that round.</div>
+  </div>
+  ${Object.keys(save.best).length ? `<div class="section-h"><h2>Report card</h2><button class="btn small" id="reportBtn">Show report card</button></div>` : ""}
+  `;
+  const nm=document.getElementById("nm");
+  nm.oninput=()=>{ save.name=nm.value.trim(); persist(); };
+  app.querySelectorAll(".mission").forEach(b=> b.onclick=()=>{ Snd.init(); Snd.click(); start(LEVELS.find(L=>L.id===b.dataset.l)); });
+  const rb=document.getElementById("reportBtn"); if(rb) rb.onclick=()=>{ Snd.init(); Snd.click(); report(); };
+  window.scrollTo(0,0);
+}
+function esc(s){ return String(s||"").replace(/[&<>"]/g, ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch])); }
+
+function start(L){
+  run = {L, correct:0, misses:0, score:0, streak:0, best:0, hints:0, retry:[], last:null, newBadges:[], startedAt:Date.now(), n:0};
+  nextQ();
+}
+function chooseTarget(){
+  const L=run.L;
+  if(run.retry.length && Math.random()<.65){ const i=run.retry.findIndex(s=>s!==run.last); if(i>=0) return run.retry.splice(i,1)[0]; }
+  let opts=L.targets.filter(s=>s!==run.last);
+  if(L.id==="L3" && Math.random()<.1) opts=["rest"];
+  return pick(opts);
+}
+function nextQ(){
+  const target=chooseTarget(); run.last=target; run.n++;
+  q = generate(run.L, target); q.t0=performance.now(); q.answered=false; q.hint=false;
+  renderQ();
+}
+function renderQ(){
+  const L=run.L, mult=multiplier();
+  app.innerHTML = `
+  <div class="hud">
+    <div class="lvl"><span class="eyebrow">Mission ${L.n} · ${run.correct}/${GOAL} cleared</span><b>${L.title}</b>
+      <div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="${GOAL}" aria-valuenow="${run.correct}"><i style="width:${run.correct/GOAL*100}%"></i></div></div>
+    <div class="stat streak" id="streakBox"><div class="v">${run.streak}${mult>1?` ×${mult}`:""}</div><div class="k">Streak</div></div>
+    <div class="stat"><div class="v" id="scoreV">${run.score.toLocaleString()}</div><div class="k">Score</div></div>
+  </div>
+  <div class="prompt">
+    <h2>Three of these describe the same motion. Which one doesn't belong?<small>Click a card or press 1–4.</small></h2>
+    <div class="tools"><button class="btn small" id="hintBtn">Hint (½ points)</button></div>
+  </div>
+  <div class="bench" id="bench">
+    ${q.cards.map((c,i)=>`<button class="card" data-i="${i}" aria-label="Card ${i+1}: ${TYPE_NAME[c.type]}">
+      <span class="key">${i+1}</span><span class="tag"></span>
+      <div class="face">${renderFace(c)}</div>
+      <div class="reading"></div></button>`).join("")}
+  </div>
+  <div id="trayHost"></div>`;
+  app.querySelectorAll(".card").forEach(b=> b.onclick=()=>answer(+b.dataset.i, b));
+  document.getElementById("hintBtn").onclick=useHint;
+}
+function multiplier(){ return Math.min(4, 1+Math.floor(run.streak/3)); }
+
+function useHint(){
+  if(q.answered||q.hint) return;
+  Snd.init(); Snd.hint(); q.hint=true; run.hints++;
+  const belong=[0,1,2,3].filter(i=>i!==q.odd);
+  const i=pick(belong); q.elim=i;
+  const el=app.querySelector(`.card[data-i="${i}"]`); el.classList.add("eliminated"); el.disabled=true;
+  document.getElementById("hintBtn").disabled=true;
+}
+
+function answer(i, el){
+  if(q.answered) return;
+  Snd.init();
+  q.answered=true;
+  const secs=(performance.now()-q.t0)/1000;
+  const right = i===q.odd;
+  const L=run.L, oddCard=q.cards[q.odd];
+  let gained=0;
+  if(right){
+    run.streak++; run.best=Math.max(run.best,run.streak); run.correct++;
+    const mult=multiplier();
+    const speed=Math.max(0, Math.round(50*(1-secs/15)))*(L.speedX||1);
+    gained = Math.round((100*mult + speed) * (q.hint?.5:1));
+    run.score+=gained;
+    Snd.correct(run.streak);
+    const r=el.getBoundingClientRect(); FX.burst(r.left+r.width/2, r.top+r.height/2, 26+Math.min(run.streak,10)*4);
+    floatPts(`+${gained}`, r);
+    el.classList.add("picked-right");
+    // badges
+    award("first");
+    if(run.streak>=5) award("streak5");
+    if(run.streak>=10) award("streak10");
+    if(secs<4) award("fast");
+    const grp=TYPE_GROUP[oddCard.type]; save.counts[grp]=(save.counts[grp]||0)+1; persist();
+    if(save.counts.fbd>=5) award("fbd"); if(save.counts.graph>=5) award("graph"); if(save.counts.dots>=5) award("dots"); if(save.counts.data>=5) award("data");
+    const T=STATES[q.target];
+    if(oddCard.type==="fbd" && T.a!==0 && T.a!==T.v && oddCard.net===T.v) award("buster");
+  } else {
+    run.streak=0; run.misses++;
+    run.retry.push(q.target);
+    Snd.wrong();
+    el.classList.add("picked-wrong");
+  }
+  // reveal
+  app.querySelector("#bench").classList.add("revealed");
+  app.querySelectorAll(".card").forEach((b,k)=>{
+    b.disabled=true; b.classList.remove("eliminated");
+    const c=q.cards[k];
+    b.classList.add(k===q.odd?"odd":"belongs");
+    b.querySelector(".tag").textContent = k===q.odd ? "Odd one out" : "Belongs";
+    b.querySelector(".reading").textContent = reading(c);
+  });
+  document.getElementById("hintBtn").disabled=true;
+  const T=STATES[q.target];
+  const done = run.correct>=GOAL;
+  document.getElementById("trayHost").innerHTML = `
+    <div class="tray ${right?"ok":"no"}" role="status">
+      <div>
+        <h3>${right ? pick(["Nice find!","Got it!","Sharp eyes!","Exactly right!","Nailed it!"]) : "Not quite."}</h3>
+        <p>The other three all show an object <b>${T.short}</b>. The ${TYPE_NAME[oddCard.type]} (card ${q.odd+1}) doesn't match. ${reading(oddCard)}</p>
+        <p class="muted">${NEWTON[q.target]}</p>
+        ${right ? `<p class="pts">+${gained} points${q.hint?" (hint used)":""}</p>` : `<p class="muted">This kind of motion will come back later in the mission.</p>`}
+      </div>
+      <button class="btn primary" id="nextBtn">${done?"Finish mission":"Next"} →</button>
+    </div>`;
+  const nb=document.getElementById("nextBtn"); nb.focus({preventScroll:true});
+  nb.onclick=()=>{ Snd.click(); done ? finish() : nextQ(); };
+  document.getElementById("trayHost").scrollIntoView({behavior:"smooth", block:"nearest"});
+  // update HUD
+  document.getElementById("scoreV").textContent=run.score.toLocaleString();
+  const sb=document.getElementById("streakBox"); const m=multiplier();
+  sb.querySelector(".v").textContent = run.streak + (m>1?` ×${m}`:""); sb.classList.remove("hot"); void sb.offsetWidth; if(right) sb.classList.add("hot");
+  const meter=app.querySelector(".meter i"); meter.style.width=(run.correct/GOAL*100)+"%";
+  app.querySelector(".lvl .eyebrow").textContent=`Mission ${L.n} · ${run.correct}/${GOAL} cleared`;
+}
+function floatPts(txt, r){
+  const d=document.createElement("div"); d.className="floatpts"; d.textContent=txt;
+  d.style.left=(r.left+r.width/2-30)+"px"; d.style.top=(r.top+r.height/3)+"px";
+  document.body.appendChild(d); setTimeout(()=>d.remove(),1200);
+}
+
+function starsFor(m){ return m===0?3 : m<=2?2 : 1; }
+function finish(){
+  const L=run.L, stars=starsFor(run.misses);
+  const prev=save.best[L.id]||{stars:0,score:0};
+  save.best[L.id]={stars:Math.max(prev.stars,stars), score:Math.max(prev.score,run.score), last:Date.now()};
+  persist();
+  if(run.misses===0) award("flawless");
+  if(run.hints===0) award("solo");
+  if(LEVELS.every(l=>save.best[l.id])) award("master");
+  Snd.fanfare(); FX.rain();
+  const when=new Date();
+  const mins=Math.max(1,Math.round((Date.now()-run.startedAt)/60000));
+  const nextL=LEVELS[L.n];
+  app.innerHTML = `
+  <div class="results">
+    <div>
+      <div class="eyebrow">Mission ${L.n} cleared</div>
+      <h1 style="font-family:var(--f-display);font-weight:400;font-size:clamp(30px,5vw,44px);margin:6px 0 0;line-height:1.05">${L.title}</h1>
+      <div class="bigstars">${[1,2,3].map(i=>starSVG(stars>=i,"")).join("").replace(/<svg class=" on"/g,'<svg class="on"')}</div>
+      <p class="muted" style="margin:0 0 14px">${stars===3?"Perfect run: no misses.":stars===2?"Three stars means zero misses. Try again for a perfect run?":"Keep practicing. Three stars means zero misses."}</p>
+      ${run.newBadges.length?`<div class="eyebrow">New badges</div><div class="newbadges">${run.newBadges.map(id=>`<span class="chip">${BADGES.find(b=>b.id===id).name}</span>`).join("")}</div>`:""}
+      <div class="row" style="margin-top:20px">
+        ${nextL?`<button class="btn primary" id="nextL">Mission ${nextL.n}: ${nextL.title} →</button>`:""}
+        <button class="btn" id="again">Play again</button>
+        <button class="btn" id="toHome">All missions</button>
+      </div>
+    </div>
+    <div class="cert" aria-label="Completion certificate">
+      <svg class="seal" viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="27" fill="#FFC93C" stroke="#a77c00" stroke-width="3"/><rect x="21" y="21" width="18" height="18" fill="#FFD43B" stroke="#E5383B" stroke-width="2.5"/><path d="M39 30h11M46 26l4 4-4 4" stroke="#E5383B" stroke-width="2.5" fill="none"/></svg>
+      <div class="eyebrow">Certificate of completion</div>
+      <h3>Odd Force Out</h3>
+      <div class="muted" style="color:#5b6475">Forces &amp; Motion: Which One Doesn't Belong?</div>
+      <div class="who">${esc(save.name)||"<span style='color:#9aa3b2'>Add your name on the home screen</span>"}</div>
+      <dl>
+        <dt>Mission</dt><dd>${L.n}. ${L.title}</dd>
+        <dt>Stars</dt><dd>${"★".repeat(stars)}${"☆".repeat(3-stars)}</dd>
+        <dt>Score</dt><dd>${run.score.toLocaleString()}</dd>
+        <dt>Correct</dt><dd>${run.correct} of ${run.correct+run.misses} tries</dd>
+        <dt>Best streak</dt><dd>${run.best}</dd>
+        <dt>Hints used</dt><dd>${run.hints}</dd>
+        <dt>Time</dt><dd>about ${mins} min</dd>
+        <dt>Completed</dt><dd>${when.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}, ${when.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})}</dd>
+      </dl>
+      <p style="font-size:13px;color:#5b6475;margin:14px 0 0">Take a screenshot of this certificate and turn it in.</p>
+    </div>
+  </div>`;
+  if(nextL) document.getElementById("nextL").onclick=()=>{ Snd.click(); start(nextL); };
+  document.getElementById("again").onclick=()=>{ Snd.click(); start(L); };
+  document.getElementById("toHome").onclick=()=>{ Snd.click(); home(); };
+  window.scrollTo(0,0);
+}
+
+function report(){
+  const when=new Date();
+  const total=LEVELS.reduce((s,l)=>s+(save.best[l.id]?.score||0),0);
+  app.innerHTML = `
+  <div class="results">
+    <div class="cert">
+      <div class="eyebrow">Report card</div>
+      <h3>Odd Force Out</h3>
+      <div class="who">${esc(save.name)||"<span style='color:#9aa3b2'>Add your name on the home screen</span>"}</div>
+      <table class="report"><thead><tr><th>Mission</th><th>Stars</th><th style="text-align:right">Best score</th></tr></thead><tbody>
+      ${LEVELS.map(l=>`<tr><td>${l.n}. ${l.title}</td><td>${save.best[l.id]?"★".repeat(save.best[l.id].stars)+"☆".repeat(3-save.best[l.id].stars):"not yet"}</td><td class="n">${save.best[l.id]?save.best[l.id].score.toLocaleString():"–"}</td></tr>`).join("")}
+      <tr><th>Total</th><td></td><td class="n"><b>${total.toLocaleString()}</b></td></tr></tbody></table>
+      <p style="font-size:14px;margin:12px 0 0"><b>Badges (${save.badges.length}/${BADGES.length}):</b> ${save.badges.map(id=>BADGES.find(b=>b.id===id)?.name).filter(Boolean).join(", ")||"none yet"}</p>
+      <p style="font-size:13px;color:#5b6475;margin:10px 0 0">Shown ${when.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}, ${when.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})}. Results are saved in this browser only.</p>
+    </div>
+    <div><button class="btn primary" id="toHome">← All missions</button></div>
+  </div>`;
+  document.getElementById("toHome").onclick=()=>{ Snd.click(); home(); };
+}
+
+document.addEventListener("keydown", e=>{
+  if(!q || !run || e.target.tagName==="INPUT") return;
+  if(!q.answered && ["1","2","3","4"].includes(e.key)){ const i=+e.key-1; const el=app.querySelector(`.card[data-i="${i}"]`); if(el && !el.disabled) answer(i, el); }
+});
+
+home();
+</script>
+
+</body></html>
