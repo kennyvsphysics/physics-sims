@@ -1,0 +1,280 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>You Be the Judge</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;700&family=Public+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one case file at a time — exhibit tag + evidence file on top, two benches (Frye | Daubert) below */
+:root{
+  --bg:#e9edf1; --panel:#ffffff; --ink:#16202b; --muted:#5a6672; --line:#cfd6dd;
+  --tag:#e2a414; --tag-ink:#2a1d00; --frye:#2f5d8a; --daub:#7a3e8f;
+  --ok:#1f7a4a; --ok-bg:#e1f2e8; --no:#b3261e; --no-bg:#fbe5e3; --mid:#946200; --mid-bg:#fbf0d4;
+  --display:"Zilla Slab",Georgia,serif; --body:"Public Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10161d; --panel:#18212b; --ink:#e7ecf1; --muted:#9aa7b4; --line:#2c3845;
+  --tag:#e8b232; --tag-ink:#231800; --frye:#7fb0e0; --daub:#c99ad8;
+  --ok:#6fd39c; --ok-bg:#163526; --no:#ff8a80; --no-bg:#3b1a18; --mid:#f0c35a; --mid-bg:#3a2e10; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10161d; --panel:#18212b; --ink:#e7ecf1; --muted:#9aa7b4; --line:#2c3845;
+  --tag:#e8b232; --tag-ink:#231800; --frye:#7fb0e0; --daub:#c99ad8;
+  --ok:#6fd39c; --ok-bg:#163526; --no:#ff8a80; --no-bg:#3b1a18; --mid:#f0c35a; --mid-bg:#3a2e10; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(2rem,6vw,3rem)}
+h2{font-size:1.6rem}
+p{margin:0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:700;font-size:1.15rem}
+.score{font-family:var(--mono);font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.score b{color:var(--ink)}
+.progress{display:flex;gap:4px}
+.progress span{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.progress span.done{background:var(--tag)}
+.progress span.now{background:var(--ink)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px}
+.tag{display:inline-flex;align-items:center;gap:8px;background:var(--tag);color:var(--tag-ink);font-family:var(--mono);
+  font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px 4px 8px;border-radius:3px 12px 12px 3px}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--panel)}
+.meta{color:var(--muted);font-size:.9rem}
+.case-head{display:flex;flex-direction:column;gap:10px}
+.scenario{max-width:65ch}
+.file{margin-top:18px;border-top:1px solid var(--line)}
+.file h3{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:12px 0 6px;font-weight:500}
+.row{display:grid;grid-template-columns:150px 92px 1fr;gap:12px;align-items:start;padding:9px 0;border-bottom:1px dashed var(--line);transition:opacity .2s}
+.row .k{font-weight:700}
+.row .k small{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+.row .v{min-width:0;font-size:.95rem}
+.chip{font-family:var(--mono);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;border-radius:20px;text-align:center;justify-self:start}
+.chip.yes{background:var(--ok-bg);color:var(--ok)}
+.chip.no{background:var(--no-bg);color:var(--no)}
+.chip.partial{background:var(--mid-bg);color:var(--mid)}
+.chip.unknown{background:var(--line);color:var(--muted)}
+.fryebadge{display:inline-block;margin-left:6px;font-family:var(--mono);font-size:.65rem;color:var(--frye);border:1px solid var(--frye);border-radius:3px;padding:0 4px;vertical-align:2px}
+.file.focus-frye .row:not(.accepted){opacity:.3}
+.benches{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.bench{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.bench.frye{--c:var(--frye)} .bench.daub{--c:var(--daub)}
+.bench h3{font-size:1.2rem;color:var(--c)}
+.bench p{font-size:.9rem;color:var(--muted)}
+.choices{display:flex;gap:8px}
+.choice{flex:1;font:700 1rem var(--body);padding:12px 8px;border-radius:8px;border:2px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;letter-spacing:.03em}
+.choice:hover{border-color:var(--c)}
+.choice:focus-visible,.btn:focus-visible{outline:3px solid var(--tag);outline-offset:2px}
+.choice[aria-pressed="true"].admit{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.choice[aria-pressed="true"].exclude{background:var(--no-bg);border-color:var(--no);color:var(--no)}
+.choice:disabled{cursor:default}
+.btn{font:700 1.05rem var(--body);background:var(--ink);color:var(--panel);border:0;border-radius:8px;padding:14px 22px;cursor:pointer;align-self:flex-start}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.verdict{display:flex;flex-direction:column;gap:14px}
+.vrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vbox{border-radius:8px;padding:14px;border:1px solid var(--line)}
+.vbox .lbl{font-family:var(--mono);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.vbox .res{font-family:var(--display);font-size:1.25rem;font-weight:700;margin:2px 0 6px}
+.vbox.right .res{color:var(--ok)} .vbox.wrong .res{color:var(--no)} .vbox.either .res{color:var(--mid)}
+.vbox p{font-size:.93rem}
+.real{background:var(--bg);border-radius:8px;padding:14px;font-size:.95rem}
+.real b{font-family:var(--mono);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px;color:var(--muted)}
+.dilemma{display:inline-block;background:var(--mid-bg);color:var(--mid);font-family:var(--mono);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:4px}
+.stamp{position:absolute;right:18px;top:18px;font-family:var(--display);font-weight:700;font-size:1.1rem;padding:4px 12px;border:3px solid currentColor;border-radius:6px;transform:rotate(-8deg);opacity:.9}
+.rel{position:relative}
+.intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.intro-grid .bench p{color:var(--ink)}
+.intro-grid ol{margin:0;padding-left:20px;font-size:.92rem}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+.tw{overflow-x:auto}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:500}
+td.r{font-weight:700} td.ok{color:var(--ok)} td.bad{color:var(--no)} td.mid{color:var(--mid)}
+.rank{font-family:var(--display);font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700}
+.big{font-family:var(--mono);font-size:1rem;color:var(--muted)}
+.gavel-anim{animation:knock .35s ease-out}
+@keyframes knock{0%{transform:scale(1)}30%{transform:scale(.97)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.gavel-anim{animation:none}.row{transition:none}}
+@media (max-width:640px){
+  .benches,.vrow,.intro-grid{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr auto;gap:4px 10px}
+  .row .v{grid-column:1/-1}
+  .card{padding:16px}
+  .stamp{position:static;display:inline-block;margin-bottom:8px}
+}
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script>
+const FACTORS=[
+ ["test","Testable","Can it be tested?"],
+ ["peer","Peer review","Published & checked?"],
+ ["error","Error rate","Known mistake rate?"],
+ ["std","Standards","Rules for doing it?"],
+ ["acc","Accepted","By the science community?"]
+];
+const CASES=[
+{id:"1923-A",title:"The Blood Pressure Lie Detector",where:"Washington, D.C. · 1923",
+ scenario:"James Frye is on trial for murder. His lawyers want Dr. William Marston to testify that a systolic blood pressure test proves Frye is telling the truth when he denies the crime. The test assumes a lie makes blood pressure rise.",
+ f:{test:["partial","Marston ran some small experiments of his own."],peer:["no","Almost nothing published or checked by other scientists."],error:["unknown","No one knows how often it calls a liar truthful, or the reverse."],std:["no","No agreed way to run or score the test."],acc:["no","Most physiologists and psychologists had not accepted it."]},
+ frye:"E",daub:"E",
+ fryeWhy:"Not generally accepted by the scientists in the field, so it stays out. This exact case created the Frye rule.",
+ daubWhy:"Fails nearly every factor: no peer review, no error rate, no standards.",
+ real:"The court excluded the test and wrote the famous line: the science \"must be sufficiently established to have gained general acceptance in the particular field in which it belongs.\" Frye was convicted."},
+{id:"2026-B",title:"DNA from a Bloodstain",where:"Suffolk County, N.Y. · Burglary",
+ scenario:"A burglar cut his hand on a broken window. The crime lab developed an STR DNA profile from the blood and it matches the suspect. The prosecution calls the lab analyst to explain the match.",
+ f:{test:["yes","Methods have been tested thousands of times."],peer:["yes","Thousands of peer-reviewed studies."],error:["yes","Labs track errors with proficiency tests; match statistics are calculated."],std:["yes","National quality standards and accredited labs."],acc:["yes","Accepted by geneticists and forensic scientists worldwide."]},
+ frye:"A",daub:"A",
+ fryeWhy:"STR DNA typing is generally accepted. Admit.",
+ daubWhy:"Passes all five factors. Admit.",
+ real:"Standard STR DNA profiling is admitted in courts in every U.S. state. Today the fights are usually about how a sample was collected or stored, not the science itself."},
+{id:"2026-C",title:"The Brand-New Hair Test",where:"Made-up example · Missing-person case",
+ scenario:"A new chemical test reads a strand of hair to estimate which region a person lived in over the past few months. The defense wants an expert to say the victim had recently moved from out of state.",
+ f:{test:["yes","Designed to be tested against people with known travel history."],peer:["yes","Three peer-reviewed studies in the past two years."],error:["yes","Blind trials measured about a 2% error rate."],std:["yes","A written lab protocol exists."],acc:["no","Only two labs use it. Most forensic scientists have never heard of it."]},
+ frye:"E",daub:"A",
+ fryeWhy:"Good science, but too new to be generally accepted. Frye only asks that one question, so it stays out for now.",
+ daubWhy:"Testable, peer reviewed, known error rate, written standards. Four of five factors pass, so a Daubert judge can let it in.",
+ real:"This one is invented to show the biggest difference between the two tests: Daubert can admit solid new science before the whole field catches up. Critics of Frye say it makes courts wait years for good science."},
+{id:"2026-D",title:"Bite Mark Match",where:"Assault trial",
+ scenario:"A forensic dentist says a bite mark on the victim's arm matches the suspect's teeth \"to a reasonable degree of dental certainty.\"",
+ f:{test:["partial","Possible to test, but skin stretches and changes the mark."],peer:["partial","Published in dental journals; outside studies found examiners often disagree."],error:["no","Studies found high and inconsistent error rates."],std:["partial","Board guidelines exist, but judgments are subjective."],acc:["partial","Accepted by forensic dentists. Rejected by many scientists outside the field."]},
+ frye:"A",daub:"E",
+ fryeWhy:"For decades, courts admitted bite marks under Frye because forensic dentists (the \"community\") accepted them. That shows Frye's weak spot: it depends on who counts as the community.",
+ daubWhy:"No reliable error rate and examiners disagree. A careful Daubert judge should exclude it.",
+ real:"A 2016 White House science advisory report (PCAST) concluded bite mark analysis is not scientifically valid. Several people convicted partly on bite mark testimony were later freed by DNA evidence."},
+{id:"2026-E",title:"FaceMatch AI",where:"Made-up example · Shoplifting case",
+ scenario:"Police ran a blurry store camera image through a new AI app called FaceMatch. It reported a 97% match to the suspect's driver's license photo. A detective wants to testify about the result.",
+ f:{test:["unknown","The company will not release its code or training data."],peer:["no","No independent studies."],error:["unknown","No one knows how it performs on blurry images or different faces."],std:["no","No rules for when or how officers should use it."],acc:["no","Detectives like it. Scientists have not evaluated it."]},
+ frye:"E",daub:"E",
+ fryeWhy:"Not accepted by any scientific community. Exclude.",
+ daubWhy:"Can't be tested, no peer review, unknown error rate. Exclude.",
+ real:"FaceMatch is invented, but the problem is real: many courts are now deciding what to do with AI and facial recognition evidence. A \"97%\" score means little without a known error rate."},
+{id:"2026-F",title:"Fingerprint Comparison",where:"Robbery trial",
+ scenario:"A latent print examiner compared a fingerprint lifted from a cash register to the suspect's prints using the ACE-V method and calls it an identification.",
+ f:{test:["yes","Can be tested with known matching and non-matching prints."],peer:["yes","Large published studies, including black-box tests of examiners."],error:["yes","A 2011 FBI-funded study found a false-positive rate near 0.1%."],std:["yes","ACE-V method and professional guidelines."],acc:["yes","Generally accepted, though scientists urge more research."]},
+ frye:"A",daub:"A",
+ fryeWhy:"Generally accepted. Admit.",
+ daubWhy:"Error rates have been measured and standards exist. Admit.",
+ real:"Fingerprint evidence is admitted nationwide. A 2009 National Academy of Sciences report pushed the field to measure error rates, which is why studies like the 2011 one exist."},
+{id:"2020-G",title:"NYC DNA Software (FST)",where:"New York · People v. Williams (2020)",
+ scenario:"New York City's Medical Examiner lab used its own software, the Forensic Statistical Tool (FST), to analyze a tiny DNA mixture with several people's DNA in it. The trial judge let the results in without a hearing.",
+ f:{test:["partial","Could be tested, but outside experts had limited access to it."],peer:["partial","Validated mostly by the same lab that built it."],error:["unknown","Defense experts questioned how well it handled tiny mixed samples."],std:["partial","Approved by a state panel."],acc:["no","Used only by the NYC lab. Outside scientists disputed it."]},
+ frye:"E",daub:"E",
+ fryeWhy:"The prosecution had not shown general acceptance beyond the lab that made it. Without a Frye hearing proving it, it should not come in.",
+ daubWhy:"Hard to test independently and error rate unclear. Exclude unless the lab can show more.",
+ real:"New York's highest court ruled the trial judge was wrong to admit FST without a Frye hearing. The error was called harmless, so the conviction stood. New York still uses Frye today."},
+{id:"2011-H",title:"The Trunk Air Sample",where:"Orlando, Florida · State v. Casey Anthony (2011)",dilemma:true,
+ scenario:"Dr. Arpad Vass of Oak Ridge National Laboratory analyzed air from carpet in Casey Anthony's car trunk. He testified the chemicals were consistent with human decomposition, and that the smell was overwhelmingly strong.",
+ f:{test:["partial","Chemicals can be measured, but linking them to a body is harder."],peer:["partial","Vass had published decomposition research. Using it on a car trunk was new."],error:["unknown","No known error rate for this use."],std:["no","No standard method for detecting decomposition in a car."],acc:["partial","Defense experts said it came mostly from one lab and was not accepted."]},
+ frye:"?",daub:"?",
+ fryeWhy:"Judge's Dilemma. Arguments to exclude: one lab, new use, disputed. Arguments to admit: the chemistry tools themselves are standard. Any ruling earns points; defend yours on your worksheet.",
+ daubWhy:"Judge's Dilemma. Unknown error rate and no standards argue for exclusion, but a judge could admit it and let the defense attack it on cross-examination.",
+ real:"Surprise: Florida still used Frye in 2011 (it switched to Daubert in 2019). Judge Belvin Perry denied the defense motion to exclude the air tests, and the jury heard Vass. Casey Anthony was acquitted of murder. New York uses Frye today. Would it get in here?"}
+];
+const RANKS=[[160,"Supreme Court Justice"],[140,"Appellate Judge"],[100,"Trial Judge"],[60,"Magistrate"],[0,"Law Clerk"]];
+let S={i:-1,score:0,picks:[],cur:{frye:null,daub:null},revealed:false};
+
+const app=document.getElementById("app");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const word=x=>x==="A"?"Admit":x==="E"?"Exclude":"Either";
+
+let ac;
+function gavel(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+  [0,0.16].forEach(t=>{const o=ac.createOscillator(),g=ac.createGain();o.type="triangle";o.frequency.setValueAtTime(180,ac.currentTime+t);
+  o.frequency.exponentialRampToValueAtTime(60,ac.currentTime+t+.12);g.gain.setValueAtTime(.5,ac.currentTime+t);
+  g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t+.15);o.connect(g).connect(ac.destination);o.start(ac.currentTime+t);o.stop(ac.currentTime+t+.16)})}catch(e){}}
+
+function header(){
+  const bars=CASES.map((_,k)=>`<span class="${k<S.i?'done':k===S.i?'now':''}"></span>`).join("");
+  return `<div class="top"><div class="brand">You Be the Judge</div><div class="score">Case <b>${Math.max(S.i+1,0)}</b>/8 · Score <b>${S.score}</b>/160</div></div><div class="progress" aria-hidden="true">${bars}</div>`;
+}
+
+function intro(){
+  app.innerHTML=`
+  <div class="card case-head">
+    <span class="tag">Court is in session</span>
+    <h1>You Be the Judge</h1>
+    <p class="scenario">Eight experts want to take the stand. Before a jury hears them, <b>you</b> decide if their science is reliable enough. Rule on each case twice: once under the Frye standard and once under Daubert.</p>
+  </div>
+  <div class="intro-grid">
+    <div class="bench frye"><h3>Frye · 1923</h3><p><b>One question:</b> Is the method <i>generally accepted</i> by the relevant scientific community?</p><p>Used in New York, California, Illinois and a few other states.</p></div>
+    <div class="bench daub"><h3>Daubert · 1993</h3><p><b>Five factors.</b> The judge is the gatekeeper and asks:</p><ol><li>Can it be tested?</li><li>Peer reviewed?</li><li>Known error rate?</li><li>Standards for doing it?</li><li>Generally accepted?</li></ol><p>Used in federal courts and most states.</p></div>
+  </div>
+  <div class="card"><p class="meta">Scoring: 10 points for each correct ruling, 160 possible. Record every ruling in Part 3 of your worksheet.</p></div>
+  <button class="btn" id="start">Call the first case</button>`;
+  document.getElementById("start").onclick=()=>{gavel();next()};
+}
+
+function next(){S.i++;S.cur={frye:null,daub:null};S.revealed=false;if(S.i>=CASES.length)return final();render();window.scrollTo({top:0,behavior:"smooth"})}
+
+function render(){
+  const c=CASES[S.i];
+  const rows=FACTORS.map(([k,l,s])=>{const [st,n]=c.f[k];return `<div class="row ${k==='acc'?'accepted':''}"><div class="k">${l}${k==='acc'?'<span class="fryebadge">FRYE</span>':''}<small>${s}</small></div><span class="chip ${st}">${st==='partial'?'mixed':st}</span><div class="v">${esc(n)}</div></div>`}).join("");
+  const bench=(key,name,cls,q)=>`<div class="bench ${cls}" data-b="${key}"><h3>${name} ruling</h3><p>${q}</p><div class="choices">
+    <button class="choice admit" data-k="${key}" data-v="A" aria-pressed="${S.cur[key]==='A'}" ${S.revealed?'disabled':''}>Admit</button>
+    <button class="choice exclude" data-k="${key}" data-v="E" aria-pressed="${S.cur[key]==='E'}" ${S.revealed?'disabled':''}>Exclude</button></div></div>`;
+  app.innerHTML=header()+`
+  <div class="card case-head">
+    <div><span class="tag">Exhibit ${c.id}</span> ${c.dilemma?'<span class="dilemma">Judge\'s Dilemma</span>':''}</div>
+    <h2>${esc(c.title)}</h2>
+    <p class="meta">${esc(c.where)}</p>
+    <p class="scenario">${esc(c.scenario)}</p>
+    <div class="file" id="file"><h3>Evidence file on the science</h3>${rows}</div>
+  </div>
+  <div class="benches">
+    ${bench("frye","Frye","frye","Only the <b>Accepted</b> row matters here.")}
+    ${bench("daub","Daubert","daub","Weigh all five factors.")}
+  </div>
+  <div id="after">${S.revealed?verdict():`<button class="btn" id="bang" ${S.cur.frye&&S.cur.daub?'':'disabled'}>Bang the gavel</button>`}</div>`;
+  const file=document.getElementById("file");
+  const fb=app.querySelector('[data-b="frye"]');
+  fb.addEventListener("mouseenter",()=>file.classList.add("focus-frye"));
+  fb.addEventListener("mouseleave",()=>file.classList.remove("focus-frye"));
+  fb.addEventListener("focusin",()=>file.classList.add("focus-frye"));
+  fb.addEventListener("focusout",()=>file.classList.remove("focus-frye"));
+  app.querySelectorAll(".choice").forEach(b=>b.onclick=()=>{S.cur[b.dataset.k]=b.dataset.v;render();
+    const nb=app.querySelector(`.choice[data-k="${b.dataset.k}"][data-v="${b.dataset.v}"]`);nb&&nb.focus()});
+  const bang=document.getElementById("bang");
+  if(bang)bang.onclick=reveal;
+  const nx=document.getElementById("nextcase");
+  if(nx)nx.onclick=()=>{gavel();next()};
+}
+
+function judge(c,key){const ans=c[key];if(ans==="?")return "either";return S.cur[key]===ans?"right":"wrong"}
+function reveal(){
+  const c=CASES[S.i];S.revealed=true;gavel();
+  let pts=0;["frye","daub"].forEach(k=>{const r=judge(c,k);if(r!=="wrong")pts+=10});
+  S.score+=pts;S.picks.push({frye:S.cur.frye,daub:S.cur.daub,fr:judge(c,"frye"),dr:judge(c,"daub")});
+  render();const a=document.getElementById("after");a.classList.add("gavel-anim");a.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function verdict(){
+  const c=CASES[S.i];
+  const box=(k,name)=>{const r=judge(c,k);const head=r==="right"?"Correct":r==="wrong"?"Overruled":"Your call stands";
+    const ans=c[k]==="?"?"Reasonable judges disagree":"Best ruling: "+word(c[k]);
+    return `<div class="vbox ${r}"><div class="lbl">${name} · you ruled ${word(S.cur[k])}</div><div class="res">${head}</div><p><b>${ans}.</b> ${esc(k==='frye'?c.fryeWhy:c.daubWhy)}</p></div>`};
+  const last=S.i===CASES.length-1;
+  return `<div class="card verdict"><div class="vrow">${box("frye","Frye")}${box("daub","Daubert")}</div>
+   <div class="real"><b>What really happened</b>${esc(c.real)}</div>
+   <p class="meta">Write your rulings and the deciding fact in your Ruling Log before moving on.</p>
+   <button class="btn" id="nextcase">${last?'See my results':'Next case'}</button></div>`;
+}
+
+function final(){
+  const rank=RANKS.find(([m])=>S.score>=m)[1];
+  const cls=r=>r==="right"?"ok":r==="wrong"?"bad":"mid";
+  const rows=CASES.map((c,k)=>{const p=S.picks[k];return `<tr><td>${k+1}</td><td>${esc(c.title)}</td><td class="r ${cls(p.fr)}">${p.frye}</td><td class="r ${cls(p.dr)}">${p.daub}</td><td>${c.frye==="?"?"Either":c.frye} / ${c.daub==="?"?"Either":c.daub}</td></tr>`}).join("");
+  app.innerHTML=`<div class="top"><div class="brand">You Be the Judge</div><div class="score">Final score <b>${S.score}</b>/160</div></div>
+  <div class="card case-head"><span class="tag">Court adjourned</span><p class="big">${S.score} of 160 points</p><div class="rank">${rank}</div>
+  <p class="scenario">Copy your score and rank onto your worksheet. Then look for the cases where Frye and Daubert gave <b>different</b> answers. Those show what each test is good and bad at.</p></div>
+  <div class="card"><div class="tw"><table><thead><tr><th>#</th><th>Case</th><th>Your Frye</th><th>Your Daubert</th><th>Best (F / D)</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <p class="meta" style="margin-top:10px">A = Admit · E = Exclude · Green = correct, red = overruled, gold = Judge's Dilemma.</p></div>
+  <div class="card"><h3 style="font-size:1.2rem;margin-bottom:6px">Exit ticket</h3><p class="scenario">New York uses Frye. If the Casey Anthony trial happened in Suffolk County tomorrow, should the judge let the trunk air expert testify? Answer on your worksheet using <i>general acceptance</i> or <i>error rate</i>.</p></div>
+  <button class="btn ghost" id="again">Play again</button>`;
+  document.getElementById("again").onclick=()=>{S={i:-1,score:0,picks:[],cur:{frye:null,daub:null},revealed:false};intro()};
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+intro();
+</script>
+
+</body></html>
