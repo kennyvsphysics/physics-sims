@@ -1,0 +1,472 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Make 24</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+/* Layout: graph-paper lab table; one board of four index cards, tools below, class mode = same cards at projector scale */
+:root{
+  --bg:#eef1f6; --grid:rgba(47,79,216,.07); --ink:#172033; --muted:#5b6478; --line:#d3d9e6;
+  --card:#ffffff; --card-shadow:0 1px 0 rgba(23,32,51,.06),0 6px 16px rgba(23,32,51,.08);
+  --accent:#2f4fd8; --accent-ink:#ffffff; --accent-soft:#e3e8fc;
+  --hot:#f2a516; --hot-soft:#fff3d6; --ok:#17885b; --ok-soft:#dcf3e8; --bad:#c93a3a; --bad-soft:#fbe4e4;
+  --display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f141e; --grid:rgba(138,162,255,.06); --ink:#e6eaf3; --muted:#9aa4ba; --line:#2a3447;
+  --card:#1a2232; --card-shadow:0 1px 0 rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.35);
+  --accent:#8aa2ff; --accent-ink:#0f141e; --accent-soft:#232e4c;
+  --hot:#ffc24d; --hot-soft:#3a2f17; --ok:#4fd19a; --ok-soft:#173528; --bad:#ff7d7d; --bad-soft:#3d1d1f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141e; --grid:rgba(138,162,255,.06); --ink:#e6eaf3; --muted:#9aa4ba; --line:#2a3447;
+  --card:#1a2232; --card-shadow:0 1px 0 rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.35);
+  --accent:#8aa2ff; --accent-ink:#0f141e; --accent-soft:#232e4c;
+  --hot:#ffc24d; --hot-soft:#3a2f17; --ok:#4fd19a; --ok-soft:#173528; --bad:#ff7d7d; --bad-soft:#3d1d1f; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;min-height:100vh}
+.wrap{max-width:980px;margin:0 auto;padding-block:20px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:18px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--hot);outline-offset:2px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand h1{font-family:var(--display);font-weight:800;font-size:2rem;margin:0;letter-spacing:-.02em}
+.brand h1 b{color:var(--accent)}
+.brand span{color:var(--muted);font-size:.9rem}
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:7px 13px;border-radius:9px;font-weight:700;font-size:.92rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg button.tw[aria-pressed="true"]{background:var(--hot);color:#1d1606}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.rules{color:var(--muted);font-size:.95rem;max-width:62ch;margin:0}
+.rules strong{color:var(--ink)}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.stat .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.stat .v{font-family:var(--display);font-weight:800;font-size:1.5rem;font-variant-numeric:tabular-nums}
+.stat.streak .v{color:var(--hot)}
+
+/* cards */
+.board{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{position:relative;aspect-ratio:5/7;max-width:100%;border-radius:16px;border:2px solid var(--line);background:var(--card);
+  box-shadow:var(--card-shadow);display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-weight:800;font-variant-numeric:tabular-nums;
+  font-size:clamp(2.4rem,9vw,4.6rem);transition:transform .15s ease,border-color .15s,background .15s;padding:8px;min-width:0}
+.card:hover{transform:translateY(-2px)}
+.card .corner{position:absolute;top:8px;left:11px;font-size:.85rem;color:var(--muted);font-weight:700}
+.card .corner.br{top:auto;left:auto;bottom:8px;right:11px;transform:rotate(180deg)}
+.card .ex{position:absolute;bottom:8px;left:8px;right:8px;text-align:center;font-family:var(--body);font-weight:400;font-size:.78rem;color:var(--muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card.derived{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
+.card.sel{border-color:var(--accent);transform:translateY(-6px);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent),var(--card-shadow)}
+.card.hint{border-color:var(--hot);border-style:dashed;border-width:3px}
+.card.empty{background:transparent;border:2px dashed var(--line);box-shadow:none;cursor:default}
+.card.empty:hover{transform:none}
+.card.long{font-size:clamp(1.5rem,5vw,2.6rem)}
+.card.win{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.frac{display:inline-flex;flex-direction:column;align-items:center;line-height:1}
+.frac>span:first-child{border-bottom:.06em solid currentColor;padding:0 .08em .04em}
+.frac>span{font-size:.62em}
+.neg{margin-right:.04em}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:shake .3s ease 2}
+
+/* ops */
+.ops{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.op{width:64px;height:58px;border-radius:14px;border:2px solid var(--line);background:var(--card);font-family:var(--display);font-weight:800;font-size:1.7rem;box-shadow:var(--card-shadow)}
+.op[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.op.tw{border-color:color-mix(in srgb,var(--hot) 60%,var(--line));background:var(--hot-soft)}
+.op.tw[aria-pressed="true"]{background:var(--hot);color:#1d1606}
+.op:disabled{opacity:.4;cursor:not-allowed}
+.op small{font-size:.6em}
+.tools{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 14px;font-weight:700;font-size:.95rem}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.warn{color:var(--bad)}
+.btn.hot{background:var(--hot);color:#1d1606;border-color:var(--hot)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.msg{min-height:1.6em;text-align:center;font-weight:700;margin:0}
+.msg.good{color:var(--ok)} .msg.bad{color:var(--bad)} .msg.tip{color:color-mix(in srgb,var(--hot) 70%,var(--ink))}
+.log{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:30px;padding:0;margin:0;list-style:none}
+.log li{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px 11px;font-size:.9rem;font-variant-numeric:tabular-nums}
+.sol{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;text-align:center}
+.sol .expr{font-family:var(--display);font-weight:800;font-size:1.5rem;overflow-x:auto}
+.sol .k{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+
+.overlay{position:absolute;inset:-6px;border-radius:18px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(2px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;z-index:2}
+.overlay .big{font-family:var(--display);font-weight:800;font-size:clamp(2.6rem,10vw,5rem);color:var(--ok);line-height:1}
+.overlay .pts{font-weight:700;color:var(--muted)}
+
+/* class mode */
+.class-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.timer{font-family:var(--display);font-weight:800;font-size:clamp(2.6rem,8vw,4.5rem);font-variant-numeric:tabular-nums;line-height:1}
+.timer.low{color:var(--bad)}
+.tbar{height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.tbar i{display:block;height:100%;background:var(--accent);width:100%;transition:width .25s linear}
+.cboard .card{font-size:clamp(3rem,13vw,8.5rem);cursor:default}
+.cboard .card:hover{transform:none}
+.cboard.hidden .card{color:transparent}
+.cboard.hidden .card .corner{color:transparent}
+.cboard.hidden .card::after{content:"?";position:absolute;color:var(--line)}
+.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.team{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.team input{font:inherit;font-weight:700;border:0;border-bottom:1px dashed var(--line);background:transparent;color:var(--ink);padding:2px 0;width:100%}
+.team .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.team .sc{font-family:var(--display);font-weight:800;font-size:2rem;font-variant-numeric:tabular-nums}
+.team .row button{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-weight:800;font-size:1.2rem}
+.section-h{font-family:var(--display);font-weight:800;font-size:1.1rem;margin:0}
+.small{font-size:.85rem;color:var(--muted)}
+select{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 10px;font-weight:700}
+.keys{font-size:.82rem;color:var(--muted);text-align:center;margin:0}
+kbd{font-family:inherit;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:var(--card)}
+
+@media (max-width:640px){
+  .board{grid-template-columns:repeat(2,minmax(0,1fr));max-width:360px;margin:0 auto;width:100%}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .card{aspect-ratio:1/1;font-size:3rem}
+  .op{width:56px;height:52px}
+  .keys{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand"><h1>Make <b>24</b></h1><span>mental math warm-up</span></div>
+    <div class="seg" role="group" aria-label="Mode">
+      <button id="m-solo" aria-pressed="true">Solo play</button>
+      <button id="m-class" aria-pressed="false">Class (projector)</button>
+    </div>
+  </header>
+
+  <div class="bar">
+    <div class="seg" role="group" aria-label="Difficulty" id="diff">
+      <button data-d="easy" aria-pressed="false">Easy</button>
+      <button data-d="medium" aria-pressed="true">Medium</button>
+      <button data-d="hard" aria-pressed="false">Hard</button>
+      <button data-d="twist" class="tw" aria-pressed="false">Physics Twist</button>
+    </div>
+    <p class="rules" id="rules"></p>
+  </div>
+
+  <!-- SOLO -->
+  <section id="solo" style="display:flex;flex-direction:column;gap:16px">
+    <div class="stats">
+      <div class="stat"><div class="k">Score</div><div class="v" id="s-score">0</div></div>
+      <div class="stat streak"><div class="k">Streak</div><div class="v" id="s-streak">0</div></div>
+      <div class="stat"><div class="k">Best streak</div><div class="v" id="s-best">0</div></div>
+      <div class="stat"><div class="k">Time</div><div class="v" id="s-time">0:00</div></div>
+    </div>
+    <div class="board" id="board"></div>
+    <div class="ops" id="ops"></div>
+    <p class="msg" id="msg" aria-live="polite"></p>
+    <ul class="log" id="log" aria-label="Your steps"></ul>
+    <div class="sol" id="solbox" hidden><div class="k">One solution</div><div class="expr" id="solexpr"></div></div>
+    <div class="tools">
+      <button class="btn" id="undo">Undo</button>
+      <button class="btn" id="reset">Start over</button>
+      <button class="btn hot" id="hint">Hint (−5)</button>
+      <button class="btn warn" id="show">Show solution</button>
+      <button class="btn primary" id="next">New puzzle</button>
+    </div>
+    <p class="keys">Keyboard: <kbd>1</kbd>–<kbd>4</kbd> pick a card, <kbd>+</kbd> <kbd>-</kbd> <kbd>*</kbd> <kbd>/</kbd> <kbd>^</kbd> operations, <kbd>Z</kbd> undo, <kbd>H</kbd> hint, <kbd>Enter</kbd> next</p>
+  </section>
+
+  <!-- CLASS -->
+  <section id="class" hidden style="flex-direction:column;gap:16px">
+    <div class="class-top">
+      <div class="timer" id="c-time">1:00</div>
+      <div class="tools">
+        <label class="small" for="c-len">Round</label>
+        <select id="c-len"><option value="30">30 s</option><option value="60" selected>60 s</option><option value="90">90 s</option><option value="120">2 min</option><option value="0">No timer</option></select>
+        <button class="btn primary" id="c-next">Reveal next puzzle</button>
+        <button class="btn" id="c-pause">Pause</button>
+      </div>
+    </div>
+    <div class="tbar"><i id="c-bar"></i></div>
+    <div class="board cboard hidden" id="cboard"></div>
+    <div class="tools">
+      <button class="btn hot" id="c-hint">Show first step</button>
+      <button class="btn warn" id="c-show">Show solution</button>
+      <button class="btn" id="c-full">Full screen</button>
+    </div>
+    <p class="msg tip" id="c-msg" aria-live="polite"></p>
+    <div class="sol" id="c-solbox" hidden><div class="k">One solution</div><div class="expr" id="c-solexpr"></div></div>
+    <div class="bar"><h2 class="section-h">Team scoreboard</h2>
+      <div class="tools"><button class="btn" id="t-add">Add team</button><button class="btn" id="t-rm">Remove team</button><button class="btn warn" id="t-zero">Reset scores</button></div></div>
+    <div class="teams" id="teams"></div>
+  </section>
+</div>
+
+<script>
+// ---- rational arithmetic + 24 solver (shared by build script and page) ----
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a}
+function R(n,d){if(d===undefined)d=1;if(d<0){n=-n;d=-d}const g=gcd(n,d)||1;return{n:n/g,d:d/g}}
+const CAP=100000;
+function ok(r){return r&&Math.abs(r.n)<=CAP&&r.d<=CAP}
+function isqrt(x){if(x<0)return -1;const s=Math.round(Math.sqrt(x));return s*s===x?s:-1}
+const OPS={
+ '+':(a,b)=>R(a.n*b.d+b.n*a.d,a.d*b.d),
+ '−':(a,b)=>R(a.n*b.d-b.n*a.d,a.d*b.d),
+ '×':(a,b)=>R(a.n*b.n,a.d*b.d),
+ '÷':(a,b)=>b.n===0?null:R(a.n*b.d,a.d*b.n),
+ '^':(a,b)=>{if(b.d!==1||b.n<1||b.n>6)return null;let n=Math.pow(a.n,b.n),d=Math.pow(a.d,b.n);if(Math.abs(n)>CAP||d>CAP)return null;return R(n,d)},
+};
+const UN={
+ '√':a=>{const n=isqrt(a.n),d=isqrt(a.d);return n<0||d<0?null:R(n,d)},
+ '²':a=>{const n=a.n*a.n,d=a.d*a.d;return n>CAP||d>CAP?null:R(n,d)},
+};
+const PREC={'+':1,'−':1,'×':2,'÷':2,'^':3};
+function fmt(r){return r.d===1?String(r.n):r.n+'/'+r.d}
+function wrap(it,need){return it.p<need?'('+it.e+')':it.e}
+function binExpr(a,op,b){const P=PREC[op];let l,r;
+ if(op==='^'){l=a.p<=3?'('+a.e+')':a.e;r=b.p<4?'('+b.e+')':b.e}
+ else{l=wrap(a,P);r=(b.p<P||(b.p===P&&(op==='−'||op==='÷')))?'('+b.e+')':b.e}
+ return{e:l+' '+op+' '+r,p:P}}
+function unExpr(op,a){if(op==='√')return{e:'√'+(a.p<4?'('+a.e+')':a.e),p:4};return{e:(a.p<4?'('+a.e+')':a.e)+'²',p:3}}
+function item(v,e,p){return{v,e:e===undefined?fmt(v):e,p:p===undefined?(v.d===1&&v.n>=0?4:2):p}}
+function key(items,u){return items.map(x=>x.v.n+'/'+x.v.d).sort().join(',')+'|'+u}
+function solve(values,opt){opt=opt||{};const twist=!!opt.twist,limit=opt.limit||400;
+ const target=opt.target||24;const items0=values.map(v=>v.e!==undefined?v:item(v));
+ const dead=new Set();const sols=[];
+ const bops=twist?['+','×','−','÷','^']:['+','×','−','÷'];
+ function rec(items,u,steps){
+  if(sols.length>=limit)return true;
+  let found=false;
+  if(items.length===1&&items[0].v.n===target&&items[0].v.d===1){sols.push({steps:steps.slice(),expr:items[0].e});found=true}
+  const k=key(items,u);if(dead.has(k))return false;
+  for(let i=0;i<items.length;i++)for(let j=i+1;j<items.length;j++){
+   const rest=items.filter((_,t)=>t!==i&&t!==j);
+   for(const op of bops){const orders=(op==='+'||op==='×')?[[i,j]]:[[i,j],[j,i]];
+    for(const [x,y] of orders){const a=items[x],b=items[y];const v=OPS[op](a.v,b.v);if(!ok(v))continue;
+     const ex=binExpr(a,op,b);const r={v,e:ex.e,p:ex.p};
+     steps.push({a:a.v,op,b:b.v,r:v});if(rec(rest.concat([r]),u,steps))found=true;steps.pop();
+     if(sols.length>=limit)return true}}}
+  if(twist&&u>0){for(let i=0;i<items.length;i++){const a=items[i];
+   for(const op of ['√','²']){const v=UN[op](a.v);if(!ok(v)||(v.n===a.v.n&&v.d===a.v.d))continue;
+    const ex=unExpr(op,a);const r={v,e:ex.e,p:ex.p};const nx=items.slice();nx[i]=r;
+    steps.push({a:a.v,op,b:null,r:v});if(rec(nx,u-1,steps))found=true;steps.pop();if(sols.length>=limit)return true}}}
+  if(!found)dead.add(k);return found}
+ rec(items0,opt.unary===undefined?2:opt.unary,[]);
+ for(const s of sols){let sc=0,frac=false,div=false;
+  for(const st of s.steps){if(st.op==='÷'){sc+=2;div=true}if(st.op==='−')sc+=.5;if(st.op==='^'||!st.b)sc+=1;
+   if(st.r.d!==1){sc+=6;frac=true}if(st.r.n<0)sc+=3;if(Math.abs(st.r.n)>100)sc+=2}
+  s.score=sc;s.frac=frac;s.div=div}
+ sols.sort((a,b)=>a.score-b.score);return sols}
+function stepText(st){return st.b?fmt(st.a)+' '+st.op+' '+fmt(st.b)+' = '+fmt(st.r):(st.op==='√'?'√'+fmt(st.a):fmt(st.a)+'²')+' = '+fmt(st.r)}
+if(typeof module!=='undefined')module.exports={R,solve,stepText,fmt,OPS,UN,item};
+
+const DECKS={"easy":"1128 1136 1137 1138 1139 1145 1146 1147 1148 1155 1156 1226 122a 1234 1236 1238 1239 123a 1244 1248 124a 1257 1258 1266 1267 1268 1269 1288 1334 1335 1337 1339 1344 1349 1359 1366 1367 1368 1388 13aa 1445 1447 1448 1449 144a 1455 1468 1478 1488 149a 14aa 1566 1588 158a 1599 159a 15aa 166a 167a 1689 168a 1699 169a 1779 177a 1788 1789 178a 1799 1888 1889 2223 2224 2228 222a 2238 2245 2246 2248 224a 2266 2268 226a 2288 228a 22aa 2336 2337 2338 2339 2344 2346 2349 2355 2356 2366 2369 236a 2378 2399 239a 2444 2448 244a 2458 2466 2468 2469 246a 2488 248a 2499 2568 256a 257a 2589 2666 2668 266a 2679 2688 2689 268a 26aa 2778 279a 2888 288a 2899 3336 3338 333a 3346 3348 3349 3356 3359 335a 3367 3369 3379 338a 3399 3446 3448 3457 3458 345a 346a 3477 347a 3489 3499 3558 3568 3569 356a 3579 3588 3599 3666 3667 3668 3669 3678 3688 3699 369a 3777 3778 377a 3788 37aa 3888 3889 3899 389a 38aa 3999 4444 4446 4448 4455 4456 4458 4469 446a 4478 4479 4488 448a 4555 4556 4559 455a 4566 4569 456a 4578 4666 4667 4668 4677 4688 4689 4699 469a 46aa 4788 4888 48aa 499a 5556 5559 5566 5568 5577 5667 568a 5788 5888 588a 59aa 6666 6668 6669 669a 6799 688a 6aaa","medium":"111b 111c 111d 1126 112a 112b 112c 112d 113c 113d 1144 1149 114c 1157 1166 119d 11ac 11ad 11bb 11bc 11bd 11cc 11cd 11dd 1224 1225 1227 1228 1229 122b 122c 122d 1233 1235 1237 123b 123c 123d 1245 1246 1247 1249 124b 124c 124d 1255 1256 1259 125a 125c 125d 126a 126c 126d 1278 1279 127a 127b 1289 128d 129c 129d 12ab 12ac 12ad 12bb 12bc 12bd 12cc 12cd 12dd 1333 1336 1338 133a 133b 133c 1345 1347 1348 134a 134b 134c 134d 1356 1358 135a 135c 135d 1369 136a 136b 136c 136d 1377 137a 137d 138c 138d 139b 139c 139d 13ab 13ac 13bb 13bc 13cc 13cd 13dd 1444 1446 144b 144c 1457 145a 145b 145c 1466 1467 146b 146c 146d 147c 147d 1489 148b 148c 148d 149b 149c 149d 14ab 14ac 1556 155b 155d 1567 1568 1569 156a 156c 156d 1578 157a 157b 157c 157d 1589 158b 158c 159b 159c 1666 1669 166b 166c 166d 167b 167c 1688 168b 168c 168d 169c 169d 16ad 177b 178b 178c 179c 179d 188a 188b 188c 189b 189c 18ac 18ad 18bd 199c 19ac 19bc 19cc 1abc 1acc 1acd 1bbd 1bcc 1bcd 1bdd 1ccd 2225 2227 2229 222b 222c 222d 2233 2236 2237 2239 223b 223c 223d 2244 2247 2249 224b 224c 224d 2255 2256 2259 225a 225b 225c 226c 2277 2278 227c 227d 2289 228c 229b 229c 22bd 22cc 2333 233a 233c 233d 2345 2347 2348 234a 234b 234c 234d 2357 2358 2359 235a 235b 235d 2367 2368 236c 236d 2377 2379 237a 237b 237c 237d 2388 2389 238a 238b 238c 239d 23ac 23ad 23bb 23bc 23bd 23cc 23cd 23dd 2445 2446 2447 244c 2456 2457 2459 245b 245c 245d 2467 246b 246c 246d 2478 2479 247a 247b 248b 248c 249a 249c 249d 24ab 24ac 24ad 24bb 24cc 24dd 2559 255c 255d 2566 2567 256b 256c 256d 257b 257d 2588 258a 258b 258c 258d 259a 259b 259c 25ab 25ad 25cc 25cd 2667 2669 266c 2678 267b 267c 267d 268b 268c 268d 2699 269a 269b 269c 26ab 26ac 26ad 26bd 26cc 277c 2788 278b 278c 278d 279b 279d 27aa 27ab 27bc 27cc 2889 288c 288d 289a 289b 289c 289d 28aa 28ab 28ac 28ad 28bc 28cc 28cd 299c 29ab 29ac 29ad 29bb 29bd 29cd 2aac 2aad 2abb 2abc 2abd 2acd 2bbc 2bbd 2bcc 2bcd 2bdd 2ccc 2ccd 2cdd 3333 3334 3335 3337 333b 333c 3344 3345 3347 334b 334c 335c 335d 3368 336a 336b 336c 336d 337b 337c 3389 338c 338d 339a 339c 33bc 33bd 33cc 33cd 3444 3445 3447 3449 344b 344d 3455 3456 3459 345b 345c 345d 3466 3468 3469 346b 346c 3479 347b 348a 348b 348c 349b 349c 349d 34aa 34ac 34ad 34bc 34bd 34cc 34cd 3557 355b 3566 3567 356b 356c 3578 357a 357b 357c 3589 358b 358c 359a 359c 359d 35ab 35ac 35ad 35bb 35cc 35cd 35dd 366c 366d 3677 3679 367c 367d 3689 368a 368d 369b 369c 369d 36ab 36ac 36bc 36bd 36cc 36cd 377d 3789 378b 378c 378d 3799 379a 379b 379c 37ab 37ad 37bc 37cc 37cd 388b 389b 389c 389d 38ab 38bb 38bc 38cc 38cd 38dd 399a 399b 399c 399d 39ab 39ac 39ad 39bc 39cd 3aac 3abc 3abd 3bcc 3ccd 4447 4449 444a 444b 444c 4457 445a 445b 445d 4468 446c 447c 4489 448b 448c 448d 449b 44ac 44ad 44bd 44cc 44cd 4567 4568 4577 4579 457b 457c 457d 4589 458b 458c 458d 459a 459c 459d 45ab 45ad 45bc 45bd 45cc 45cd 4669 466c 4678 467a 468c 469c 469d 46ab 46ac 46bb 46bc 46cc 46cd 46dd 4778 477b 4789 478c 478d 479a 479c 479d 47ab 47ac 47bc 47cc 47cd 4889 488a 488c 489a 489b 489c 489d 48ab 48ac 48bc 48bd 48cd 499c 49ad 49bb 49bc 49cc 4acc 4acd 4bcd 4ccc 5567 556b 5578 5589 558b 558c 558d 559a 559b 55ab 55bc 55bd 55cc 55cd 566a 566c 5678 567c 567d 5688 5689 5699 569a 569c 56ab 56ad 56bc 56bd 56cc 56cd 5789 579d 57ac 57bb 57dd 5889 588d 589b 589c 58ab 58ac 58bc 58bd 599b 599c 59ad 59cc 59cd 5acd 5add 666a 666b 6679 667c 6689 668a 668c 669b 669c 66ac 66ad 66bd 66cc 677a 677b 678a 678b 679c 67ac 67ad 67bc 67bd 67cc 67cd 6888 6889 688b 688c 689c 689d 68ac 68ad 68bb 68bd 68cc 68dd 699b 699c 69ab 69cc 69cd 6acc 778b 77bc 77bd 77cc 77cd 788c 789d 78ad 78bc 78bd 78cc 78cd 799d 79ac 79bb 79bc 79dd 7aab 7acc 888a 888b 888c 888d 889b 88ad 88bd 88cc 89ad 89bc 89bd 89cc 89cd 8aac 8abb 8acc 8add 99bc 99bd 99cc 99cd 9aad 9abc 9abd 9acc 9acd 9bbb 9bdd 9ccc aabd aacc abbc abbd abcc abcd accc accd acdd bbbd bbcc bbcd bccc bccd bcdd bddd cccc cccd ccdd","hard":"1118 1127 1129 1134 1135 113a 113b 114a 1158 1168 1169 116c 117a 1188 126b 1277 127c 128a 129b 1346 1357 135b 1378 1379 137c 1389 138a 138b 1399 139a 1456 1458 1459 145d 1469 146a 1477 1479 147b 14cc 1555 1559 155a 155c 156b 1579 158d 159d 15ab 15ac 15ad 15bb 15bc 15cc 1668 1679 16ac 16bc 16bd 16cc 16cd 177c 179a 179b 17ac 17ad 17cc 17cd 17dd 189d 18ab 18bc 18cc 19ad 19bb 19bd 1aac 1bbc 1ccc 1cdd 2234 2235 223a 2257 2258 2267 2269 226b 226d 227a 229a 22ab 22ad 22bb 22bc 22cd 22dd 2335 233b 235c 236b 238d 239c 23aa 2449 244b 244d 2455 245a 2477 247c 2489 248d 24aa 24bc 2557 2558 255a 255b 2569 2577 2578 2579 25aa 25ac 25bc 266b 266d 267a 26bc 26cd 277a 277b 277d 2789 27ac 27cd 288b 28bb 28dd 299b 299d 29aa 29dd 2aab 2bbb 2ddd 3339 334d 3355 3357 3366 3377 3378 337d 3388 339b 339d 33ad 344a 344c 346d 3478 347c 348d 3556 3559 355c 356d 357d 358d 35aa 35bc 366a 366b 367a 368c 36aa 36bb 36dd 3779 377c 379d 37bb 37dd 388a 388c 38ac 39aa 39bb 39bd 39cc 39dd 3bbc 3ccc 3cdd 4445 445c 446b 446d 4477 447a 447d 449c 44aa 44bc 4557 4558 456b 456c 456d 457a 4588 458a 4599 45aa 45ac 45bb 45dd 466a 4679 467c 468a 468d 4777 478a 478b 4799 479b 47aa 47bb 47bd 47dd 488b 488d 4899 48bb 48cc 48dd 49ab 49ac 4aab 4aac 4abc 4abd 5555 555c 557a 557b 5588 558a 5599 55aa 55ad 55bb 55dd 5666 5668 5669 5677 5679 568c 568d 569b 569d 56aa 56ac 56bb 56dd 5779 577a 577b 578a 579a 579b 579c 57aa 57ab 57ad 57bd 57cc 589d 58cc 59ab 59bd 5aab 5aac 5aad 5abb 5bcc 666c 667a 667b 6688 668b 668d 669d 66bc 66cd 6789 678c 67aa 67bb 6899 689a 689b 68ab 68bc 699a 69ac 69bc 69bd 6aad 6abc 6acd 6bbc 6bcc 6bcd 6ccc 6ccd 6cdd 777c 779a 77ad 7889 788a 788b 788d 789a 789c 78aa 78ab 79ab 79cc 7aac 7abd 7acd 7ccd 889c 889d 88ac 88bc 88cd 899c 89ac 89bb 8acd 8bcc 999c 99ad 9bcc 9bcd aaac aaad aabc aacd addd bbbc cddd","twist":"1111 1112 1113 1114 1115 1116 1117 1119 111a 1122 1123 1124 1125 1133 114b 114d 1159 115a 115b 115c 115d 1167 116a 116b 116d 1177 1178 1179 117b 117c 117d 1189 118a 118b 118c 118d 1199 119a 119b 119c 11aa 1222 1223 125b 127d 128b 128c 1299 129a 12aa 133d 1355 137b 13ad 13bd 144d 147a 148a 1499 14ad 14bb 14bc 14bd 14cd 14dd 1557 1558 1577 15bd 15cd 15dd 1667 1677 1678 167d 169b 16aa 16ab 16bb 16dd 1778 177d 178d 17aa 17ab 17bb 17bc 17bd 188d 1899 189a 18aa 18bb 18cd 18dd 1999 199a 199b 199d 19aa 19ab 19cd 19dd 1aaa 1aab 1aad 1abd 1add 2222 2226 225d 2279 227b 228b 228d 2299 229d 22ac 2334 239b 23ab 247d 249b 24bd 24cd 2555 2556 257c 2599 259d 25bb 25bd 25dd 2677 269d 26bb 26dd 2777 2779 278a 2799 279c 27ad 27bb 27bd 27dd 28bd 2999 299a 29bc 29cc 2aaa 2acc 2add 333d 334a 3358 335b 337a 338b 33aa 33ab 33ac 33bb 33dd 3467 347d 3488 349a 34ab 34bb 34dd 3555 355a 355d 3577 358a 359b 35bd 367b 368b 36ad 377b 378a 37ac 37bd 388d 38ad 38bd 3aab 3aad 3abb 3acc 3acd 3add 3bbb 3bbd 3bcd 3bdd 3ddd 444d 4459 4466 4467 447b 4499 449a 449d 44ab 44bb 44dd 455b 455c 455d 459b 466b 466d 467b 467d 468b 469b 46ad 46bd 4779 477a 477c 477d 47ad 48ad 4999 499b 499d 49aa 49bd 49cd 49dd 4aaa 4aad 4abb 4add 4bbb 4bbc 4bbd 4bcc 4bdd 4ccd 4cdd 4ddd 5557 5558 555a 555b 5569 556a 556c 556d 5579 557c 557d 559c 559d 55ac 566b 566d 567a 567b 568b 5777 5778 577c 577d 578b 578c 578d 5799 57bc 57cd 588b 588c 5899 589a 58aa 58ad 58bb 58cd 58dd 5999 599a 599d 59ac 59bb 59bc 59dd 5aaa 5abc 5abd 5acc 5bbb 5bbc 5bbd 5bcd 5bdd 5ccc 5ccd 5cdd 5ddd 6667 666d 6677 6678 667d 6699 66aa 66ab 66bb 6777 6778 6779 677c 677d 6788 678d 679a 679b 679d 67ab 67dd 688d 68aa 68cd 6999 699d 69aa 69ad 69bb 69dd 6aab 6aac 6abb 6abd 6add 6bbb 6bbd 6bdd 6ddd 7778 7779 777a 777b 777d 7788 7789 778a 778c 778d 7799 779b 779c 779d 77aa 77ab 77ac 7888 7899 789b 78ac 78bb 78dd 7999 799a 799b 799c 79aa 79ad 79bd 79cd 7aad 7abc 7add 7bbb 7bbc 7bbd 7bcc 7bcd 7bdd 7ccc 7cdd 7ddd 8888 8889 8899 889a 88aa 88ab 88bb 88dd 8999 899a 899b 899d 89aa 89ab 89dd 8aaa 8aab 8aad 8abc 8abd 8bbb 8bbc 8bbd 8bcd 8bdd 8ccc 8ccd 8cdd 8ddd 9999 999a 999b 999d 99aa 99ab 99ac 99bb 99dd 9aab 9aac 9abb 9add 9bbc 9bbd 9ccd 9cdd 9ddd aadd bbdd"};
+const HEX='0123456789abcd';
+const decode=s=>s.split(' ').map(c=>[...c].map(ch=>HEX.indexOf(ch)));
+const POOL={};for(const k in DECKS)POOL[k]=decode(DECKS[k]);
+const BASE={easy:10,medium:20,hard:30,twist:30};
+const RULES={
+  easy:'Use <strong>all four cards exactly once</strong> with + − × ÷ to make 24. Easy puzzles have lots of answers.',
+  medium:'Use <strong>all four cards exactly once</strong> with + − × ÷ to make 24.',
+  hard:'Use <strong>all four cards exactly once</strong> with + − × ÷ to make 24. Hard puzzles may need fractions along the way.',
+  twist:'<strong>Physics Twist:</strong> these can’t be solved with + − × ÷ alone. You also get powers (a<sup>b</sup>), squares (x²) and square roots (√).'
+};
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem('m24-'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('m24-'+k,JSON.stringify(v))}catch(e){}}};
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function makeDealer(){const decks={};return d=>{if(!decks[d]||!decks[d].length)decks[d]=shuffle(POOL[d]);return shuffle(decks[d].pop())}}
+const dealSolo=makeDealer(),dealClass=makeDealer();
+
+function valHTML(v){const neg=v.n<0,n=Math.abs(v.n);const s=neg?'<span class="neg">−</span>':'';
+  return v.d===1?s+n:s+'<span class="frac"><span>'+n+'</span><span>'+v.d+'</span></span>'}
+function prettyExpr(e){return e.replace(/\^/g,'^')}
+function isLong(v){return (String(Math.abs(v.n)).length+(v.d===1?0:String(v.d).length))>3}
+
+let diff=store.get('diff','medium');
+let mode='solo';
+
+/* ---------------- SOLO ---------------- */
+const S={hand:[],cards:[],hist:[],sel:-1,op:null,hints:0,start:0,done:false,gaveUp:false,
+  score:0,streak:0,best:store.get('best',0)};
+let nextId=1;
+function newPuzzle(){
+  S.hand=dealSolo(diff);
+  S.cards=S.hand.map(n=>({id:nextId++,v:R(n),e:String(n),p:4,orig:true}));
+  S.hist=[];S.sel=-1;S.op=null;S.hints=0;S.start=Date.now();S.done=false;S.gaveUp=false;S.hintIds=[];
+  $('solbox').hidden=true;setMsg('');renderSolo();
+}
+function setMsg(t,cls){const m=$('msg');m.textContent=t;m.className='msg'+(cls?' '+cls:'')}
+function renderOps(){
+  const ops=['+','−','×','÷'];if(diff==='twist')ops.push('^','√','²');
+  $('ops').innerHTML=ops.map(o=>{const tw=['^','√','²'].includes(o);
+    const label=o==='^'?'a<small><sup>b</sup></small>':o==='²'?'x<small><sup>2</sup></small>':o;
+    const aria={'+':'plus','−':'minus','×':'times','÷':'divide','^':'power','√':'square root','²':'square'}[o];
+    return `<button class="op${tw?' tw':''}" data-op="${o}" aria-label="${aria}" aria-pressed="${S.op===o}" ${S.done?'disabled':''}>${label}</button>`}).join('');
+}
+function renderSolo(){
+  const b=$('board');
+  b.innerHTML=S.cards.map((c,i)=>{
+    if(!c)return `<div class="card empty" aria-hidden="true"></div>`;
+    const cls=['card'];if(!c.orig)cls.push('derived');if(i===S.sel)cls.push('sel');if(S.hintIds.includes(c.id))cls.push('hint');
+    if(isLong(c.v))cls.push('long');if(S.done&&!S.gaveUp)cls.push('win');
+    const corner=c.orig?`<span class="corner">${c.v.n}</span><span class="corner br">${c.v.n}</span>`:'';
+    const ex=c.orig?'':`<span class="ex">${c.e}</span>`;
+    return `<button class="${cls.join(' ')}" data-i="${i}" aria-label="Card ${i+1}: ${fmt(c.v)}" ${S.done?'disabled':''}>${corner}${valHTML(c.v)}${ex}</button>`}).join('');
+  if(S.done){const ov=document.createElement('div');ov.className='overlay';
+    ov.innerHTML=S.gaveUp?`<div class="big" style="color:var(--muted)">Next one!</div><div class="pts">No points this round. Streak reset.</div><button class="btn primary" id="ov-next">New puzzle</button>`
+      :`<div class="big">24!</div><div class="pts">+${S.lastPts} points · ${S.lastTime}</div><button class="btn primary" id="ov-next">Next puzzle</button>`;
+    b.appendChild(ov);$('ov-next').onclick=newPuzzle;$('ov-next').focus()}
+  renderOps();
+  $('log').innerHTML=S.hist.map(h=>`<li>${h.text}</li>`).join('');
+  $('s-score').textContent=S.score;$('s-streak').textContent=S.streak;$('s-best').textContent=S.best;
+  $('undo').disabled=!S.hist.length||S.done;$('reset').disabled=!S.hist.length||S.done;
+  $('hint').disabled=S.done;$('show').disabled=S.done;
+  $('rules').innerHTML=RULES[diff];
+}
+function live(){return S.cards.filter(Boolean)}
+function apply(newCard,removeIdx,placeIdx,text){
+  S.hist.push({cards:S.cards.slice(),text});
+  const c=S.cards.slice();if(removeIdx>=0)c[removeIdx]=null;c[placeIdx]=newCard;S.cards=c;
+  S.sel=placeIdx;S.op=null;S.hintIds=[];
+  const L=live();
+  if(L.length===1){
+    if(L[0].v.n===24&&L[0].v.d===1)return win();
+    setMsg(`That makes ${fmt(L[0].v)}, not 24. Undo a step or start over.`,'bad');shakeBoard();
+  }else setMsg('');
+  renderSolo();
+}
+function shakeBoard(){const b=$('board');b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake')}
+function win(){
+  const sec=Math.round((Date.now()-S.start)/1000);
+  const speed=Math.max(0,10-Math.floor(sec/6));
+  const pts=Math.max(5,BASE[diff]+speed-5*S.hints);
+  S.score+=pts;S.streak++;if(S.streak>S.best){S.best=S.streak;store.set('best',S.best)}
+  S.done=true;S.lastPts=pts;S.lastTime=fmtTime(sec);S.sel=-1;setMsg('');renderSolo();
+}
+function clickCard(i){
+  if(S.done)return;const c=S.cards[i];if(!c)return;
+  if(S.sel===-1||S.sel===i&&!S.op){S.sel=S.sel===i?-1:i;S.op=null;renderSolo();return}
+  if(S.sel===i){S.op=null;renderSolo();return}
+  if(!S.op){S.sel=i;renderSolo();return}
+  const a=S.cards[S.sel],op=S.op;
+  const v=OPS[op](a.v,c.v);
+  if(!v){setMsg(op==='÷'?'You can’t divide by zero.':'Exponents must be whole numbers from 1 to 6.','bad');return}
+  if(Math.abs(v.n)>100000||v.d>100000){setMsg('That number is too big to keep track of. Try something else.','bad');return}
+  const ex=binExpr(a,op,c);
+  apply({id:nextId++,v,e:ex.e,p:ex.p,orig:false},S.sel,i,`${fmt(a.v)} ${op} ${fmt(c.v)} = ${fmt(v)}`);
+}
+function clickOp(op){
+  if(S.done)return;
+  if(op==='√'||op==='²'){
+    if(S.sel<0){setMsg('Pick a card first, then press '+(op==='√'?'√':'x²')+'.','tip');return}
+    const a=S.cards[S.sel];const v=UN[op](a.v);
+    if(!v){setMsg(op==='√'?`√${fmt(a.v)} isn’t a whole number or fraction. Try another card.`:'That number is too big.','bad');return}
+    const ex=unExpr(op,a);
+    apply({id:nextId++,v,e:ex.e,p:ex.p,orig:false},-1,S.sel,(op==='√'?'√'+fmt(a.v):fmt(a.v)+'²')+' = '+fmt(v));return}
+  if(S.sel<0){setMsg('Pick a card first, then an operation, then a second card.','tip');return}
+  S.op=S.op===op?null:op;renderSolo();
+}
+function undo(){if(!S.hist.length||S.done)return;const h=S.hist.pop();S.cards=h.cards;S.sel=-1;S.op=null;S.hintIds=[];setMsg('');renderSolo()}
+function reset(){if(!S.hist.length||S.done)return;S.cards=S.hist[0].cards;S.hist=[];S.sel=-1;S.op=null;S.hintIds=[];setMsg('');renderSolo()}
+function hint(){
+  if(S.done)return;const L=live();
+  const sols=solve(L.map(c=>({v:c.v,e:c.e,p:c.p})),{twist:diff==='twist',limit:150});
+  if(!sols.length){setMsg('There’s no way to reach 24 from here. Undo a step or start over.','bad');shakeBoard();return}
+  const st=sols[0].steps[0];S.hints++;
+  // highlight the cards used in that step
+  const ids=[];const used=new Set();
+  for(const v of st.b?[st.a,st.b]:[st.a]){const c=L.find(c=>!used.has(c.id)&&c.v.n===v.n&&c.v.d===v.d);if(c){used.add(c.id);ids.push(c.id)}}
+  S.hintIds=ids;S.sel=-1;S.op=null;
+  setMsg('Try this: '+stepText(st),'tip');renderSolo();
+}
+function showSolution(){
+  if(S.done)return;
+  const sols=solve(S.hand.map(n=>R(n)),{twist:diff==='twist',limit:150});
+  $('solexpr').textContent=sols.length?sols[0].expr+' = 24':'(no solution found)';$('solbox').hidden=false;
+  S.streak=0;S.done=true;S.gaveUp=true;S.sel=-1;setMsg('');renderSolo();
+}
+function fmtTime(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+setInterval(()=>{if(mode==='solo'&&!S.done)$('s-time').textContent=fmtTime(Math.floor((Date.now()-S.start)/1000))},250);
+
+$('board').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b)clickCard(+b.dataset.i)});
+$('ops').addEventListener('click',e=>{const b=e.target.closest('[data-op]');if(b)clickOp(b.dataset.op)});
+$('undo').onclick=undo;$('reset').onclick=reset;$('hint').onclick=hint;$('show').onclick=showSolution;
+$('next').onclick=()=>{if(!S.done){S.streak=0}newPuzzle()};
+document.addEventListener('keydown',e=>{
+  if(mode!=='solo'||e.target.tagName==='INPUT'||e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key;
+  if(k>='1'&&k<='4'){const i=+k-1;if(S.cards[i])clickCard(i);return}
+  const map={'+':'+','-':'−','*':'×','x':'×','/':'÷','^':'^'};
+  if(map[k]){if(map[k]==='^'&&diff!=='twist')return;e.preventDefault();clickOp(map[k]);return}
+  if(k==='z'||k==='Z'||k==='Backspace'){e.preventDefault();undo();return}
+  if(k==='h'||k==='H'){hint();return}
+  if(k==='Enter'&&S.done){e.preventDefault();newPuzzle()}
+});
+
+/* ---------------- CLASS ---------------- */
+const C={hand:null,len:60,left:60,running:false,last:0,shown:false,teams:store.get('teams',[{n:'Team 1',s:0},{n:'Team 2',s:0},{n:'Team 3',s:0},{n:'Team 4',s:0}])};
+function renderClass(){
+  const b=$('cboard');const hand=C.hand||[0,0,0,0];
+  b.classList.toggle('hidden',!C.hand);
+  b.innerHTML=hand.map(n=>`<div class="card"><span class="corner">${n}</span><span class="corner br">${n}</span>${C.hand?n:''}</div>`).join('');
+  $('c-hint').disabled=!C.hand;$('c-show').disabled=!C.hand;
+  $('c-pause').disabled=!C.hand||!C.len;$('c-pause').textContent=C.running?'Pause':'Resume';
+  renderTimer();
+}
+function renderTimer(){
+  const t=$('c-time');
+  if(!C.len){t.textContent='∞';t.classList.remove('low');$('c-bar').style.width='100%';return}
+  const s=Math.ceil(C.left);t.textContent=fmtTime(Math.max(0,s));t.classList.toggle('low',C.left<=10&&!!C.hand);
+  $('c-bar').style.width=(100*Math.max(0,C.left)/C.len)+'%';
+}
+function cNext(){
+  C.hand=dealClass(diff);C.len=+$('c-len').value;C.left=C.len;C.running=!!C.len;C.last=performance.now();
+  $('c-solbox').hidden=true;$('c-msg').textContent='';renderClass();
+}
+function tick(now){
+  if(C.running&&mode==='class'){C.left-= (now-C.last)/1000;
+    if(C.left<=0){C.left=0;C.running=false;$('c-msg').textContent='Time! Hands down. Who got it?';renderClass()}
+    renderTimer()}
+  C.last=now;requestAnimationFrame(tick)}
+requestAnimationFrame(tick);
+$('c-next').onclick=cNext;
+$('c-pause').onclick=()=>{C.running=!C.running&&C.left>0;renderClass()};
+$('c-len').onchange=()=>{C.len=+$('c-len').value;C.left=C.len;renderTimer()};
+$('c-hint').onclick=()=>{const s=solve(C.hand.map(n=>R(n)),{twist:diff==='twist',limit:150});$('c-msg').textContent=s.length?'First step: '+stepText(s[0].steps[0]):''};
+$('c-show').onclick=()=>{const s=solve(C.hand.map(n=>R(n)),{twist:diff==='twist',limit:150});$('c-solexpr').textContent=s[0].expr+' = 24';$('c-solbox').hidden=false;C.running=false;renderClass()};
+$('c-full').onclick=()=>{try{const p=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();if(p&&p.catch)p.catch(()=>{$('c-msg').textContent='Full screen isn’t available here. Try your browser’s full-screen key (F11).'})}catch(e){}};
+function renderTeams(){
+  $('teams').innerHTML=C.teams.map((t,i)=>`<div class="team"><input id="team-${i}" aria-label="Team name" value="${t.n.replace(/"/g,'&quot;')}" data-t="${i}">
+    <div class="row"><button data-t="${i}" data-d="-1" aria-label="Subtract a point">−</button><span class="sc">${t.s}</span><button data-t="${i}" data-d="1" aria-label="Add a point">+</button></div></div>`).join('');
+  store.set('teams',C.teams);
+}
+$('teams').addEventListener('click',e=>{const b=e.target.closest('button[data-d]');if(!b)return;C.teams[+b.dataset.t].s+=+b.dataset.d;renderTeams()});
+$('teams').addEventListener('input',e=>{const i=e.target.dataset.t;if(i!==undefined){C.teams[+i].n=e.target.value;store.set('teams',C.teams)}});
+$('t-add').onclick=()=>{if(C.teams.length<8){C.teams.push({n:'Team '+(C.teams.length+1),s:0});renderTeams()}};
+$('t-rm').onclick=()=>{if(C.teams.length>1){C.teams.pop();renderTeams()}};
+let zeroArmed=false;
+$('t-zero').onclick=()=>{if(!zeroArmed){zeroArmed=true;$('t-zero').textContent='Tap again to reset';setTimeout(()=>{zeroArmed=false;$('t-zero').textContent='Reset scores'},3000);return}
+  zeroArmed=false;$('t-zero').textContent='Reset scores';C.teams.forEach(t=>t.s=0);renderTeams()};
+
+/* ---------------- shared ---------------- */
+function setDiff(d){diff=d;store.set('diff',d);
+  document.querySelectorAll('#diff button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.d===d));
+  $('rules').innerHTML=RULES[d];
+  if(mode==='solo')newPuzzle();else{C.hand=null;C.running=false;$('c-solbox').hidden=true;$('c-msg').textContent='';renderClass()}
+}
+$('diff').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b)setDiff(b.dataset.d)});
+function setMode(m){mode=m;$('m-solo').setAttribute('aria-pressed',m==='solo');$('m-class').setAttribute('aria-pressed',m==='class');
+  $('solo').hidden=m!=='solo';$('class').hidden=m!=='class';$('class').style.display=m==='class'?'flex':'';$('solo').style.display=m==='solo'?'flex':'';
+  if(m==='class'){renderClass();renderTeams()}}
+$('m-solo').onclick=()=>setMode('solo');$('m-class').onclick=()=>setMode('class');
+
+document.querySelectorAll('#diff button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.d===diff));
+newPuzzle();
+</script>
+
+</body></html>
