@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Your Weight on Other Worlds</title>
+<style>
+:root{
+  --night:#191741; --night2:#211e55; --panel:#262262; --line:#3d3889;
+  --ink:#f3f1ff; --muted:#aaa6dc; --sodium:#ffb547; --good:#5fd39a; --bad:#ff7383;
+  --head:"Futura","Century Gothic","Avenir Next","Trebuchet MS",sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--night);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45}
+body{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--sodium);outline-offset:2px}
+.num,td,input[type=text],.big{font-variant-numeric:tabular-nums}
+sup{font-size:.7em;line-height:0}
+
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding:14px 20px;background:var(--night2);border-bottom:1px solid var(--line)}
+header h1{font-family:var(--head);font-weight:600;font-size:1.45rem;letter-spacing:.01em;margin:0;line-height:1.1}
+header .sub{color:var(--muted);font-size:.85rem}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:none;border:1px solid transparent;border-radius:999px;padding:6px 14px;color:var(--muted)}
+nav button[aria-selected=true]{background:var(--panel);border-color:var(--line);color:var(--ink)}
+.you{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:.92rem}
+.you input{width:78px;padding:5px 8px;border-radius:8px;border:1px solid var(--line);background:var(--night);text-align:right}
+.iconbtn{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+
+main{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+section[hidden]{display:none}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+h2{font-family:var(--head);font-weight:600;font-size:1.25rem;margin:0 0 8px}
+h3{font-family:var(--head);font-weight:600;font-size:1.05rem;margin:0 0 6px}
+p{margin:0 0 10px}
+.muted{color:var(--muted)}
+.btn{background:var(--sodium);color:#2a1a00;border:0;border-radius:10px;padding:9px 16px;font-weight:600}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* world picker */
+.worlds{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 12px;scrollbar-width:thin}
+.world{flex:0 0 auto;width:74px;background:none;border:1px solid transparent;border-radius:12px;padding:8px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--muted);font-size:.78rem;position:relative}
+.world .orb{width:var(--s,30px);height:var(--s,30px);border-radius:50%;background:var(--c);box-shadow:inset -6px -5px 0 rgba(0,0,0,.28)}
+.world[aria-pressed=true]{border-color:var(--sodium);color:var(--ink);background:rgba(255,181,71,.08)}
+.world .seen{position:absolute;top:5px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--good)}
+.world.sep{margin-left:10px}
+
+.lab{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.lab{grid-template-columns:1fr}.you{margin-left:0}}
+.stage{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#000}
+.stage svg{display:block;width:100%;height:auto}
+.stagebar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;background:var(--panel);border-top:1px solid var(--line)}
+.worldname{position:absolute;left:14px;top:10px;font-family:var(--head);font-size:1.6rem;font-weight:600;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+.worldtag{position:absolute;left:15px;top:46px;font-size:.82rem;color:#fff;opacity:.85;text-shadow:0 1px 4px rgba(0,0,0,.8);max-width:55%}
+.gauge{position:absolute;right:10px;top:10px;width:170px;background:rgba(15,13,45,.82);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:6px 8px 8px;text-align:center}
+.gauge svg{width:100%}
+.gauge .big{font-family:var(--head);font-size:1.5rem;font-weight:600;line-height:1}
+.gauge .small{font-size:.75rem;color:var(--muted)}
+@media (max-width:600px){.gauge{width:118px;padding:4px 6px 6px}.gauge .big{font-size:1.1rem}.worldname{font-size:1.2rem}.worldtag{top:36px;font-size:.72rem;max-width:58%}}
+#needle{transform-origin:80px 78px;transition:transform .7s cubic-bezier(.3,1.6,.5,1)}
+.jumpout{font-size:.88rem;color:var(--muted)}
+.jumpout b{color:var(--ink)}
+
+.calc .step{display:grid;grid-template-columns:22px 1fr;gap:8px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.calc .step:last-of-type{border-bottom:0}
+.calc .k{width:22px;height:22px;border-radius:50%;background:var(--line);display:grid;place-items:center;font-size:.75rem;font-weight:700}
+.calc .eq{font-size:.98rem}
+.calc .res{color:var(--sodium);font-weight:700}
+.insight{margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(255,181,71,.09);border-left:3px solid var(--sodium);font-size:.92rem}
+.check{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.check input{width:130px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--night)}
+.ok{color:var(--good)} .no{color:var(--bad)}
+.switch{display:flex;align-items:center;gap:8px;font-size:.9rem;color:var(--muted);cursor:pointer}
+.switch input{width:18px;height:18px;accent-color:var(--sodium)}
+
+.custom{margin-top:12px}
+.custom label{display:block;font-size:.88rem;color:var(--muted);margin-top:8px}
+.custom input[type=range]{width:100%;accent-color:var(--sodium)}
+
+/* table */
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:.92rem}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-weight:600;color:var(--muted);font-size:.82rem}
+td input{width:110px;padding:5px 7px;border-radius:7px;border:1px solid var(--line);background:var(--night)}
+td input.right{border-color:var(--good);background:rgba(95,211,154,.12)}
+td input.wrong{border-color:var(--bad);background:rgba(255,115,131,.1)}
+.ans{display:block;font-size:.75rem;color:var(--sodium)}
+tr.ref td{color:var(--muted)}
+.backq{display:grid;gap:12px;margin-top:16px}
+.backq .q{padding:12px;border-radius:10px;background:var(--night2);border:1px solid var(--line)}
+.backq textarea{width:100%;min-height:70px;border-radius:8px;border:1px solid var(--line);background:var(--night);padding:8px}
+.backq select,.backq input{padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--night)}
+.model{margin-top:8px;padding:10px;border-left:3px solid var(--sodium);background:rgba(255,181,71,.08);border-radius:6px;font-size:.92rem}
+
+/* games */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{display:flex;flex-direction:column;gap:8px}
+.card .best{font-size:.85rem;color:var(--muted);margin-top:auto}
+.ghead{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin-bottom:10px}
+.ghead .t{font-family:var(--head);font-size:1.2rem;font-weight:600;margin-right:auto}
+.pill{padding:3px 10px;border-radius:999px;background:var(--night2);border:1px solid var(--line);font-size:.88rem}
+.pill.hot{border-color:var(--sodium);color:var(--sodium)}
+.timer{height:8px;border-radius:4px;background:var(--night2);overflow:hidden;margin-bottom:14px}
+.timer div{height:100%;background:var(--sodium);width:100%}
+.prompt{font-size:1.08rem;margin-bottom:12px}
+.datum{display:inline-block;margin:4px 14px 4px 0;padding:6px 10px;border-radius:8px;background:var(--night2);border:1px solid var(--line)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--night2);text-align:left}
+.opt .orb{width:26px;height:26px;border-radius:50%;background:var(--c);flex:0 0 auto;box-shadow:inset -5px -4px 0 rgba(0,0,0,.28)}
+.opt .key{margin-left:auto;font-size:.75rem;color:var(--muted)}
+.opt.right{border-color:var(--good);background:rgba(95,211,154,.15)}
+.opt.wrong{border-color:var(--bad);background:rgba(255,115,131,.12)}
+.fb{margin-top:12px;padding:12px;border-radius:10px;display:none}
+.fb.show{display:block}
+.fb.good{background:rgba(95,211,154,.12);border:1px solid var(--good)}
+.fb.bad{background:rgba(255,115,131,.1);border:1px solid var(--bad)}
+.gactions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.pop{position:fixed;font-family:var(--head);font-weight:700;font-size:1.6rem;color:var(--sodium);pointer-events:none;animation:pop 1s ease-out forwards;z-index:50}
+@keyframes pop{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-60px)}}
+.runbox svg{width:100%;max-width:420px;display:block;margin:8px auto 0}
+.spin{animation:spin 3s linear 1;transform-origin:150px 110px}
+@keyframes spin{to{transform:rotate(-360deg)}}
+.hop{animation:hop .9s ease-out 2;transform-origin:150px 110px}
+@keyframes hop{50%{transform:translateY(-14px)}}
+
+/* badges */
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.badge{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--night2);opacity:.45}
+.badge.got{opacity:1;border-color:var(--sodium)}
+.badge .medal{width:34px;height:34px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;background:var(--line);font-size:1.1rem}
+.badge.got .medal{background:var(--sodium)}
+.badge b{display:block}
+.badge span{font-size:.84rem;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--sodium);color:#2a1a00;padding:10px 18px;border-radius:12px;font-weight:600;z-index:60;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+
+/* results */
+.modal{position:fixed;inset:0;background:rgba(8,6,30,.75);display:grid;place-items:center;z-index:40;padding:16px}
+.modal[hidden]{display:none}
+.result{width:min(440px,100%);text-align:center;background:var(--panel);border:2px solid var(--sodium);border-radius:18px;padding:22px}
+.result .stars{font-size:2.2rem;color:var(--sodium);letter-spacing:6px}
+.result .score{font-family:var(--head);font-size:2.6rem;font-weight:700;line-height:1.1}
+.result input{width:100%;margin:8px 0;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--night);text-align:center}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:45}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Your Weight on Other Worlds</h1>
+    <div class="sub">Newton’s law of gravitation lab simulator</div>
+  </div>
+  <nav role="tablist">
+    <button role="tab" data-tab="lab" aria-selected="true">Lab</button>
+    <button role="tab" data-tab="table" aria-selected="false">Data table</button>
+    <button role="tab" data-tab="games" aria-selected="false">Games</button>
+    <button role="tab" data-tab="badges" aria-selected="false">Badges</button>
+  </nav>
+  <div class="you">
+    <label for="earthW">Your weight on Earth</label>
+    <input id="earthW" type="number" min="1" max="1000" step="1" value="150"> lb
+    <button class="iconbtn" id="mute" aria-label="Sound on">🔊</button>
+  </div>
+</header>
+
+<main>
+<!-- LAB -->
+<section id="tab-lab">
+  <div class="worlds" id="worlds" aria-label="Choose a world"></div>
+  <div class="lab">
+    <div>
+      <div class="stage">
+        <svg id="scene" viewBox="0 0 600 360" role="img" aria-label="Astronaut standing on a scale">
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop id="s0" offset="0"/><stop id="s1" offset="1"/></linearGradient>
+            <radialGradient id="sunglow" cx=".5" cy="1" r=".9"><stop offset="0" stop-color="#fff3b0" stop-opacity=".9"/><stop offset="1" stop-color="#ff7a00" stop-opacity="0"/></radialGradient>
+          </defs>
+          <rect width="600" height="360" fill="url(#sky)"/>
+          <g id="stars"></g>
+          <rect id="glow" width="600" height="360" fill="url(#sunglow)" opacity="0"/>
+          <g id="ground"></g>
+          <g id="platform" opacity="0">
+            <rect x="200" y="300" width="200" height="12" rx="3" fill="#8d8aa8"/>
+            <rect x="215" y="312" width="8" height="40" fill="#6f6c8a"/><rect x="377" y="312" width="8" height="40" fill="#6f6c8a"/>
+            <text x="300" y="336" text-anchor="middle" font-size="11" fill="#fff" opacity=".85">floating platform at the cloud tops</text>
+          </g>
+          <ellipse id="shadow" cx="300" cy="301" rx="44" ry="5" fill="#000" opacity=".3"/>
+          <g id="scale" transform="translate(300,300)">
+            <rect x="-40" y="-15" width="80" height="15" rx="4" fill="#ecebf5" stroke="#9b98b8"/>
+            <rect x="-15" y="-12" width="30" height="9" rx="2" fill="#1b1a2e"/>
+            <text id="scaleTxt" x="0" y="-4.5" text-anchor="middle" font-size="7.5" fill="#7dffb5" font-family="monospace">150</text>
+            <path id="crack" d="M-30 -14 l8 6 l-5 4 l9 4 M18 -15 l-4 7 l7 2 l-3 6" stroke="#333" stroke-width="1.6" fill="none" opacity="0"/>
+          </g>
+          <g id="personWrap" transform="translate(300,285)">
+            <g id="person">
+              <g stroke="#f5f5ff" stroke-width="7" stroke-linecap="round" fill="none">
+                <path d="M-8 0 L-4 -30 M8 0 L4 -30"/>
+                <path d="M0 -30 L0 -60"/>
+                <path d="M0 -55 L-17 -37 M0 -55 L17 -37"/>
+              </g>
+              <rect x="-9" y="-58" width="18" height="16" rx="4" fill="#d0d4ff"/>
+              <circle cx="0" cy="-73" r="12" fill="#f5f5ff"/>
+              <rect x="-8" y="-79" width="16" height="9" rx="4" fill="#ffb547"/>
+            </g>
+          </g>
+          <g id="bag" opacity="0"><rect x="-9" y="-11" width="18" height="14" rx="3" fill="#ff7383"/><rect x="-5" y="-15" width="10" height="5" rx="2" fill="none" stroke="#ff7383" stroke-width="2"/></g>
+        </svg>
+        <div class="worldname" id="wName">Earth</div>
+        <div class="worldtag" id="wTag"></div>
+        <div class="gauge" aria-live="polite">
+          <svg viewBox="0 0 160 92">
+            <path d="M12 78 A68 68 0 0 1 148 78" fill="none" stroke="#3d3889" stroke-width="10"/>
+            <g id="ticks"></g>
+            <g id="needle"><path d="M80 78 L80 18" stroke="#ffb547" stroke-width="3.5" stroke-linecap="round"/></g>
+            <circle cx="80" cy="78" r="6" fill="#ffb547"/>
+          </svg>
+          <div class="big" id="reading">150 lb</div>
+          <div class="small" id="readingSub">scale reading</div>
+        </div>
+      </div>
+      <div class="stagebar">
+        <button class="btn" id="jumpBtn">Jump</button>
+        <button class="btn ghost" id="tossBtn">Toss the 5.0 kg book bag</button>
+        <span class="jumpout" id="jumpOut">Same push off the ground on every world.</span>
+      </div>
+    </div>
+
+    <div class="panel calc" id="calc"></div>
+  </div>
+</section>
+
+<!-- TABLE -->
+<section id="tab-table" hidden>
+  <div class="panel">
+    <h2>Lab data table</h2>
+    <p class="muted">Use g = GM/R² with G = 6.67 × 10<sup>−11</sup> N·m²/kg². Divide each g by Earth’s 9.8 m/s² for the gravity factor, then multiply by your Earth weight. Type answers like <b>274.8</b>, <b>3.7e8</b> or <b>3.7x10^8</b>. Boxes turn green when you’re within 3%.</p>
+    <div class="check" style="margin-bottom:10px">
+      <button class="btn ghost" id="revealBtn">Show answers</button>
+      <button class="btn ghost" id="clearBtn">Clear my answers</button>
+      <span id="tableScore" class="muted" style="align-self:center"></span>
+    </div>
+    <div class="tablewrap"><table id="dataTable"></table></div>
+
+    <h2 style="margin-top:22px">Back of the sheet</h2>
+    <div class="backq" id="backq"></div>
+  </div>
+</section>
+
+<!-- GAMES -->
+<section id="tab-games" hidden>
+  <div id="gameMenu">
+    <div class="cards" id="gameCards"></div>
+    <p class="muted" style="margin-top:14px">Scoring: 100 points per correct answer, a ×2, ×3, ×4 multiplier for every 3 in a row, and up to 50 bonus points for speed. A hint halves the points for that round.</p>
+  </div>
+  <div id="gamePlay" class="panel" hidden>
+    <div class="ghead">
+      <span class="t" id="gTitle"></span>
+      <span class="pill" id="gRound"></span>
+      <span class="pill" id="gScore"></span>
+      <span class="pill" id="gMult">×1</span>
+      <button class="btn ghost" id="gQuit">Quit</button>
+    </div>
+    <div class="timer"><div id="gTimer"></div></div>
+    <div id="gBody"></div>
+    <div class="fb" id="gFb"></div>
+    <div class="gactions">
+      <button class="btn ghost" id="gHint">Hint (half points)</button>
+      <button class="btn" id="gNext" hidden>Next</button>
+    </div>
+  </div>
+</section>
+
+<!-- BADGES -->
+<section id="tab-badges" hidden>
+  <div class="panel">
+    <h2>Badges</h2>
+    <p class="muted">Saved in this browser only.</p>
+    <div class="badges" id="badgeList"></div>
+  </div>
+</section>
+</main>
+
+<div class="modal" id="results" hidden>
+  <div class="result" role="dialog" aria-labelledby="rTitle">
+    <h2 id="rTitle"></h2>
+    <div class="stars" id="rStars"></div>
+    <div class="score" id="rScore"></div>
+    <p class="muted" id="rDetail"></p>
+    <input id="rName" placeholder="Type your name for the screenshot" aria-label="Your name">
+    <p class="muted" id="rDate"></p>
+    <div class="gactions" style="justify-content:center">
+      <button class="btn" id="rAgain">Play again</button>
+      <button class="btn ghost" id="rClose">Close</button>
+    </div>
+  </div>
+</div>
+<canvas id="confetti"></canvas>
+
+<script>
+"use strict";
+const G = 6.67e-11, GE = 9.8, LB_PER_KG = 2.2046;
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- storage ---------- */
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem('wow:'+k); return v==null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem('wow:'+k, JSON.stringify(v)); }catch(e){} }
+};
+
+/* ---------- worlds (masses and radii as printed on the lab sheet) ---------- */
+const EARTH = {id:'earth', name:'Earth', M:6.0e24, R:6.4e6, c:'#3f86d6', sky:['#2f6fd0','#9fd0ff'], kind:'rock', ground:'#4f8f45', tag:'Reference world. The lab uses g = 9.8 m/s².', fixedG:9.8};
+const SHEET = [
+  {id:'sun', name:'Sun', M:1.99e30, R:6.95e8, c:'#ffb000', sky:['#ff6a00','#ffd36b'], kind:'sun', ground:'#ff9a00', tag:'No surface: you’d be standing on a very hot platform.'},
+  {id:'mercury', name:'Mercury', M:3.30e23, R:2.44e6, c:'#a1958c', sky:['#000','#15141f'], kind:'rock', ground:'#8c8178', tag:'No air, so the sky is black even in daytime.'},
+  {id:'venus', name:'Venus', M:4.87e24, R:6.05e6, c:'#e3c27a', sky:['#b9873a','#f0d08b'], kind:'rock', ground:'#b88c4a', tag:'Thick, hot, yellow clouds overhead.'},
+  {id:'moon', name:'Moon', M:7.35e22, R:1.74e6, c:'#c4c4c4', sky:['#000','#101018'], kind:'rock', ground:'#a9a9a9', tag:'Earth’s Moon.'},
+  {id:'mars', name:'Mars', M:6.42e23, R:3.39e6, c:'#c1440e', sky:['#c98a55','#ecc39a'], kind:'rock', ground:'#a8461d', tag:'Dusty butterscotch sky.'},
+  {id:'jupiter', name:'Jupiter', M:1.90e27, R:7.15e7, c:'#d8a46b', sky:['#6b4a2c','#e9c08d'], kind:'gas', ground:'#c99560', tag:'Gas giant: no solid surface.'},
+  {id:'saturn', name:'Saturn', M:5.67e26, R:6.03e7, c:'#e6cf8b', sky:['#8a7646','#f3e2ae'], kind:'gas', ground:'#d8bf78', tag:'Gas giant: no solid surface.'},
+  {id:'uranus', name:'Uranus', M:8.68e25, R:2.56e7, c:'#8fd3dc', sky:['#3e8c97','#bfeef2'], kind:'gas', ground:'#7cc4cd', tag:'Ice giant: no solid surface.'},
+  {id:'neptune', name:'Neptune', M:1.02e26, R:2.48e7, c:'#3f6fd8', sky:['#1c3486','#6f9cf0'], kind:'gas', ground:'#3a63c4', tag:'Ice giant: no solid surface.'},
+  {id:'pluto', name:'Pluto', M:1.19e22, R:1.15e6, c:'#d8c3a5', sky:['#000','#14121c'], kind:'rock', ground:'#c9b393', tag:'Dwarf planet, very far from the Sun.'},
+  {id:'neutron', name:'Neutron star', M:1.99e32, R:6.00e6, c:'#b9d2ff', sky:['#05040f','#2b2d6e'], kind:'neutron', ground:'#9fbfff', tag:'Using the mass and radius on the lab sheet.'}
+];
+const DEIMOS = {id:'deimos', name:'Deimos', M:1.8e15, R:6.0e3, c:'#8a7f74', sky:['#7a4a2a','#c98a55'], kind:'rock', ground:'#7d7268', tag:'Tiny moon of Mars (back of the sheet). Mars hangs in the sky.'};
+const CUSTOM = {id:'custom', name:'Build a world', M:6.0e24, R:6.4e6, c:'#b48cff', sky:['#3a1f6e','#9a7ae0'], kind:'rock', ground:'#7f5fc4', tag:'Change mass and radius to see what controls g.'};
+const ALL = [EARTH, ...SHEET, DEIMOS, CUSTOM];
+const byId = id => ALL.find(w => w.id === id);
+const gOf = w => w.fixedG || G*w.M/(w.R*w.R);
+
+/* ---------- number helpers ---------- */
+const SUP = {'-':'−'};
+function sci(x, sig=3){
+  if (x === 0) return '0';
+  const e = Math.floor(Math.log10(Math.abs(x)));
+  let m = x/Math.pow(10,e);
+  let ms = m.toPrecision(sig);
+  if (parseFloat(ms) >= 10){ ms = (m/10).toPrecision(sig); return ms+' × 10<sup>'+String(e+1).replace('-','−')+'</sup>'; }
+  return ms+' × 10<sup>'+String(e).replace('-','−')+'</sup>';
+}
+function nice(x, sig=3){
+  const a = Math.abs(x);
+  if (a === 0) return '0';
+  if (a >= 1e6 || a < 0.01) return sci(x, sig);
+  let s = Number(x.toPrecision(sig));
+  return s.toLocaleString('en-US', {maximumFractionDigits: 6});
+}
+function plain(x, sig=3){ return nice(x,sig).replace(/<sup>/g,'^').replace(/<\/sup>/g,''); }
+function parseNum(str){
+  if (str == null) return NaN;
+  let s = String(str).trim().replace(/,/g,'').replace(/−/g,'-').replace(/\s+/g,'');
+  let m = s.match(/^([-+]?\d*\.?\d+)(?:(?:[xX\*×]10\^?([-+]?\d+))|(?:[eE]([-+]?\d+)))?$/);
+  if (!m) return NaN;
+  const ex = m[2] ?? m[3];
+  return parseFloat(m[1]) * (ex != null ? Math.pow(10, parseInt(ex,10)) : 1);
+}
+function close(a, b, tol=0.03){
+  if (!isFinite(a)) return false;
+  if (Math.abs(a-b) <= tol*Math.abs(b)) return true;
+  return Number(b.toPrecision(2)) === a;
+}
+
+/* ---------- sound ---------- */
+let actx = null, muted = store.get('muted', false);
+function tone(f, d=.12, type='sine', v=.15, when=0){
+  if (muted) return;
+  try{
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const t = actx.currentTime + when, o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t+d);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t+d+.02);
+  }catch(e){}
+}
+const sfx = {
+  good(){ tone(660,.1,'triangle'); tone(990,.16,'triangle',.15,.09); },
+  bad(){ tone(220,.22,'sawtooth',.08); },
+  jump(){ if(muted) return; try{ actx = actx || new AudioContext(); const t=actx.currentTime,o=actx.createOscillator(),g=actx.createGain(); o.type='square'; o.frequency.setValueAtTime(260,t); o.frequency.exponentialRampToValueAtTime(780,t+.25); g.gain.setValueAtTime(.06,t); g.gain.exponentialRampToValueAtTime(.0001,t+.3); o.connect(g).connect(actx.destination); o.start(t); o.stop(t+.32);}catch(e){} },
+  land(){ tone(110,.12,'triangle',.2); },
+  crunch(){ tone(90,.3,'sawtooth',.15); tone(60,.4,'square',.1,.05); },
+  fanfare(){ [523,659,784,1047].forEach((f,i)=>tone(f,.18,'triangle',.14,i*.11)); },
+  click(){ tone(880,.04,'square',.05); }
+};
+function setMute(){ $('#mute').textContent = muted ? '🔇' : '🔊'; $('#mute').setAttribute('aria-label', muted ? 'Sound off' : 'Sound on'); }
+$('#mute').onclick = () => { muted = !muted; store.set('muted', muted); setMute(); };
+setMute();
+
+/* ---------- state ---------- */
+const state = {
+  world: 'earth',
+  earthW: store.get('earthW', 150),
+  visited: new Set(store.get('visited', [])),
+  predict: store.get('predict', false),
+  revealed: new Set(store.get('revealed', [])),
+  custom: store.get('custom', {m:0, r:0}),   // log10 of Earth multiples
+  badges: new Set(store.get('badges', [])),
+  bests: store.get('bests', {}),
+  name: store.get('name', '')
+};
+$('#earthW').value = state.earthW;
+$('#earthW').addEventListener('input', () => {
+  const v = parseFloat($('#earthW').value);
+  if (v > 0 && v < 5000){ state.earthW = v; store.set('earthW', v); renderLab(false); renderTable(); }
+});
+
+/* ---------- badges ---------- */
+const BADGES = [
+  ['grand','🪐','Grand tour','Visit every world on the lab sheet'],
+  ['heavy','🥞','Pancaked','Stand on the neutron star'],
+  ['moonjump','🌙','Moonwalker','Jump on the Moon'],
+  ['orbitjump','🚀','Accidental astronaut','Jump on Deimos'],
+  ['giants','🔭','Gas giant detective','Visit Saturn, Uranus and Neptune'],
+  ['builder','🛠️','World builder','Build a world over 3× Earth’s radius with Earth-like gravity (within 10%)'],
+  ['table','📋','Lab complete','Get every cell in the data table right'],
+  ['backpage','📝','Back page','Get every checkable back-of-sheet answer right'],
+  ['gauge','🎯','Perfect gauge','Finish Gravity Gauge with no misses'],
+  ['mystery','🕵️','Sharp eye','Finish Mystery World with no misses'],
+  ['orbit','🏃','Orbit runner','Finish Run into Orbit with no misses'],
+  ['streak','🔥','On fire','Reach the ×4 multiplier in any game']
+];
+function award(id){
+  if (state.badges.has(id)) return;
+  state.badges.add(id); store.set('badges', [...state.badges]);
+  const b = BADGES.find(x => x[0] === id);
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = 'Badge earned: '+b[1]+' '+b[2];
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+  sfx.fanfare(); renderBadges();
+}
+function renderBadges(){
+  $('#badgeList').innerHTML = BADGES.map(([id,ic,n,d]) =>
+    `<div class="badge ${state.badges.has(id)?'got':''}"><div class="medal">${ic}</div><div><b>${n}</b><span>${d}</span></div></div>`).join('');
+}
+
+/* ---------- tabs ---------- */
+$$('nav button').forEach(b => b.onclick = () => {
+  $$('nav button').forEach(x => x.setAttribute('aria-selected', x === b));
+  $$('main > section').forEach(s => s.hidden = s.id !== 'tab-'+b.dataset.tab);
+  if (b.dataset.tab === 'table') renderTable();
+});
+
+/* ---------- world picker ---------- */
+function orbSize(w){ if (w.id==='custom') return 30; const r = Math.log10(w.R); return Math.round(14 + (r-3.78)/(8.84-3.78)*30); }
+function renderPicker(){
+  $('#worlds').innerHTML = ALL.map(w =>
+    `<button class="world ${w.id==='deimos'||w.id==='custom'?'sep':''}" data-id="${w.id}" aria-pressed="${w.id===state.world}">
+      ${state.visited.has(w.id)&&w.id!=='earth'?'<span class="seen" title="visited"></span>':''}
+      <span class="orb" style="--c:${w.c};--s:${orbSize(w)}px"></span>${w.name}</button>`).join('');
+  $$('#worlds .world').forEach(b => b.onclick = () => { sfx.click(); state.world = b.dataset.id; renderLab(true); renderPicker(); });
+}
+
+/* ---------- scene ---------- */
+(function makeStars(){
+  let s = 7, out = '';
+  const rnd = () => (s = (s*9301+49297)%233280)/233280;
+  for (let i=0;i<60;i++) out += `<circle cx="${(rnd()*600).toFixed(1)}" cy="${(rnd()*280).toFixed(1)}" r="${(rnd()*1.3+.3).toFixed(2)}" fill="#fff" opacity="${(rnd()*.7+.3).toFixed(2)}"/>`;
+  $('#stars').innerHTML = out;
+})();
+let dialMax = 450;
+function niceMax(v){ const steps=[50,100,150,200,250,300,400,500,600,800,1000,1500,2000]; return steps.find(s=>s>=v) || Math.ceil(v/500)*500; }
+function drawTicks(){
+  let out='';
+  for (let i=0;i<=10;i++){
+    const a = Math.PI*(1 - i/10), x1 = 80+68*Math.cos(a), y1 = 78-68*Math.sin(a), x2 = 80+(i%5?60:55)*Math.cos(a), y2 = 78-(i%5?60:55)*Math.sin(a);
+    out += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#aaa6dc" stroke-width="${i%5?1:2}"/>`;
+    if (i%5===0){ const tx = 80+44*Math.cos(a), ty = 78-44*Math.sin(a)+3; out += `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" font-size="9" fill="#aaa6dc" text-anchor="middle">${dialMax*i/10}</text>`; }
+  }
+  $('#ticks').innerHTML = out;
+}
+function setNeedle(lb){
+  const f = Math.max(0, Math.min(1.04, lb/dialMax));
+  $('#needle').style.transform = `rotate(${-90 + f*180}deg)`;
+}
+function curW(){ const w = byId(state.world); if (w.id==='custom'){ w.M = 6.0e24*Math.pow(10,state.custom.m); w.R = 6.4e6*Math.pow(10,state.custom.r); } return w; }
+function isHidden(w){ return state.predict && w.id!=='earth' && w.id!=='custom' && !state.revealed.has(w.id); }
+
+function drawScene(w){
+  $('#s0').setAttribute('stop-color', w.sky[0]); $('#s1').setAttribute('stop-color', w.sky[1]);
+  const dark = ['mercury','moon','pluto','neutron'].includes(w.id);
+  $('#stars').setAttribute('opacity', dark ? 1 : (w.id==='deimos'?.25:0));
+  $('#glow').setAttribute('opacity', w.kind==='sun' ? 1 : 0);
+  const lr = Math.log10(w.R);
+  const r = Math.max(320, 320 + (lr-3.78)/(8.84-3.78)*9000);
+  const cy = 300 + r;
+  let g = `<circle cx="300" cy="${cy}" r="${r}" fill="${w.ground}"/>`;
+  if (w.kind==='gas' || w.kind==='sun'){
+    const band = w.kind==='sun' ? '#ffdf6b' : 'rgba(0,0,0,.25)';
+    [14,34,62].forEach((d,i) => g += `<circle cx="300" cy="${cy}" r="${r-d}" fill="none" stroke="${band}" stroke-width="${9-i*2}" opacity=".55"/>`);
+  } else {
+    g += `<circle cx="300" cy="${cy}" r="${r-3}" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="3"/>`;
+    [[120,8],[470,12],[60,5],[530,6]].forEach(([x,rr]) => g += `<ellipse cx="${x}" cy="${330 + (x%3)*6}" rx="${rr*2}" ry="${rr*.55}" fill="rgba(0,0,0,.18)"/>`);
+  }
+  if (w.id==='deimos') g += `<circle cx="470" cy="90" r="46" fill="#c1440e"/><circle cx="455" cy="78" r="46" fill="${w.sky[0]}" opacity=".35"/>`;
+  if (w.id==='moon') g += `<circle cx="480" cy="80" r="22" fill="#3f86d6"/><path d="M466 72 q10 -6 18 2 q6 8 -4 14" fill="#4f8f45"/>`;
+  $('#ground').innerHTML = g;
+  $('#platform').setAttribute('opacity', (w.kind==='gas'||w.kind==='sun') ? 1 : 0);
+}
+
+let jumping = false, squished = false;
+function personPose(w){
+  const neutron = w.id === 'neutron';
+  squished = neutron;
+  $('#person').setAttribute('transform', neutron ? 'scale(1.7,0.12)' : (w.id==='sun' ? 'scale(1,0.8)' : ''));
+  $('#crack').setAttribute('opacity', (neutron || w.id==='sun' || weightLb(w) > dialMax*1.04) ? 1 : 0);
+}
+function weightLb(w){ return state.earthW * gOf(w)/GE; }
+
+/* ---------- lab render ---------- */
+function renderLab(changedWorld){
+  const w = curW(), g = gOf(w), f = g/GE, W = weightLb(w), mass = state.earthW/LB_PER_KG;
+  const hide = isHidden(w);
+  if (changedWorld && !jumping){
+    if (w.id!=='custom'){ state.visited.add(w.id); store.set('visited', [...state.visited]); }
+    if (w.id==='neutron'){ sfx.crunch(); award('heavy'); }
+    if (SHEET.every(s => state.visited.has(s.id))) award('grand');
+    if (['saturn','uranus','neptune'].every(id => state.visited.has(id))) award('giants');
+    $('#jumpOut').innerHTML = 'Same push off the ground on every world.';
+    $('#bag').setAttribute('opacity', 0);
+  }
+  $('#wName').textContent = w.name;
+  $('#wTag').textContent = w.tag;
+  drawScene(w);
+  dialMax = niceMax(state.earthW*3);
+  drawTicks();
+  if (hide){
+    $('#reading').textContent = '? lb'; $('#readingSub').textContent = 'find g to unlock'; setNeedle(0);
+    $('#scaleTxt').textContent = '???'; $('#person').setAttribute('transform',''); $('#crack').setAttribute('opacity',0);
+  } else {
+    personPose(w);
+    if (!jumping){
+      $('#reading').innerHTML = (W >= 1e5 || W < 10 ? nice(W) : Math.round(W).toLocaleString()) + ' lb';
+      $('#readingSub').textContent = W > dialMax*1.04 ? 'off the dial!' : 'scale reading';
+      setNeedle(W);
+      $('#scaleTxt').textContent = W >= 9999 ? 'ERR' : (W < 10 ? W.toFixed(1) : Math.round(W));
+    }
+  }
+  $('#jumpBtn').disabled = hide; $('#tossBtn').disabled = hide;
+  renderCalc(w, hide);
+}
+
+function renderCalc(w, hide){
+  const g = gOf(w), f = g/GE, W = weightLb(w), mass = state.earthW/LB_PER_KG;
+  let h = `<h2>${w.name}</h2>`;
+  if (w.id==='earth'){
+    h += `<p>Your weight is the gravitational force on you: F<sub>g</sub> = mg. On Earth the lab uses <b>g = 9.8 m/s²</b>.</p>
+      <div class="step"><span class="k">m</span><div class="eq">Your mass: ${nice(state.earthW)} lb ÷ 2.2046 = <span class="res">${nice(mass)} kg</span>. This stays the same on every world.</div></div>
+      <div class="step"><span class="k">W</span><div class="eq">Your weight: mg = (${nice(mass)} kg)(9.8 m/s²) = <span class="res">${nice(mass*9.8)} N</span> = ${nice(state.earthW)} lb</div></div>
+      <div class="insight">Pick another world. Its mass M and radius R set g = GM/R², and your weight scales with g.</div>`;
+  } else {
+    h += `<p class="muted">M = ${sci(w.M)} kg, R = ${sci(w.R)} m</p>`;
+    const gLine = `g = GM/R² = (6.67 × 10<sup>−11</sup>)(${sci(w.M)}) / (${sci(w.R)})²`;
+    h += `<div class="step"><span class="k">1</span><div class="eq">${gLine} = ${hide ? '<b>?</b>' : `<span class="res">${nice(g)} m/s²</span>`}`;
+    if (hide) h += `<div class="check"><input id="predIn" inputmode="decimal" placeholder="your g (m/s²)" aria-label="Your value of g"><button class="btn" id="predBtn">Check</button><span id="predMsg"></span></div>`;
+    h += `</div></div>`;
+    if (!hide){
+      h += `<div class="step"><span class="k">2</span><div class="eq">Gravity factor = g ÷ 9.8 = <span class="res">${nice(f)}</span></div></div>
+        <div class="step"><span class="k">3</span><div class="eq">Your weight = ${nice(state.earthW)} lb × ${nice(f)} = <span class="res">${W>=1e5||W<10?nice(W):Math.round(W).toLocaleString()} lb</span> (${nice(mass*g)} N)</div></div>
+        <div class="step"><span class="k">m</span><div class="eq">Your mass is still ${nice(mass)} kg.</div></div>`;
+      const mx = w.M/EARTH.M, rx = w.R/EARTH.R;
+      h += `<div class="insight">Compared with Earth: mass × ${nice(mx)}, radius × ${nice(rx)}, so R² × ${nice(rx*rx)}. g ≈ ${nice(mx)} ÷ ${nice(rx*rx)} = <b>${nice(mx/(rx*rx))} × Earth’s</b>.`;
+      if (['saturn','uranus','neptune','jupiter'].includes(w.id)) h += ` The huge mass is mostly cancelled by the huge R², because these planets are mostly light gas (low density).`;
+      if (w.id==='deimos'){ const v = Math.sqrt(g*w.R); h += ` To orbit just above the surface you need v = √(gR) = ${nice(v)} m/s (${nice(v*2.237)} mph). A fast run would do it.`; }
+      if (w.id==='neutron') h += ` A real neutron star is about 1.4 Suns of mass squeezed into a ball roughly 10 km wide, so its real g is even larger.`;
+      h += `</div>`;
+    }
+    if (w.id==='custom'){
+      const rho = w.M/(4/3*Math.PI*Math.pow(w.R,3));
+      h += `<div class="custom">
+        <label for="cm">Mass: <b>${nice(w.M/EARTH.M)} × Earth</b> (${sci(w.M)} kg)</label>
+        <input id="cm" type="range" min="-3" max="3.5" step="0.01" value="${state.custom.m}">
+        <label for="cr">Radius: <b>${nice(w.R/EARTH.R)} × Earth</b> (${sci(w.R)} m)</label>
+        <input id="cr" type="range" min="-1.5" max="1.5" step="0.01" value="${state.custom.r}">
+        <p class="muted" style="margin-top:8px">Density: ${nice(rho)} kg/m³ (Earth ≈ 5,500, water 1,000). Try a world 10× Earth’s radius with Earth’s gravity: how much mass does it need?</p>
+        <button class="btn ghost" id="cReset">Reset to Earth</button></div>`;
+    }
+  }
+  h += `<label class="switch" style="margin-top:14px"><input type="checkbox" id="predToggle" ${state.predict?'checked':''}> Predict first: hide answers until I calculate g</label>`;
+  $('#calc').innerHTML = h;
+
+  $('#predToggle').onchange = e => { state.predict = e.target.checked; store.set('predict', state.predict); renderLab(false); };
+  if (hide){
+    const go = () => {
+      const v = parseNum($('#predIn').value);
+      if (close(v, g)){
+        sfx.good(); state.revealed.add(w.id); store.set('revealed', [...state.revealed]);
+        const t = store.get('table', {}); t[w.id] = t[w.id] || {}; if (!t[w.id].g) t[w.id].g = $('#predIn').value; store.set('table', t);
+        renderLab(false);
+      } else { sfx.bad(); $('#predMsg').innerHTML = '<span class="no">Not yet. Check your powers of ten and square R.</span>'; }
+    };
+    $('#predBtn').onclick = go; $('#predIn').onkeydown = e => { if (e.key==='Enter') go(); };
+  }
+  if (w.id==='custom'){
+    const upd = () => {
+      state.custom = {m: parseFloat($('#cm').value), r: parseFloat($('#cr').value)}; store.set('custom', state.custom);
+      const cw = curW(), ratio = gOf(cw)/GE;
+      if (cw.R/EARTH.R > 3 && Math.abs(ratio-1) <= 0.1) award('builder');
+      const ae = document.activeElement && document.activeElement.id;
+      renderLab(false);
+      if (ae) { const el = document.getElementById(ae); if (el) el.focus(); }
+    };
+    $('#cm').oninput = upd; $('#cr').oninput = upd;
+    $('#cReset').onclick = () => { state.custom = {m:0,r:0}; store.set('custom', state.custom); renderLab(false); };
+  }
+}
+
+/* ---------- jump & toss ---------- */
+const V0 = 2.5; // m/s takeoff speed: about a 32 cm jump on Earth
+function fmtLen(m){
+  if (m >= 1000) return nice(m/1000)+' km';
+  if (m >= 1) return nice(m)+' m';
+  if (m >= 0.01) return nice(m*100)+' cm';
+  if (m >= 1e-5) return nice(m*1000)+' mm';
+  return nice(m*1e9)+' nm';
+}
+function fmtTime(s){
+  if (s >= 3600) return nice(s/3600)+' h';
+  if (s >= 60) return nice(s/60)+' min';
+  if (s >= 0.01) return nice(s)+' s';
+  if (s >= 1e-5) return nice(s*1000)+' ms';
+  return nice(s*1e6)+' µs';
+}
+function animateArc(el, baseX, baseY, heightPx, dur, dx, done){
+  if (reduced){ done && done(); return; }
+  const t0 = performance.now();
+  function step(now){
+    let t = Math.min(1, (now-t0)/dur);
+    const y = 4*heightPx*t*(1-t);
+    el.setAttribute('transform', `translate(${baseX + dx*t},${baseY - y})`);
+    if (t < 1) requestAnimationFrame(step); else done && done();
+  }
+  requestAnimationFrame(step);
+}
+$('#jumpBtn').onclick = () => {
+  if (jumping) return;
+  const w = curW(), g = gOf(w), h = V0*V0/(2*g), T = 2*V0/g;
+  jumping = true; sfx.jump();
+  if (w.id==='moon') award('moonjump');
+  if (w.id==='deimos') award('orbitjump');
+  let px = Math.min(420, 40*Math.sqrt(h/0.32));
+  if (h > 50) px = 420;
+  if (squished) px = 0;
+  const dur = Math.max(350, Math.min(3200, T*600));
+  $('#reading').textContent = '0 lb'; $('#readingSub').textContent = 'in the air: scale reads zero'; setNeedle(0); $('#scaleTxt').textContent = '0';
+  let msg = `Jump height <b>${fmtLen(h)}</b>, time in the air <b>${fmtTime(T)}</b> (Earth: 32 cm, 0.51 s).`;
+  if (w.id==='deimos') msg += ' You’re nearly at orbit speed already!';
+  if (squished) msg += ' You can’t even lift your foot.';
+  $('#jumpOut').innerHTML = msg;
+  animateArc($('#personWrap'), 300, 285, px, dur, 0, () => { jumping = false; if (!squished) sfx.land(); renderLab(false); });
+};
+$('#tossBtn').onclick = () => {
+  if (jumping) return;
+  const w = curW(), g = gOf(w), v = 6, range = v*v/g, hmax = v*v/(4*g); // 45° toss at 6 m/s
+  const bagN = 5.0*g;
+  const bag = $('#bag'); bag.setAttribute('opacity', 1); sfx.jump();
+  const dx = Math.min(290, 18*Math.sqrt(range/3.67)*5.5);
+  const px = Math.min(300, 30*Math.sqrt(hmax/0.92));
+  const dur = Math.max(400, Math.min(3000, (2*v*0.7071/g)*500));
+  $('#jumpOut').innerHTML = `The 5.0 kg bag weighs <b>${nice(bagN)} N</b> (${nice(bagN/4.448)} lb) here. Tossed at the same speed, it lands <b>${fmtLen(range)}</b> away (Earth: 3.7 m). Its mass is still 5.0 kg, so it’s just as hard to get moving fast.`;
+  animateArc(bag, 315, 268, squished ? 0 : px, dur, squished ? 4 : dx, () => {});
+};
+
+/* ---------- data table ---------- */
+let showAns = false;
+function tableData(){ return store.get('table', {}); }
+function renderTable(){
+  const t = tableData();
+  let h = `<thead><tr><th>Object</th><th>Mass (kg)</th><th>Radius (m)</th><th>g (m/s²)</th><th>Gravity factor (g ÷ 9.8)</th><th>Your weight (lb)</th></tr></thead><tbody>
+    <tr class="ref"><td>Earth</td><td>${sci(EARTH.M,2)}</td><td>${sci(EARTH.R,2)}</td><td>9.8</td><td>1</td><td>${nice(state.earthW)}</td></tr>`;
+  let right = 0, total = 0;
+  SHEET.forEach(w => {
+    const g = gOf(w), ans = {g, f:g/GE, w:weightLb(w)};
+    h += `<tr><td>${w.name}</td><td>${sci(w.M)}</td><td>${sci(w.R)}</td>`;
+    ['g','f','w'].forEach(k => {
+      const val = (t[w.id]||{})[k] || '';
+      let cls = '';
+      if (val !== ''){ total++; if (close(parseNum(val), ans[k])){ cls='right'; right++; } else cls='wrong'; }
+      else total++;
+      h += `<td><input data-w="${w.id}" data-k="${k}" class="${cls}" value="${val.replace(/"/g,'&quot;')}" inputmode="decimal" aria-label="${w.name} ${k}">${showAns?`<span class="ans">${nice(ans[k])}</span>`:''}</td>`;
+    });
+    h += `</tr>`;
+  });
+  $('#dataTable').innerHTML = h + '</tbody>';
+  $('#tableScore').textContent = `${right} of ${total} correct`;
+  if (right === total) award('table');
+  $$('#dataTable input').forEach(inp => inp.onchange = () => {
+    const d = tableData(); d[inp.dataset.w] = d[inp.dataset.w] || {}; d[inp.dataset.w][inp.dataset.k] = inp.value.trim(); store.set('table', d);
+    const w = byId(inp.dataset.w), g = gOf(w), a = {g, f:g/GE, w:weightLb(w)}[inp.dataset.k];
+    if (inp.value.trim()) (close(parseNum(inp.value), a) ? sfx.good : sfx.bad)();
+    const pos = inp.dataset.w+inp.dataset.k;
+    renderTable();
+    const next = $$('#dataTable input'); const i = next.findIndex(x => x.dataset.w+x.dataset.k === pos);
+    if (next[i+1] && document.activeElement === document.body) next[i+1].focus();
+  });
+  renderBack();
+}
+$('#revealBtn').onclick = () => { showAns = !showAns; $('#revealBtn').textContent = showAns ? 'Hide answers' : 'Show answers'; renderTable(); };
+$('#clearBtn').onclick = () => { if (confirm('Clear all your table and back-of-sheet answers?')){ store.set('table', {}); store.set('back', {}); renderTable(); } };
+
+function renderBack(){
+  const b = store.get('back', {});
+  const highest = SHEET.reduce((a,c) => gOf(c)>gOf(a)?c:a), lowest = SHEET.reduce((a,c) => gOf(c)<gOf(a)?c:a);
+  const moon = byId('moon'), gD = gOf(DEIMOS);
+  const keys = {
+    q1w: highest.id, q1v: weightLb(highest), q2w: lowest.id, q2v: weightLb(lowest),
+    q3: b.q3u === 'lb' ? 5.0*gOf(moon)/4.448 : 5.0*gOf(moon), q5: gD, q6: state.earthW*gD/GE
+  };
+  const opts = sel => SHEET.map(w => `<option value="${w.id}" ${sel===w.id?'selected':''}>${w.name}</option>`).join('');
+  const mark = (val, ans) => val ? (close(parseNum(val), ans) ? '<span class="ok">✓</span>' : '<span class="no">✗</span>') : '';
+  const markSel = (val, ans) => val ? (val===ans ? '<span class="ok">✓</span>' : '<span class="no">✗</span>') : '';
+  $('#backq').innerHTML = `
+  <div class="q"><b>1.</b> What is your highest weight and on which object?<div class="check"><select data-b="q1w"><option value="">choose</option>${opts(b.q1w)}</select>${markSel(b.q1w,keys.q1w)}<input data-b="q1v" value="${b.q1v||''}" placeholder="weight (lb)">${mark(b.q1v,keys.q1v)}</div>${showAns?`<span class="ans">${highest.name}, ${plain(keys.q1v)} lb</span>`:''}</div>
+  <div class="q"><b>2.</b> What is your lowest weight and on which object?<div class="check"><select data-b="q2w"><option value="">choose</option>${opts(b.q2w)}</select>${markSel(b.q2w,keys.q2w)}<input data-b="q2v" value="${b.q2v||''}" placeholder="weight (lb)">${mark(b.q2v,keys.q2v)}</div>${showAns?`<span class="ans">${lowest.name}, ${plain(keys.q2v)} lb</span>`:''}</div>
+  <div class="q"><b>3.</b> How much would your 5.0 kg book bag weigh on the Moon? Could you easily throw it there?
+    <div class="check"><input data-b="q3" value="${b.q3||''}" placeholder="weight"><select data-b="q3u"><option value="N" ${b.q3u!=='lb'?'selected':''}>N</option><option value="lb" ${b.q3u==='lb'?'selected':''}>lb</option></select>${mark(b.q3,keys.q3)}</div>
+    <textarea data-b="q3t" placeholder="Explain">${b.q3t||''}</textarea>
+    <button class="btn ghost" data-model="m3" style="margin-top:6px">Compare with a model answer</button>
+    <div class="model" id="m3" hidden>W = mg = (5.0 kg)(1.62 m/s²) ≈ 8.1 N, about 1.8 lb, roughly 1/6 of its Earth weight. It would be easy to lift and toss upward, and it would fly much farther. But its mass is still 5.0 kg, so it has the same inertia: it’s no easier to make it move fast.</div></div>
+  <div class="q"><b>4.</b> Saturn, Uranus and Neptune are much larger than Earth (Earth: M = 6.0 × 10<sup>24</sup> kg, R = 6.4 × 10<sup>6</sup> m). Why are their values of g so close to Earth’s?
+    <textarea data-b="q4t" placeholder="Explain">${b.q4t||''}</textarea>
+    <button class="btn ghost" data-model="m4" style="margin-top:6px">Compare with a model answer</button>
+    <div class="model" id="m4" hidden>g depends on M/R², not on size alone. Saturn has about 95 times Earth’s mass, but its radius is about 9.4 times Earth’s, so R² is about 89 times larger. The extra mass is almost exactly cancelled by the extra distance from the center: 95 ÷ 89 ≈ 1.1. That happens because these planets are mostly light gas, so their density is low. Try it in Build a world.</div></div>
+  <div class="q"><b>5.</b> Deimos has mass 1.8 × 10<sup>15</sup> kg and radius 6000 m. What is g on Deimos?<div class="check"><input data-b="q5" value="${b.q5||''}" placeholder="g (m/s²)">${mark(b.q5,keys.q5)}</div>${showAns?`<span class="ans">${plain(keys.q5)} m/s²</span>`:''}</div>
+  <div class="q"><b>6.</b> What is your weight on Deimos?<div class="check"><input data-b="q6" value="${b.q6||''}" placeholder="weight (lb)">${mark(b.q6,keys.q6)}</div>${showAns?`<span class="ans">${plain(keys.q6)} lb</span>`:''}</div>`;
+  const allRight = b.q1w===keys.q1w && b.q2w===keys.q2w && ['q1v','q2v','q3','q5','q6'].every(k => close(parseNum(b[k]), keys[k]));
+  if (allRight) award('backpage');
+  $$('#backq [data-b]').forEach(el => el.onchange = () => { const d = store.get('back', {}); d[el.dataset.b] = el.value; store.set('back', d); if (!el.matches('textarea')) renderBack(); });
+  $$('#backq [data-model]').forEach(btn => btn.onclick = () => { const m = document.getElementById(btn.dataset.model); m.hidden = !m.hidden; });
+  if (showAns) $$('#backq .model').forEach(m => m.hidden = false);
+}
+
+/* ---------- games ---------- */
+const rand = (a,b) => a + Math.random()*(b-a);
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const shuffle = a => { a = [...a]; for (let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; };
+const r3 = x => Number(x.toPrecision(3));
+
+const PLANET_NAMES = ['Kestrel-4b','Vanta','Orrin Prime','Tessaly','Glimmer-9','Hadal','Brontë IV','Quillon','Marrow','Ixion Minor','Sable-2c','Corvina'];
+function makePlanet(){
+  const gas = Math.random() < .4;
+  const R = r3(EARTH.R * (gas ? rand(3, 12) : rand(.3, 2.2)));
+  const rho = gas ? rand(700, 1700) : rand(3000, 8000);
+  const M = r3(rho * 4/3*Math.PI*R*R*R);
+  return {name: pick(PLANET_NAMES), M, R, c: gas ? pick(['#d9a86c','#88c7d4','#9db0ff','#e6cf8b']) : pick(['#b0715a','#9a9a9a','#c8a37a','#7f9a6a'])};
+}
+const SMALL = [
+  {name:'Deimos', M:1.8e15, R:6.0e3},
+  {name:'Phobos', M:1.07e16, R:1.13e4},
+  {name:'Asteroid Bennu', M:7.33e10, R:245},
+  {name:'Asteroid Itokawa', M:3.5e10, R:165},
+  {name:'Comet Halley’s nucleus', M:2.2e14, R:5.5e3},
+  {name:'Dwarf planet Ceres', M:9.39e20, R:4.70e5},
+  {name:'Saturn’s moon Mimas', M:3.75e19, R:1.98e5},
+  {name:'Asteroid Psyche', M:2.29e19, R:1.13e5}
+];
+const SPRINT = 10; // m/s, a very fast human sprint
+
+const GAMES = {
+  gauge: {
+    title:'Gravity Gauge', icon:'🎯', rounds:8, time:90,
+    blurb:'Get a world’s mass and radius, then calculate g = GM/R². Lab-sheet worlds and made-up planets.',
+    gen(){ const sheet = shuffle(SHEET).slice(0,4).map(w => ({name:w.name, M:w.M, R:w.R, c:w.c})); return shuffle([...sheet, ...Array.from({length:4}, makePlanet)]); },
+    render(r, body, api){
+      const g = G*r.M/(r.R*r.R); r.ans = g;
+      body.innerHTML = `<div class="prompt"><span class="orb" style="display:inline-block;vertical-align:middle;width:22px;height:22px;border-radius:50%;background:${r.c};margin-right:8px"></span><b>${r.name}</b>: what is g at the surface?</div>
+        <span class="datum">M = ${sci(r.M)} kg</span><span class="datum">R = ${sci(r.R)} m</span>
+        <div class="check" style="margin-top:12px"><input id="gIn" inputmode="decimal" placeholder="g in m/s²" aria-label="g in meters per second squared"><button class="btn" id="gGo">Check</button></div>`;
+      const go = () => { const v = parseNum($('#gIn').value); if (isNaN(v)) { $('#gIn').focus(); return; } api.submit(close(v, g), `g = (6.67 × 10<sup>−11</sup>)(${sci(r.M)}) / (${sci(r.R)})² = <b>${nice(g)} m/s²</b> (${nice(g/GE)} × Earth).`); };
+      $('#gGo').onclick = go; $('#gIn').onkeydown = e => { if (e.key==='Enter') go(); }; $('#gIn').focus();
+    },
+    hint(r){ return `Square R first: (${sci(r.R)})² = ${sci(r.R*r.R)}. Then GM = ${sci(G*r.M)}. Divide.`; }
+  },
+  mystery: {
+    title:'Mystery World', icon:'🕵️', rounds:8, time:15,
+    blurb:'A rider steps on a scale somewhere in the solar system. From the reading, figure out where they are.',
+    gen(){
+      return Array.from({length:8}, () => {
+        const pool = [EARTH, ...SHEET, DEIMOS];
+        const ans = pick(pool.filter(w => w.id!=='earth'));
+        const opts = [ans];
+        for (const w of shuffle(pool)){
+          if (opts.length === 4) break;
+          if (opts.every(o => o !== w && Math.abs(Math.log(gOf(o)/gOf(w))) > 0.12)) opts.push(w);
+        }
+        return {ans, opts: shuffle(opts), W: Math.round(rand(90, 240))};
+      });
+    },
+    render(r, body, api){
+      const reading = r.W*gOf(r.ans)/GE;
+      const rd = reading >= 1e5 ? nice(reading) : reading < 10 ? nice(reading) : Math.round(reading).toLocaleString();
+      body.innerHTML = `<div class="prompt">A rider who weighs <b>${r.W} lb</b> on Earth steps on a scale. It reads <b style="color:var(--sodium);font-size:1.3em">${rd} lb</b>. Where are they?</div>
+        <div class="opts">${r.opts.map((w,i) => `<button class="opt" data-id="${w.id}"><span class="orb" style="--c:${w.c}"></span>${w.name}<span class="key">${i+1}</span></button>`).join('')}</div>`;
+      const choose = id => {
+        if (api.done()) return;
+        const ok = id === r.ans.id;
+        $$('.opt').forEach(b => { if (b.dataset.id === r.ans.id) b.classList.add('right'); else if (b.dataset.id === id) b.classList.add('wrong'); });
+        api.submit(ok, `Gravity factor = ${rd} ÷ ${r.W} = ${nice(gOf(r.ans)/GE)}, which matches <b>${r.ans.name}</b> (g = ${nice(gOf(r.ans))} m/s²).`);
+      };
+      $$('.opt').forEach(b => b.onclick = () => choose(b.dataset.id));
+      api.onKey(e => { const n = parseInt(e.key,10); if (n>=1 && n<=4 && r.opts[n-1]) choose(r.opts[n-1].id); });
+    },
+    hint(r){ return `Divide the reading by ${r.W} lb to get the gravity factor, then compare with g ÷ 9.8 for each choice.`; }
+  },
+  orbit: {
+    title:'Run into Orbit', icon:'🏃', rounds:5, time:120,
+    blurb:'On a tiny world, running fast enough puts you in orbit. Calculate the speed v = √(gR) and see if a sprinter could do it.',
+    gen(){ return [SMALL[0], ...shuffle(SMALL.slice(1)).slice(0,4)]; },
+    render(r, body, api){
+      const g = G*r.M/(r.R*r.R), v = Math.sqrt(g*r.R); r.ans = v;
+      body.innerHTML = `<div class="prompt"><b>${r.name}</b>: how fast would you have to run to orbit just above the surface? (Treat it as a sphere.)</div>
+        <span class="datum">M = ${sci(r.M)} kg</span><span class="datum">R = ${sci(r.R)} m</span>
+        <p class="muted" style="margin-top:8px">For a circular orbit, gravity supplies the centripetal force: mg = mv²/R, so v = √(gR).</p>
+        <div class="check"><input id="vIn" inputmode="decimal" placeholder="v in m/s" aria-label="speed in meters per second"><button class="btn" id="vGo">Check</button></div>
+        <div class="runbox" id="runbox"></div>`;
+      const go = () => {
+        const val = parseNum($('#vIn').value); if (isNaN(val)) { $('#vIn').focus(); return; }
+        const can = v <= SPRINT;
+        api.submit(close(val, v), `g = ${nice(g)} m/s², so v = √(gR) = √(${nice(g)} × ${nice(r.R)}) = <b>${nice(v)} m/s</b> (${nice(v*2.237)} mph). ${can ? (v < 1.5 ? 'That’s a gentle walk. Careful: stepping too briskly launches you!' : 'A fast human sprint is about 10 m/s, so yes, you could run into orbit!') : `A fast human sprint is only about 10 m/s, so you’d need to go ${nice(v/SPRINT)} times faster.`}`);
+        const bodyR = 70;
+        $('#runbox').innerHTML = `<svg viewBox="0 0 300 220"><circle cx="150" cy="110" r="${bodyR}" fill="#8a7f74"/><circle cx="130" cy="95" r="10" fill="rgba(0,0,0,.2)"/><circle cx="170" cy="135" r="14" fill="rgba(0,0,0,.2)"/>
+          ${can ? `<circle cx="150" cy="110" r="${bodyR+12}" fill="none" stroke="#ffb547" stroke-dasharray="4 5" opacity=".7"/>` : ''}
+          <g class="${can?'spin':'hop'}"><circle cx="150" cy="${110-bodyR-9}" r="7" fill="#f5f5ff"/><rect x="146" y="${110-bodyR-10}" width="8" height="4" rx="2" fill="#ffb547"/></g>
+          <text x="150" y="212" text-anchor="middle" fill="#aaa6dc" font-size="12">${can ? 'in orbit!' : 'falls back down'}</text></svg>`;
+      };
+      $('#vGo').onclick = go; $('#vIn').onkeydown = e => { if (e.key==='Enter') go(); }; $('#vIn').focus();
+    },
+    hint(r){ const g = G*r.M/(r.R*r.R); return `First g = GM/R² = ${nice(g)} m/s². Then multiply by R = ${nice(r.R)} m and take the square root.`; }
+  }
+};
+
+let game = null, keyHandler = null;
+function renderMenu(){
+  $('#gameCards').innerHTML = Object.entries(GAMES).map(([id,g]) =>
+    `<div class="panel card"><h3>${g.icon} ${g.title}</h3><p class="muted">${g.blurb}</p><p class="muted" style="font-size:.85rem">${g.rounds} rounds, ${g.time} s each</p>
+     <button class="btn" data-g="${id}">Play</button><span class="best">${state.bests[id] ? `Best: ${state.bests[id].score} pts (${'★'.repeat(state.bests[id].stars)})` : 'No score yet'}</span></div>`).join('');
+  $$('#gameCards [data-g]').forEach(b => b.onclick = () => startGame(b.dataset.g));
+}
+document.addEventListener('keydown', e => { if (keyHandler && !(e.target.matches && e.target.matches('input,textarea'))) keyHandler(e); });
+
+function startGame(id){
+  const def = GAMES[id];
+  game = {id, def, list: def.gen(), i: -1, score: 0, streak: 0, misses: 0, right: 0, hint: false, answered: false, raf: 0, t0: 0, bestMult: 1};
+  $('#gameMenu').hidden = true; $('#gamePlay').hidden = false; $('#gTitle').textContent = def.icon+' '+def.title;
+  nextRound();
+}
+function mult(){ return Math.min(4, 1 + Math.floor(game.streak/3)); }
+function updHead(){
+  $('#gRound').textContent = `Round ${game.i+1} of ${game.list.length}`;
+  $('#gScore').textContent = `${game.score} pts`;
+  const m = mult(); $('#gMult').textContent = '×'+m; $('#gMult').classList.toggle('hot', m > 1);
+}
+function nextRound(){
+  game.i++;
+  if (game.i >= game.list.length) return endGame();
+  game.hint = false; game.answered = false; keyHandler = null;
+  $('#gFb').className = 'fb'; $('#gFb').innerHTML = ''; $('#gNext').hidden = true; $('#gHint').disabled = false;
+  updHead();
+  const r = game.list[game.i];
+  game.def.render(r, $('#gBody'), {
+    submit: (ok, explain) => submit(ok, explain),
+    done: () => game.answered,
+    onKey: fn => keyHandler = fn
+  });
+  game.t0 = performance.now();
+  cancelAnimationFrame(game.raf);
+  const tick = () => {
+    if (!game || game.answered) return;
+    const left = 1 - (performance.now()-game.t0)/(game.def.time*1000);
+    $('#gTimer').style.width = Math.max(0,left*100)+'%';
+    if (left <= 0) { submit(false, 'Time’s up. ' + timeoutExplain()); return; }
+    game.raf = requestAnimationFrame(tick);
+  };
+  tick();
+}
+function timeoutExplain(){
+  const r = game.list[game.i];
+  if (game.id==='mystery') { $$('.opt').forEach(b => { if (b.dataset.id === r.ans.id) b.classList.add('right'); }); return `It was <b>${r.ans.name}</b> (gravity factor ${nice(gOf(r.ans)/GE)}).`; }
+  if (game.id==='gauge') return `g = <b>${nice(r.ans)} m/s²</b>.`;
+  return `v = √(gR) = <b>${nice(r.ans)} m/s</b>.`;
+}
+function submit(ok, explain){
+  if (game.answered) return;
+  game.answered = true; cancelAnimationFrame(game.raf); $('#gHint').disabled = true;
+  const left = Math.max(0, 1 - (performance.now()-game.t0)/(game.def.time*1000));
+  let pts = 0;
+  if (ok){
+    game.streak++; game.right++;
+    const m = mult(); game.bestMult = Math.max(game.bestMult, m);
+    pts = 100*m + Math.round(50*left);
+    if (game.hint) pts = Math.round(pts/2);
+    game.score += pts; sfx.good(); popPoints('+'+pts);
+    if (m === 4) award('streak');
+  } else { game.streak = 0; game.misses++; sfx.bad(); }
+  const fb = $('#gFb'); fb.className = 'fb show '+(ok?'good':'bad');
+  fb.innerHTML = (ok ? `<b>Correct! +${pts}</b> ` : '<b>Not quite.</b> ') + explain;
+  $$('#gBody input, #gBody .btn').forEach(el => el.disabled = true);
+  updHead();
+  $('#gNext').hidden = false; $('#gNext').textContent = game.i+1 >= game.list.length ? 'See results' : 'Next';
+  $('#gNext').focus();
+  keyHandler = e => { if (e.key==='Enter') nextRound(); };
+}
+$('#gNext').onclick = () => nextRound();
+$('#gHint').onclick = () => {
+  if (!game || game.answered || game.hint) return;
+  game.hint = true; const fb = $('#gFb'); fb.className = 'fb show'; fb.style.background = 'var(--night2)'; fb.innerHTML = '💡 '+game.def.hint(game.list[game.i]);
+  setTimeout(() => fb.style.background = '', 0);
+};
+$('#gQuit').onclick = () => { cancelAnimationFrame(game.raf); game = null; keyHandler = null; $('#gamePlay').hidden = true; $('#gameMenu').hidden = false; renderMenu(); };
+function popPoints(txt){
+  const r = $('#gScore').getBoundingClientRect(), p = document.createElement('div');
+  p.className = 'pop'; p.textContent = txt; p.style.left = r.left+'px'; p.style.top = (r.top+20)+'px';
+  document.body.appendChild(p); setTimeout(() => p.remove(), 1000);
+}
+function endGame(){
+  cancelAnimationFrame(game.raf); keyHandler = null;
+  const stars = game.misses === 0 ? 3 : game.misses <= 2 ? 2 : 1;
+  const prev = state.bests[game.id];
+  const isBest = !prev || game.score > prev.score;
+  if (isBest){ state.bests[game.id] = {score: game.score, stars}; store.set('bests', state.bests); }
+  if (game.misses === 0) award(game.id === 'gauge' ? 'gauge' : game.id === 'mystery' ? 'mystery' : 'orbit');
+  $('#rTitle').textContent = game.def.icon+' '+game.def.title;
+  $('#rStars').textContent = '★'.repeat(stars) + '☆'.repeat(3-stars);
+  $('#rScore').textContent = game.score.toLocaleString()+' pts';
+  $('#rDetail').textContent = `${game.right} of ${game.list.length} correct, best multiplier ×${game.bestMult}${isBest ? '. New personal best!' : ''}`;
+  $('#rName').value = state.name;
+  $('#rDate').textContent = new Date().toLocaleString([], {dateStyle:'medium', timeStyle:'short'});
+  $('#results').hidden = false; sfx.fanfare();
+  if (stars === 3) confetti();
+  const id = game.id; $('#rAgain').onclick = () => { $('#results').hidden = true; startGame(id); };
+}
+$('#rName').oninput = e => { state.name = e.target.value; store.set('name', state.name); };
+$('#rClose').onclick = () => { $('#results').hidden = true; game = null; $('#gamePlay').hidden = true; $('#gameMenu').hidden = false; renderMenu(); };
+
+/* ---------- confetti ---------- */
+function confetti(){
+  if (reduced) return;
+  const cv = $('#confetti'), cx = cv.getContext('2d');
+  cv.width = innerWidth; cv.height = innerHeight;
+  const cols = ['#ffb547','#5fd39a','#8fd3dc','#ff7383','#b48cff','#fff'];
+  const ps = Array.from({length:140}, () => ({x: Math.random()*cv.width, y: -20-Math.random()*cv.height*.5, vx: rand(-2,2), vy: rand(2,6), r: rand(4,8), c: pick(cols), a: rand(0,6)}));
+  const t0 = performance.now();
+  (function f(now){
+    cx.clearRect(0,0,cv.width,cv.height);
+    ps.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += .05; p.a += .1; cx.save(); cx.translate(p.x,p.y); cx.rotate(p.a); cx.fillStyle = p.c; cx.fillRect(-p.r/2,-p.r/4,p.r,p.r/2); cx.restore(); });
+    if (now - t0 < 3500) requestAnimationFrame(f); else cx.clearRect(0,0,cv.width,cv.height);
+  })(t0);
+}
+
+/* ---------- init ---------- */
+renderPicker(); renderLab(false); renderBadges(); renderMenu();
+</script>
+</body>
+</html>
