@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
 <title>Your Weight on Other Worlds</title>
 <style>
 :root{
@@ -567,17 +568,28 @@ function renderCalc(w, hide){
       h += `<div class="insight">Compared with Earth: mass × ${nice(mx)}, radius × ${nice(rx)}, so R² × ${nice(rx*rx)}. g ≈ ${nice(mx)} ÷ ${nice(rx*rx)} = <b>${nice(mx/(rx*rx))} × Earth’s</b>.`;
       if (['saturn','uranus','neptune','jupiter'].includes(w.id)) h += ` The huge mass is mostly cancelled by the huge R², because these planets are mostly light gas (low density).`;
       if (w.id==='deimos'){ const v = Math.sqrt(g*w.R); h += ` To orbit just above the surface you need v = √(gR) = ${nice(v)} m/s (${nice(v*2.237)} mph). A fast run would do it.`; }
-      if (w.id==='neutron') h += ` A real neutron star is about 1.4 Suns of mass squeezed into a ball roughly 10 km wide, so its real g is even larger.`;
+      if (w.id==='neutron') h += ` A real neutron star is about 1.4 Suns of mass squeezed into a ball only about 20 km across (radius ≈ 10 km), so its real g is even larger.`;
       h += `</div>`;
     }
     if (w.id==='custom'){
       const rho = w.M/(4/3*Math.PI*Math.pow(w.R,3));
+      const live = $('#calc .custom');
+      if (live){
+        $('#calcMain').innerHTML = h;
+        $('#cmL').innerHTML = `Mass: <b>${nice(w.M/EARTH.M)} × Earth</b> (${sci(w.M)} kg)`;
+        $('#crL').innerHTML = `Radius: <b>${nice(w.R/EARTH.R)} × Earth</b> (${sci(w.R)} m)`;
+        $('#cDen').innerHTML = nice(rho);
+        $('#cm').value = state.custom.m;
+        $('#cr').value = state.custom.r;
+        return;
+      }
+      h = `<div id="calcMain">${h}</div>`;
       h += `<div class="custom">
-        <label for="cm">Mass: <b>${nice(w.M/EARTH.M)} × Earth</b> (${sci(w.M)} kg)</label>
+        <label for="cm" id="cmL">Mass: <b>${nice(w.M/EARTH.M)} × Earth</b> (${sci(w.M)} kg)</label>
         <input id="cm" type="range" min="-3" max="3.5" step="0.01" value="${state.custom.m}">
-        <label for="cr">Radius: <b>${nice(w.R/EARTH.R)} × Earth</b> (${sci(w.R)} m)</label>
+        <label for="cr" id="crL">Radius: <b>${nice(w.R/EARTH.R)} × Earth</b> (${sci(w.R)} m)</label>
         <input id="cr" type="range" min="-1.5" max="1.5" step="0.01" value="${state.custom.r}">
-        <p class="muted" style="margin-top:8px">Density: ${nice(rho)} kg/m³ (Earth ≈ 5,500, water 1,000). Try a world 10× Earth’s radius with Earth’s gravity: how much mass does it need?</p>
+        <p class="muted" style="margin-top:8px">Density: <span id="cDen">${nice(rho)}</span> kg/m³ (Earth ≈ 5,500, water 1,000). Try a world 10× Earth’s radius with Earth’s gravity: how much mass does it need?</p>
         <button class="btn ghost" id="cReset">Reset to Earth</button></div>`;
     }
   }
@@ -601,9 +613,7 @@ function renderCalc(w, hide){
       state.custom = {m: parseFloat($('#cm').value), r: parseFloat($('#cr').value)}; store.set('custom', state.custom);
       const cw = curW(), ratio = gOf(cw)/GE;
       if (cw.R/EARTH.R > 3 && Math.abs(ratio-1) <= 0.1) award('builder');
-      const ae = document.activeElement && document.activeElement.id;
       renderLab(false);
-      if (ae) { const el = document.getElementById(ae); if (el) el.focus(); }
     };
     $('#cm').oninput = upd; $('#cr').oninput = upd;
     $('#cReset').onclick = () => { state.custom = {m:0,r:0}; store.set('custom', state.custom); renderLab(false); };
@@ -649,7 +659,7 @@ $('#jumpBtn').onclick = () => {
   const dur = Math.max(350, Math.min(3200, T*600));
   $('#reading').textContent = '0 lb'; $('#readingSub').textContent = 'in the air: scale reads zero'; setNeedle(0); $('#scaleTxt').textContent = '0';
   let msg = `Jump height <b>${fmtLen(h)}</b>, time in the air <b>${fmtTime(T)}</b> (Earth: 32 cm, 0.51 s).`;
-  if (w.id==='deimos') msg += ' You’re nearly at orbit speed already!';
+  if (w.id==='deimos') msg += ` Your 2.5 m/s jump is already more than half of orbit speed (${nice(Math.sqrt(g*w.R))} m/s)!`;
   if (squished) msg += ' You can’t even lift your foot.';
   $('#jumpOut').innerHTML = msg;
   animateArc($('#personWrap'), 300, 285, px, dur, 0, () => { jumping = false; if (!squished) sfx.land(); renderLab(false); });
@@ -662,7 +672,11 @@ $('#tossBtn').onclick = () => {
   const dx = Math.min(290, 18*Math.sqrt(range/3.67)*5.5);
   const px = Math.min(300, 30*Math.sqrt(hmax/0.92));
   const dur = Math.max(400, Math.min(3000, (2*v*0.7071/g)*500));
-  $('#jumpOut').innerHTML = `The 5.0 kg bag weighs <b>${nice(bagN)} N</b> (${nice(bagN/4.448)} lb) here. Tossed at the same speed, it lands <b>${fmtLen(range)}</b> away (Earth: 3.7 m). Its mass is still 5.0 kg, so it’s just as hard to get moving fast.`;
+  const vEsc = Math.sqrt(2*g*w.R);
+  const where = range > 0.2*w.R
+    ? `Tossed at the same 6 m/s, it doesn’t land a few meters away: that’s close to the ${nice(vEsc)} m/s escape speed here, so it sails off on a huge arc around the moon and takes ages to come down (Earth: lands 3.7 m away).`
+    : `Tossed at the same speed, it lands <b>${fmtLen(range)}</b> away (Earth: 3.7 m).`;
+  $('#jumpOut').innerHTML = `The 5.0 kg bag weighs <b>${nice(bagN)} N</b> (${nice(bagN/4.448)} lb) here. ${where} Its mass is still 5.0 kg, so it’s just as hard to get moving fast.`;
   animateArc(bag, 315, 268, squished ? 0 : px, dur, squished ? 4 : dx, () => {});
 };
 
@@ -800,7 +814,7 @@ const GAMES = {
         if (api.done()) return;
         const ok = id === r.ans.id;
         $$('.opt').forEach(b => { if (b.dataset.id === r.ans.id) b.classList.add('right'); else if (b.dataset.id === id) b.classList.add('wrong'); });
-        api.submit(ok, `Gravity factor = ${rd} ÷ ${r.W} = ${nice(gOf(r.ans)/GE)}, which matches <b>${r.ans.name}</b> (g = ${nice(gOf(r.ans))} m/s²).`);
+        api.submit(ok, `Gravity factor = ${rd} ÷ ${r.W} ≈ ${nice(reading/r.W)}, which matches <b>${r.ans.name}</b> (g = ${nice(gOf(r.ans))} m/s²).`);
       };
       $$('.opt').forEach(b => b.onclick = () => choose(b.dataset.id));
       api.onKey(e => { const n = parseInt(e.key,10); if (n>=1 && n<=4 && r.opts[n-1]) choose(r.opts[n-1].id); });
