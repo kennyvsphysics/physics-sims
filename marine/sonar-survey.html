@@ -1,0 +1,478 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Seafloor Sonar Survey</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: instrument-console page — header with mode switch, full-width echo-sounder canvas, controls, readout + data log, feature guide */
+:root{
+  --bg:#eaf0f4; --surface:#ffffff; --surface-2:#f4f7fa; --ink:#0f2233; --muted:#506577; --line:#cdd8e1;
+  --accent:#d9540b; --accent-ink:#ffffff; --accent-soft:#fde5d6;
+  --rock:#6f6253; --water-top:#a6d6ea; --water-bot:#0c3a63; --sky:#e3eef5; --grid:rgba(15,34,51,.14);
+  --good:#1d7f47; --good-soft:#dcf2e5; --bad:#b9372a; --bad-soft:#f9e0dc;
+  --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0a1520; --surface:#112131; --surface-2:#0d1b28; --ink:#e2ecf4; --muted:#93a8ba; --line:#233a4e;
+  --accent:#ff8a3d; --accent-ink:#1a0d03; --accent-soft:#3a2312;
+  --rock:#3b342d; --water-top:#1f5f80; --water-bot:#040d16; --sky:#0e1c29; --grid:rgba(226,236,244,.12);
+  --good:#4cc283; --good-soft:#12301f; --bad:#ff6b5b; --bad-soft:#3a1a16; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0a1520; --surface:#112131; --surface-2:#0d1b28; --ink:#e2ecf4; --muted:#93a8ba; --line:#233a4e;
+  --accent:#ff8a3d; --accent-ink:#1a0d03; --accent-soft:#3a2312;
+  --rock:#3b342d; --water-top:#1f5f80; --water-bot:#040d16; --sky:#0e1c29; --grid:rgba(226,236,244,.12);
+  --good:#4cc283; --good-soft:#12301f; --bad:#ff6b5b; --bad-soft:#3a1a16; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px;display:grid;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(2rem,5vw,2.8rem);line-height:1;margin:0;letter-spacing:.01em;text-wrap:balance}
+h1 small{display:block;font-family:var(--f-body);font-weight:500;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+h2{font-family:var(--f-display);font-weight:700;font-size:1.5rem;margin:0;letter-spacing:.01em}
+h3{font-family:var(--f-display);font-weight:600;font-size:1.2rem;margin:0}
+p{margin:0}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px}
+.tabs button{border:0;background:transparent;color:var(--muted);font:600 .95rem var(--f-body);padding:8px 14px;border-radius:7px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.intro{color:var(--muted);max-width:70ch}
+.console{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.console-head{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line)}
+.route-name{font-family:var(--f-display);font-weight:600;font-size:1.25rem}
+.stats{display:flex;flex-wrap:wrap;gap:6px 16px;font:500 .8rem var(--f-mono);color:var(--muted)}
+.stats b{color:var(--ink);font-weight:500}
+canvas{display:block;width:100%;touch-action:manipulation;cursor:crosshair}
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:8px 16px;font:400 .75rem var(--f-mono);color:var(--muted);border-top:1px solid var(--line)}
+.legend .bar{flex:0 1 220px;height:10px;border-radius:3px;background:linear-gradient(90deg,#d7301f,#fc8d59,#fee08b,#91cf60,#3fb6c9,#2c5fa8,#4b2c83)}
+.controls{display:grid;gap:12px;padding:14px 16px;border-top:1px solid var(--line);background:var(--surface-2)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.row label{font-size:.85rem;color:var(--muted)}
+input[type=range]{flex:1 1 220px;accent-color:var(--accent);min-width:0}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:600 .9rem var(--f-body);padding:8px 14px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.tabs button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+select,input[type=number],input[type=text]{font:500 .9rem var(--f-mono);padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink)}
+.toggle{display:inline-flex;align-items:center;gap:6px;font-size:.9rem}
+.toggle input{accent-color:var(--accent);width:16px;height:16px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--surface);color:var(--muted);font:500 .85rem var(--f-body);padding:7px 11px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.msg{font-size:.9rem;min-height:1.4em;color:var(--muted)}
+.msg.warn{color:var(--bad)}
+.msg.ok{color:var(--good)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:18px}
+@media (max-width:760px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:12px;align-content:start;min-width:0}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.clock{font:500 2.6rem/1 var(--f-mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.clock small{font-size:1rem;color:var(--muted)}
+.eq{font:400 .95rem var(--f-mono);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow-x:auto;white-space:nowrap}
+.eq b{color:var(--accent);font-weight:500}
+.mathbox{display:grid;gap:8px;padding:12px;border:1px dashed var(--accent);border-radius:10px;background:var(--accent-soft)}
+.mathbox .row input{width:130px}
+.tablewrap{overflow:auto;max-height:300px;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font:400 .85rem var(--f-mono);font-variant-numeric:tabular-nums}
+th,td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--line)}
+th{position:sticky;top:0;background:var(--surface-2);font-weight:500;color:var(--muted);font-family:var(--f-body);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+td:first-child,th:first-child{text-align:left}
+.empty{color:var(--muted);font-size:.9rem;padding:14px;text-align:center}
+.quiz{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.qitem{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface-2)}
+.qitem select{flex:1;min-width:0;font-family:var(--f-body)}
+.qnum{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:var(--bg);font:600 .85rem var(--f-mono)}
+.qitem.right{border-color:var(--good);background:var(--good-soft)}
+.qitem.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.guide{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--surface);display:grid;gap:6px;align-content:start}
+.card h3{display:flex;align-items:center;gap:8px}
+.swatch{width:12px;height:12px;border-radius:3px;flex:none}
+.card p{font-size:.9rem;color:var(--muted)}
+.card p b{color:var(--ink);font-weight:600}
+.note{font-size:.85rem;color:var(--muted);border-left:3px solid var(--accent);padding-left:10px}
+.code{font:500 1rem var(--f-mono);letter-spacing:.06em}
+footer{font-size:.8rem;color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1><small>Marine Science · Unit 7 The Ocean Floor</small>Seafloor Sonar Survey</h1>
+    <div class="tabs" role="group" aria-label="Survey mode">
+      <button id="tab-li" aria-pressed="true">Long Island Transect</button>
+      <button id="tab-mystery" aria-pressed="false">Mystery Basin</button>
+    </div>
+  </header>
+
+  <p class="intro" id="intro"></p>
+
+  <section class="console" aria-label="Echo sounder">
+    <div class="console-head">
+      <div class="route-name" id="route-name"></div>
+      <div class="stats">
+        <span>Ship at <b id="st-x">0</b> km</span>
+        <span>Pings used <b id="st-used">0</b></span>
+        <span>Pings left <b id="st-left">∞</b></span>
+        <span>Vertical exaggeration <b id="st-ve">×1</b></span>
+      </div>
+    </div>
+    <canvas id="cv" role="img" aria-label="Cross-section of the ocean with a survey ship. Tap the water to send a sonar ping."></canvas>
+    <div class="legend" id="legend" hidden><span>0 m</span><span class="bar"></span><span id="legend-max">6,000 m</span><span>Seafloor line uses multibeam-style colors: warm = shallow, purple = deep</span></div>
+    <div class="controls">
+      <div class="row">
+        <label for="ship">Move ship</label>
+        <input type="range" id="ship" min="0" max="4200" step="1" value="40">
+        <button class="btn primary" id="btn-ping">Ping ↓</button>
+      </div>
+      <div class="row">
+        <span class="seg" role="group" aria-label="View">
+          <button id="view-full" aria-pressed="true">Whole route</button>
+          <button id="view-margin" aria-pressed="false">Zoom: continental margin</button>
+        </span>
+        <label class="toggle"><input type="checkbox" id="math" checked> I'll do the math</label>
+        <label for="spacing">Auto-survey every</label>
+        <select id="spacing"><option value="25">25 km</option><option value="50">50 km</option><option value="100" selected>100 km</option><option value="200">200 km</option></select>
+        <button class="btn" id="btn-auto">Run survey line</button>
+      </div>
+      <div class="row">
+        <button class="btn" id="btn-label">Label features</button>
+        <button class="btn" id="btn-reveal">Reveal seafloor</button>
+        <button class="btn" id="btn-reset">Restart survey</button>
+        <span id="mystery-tools" class="row" hidden>
+          <span class="code" id="basin-code"></span>
+          <button class="btn" id="btn-new">New basin</button>
+          <label for="code-in" class="sr">Basin code</label>
+          <input type="text" id="code-in" inputmode="numeric" maxlength="4" placeholder="code" style="width:80px">
+          <button class="btn" id="btn-load">Load</button>
+        </span>
+      </div>
+      <p class="msg" id="msg" aria-live="polite">Tap anywhere on the water to sail there and ping.</p>
+    </div>
+  </section>
+
+  <div class="grid2">
+    <section class="panel" aria-label="Echo readout">
+      <div class="panel-head"><h2>Echo readout</h2><span class="stats">sound in seawater ≈ <b>1,500 m/s</b></span></div>
+      <div class="clock" id="clock">0.00 <small>s</small></div>
+      <div class="eq" id="eq">depth = speed × time ÷ 2</div>
+      <div class="mathbox" id="mathbox" hidden>
+        <p id="math-prompt"></p>
+        <div class="row">
+          <label for="math-in">Depth (m)</label>
+          <input type="number" id="math-in" step="1" inputmode="decimal">
+          <button class="btn primary" id="math-check">Check</button>
+          <button class="btn" id="math-show">Show me</button>
+        </div>
+        <p class="msg" id="math-msg"></p>
+      </div>
+      <p class="note">The ping travels down to the seafloor <i>and</i> back up, so the one-way trip takes half the echo time.</p>
+    </section>
+
+    <section class="panel" aria-label="Sounding log">
+      <div class="panel-head"><h2>Sounding log</h2><button class="btn" id="btn-copy">Copy data</button></div>
+      <div class="tablewrap"><table><thead><tr><th>#</th><th>Distance (km)</th><th>Echo time (s)</th><th>Depth (m)</th></tr></thead><tbody id="log"></tbody></table><p class="empty" id="log-empty">No soundings yet.</p></div>
+      <p class="msg" id="copy-msg">Copy pastes straight into Google Sheets for graphing.</p>
+    </section>
+  </div>
+
+  <section class="panel" id="quiz-panel" hidden aria-label="Label the features">
+    <div class="panel-head"><h2>Label the features</h2><div class="row"><span class="msg" id="quiz-score"></span><button class="btn primary" id="quiz-check">Check labels</button></div></div>
+    <p class="intro">Use your sounding profile to decide what each numbered marker is pointing at. Zoom into the continental margin for the features near the coast.</p>
+    <div class="quiz" id="quiz"></div>
+  </section>
+
+  <section class="panel" id="field-notes" hidden aria-label="Field notes">
+    <h2>Field notes: what you just mapped</h2>
+    <div class="guide" id="notes"></div>
+    <p class="note">This route is a simplified composite built from real features between Long Island and the Mid-Atlantic Ridge. Distances and depths are approximate.</p>
+  </section>
+
+  <section class="panel" aria-label="Feature guide">
+    <h2>Feature guide</h2>
+    <div class="guide" id="guide"></div>
+  </section>
+
+  <footer>Built for Unit 7 · The Ocean Floor. Sound speed varies with temperature, salinity and pressure; 1,500 m/s is the standard average used in class.</footer>
+</div>
+
+<script>
+(()=>{
+const SPEED=1500;
+const RAMP=['#d7301f','#fc8d59','#fee08b','#91cf60','#3fb6c9','#2c5fa8','#4b2c83'];
+const NAMES={shelf:'Continental shelf',slope:'Continental slope',rise:'Continental rise',canyon:'Submarine canyon',plain:'Abyssal plain',seamount:'Seamount',guyot:'Guyot',island:'Volcanic island',trench:'Trench',ridge:'Mid-ocean ridge'};
+const GUIDE=[
+ ['shelf','#d7301f','The flooded edge of a continent. Gently sloping and usually less than about 200 m deep.','Sediment carried off the land by rivers (and, around Long Island, by glaciers) piled up here. When sea level dropped in ice ages, much of the shelf was dry land.'],
+ ['slope','#fc8d59','The steeper drop from the edge of the shelf down toward the deep ocean. This is where the continent really ends.','Marks the boundary between thick continental crust and thinner oceanic crust.'],
+ ['rise','#fee08b','A gentle apron of sediment at the bottom of the slope.','Built by turbidity currents (Unit 6) and slumps that carry sand and mud down the slope and drop it where the slope flattens.'],
+ ['canyon','#91cf60','A deep, steep-sided, V-shaped valley cut into the shelf and slope.','Upper parts were carved by rivers when sea level was lower; deeper parts were scoured by turbidity currents.'],
+ ['plain','#3fb6c9','Huge, flat regions of the deep ocean floor, usually 4,000 to 6,000 m deep. The flattest places on Earth.','Sediment slowly raining down from above, plus turbidity-current deposits, buries the rough rock underneath.'],
+ ['seamount','#2c5fa8','An underwater volcano with steep sides and a pointed peak that does not reach the surface.','Forms over hot spots or near plate boundaries where magma erupts on the seafloor.'],
+ ['guyot','#4b2c83','A seamount with a flat top.','Its top once stuck out of the water and waves planed it flat. Then the plate cooled, sank and carried it deeper.'],
+ ['island','#8c6d46','A volcano tall enough to break the surface. Mauna Kea in Hawaii is over 10,000 m tall measured from its base.','A seamount that kept erupting until it rose above sea level.'],
+ ['trench','#5b6770','Long, narrow, V-shaped troughs. The deepest places in the ocean, down to about 11,000 m in the Mariana Trench.','Form where one plate bends and sinks under another (subduction). They are plate boundaries, not simple cracks.'],
+ ['ridge','#9a3b6f','A mountain chain running through the ocean basins, with a rift valley down its center.','Plates pull apart, magma rises, cools and forms new crust: seafloor spreading. The Atlantic widens about 2.5 cm per year.']
+];
+const LI_NOTES={
+ shelf:['Long Island shelf','About 150 km wide here and mostly under 120 m deep. About 20,000 years ago sea level was roughly 120 m lower, and the shoreline sat near the edge of this shelf. Long Island itself is a pile of glacial moraine.'],
+ canyon:['Hudson Canyon','The largest submarine canyon on the U.S. Atlantic coast. It begins about 100 miles southeast of New York City, is up to 7.5 miles wide, and has walls up to about 1.1 km tall. NOAA has proposed it as a National Marine Sanctuary.'],
+ slope:['Continental slope','The shelf edge drops off quickly here, from about 120 m to over 2,000 m in less than 100 km.'],
+ rise:['Continental rise','Sediment funneled down Hudson Canyon and other canyons spreads out into this apron.'],
+ guyot:['Bear Seamount','A guyot: a flat-topped extinct volcano whose summit is about 1,100 m deep. It is the first of the New England Seamounts, about 200 miles from Woods Hole, MA, and about 100 million years old.'],
+ seamount:['New England Seamounts','A chain of extinct volcanoes stretching southeast toward Bermuda. Some have peaked tops; others are guyots.'],
+ plain:['Sohm Abyssal Plain','Over 5,000 m deep and remarkably flat. Thick layers of sediment bury the older, rougher crust.'],
+ ridge:['Mid-Atlantic Ridge','The boundary where the North American plate pulls away from Africa and Europe. New crust forms in the rift valley along its center. It reaches the surface in Iceland.']
+};
+
+/* ---------- seafloor construction ---------- */
+function rngFrom(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function piecewise(pts,L){const a=new Float32Array(L+1);let j=0;for(let x=0;x<=L;x++){while(j<pts.length-2&&x>pts[j+1][0])j++;const[x0,d0]=pts[j],[x1,d1]=pts[j+1];const t=Math.min(1,Math.max(0,(x-x0)/(x1-x0)));const s=t*t*(3-2*t);a[x]=d0+(d1-d0)*s}return a}
+function span(a,cx,w,fn){const h=w/2;for(let x=Math.max(0,Math.ceil(cx-h));x<=Math.min(a.length-1,Math.floor(cx+h));x++)fn(x,Math.abs(x-cx)/h,Math.abs(x-cx))}
+function cone(a,cx,w,summit){span(a,cx,w,(x,t)=>{a[x]=Math.min(a[x],summit+(a[x]-summit)*Math.pow(t,1.1))})}
+function guyot(a,cx,w,wt,top){const h=w/2,ht=wt/2;span(a,cx,w,(x,t,dx)=>{const d=dx<=ht?top+8*Math.sin(x):top+(a[x]-top)*((dx-ht)/(h-ht));a[x]=Math.min(a[x],d)})}
+function trench(a,cx,w,bottom){span(a,cx,w,(x,t)=>{a[x]=Math.max(a[x],bottom-(bottom-a[x])*Math.pow(t,.75))})}
+function canyon(a,cx,w,extra){span(a,cx,w,(x,t)=>{a[x]+=extra*(1-t)})}
+function ridge(a,cx,w,crest){span(a,cx,w,(x,t,dx)=>{const b=(1+Math.cos(Math.PI*t))/2;let d=a[x]-(a[x]-crest)*b+160*Math.sin(x*.35)*b*b;if(dx<16)d+=650*(1-dx/16);a[x]=d})}
+function noise(a,rng,amp){const n=5,P=[];for(let i=0;i<n;i++)P.push([rng()*6.28,.015+rng()*.09,amp*(.4+rng()*.6)/(i+1)]);for(let x=0;x<a.length;x++){let s=0;for(const[p,f,m]of P)s+=m*Math.sin(x*f+p);a[x]+=s*Math.min(1,Math.max(0,a[x])/2500)}}
+
+function buildLI(){
+  const L=4200,rng=rngFrom(870);
+  const a=piecewise([[0,8],[40,30],[120,70],[160,120],[235,2400],[300,3500],[450,4500],[640,5050],[1700,5250],[2600,5200],[4200,5150]],L);
+  canyon(a,185,26,800);
+  guyot(a,520,80,16,1100);
+  cone(a,1050,70,1700);
+  cone(a,1330,50,2600);
+  ridge(a,3780,1900,2550);
+  noise(a,rng,70);
+  for(let x=0;x<=200;x++)a[x]=Math.max(a[x],5);
+  return{L,floor:a,maxD:6000,views:[[0,L],[0,650]],budget:Infinity,
+    features:[{k:'shelf',x:80},{k:'canyon',x:185},{k:'slope',x:215},{k:'rise',x:380},{k:'guyot',x:520},{k:'seamount',x:1050},{k:'plain',x:1950},{k:'ridge',x:3780}],
+    name:'Long Island → Mid-Atlantic Ridge',notes:true};
+}
+function buildMystery(seed){
+  const L=2500,rng=rngFrom(seed*7919+13),r=(a,b)=>a+(b-a)*rng();
+  const shelfW=Math.round(r(60,190)),shelfD=r(90,180),slopeEnd=shelfW+Math.round(r(60,110)),slopeD=r(2500,3200),riseEnd=slopeEnd+Math.round(r(160,280)),riseD=r(4200,4600),plainD=riseD+r(250,700);
+  const a=piecewise([[0,5],[shelfW*.3,shelfD*.4],[shelfW,shelfD],[slopeEnd,slopeD],[riseEnd,riseD],[riseEnd+120,plainD],[L,plainD+r(-200,200)]],L);
+  const feats=[{k:'shelf',x:Math.round(shelfW/2)},{k:'rise',x:Math.round((slopeEnd+riseEnd)/2)}];
+  if(rng()<.65){const cx=Math.round(shelfW+(slopeEnd-shelfW)*.35);canyon(a,cx,r(16,26),r(500,900));feats.push({k:'canyon',x:cx});feats.push({k:'slope',x:Math.round(shelfW+(slopeEnd-shelfW)*.78)})}
+  else feats.push({k:'slope',x:Math.round((shelfW+slopeEnd)/2)});
+  const W={seamount:90,guyot:120,trench:190,ridge:560,island:140};
+  const pool=['seamount','guyot','trench','ridge','island'];
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
+  const start=riseEnd+220,end=L-40,placed=[];let hasTrench=false;
+  for(const k of pool.slice(0,3)){
+    for(let tries=0;tries<300;tries++){
+      const w=W[k],cx=Math.round(r(start+w/2,end-w/2));
+      if(placed.every(p=>Math.abs(p.x-cx)>(p.w+w)/2+110)){placed.push({k,x:cx,w});break}
+    }
+  }
+  placed.sort((p,q)=>p.x-q.x);
+  for(const p of placed){
+    if(p.k==='seamount')cone(a,p.x,p.w,r(900,2200));
+    if(p.k==='guyot')guyot(a,p.x,p.w,r(16,26),r(900,1500));
+    if(p.k==='island')cone(a,p.x,p.w,-r(250,500));
+    if(p.k==='trench'){trench(a,p.x,p.w,r(7600,10400));hasTrench=true}
+    if(p.k==='ridge')ridge(a,p.x,p.w,r(2300,2800));
+    feats.push({k:p.k,x:p.x});
+  }
+  noise(a,rng,70);
+  for(let x=0;x<=shelfW;x++)a[x]=Math.max(a[x],4);
+  // find the flattest open stretch for the abyssal plain marker
+  let best=null,bestScore=-1;
+  for(let x=riseEnd+140;x<=L-40;x+=10){const m=Math.min(...placed.map(p=>Math.abs(p.x-x)-p.w/2),L-x+40);if(m>bestScore){bestScore=m;best=x}}
+  if(best!=null&&bestScore>40)feats.push({k:'plain',x:best});
+  feats.sort((p,q)=>p.x-q.x);
+  return{L,floor:a,maxD:hasTrench?11000:6000,views:[[0,L],[0,Math.min(L,riseEnd+150)]],budget:30,features:feats,name:'Mystery Basin',notes:false,seed};
+}
+
+/* ---------- state ---------- */
+const $=id=>document.getElementById(id);
+const cv=$('cv'),ctx=cv.getContext('2d');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let S=null;
+function load(mode,seed){
+  const B=mode==='li'?buildLI():buildMystery(seed);
+  S={mode,...B,pings:[],used:0,view:0,ship:mode==='li'?40:20,anim:null,pending:null,labels:false,checked:false,answers:{},revealed:false};
+  $('tab-li').setAttribute('aria-pressed',mode==='li');$('tab-mystery').setAttribute('aria-pressed',mode!=='li');
+  $('route-name').textContent=S.name+(mode==='li'?'':' #'+seed);
+  $('intro').textContent=mode==='li'
+    ?'Sail a research ship from Long Island\'s south shore out to the middle of the Atlantic. Send sonar pings, time the echoes, and build a depth profile of a seafloor you can\'t see. Then label what you found.'
+    :'Like swapping shoeboxes in the lab: this basin is hidden and randomly built. You have 30 pings. Space them wisely, map the floor, and identify its features. Share the basin code so classmates can survey the same one.';
+  $('mystery-tools').hidden=mode==='li';$('basin-code').textContent=mode==='li'?'':'Basin code '+seed;
+  $('field-notes').hidden=true;$('quiz-panel').hidden=true;$('legend').hidden=true;$('mathbox').hidden=true;
+  $('clock').innerHTML='0.00 <small>s</small>';$('eq').textContent='depth = speed × time ÷ 2';
+  $('legend-max').textContent=S.maxD.toLocaleString()+' m';
+  setView(0);msg('Tap anywhere on the water to sail there and ping.');
+  try{const h=mode==='li'?'#long-island':'#basin-'+seed;if(location.hash!==h)history.replaceState(null,'',h)}catch(e){}
+  renderLog();draw();
+}
+function setView(i){
+  S.view=i;const[x0,x1]=S.views[i];
+  $('view-full').setAttribute('aria-pressed',i===0);$('view-margin').setAttribute('aria-pressed',i===1);
+  const sl=$('ship');sl.min=x0;sl.max=x1;S.ship=Math.min(Math.max(S.ship,x0),x1);sl.value=S.ship;
+  stats();draw();
+}
+function msg(t,cls){const m=$('msg');m.textContent=t;m.className='msg'+(cls?' '+cls:'')}
+function depthAt(x){const a=S.floor,i=Math.floor(x),f=x-i;if(i>=a.length-1)return a[a.length-1];return a[i]*(1-f)+a[i+1]*f}
+
+/* ---------- geometry ---------- */
+let W=0,H=0,M={l:58,r:14,t:46,b:30};
+function size(){const w=cv.parentElement.clientWidth;W=w;H=Math.round(Math.min(480,Math.max(300,w*.5)));M.l=w<500?46:58;const d=devicePixelRatio||1;cv.width=W*d;cv.height=H*d;cv.style.height=H+'px';ctx.setTransform(d,0,0,d,0,0);stats();draw()}
+const PW=()=>W-M.l-M.r,PH=()=>H-M.t-M.b;
+function px(x){const[x0,x1]=S.views[S.view];return M.l+(x-x0)/(x1-x0)*PW()}
+function py(d){return M.t+d/S.maxD*PH()}
+function xFromPx(p){const[x0,x1]=S.views[S.view];return x0+(p-M.l)/PW()*(x1-x0)}
+function stats(){if(!S||!W)return;const[x0,x1]=S.views[S.view];const ve=((x1-x0)*1000/PW())/(S.maxD/PH());
+  $('st-x').textContent=Math.round(S.ship).toLocaleString();$('st-used').textContent=S.used;$('st-left').textContent=S.budget===Infinity?'∞':Math.max(0,S.budget-S.used);$('st-ve').textContent='×'+Math.round(ve).toLocaleString()}
+
+/* ---------- drawing ---------- */
+function tok(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+function niceStep(range,target){const raw=range/target,p=Math.pow(10,Math.floor(Math.log10(raw))),n=raw/p;return(n<1.5?1:n<3.5?2:n<7.5?5:10)*p}
+function draw(){
+  if(!S||!W)return;
+  const T={rock:tok('--rock'),ink:tok('--ink'),muted:tok('--muted'),acc:tok('--accent'),top:tok('--water-top'),bot:tok('--water-bot'),sky:tok('--sky'),grid:tok('--grid'),surf:tok('--surface'),good:tok('--good'),bad:tok('--bad')};
+  const[x0,x1]=S.views[S.view],pw=PW(),ph=PH(),sea=M.t;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle=T.sky;ctx.fillRect(0,0,W,sea);
+  const g=ctx.createLinearGradient(0,sea,0,M.t+ph);g.addColorStop(0,T.top);g.addColorStop(1,T.bot);
+  ctx.fillStyle=g;ctx.fillRect(M.l,sea,pw,ph);
+  // grid + axes
+  ctx.font='500 11px "IBM Plex Mono",monospace';ctx.textBaseline='middle';
+  const dStep=S.maxD>6000?2000:1000;
+  for(let d=0;d<=S.maxD;d+=dStep){const y=py(d);ctx.strokeStyle=T.grid;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(M.l,y+.5);ctx.lineTo(M.l+pw,y+.5);ctx.stroke();ctx.fillStyle=T.muted;ctx.textAlign='right';ctx.fillText(d===0?'0 m':(d/1000)+'k',M.l-6,y)}
+  ctx.save();ctx.translate(12,M.t+ph/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillStyle=T.muted;ctx.fillText('Depth (m)',0,0);ctx.restore();
+  const xs=niceStep(x1-x0,W<500?4:8);ctx.textAlign='center';ctx.textBaseline='top';
+  for(let x=Math.ceil(x0/xs)*xs;x<=x1;x+=xs){const X=px(x);ctx.fillStyle=T.muted;ctx.fillText(x.toLocaleString()+(x===0?' km':''),X,M.t+ph+8);ctx.strokeStyle=T.grid;ctx.beginPath();ctx.moveTo(X+.5,M.t+ph);ctx.lineTo(X+.5,M.t+ph+4);ctx.stroke()}
+  ctx.textAlign='right';ctx.fillText('distance from shore (km) →',M.l+pw,M.t+ph+18>H-12?H-12:M.t+ph+18);
+  // land at left edge of mystery/LI (coast)
+  // revealed floor
+  ctx.save();ctx.beginPath();ctx.rect(M.l,0,pw,M.t+ph);ctx.clip();
+  if(S.revealed){
+    const bottom=M.t+ph,step=(x1-x0)/pw,ys=[];
+    for(let p=0;p<=pw;p++)ys.push(Math.max(py(depthAt(x0+p*step)),py(-S.maxD*.06)));
+    ctx.beginPath();ctx.moveTo(M.l,bottom);ys.forEach((y,p)=>ctx.lineTo(M.l+p,y));ctx.lineTo(M.l+pw,bottom);ctx.closePath();ctx.fillStyle=T.rock;ctx.fill();
+    const fg=ctx.createLinearGradient(0,py(0),0,py(S.maxD));RAMP.forEach((c,i,arr)=>fg.addColorStop(i/(arr.length-1),c));
+    ctx.beginPath();ys.forEach((y,p)=>p?ctx.lineTo(M.l+p,y):ctx.moveTo(M.l,y));ctx.strokeStyle=fg;ctx.lineWidth=5;ctx.lineJoin='round';ctx.stroke();
+  } else {
+    ctx.fillStyle=T.muted;ctx.globalAlpha=.55;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='500 12px "IBM Plex Sans",sans-serif';
+    if(!S.pings.length)ctx.fillText('Seafloor unmapped · tap the water to ping',M.l+pw/2,M.t+ph*.55);ctx.globalAlpha=1;
+  }
+  // sea surface line
+  ctx.strokeStyle=T.ink;ctx.globalAlpha=.35;ctx.beginPath();ctx.moveTo(M.l,sea+.5);ctx.lineTo(M.l+pw,sea+.5);ctx.stroke();ctx.globalAlpha=1;
+  // pings
+  const ps=S.pings.filter(p=>p.x>=x0-1&&p.x<=x1+1).sort((a,b)=>a.x-b.x);
+  ctx.setLineDash([2,4]);ctx.strokeStyle=T.acc;ctx.globalAlpha=.35;
+  for(const p of ps){if(p.land)continue;ctx.beginPath();ctx.moveTo(px(p.x),sea);ctx.lineTo(px(p.x),py(p.d));ctx.stroke()}
+  ctx.setLineDash([]);ctx.globalAlpha=1;
+  const wp=ps.filter(p=>!p.land);
+  if(wp.length>1){ctx.strokeStyle=T.acc;ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.beginPath();wp.forEach((p,i)=>i?ctx.lineTo(px(p.x),py(p.d)):ctx.moveTo(px(p.x),py(p.d)));ctx.stroke()}
+  for(const p of ps){const X=px(p.x);if(p.land){ctx.fillStyle=T.ink;ctx.beginPath();ctx.moveTo(X,sea-12);ctx.lineTo(X-7,sea);ctx.lineTo(X+7,sea);ctx.closePath();ctx.fill();continue}
+    ctx.fillStyle=T.surf;ctx.strokeStyle=T.acc;ctx.lineWidth=2;ctx.beginPath();ctx.arc(X,py(p.d),4,0,7);ctx.fill();ctx.stroke()}
+  // pulse
+  if(S.anim){const a=S.anim,p=Math.min(1,(performance.now()-a.t0)/a.dur),X=px(a.x),yb=py(a.d),y=p<.5?sea+(yb-sea)*p*2:yb-(yb-sea)*(p-.5)*2;
+    ctx.strokeStyle=T.acc;ctx.lineWidth=2;ctx.setLineDash([]);ctx.globalAlpha=.25;ctx.beginPath();ctx.moveTo(X,sea);ctx.lineTo(X,yb);ctx.stroke();ctx.globalAlpha=1;
+    for(let k=0;k<3;k++){ctx.globalAlpha=1-k*.3;ctx.beginPath();const yy=p<.5?y-k*6:y+k*6;ctx.ellipse(X,yy,12-k*2,4,0,p<.5?0:Math.PI,p<.5?Math.PI:Math.PI*2);ctx.stroke()}ctx.globalAlpha=1}
+  ctx.restore();
+  // feature markers
+  if(S.labels||S.revealed){
+    const vis=S.features.map((f,i)=>({...f,i})).filter(f=>f.x>=x0&&f.x<=x1);const lastX=[-99,-99,-99],rows=[13,sea+14,sea+38],boxes=[];
+    for(const f of vis){const X=px(f.x);let row=lastX.findIndex(l=>X-l>=23);if(row<0)row=2;lastX[row]=X;const cy=rows[row];
+      const ans=S.answers[f.i],ok=S.checked&&ans===f.k,bad=S.checked&&ans!==f.k;
+      ctx.strokeStyle=T.ink;ctx.globalAlpha=.4;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(X,cy+10);ctx.lineTo(X,S.revealed?py(depthAt(f.x))-4:sea+4);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
+      ctx.fillStyle=ok?T.good:bad?T.bad:T.ink;ctx.beginPath();ctx.arc(X,cy,10,0,7);ctx.fill();
+      ctx.fillStyle=T.surf;ctx.font='600 11px "IBM Plex Mono",monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.i+1,X,cy+.5);
+      if(S.revealed){ctx.font='600 11px "IBM Plex Sans",sans-serif';const t=NAMES[f.k];const tw=ctx.measureText(t).width;const tx=Math.min(Math.max(X,M.l+tw/2+4),M.l+pw-tw/2-4);
+        const base=Math.max(py(depthAt(f.x))-16,sea+56);let yy=null;
+        for(const off of [0,-18,18,-36,36]){const y=Math.min(M.t+ph-10,base+off),r=[tx-tw/2-4,y-8,tx+tw/2+4,y+8];if(!boxes.some(b=>r[0]<b[2]&&r[2]>b[0]&&r[1]<b[3]&&r[3]>b[1])){yy=y;boxes.push(r);break}}
+        if(yy!=null){ctx.fillStyle=T.surf;ctx.globalAlpha=.88;ctx.fillRect(tx-tw/2-4,yy-8,tw+8,16);ctx.globalAlpha=1;ctx.fillStyle=T.ink;ctx.fillText(t,tx,yy)}}
+    }
+  }
+  // ship
+  const SX=px(S.ship);ctx.fillStyle=T.ink;ctx.beginPath();ctx.moveTo(SX-15,sea-8);ctx.lineTo(SX+15,sea-8);ctx.lineTo(SX+10,sea);ctx.lineTo(SX-10,sea);ctx.closePath();ctx.fill();
+  ctx.fillRect(SX-6,sea-15,10,7);ctx.fillStyle=T.acc;ctx.fillRect(SX+5,sea-20,2,12);
+}
+
+/* ---------- pinging ---------- */
+function busy(){return S.anim||S.pending||S.auto}
+function animate(x,d,T,dur){return new Promise(res=>{S.anim={x,d,t0:performance.now(),dur};
+  const tick=()=>{const p=Math.min(1,(performance.now()-S.anim.t0)/dur);$('clock').innerHTML=(T*p).toFixed(2)+' <small>s</small>';draw();if(p<1)requestAnimationFrame(tick);else{S.anim=null;draw();res()}};requestAnimationFrame(tick)})}
+async function ping(fromAuto){
+  if(!fromAuto&&busy()){if(S.pending)msg('Finish the depth calculation first.','warn');return false}
+  if(S.used>=S.budget){msg('Out of pings. Label the features, then reveal the seafloor.','warn');return false}
+  const x=Math.round(S.ship),true_d=depthAt(x);
+  if(true_d<=0){if(!S.pings.some(p=>p.x===x&&p.land))S.pings.push({x,land:true});msg('Land ho! The ship ran into a volcanic island at '+x+' km. No ping used.','warn');renderLog();draw();return true}
+  const T=Math.round(2*true_d/SPEED*100)/100,d=Math.round(SPEED*T/2);
+  S.used++;stats();
+  const dur=fromAuto||reduce?220:Math.min(3200,Math.max(700,T/3*1000));
+  if(!fromAuto)msg('Ping sent… listening for the echo.');
+  await animate(x,d,T,dur);
+  const math=$('math').checked&&!fromAuto;
+  if(math){S.pending={x,T,d,tries:0};$('eq').innerHTML='depth = 1,500 m/s × <b>'+T.toFixed(2)+' s</b> ÷ 2 = <b>?</b>';
+    $('mathbox').hidden=false;$('math-prompt').textContent='Echo returned after '+T.toFixed(2)+' s at '+x.toLocaleString()+' km. How deep is the water?';$('math-in').value='';$('math-msg').textContent='';$('math-in').focus({preventScroll:true});msg('Calculate the depth in the Echo readout.');}
+  else record(x,T,d);
+  return true;
+}
+function record(x,T,d){S.pings=S.pings.filter(p=>p.x!==x);S.pings.push({x,T,d});
+  $('eq').innerHTML='depth = 1,500 m/s × <b>'+T.toFixed(2)+' s</b> ÷ 2 = <b>'+d.toLocaleString()+' m</b>';
+  if(!S.auto)msg('Sounding logged: '+d.toLocaleString()+' m deep at '+x.toLocaleString()+' km.','ok');renderLog();draw()}
+function checkMath(show){const P=S.pending;if(!P)return;const v=parseFloat($('math-in').value);
+  if(show||(!isNaN(v)&&Math.abs(v-P.d)<=Math.max(15,P.d*.01))){
+    $('math-msg').className='msg ok';$('math-msg').textContent=show?'1,500 × '+P.T.toFixed(2)+' = '+(1500*P.T).toLocaleString()+' m round trip, ÷ 2 = '+P.d.toLocaleString()+' m.':'Correct!';
+    S.pending=null;record(P.x,P.T,P.d);setTimeout(()=>{if(!S.pending)$('mathbox').hidden=true},show?2600:900);return}
+  P.tries++;$('math-msg').className='msg warn';
+  if(isNaN(v))$('math-msg').textContent='Type a depth in meters.';
+  else if(Math.abs(v-P.d*2)<=Math.max(30,P.d*.02))$('math-msg').textContent='That is the round trip. Remember the sound went down AND back. Divide by 2.';
+  else $('math-msg').textContent='Not quite. Multiply 1,500 by the echo time, then divide by 2.';
+}
+async function autoSurvey(){
+  if(busy())return;const sp=+$('spacing').value,[x0,x1]=S.views[S.view];S.auto=true;$('btn-auto').disabled=true;let n=0;
+  for(let x=x0+Math.min(sp/2,10);x<=x1;x+=sp){if(S.used>=S.budget)break;S.ship=x;$('ship').value=x;stats();await ping(true);n++}
+  S.auto=false;$('btn-auto').disabled=false;msg(S.used>=S.budget?'Survey line stopped: out of pings.':'Survey line done: '+n+' stations at '+sp+' km spacing.',S.used>=S.budget?'warn':'ok');renderLog();draw()}
+
+/* ---------- log ---------- */
+function renderLog(){const rows=S.pings.filter(p=>!p.land).sort((a,b)=>a.x-b.x);
+  $('log').innerHTML=rows.map((p,i)=>'<tr><td>'+(i+1)+'</td><td>'+p.x.toLocaleString()+'</td><td>'+p.T.toFixed(2)+'</td><td>'+p.d.toLocaleString()+'</td></tr>').join('');
+  $('log-empty').hidden=rows.length>0}
+$('btn-copy').onclick=async()=>{const rows=S.pings.filter(p=>!p.land).sort((a,b)=>a.x-b.x);const txt='Distance (km)\tEcho time (s)\tDepth (m)\n'+rows.map(p=>p.x+'\t'+p.T.toFixed(2)+'\t'+p.d).join('\n');
+  try{await navigator.clipboard.writeText(txt);$('copy-msg').textContent='Copied '+rows.length+' soundings. Paste into Google Sheets.';}catch(e){$('copy-msg').textContent='Copy was blocked. Select the table and copy it instead.'}};
+
+/* ---------- labels ---------- */
+function buildQuiz(){const keys=[...new Set(S.features.map(f=>f.k))];const extra=Object.keys(NAMES).filter(k=>!keys.includes(k));
+  const opts=[...keys,...extra.slice(0,2)].sort((a,b)=>NAMES[a].localeCompare(NAMES[b]));
+  $('quiz').innerHTML=S.features.map((f,i)=>'<div class="qitem" id="q'+i+'"><span class="qnum">'+(i+1)+'</span><select id="qs'+i+'" aria-label="Feature '+(i+1)+'"><option value="">Choose…</option>'+opts.map(k=>'<option value="'+k+'">'+NAMES[k]+'</option>').join('')+'</select></div>').join('');
+  S.features.forEach((f,i)=>{$('qs'+i).onchange=e=>{S.answers[i]=e.target.value;S.checked=false;$('q'+i).className='qitem';$('quiz-score').textContent='';draw()}})}
+$('btn-label').onclick=()=>{S.labels=true;buildQuiz();$('quiz-panel').hidden=false;draw();$('quiz-panel').scrollIntoView({behavior:reduce?'auto':'smooth',block:'nearest'})};
+$('quiz-check').onclick=()=>{S.checked=true;let n=0;S.features.forEach((f,i)=>{const ok=S.answers[i]===f.k;if(ok)n++;$('q'+i).className='qitem '+(ok?'right':'wrong')});$('quiz-score').textContent=n+' / '+S.features.length+' correct';draw()};
+$('btn-reveal').onclick=()=>{S.revealed=true;$('legend').hidden=false;if(!S.labels){S.labels=true;buildQuiz();$('quiz-panel').hidden=false}
+  if(S.notes){$('notes').innerHTML=S.features.map((f,i)=>{const n=LI_NOTES[f.k];return n?'<div class="card"><h3><span class="qnum">'+(i+1)+'</span>'+n[0]+'</h3><p>'+n[1]+'</p></div>':''}).join('');$('field-notes').hidden=false}
+  msg('Seafloor revealed. Compare the true floor with your orange profile. Where did your pings miss something?');draw()};
+$('btn-reset').onclick=()=>{if(S.auto)return;load(S.mode,S.seed)};
+
+/* ---------- guide ---------- */
+$('guide').innerHTML=GUIDE.map(([k,c,what,how])=>'<div class="card"><h3><span class="swatch" style="background:'+c+'"></span>'+NAMES[k]+'</h3><p>'+what+'</p><p><b>How it forms:</b> '+how+'</p></div>').join('');
+
+/* ---------- wiring ---------- */
+$('ship').oninput=e=>{if(S.auto)return;S.ship=+e.target.value;stats();draw()};
+$('btn-ping').onclick=()=>ping(false);
+$('btn-auto').onclick=autoSurvey;
+$('view-full').onclick=()=>setView(0);$('view-margin').onclick=()=>setView(1);
+$('math-check').onclick=()=>checkMath(false);$('math-show').onclick=()=>checkMath(true);
+$('math-in').onkeydown=e=>{if(e.key==='Enter')checkMath(false)};
+cv.addEventListener('click',e=>{if(busy()){if(S.pending)msg('Finish the depth calculation first.','warn');return}const r=cv.getBoundingClientRect(),X=e.clientX-r.left;if(X<M.l||X>M.l+PW())return;const[x0,x1]=S.views[S.view];S.ship=Math.round(Math.min(x1,Math.max(x0,xFromPx(X))));$('ship').value=S.ship;stats();ping(false)});
+$('tab-li').onclick=()=>{if(!S.auto)load('li')};
+$('tab-mystery').onclick=()=>{if(!S.auto)load('mystery',S.mode==='mystery'?S.seed:1000+Math.floor(Math.random()*9000))};
+$('btn-new').onclick=()=>{if(!S.auto)load('mystery',1000+Math.floor(Math.random()*9000))};
+$('btn-load').onclick=()=>{const v=parseInt($('code-in').value,10);if(v>=1000&&v<=9999)load('mystery',v);else msg('Basin codes are 4-digit numbers, like 4821.','warn')};
+function fromHash(){const h=location.hash.replace('#','');const m=/^basin-(\d{4})$/.exec(h);if(m)load('mystery',+m[1]);else load('li')}
+addEventListener('hashchange',()=>{if(!S||!S.auto)fromHash()});
+new ResizeObserver(size).observe(cv.parentElement);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+fromHash();size();
+if(document.fonts)document.fonts.ready.then(draw);
+})();
+</script>
+
+</body></html>
